@@ -310,6 +310,53 @@ npm run check          # Run all checks
 
 **ESLint**: @typescript-eslint with `consistent-type-definitions: "type"`, integrated with Prettier via `eslint-config-prettier`.
 
+## Building URLs to ADP Pages
+
+Any code that opens a panel page in a new tab (badge Ctrl/Cmd-click, "Open in panel" menu items, external-anchor links) **must** go through `panelPagePath` from `@app-dev-panel/sdk/Helper/panelMountPath`.
+
+A valid panel URL has three parts:
+
+```
+{mount}{panelPath}{?query}
+ ─┬──── ─┬──────── ─┬─────
+  │      │          │
+  │      │          └── page-specific params (collector, debugEntry, level, class, path, …)
+  │      │
+  │      └── panel-internal React Router path
+  │          (`/debug`, `/debug/list`, `/debug/object`, `/inspector/files`, `/llm`, `/mcp`, …)
+  │
+  └── ADP mount inside the host app.
+      Read from `window.__adp_panel_url` (set by PHP `ToolbarInjector` from
+      `PanelConfig::viewerBasePath`). Defaults to `/debug`.
+```
+
+**Two `/debug` segments is correct when the panel is at its default mount:** the first is the mount, the second is the internal collector viewer route. `panelPagePath('/debug?collector=X&debugEntry=Y')` resolves to `/debug/debug?collector=X&debugEntry=Y` by default, and to `/adp/debug?collector=X&debugEntry=Y` when the host configured `__adp_panel_url = '/adp'`.
+
+### Rules
+
+- Always URL-encode dynamic path/query values with `encodeURIComponent` — especially backslashes in PHP collector FQCNs (`AppDevPanel\Kernel\Collector\LogCollector` → `AppDevPanel%5C...`). `Application/Component/Layout.tsx` is the reference (see line ~476).
+- Never hardcode `/debug` as the mount. Always call `panelPagePath` so a custom `__adp_panel_url` is respected.
+- The panel-internal path must include `/debug` for collector viewer URLs. A bare-query call — `panelPagePath('?collector=X')` → `/debug?...` — goes to the panel **home** page, not the collector viewer. Use `panelPagePath('/debug?collector=X&debugEntry=Y')`.
+- For inspector pages use the corresponding internal route: `panelPagePath('/inspector/files?class=Foo')`.
+
+### Badge → panel URL mapping
+
+| Badge | Panel URL |
+|-------|-----------|
+| Logs | `{mount}/debug?collector=<LogCollector>&debugEntry=<id>[&level=…]` |
+| Events | `{mount}/debug?collector=<EventCollector>&debugEntry=<id>` |
+| RequestTime | `{mount}/debug?collector=<TimelineCollector>&debugEntry=<id>` |
+| Memory | `{mount}/debug?collector=<Web/Console AppInfoCollector>&debugEntry=<id>` |
+| Database | `{mount}/debug?collector=<DatabaseCollector>&debugEntry=<id>` |
+| HttpClient | `{mount}/debug?collector=<HttpClientCollector>&debugEntry=<id>` |
+| Validator | `{mount}/debug?collector=<ValidatorCollector>&debugEntry=<id>` |
+| Deprecation | `{mount}/debug?collector=<DeprecationCollector>&debugEntry=<id>` |
+| Request (web) | `{mount}/debug?debugEntry=<id>` (entry overview) |
+| Command (console) | `{mount}/debug?debugEntry=<id>` (entry overview) |
+| Exception | `{mount}/inspector/files?class=<ExceptionClass>` (class explorer) |
+
+Toolbar badges fall through `openInNewTabOnModifier` (`@app-dev-panel/sdk/Helper/openInNewTabOnModifier`) for the modifier branch — it handles `ctrlKey || metaKey`, calls `window.open(url, '_blank', 'noopener,noreferrer')`, and stops the event. Tests live next to each badge (`LogsItem.test.tsx`, `EventsItem.test.tsx`, `Web/RequestItem.test.tsx`) and assert the full URL shape including both `/debug` segments.
+
 ## Build & Development
 
 ```bash

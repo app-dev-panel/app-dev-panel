@@ -1,5 +1,7 @@
 import {DebugEntry} from '@app-dev-panel/sdk/API/Debug/Debug';
 import {CollectorsMap} from '@app-dev-panel/sdk/Helper/collectors';
+import {openInNewTabOnModifier} from '@app-dev-panel/sdk/Helper/openInNewTabOnModifier';
+import {panelPagePath} from '@app-dev-panel/sdk/Helper/panelMountPath';
 import {
     LOG_LEVEL_GROUP_ORDER,
     LOG_LEVEL_GROUPS,
@@ -19,8 +21,9 @@ const GROUP_COLOR: Record<LogLevelGroup, string> = {
 };
 
 const buildUrl = (entryId: string, levels?: LogLevel[]) => {
-    const base = `/debug?collector=${CollectorsMap.LogCollector}&debugEntry=${entryId}`;
-    return levels && levels.length > 0 ? `${base}&level=${levels.join(',')}` : base;
+    const query = `collector=${encodeURIComponent(CollectorsMap.LogCollector)}&debugEntry=${entryId}`;
+    const withLevels = levels && levels.length > 0 ? `${query}&level=${levels.join(',')}` : query;
+    return panelPagePath(`/debug?${withLevels}`);
 };
 
 export const LogsItem = ({data, iframeUrlHandler}: LogsItemProps) => {
@@ -66,7 +69,9 @@ export const LogsItem = ({data, iframeUrlHandler}: LogsItemProps) => {
                                 <Box
                                     component="span"
                                     onClick={(e) => {
-                                        iframeUrlHandler(buildUrl(data.id, LOG_LEVEL_GROUPS[group]));
+                                        const url = buildUrl(data.id, LOG_LEVEL_GROUPS[group]);
+                                        if (openInNewTabOnModifier(e, url)) return;
+                                        iframeUrlHandler(url);
                                         e.stopPropagation();
                                         e.preventDefault();
                                     }}
@@ -88,7 +93,9 @@ export const LogsItem = ({data, iframeUrlHandler}: LogsItemProps) => {
                 size="small"
                 variant="outlined"
                 onClick={(e) => {
-                    iframeUrlHandler(buildUrl(data.id));
+                    const url = buildUrl(data.id);
+                    if (openInNewTabOnModifier(e, url)) return;
+                    iframeUrlHandler(url);
                     e.stopPropagation();
                     e.preventDefault();
                 }}

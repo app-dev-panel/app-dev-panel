@@ -447,6 +447,7 @@
         foreach ($links as $url => $label): ?>
             <a href="/<?= $url ?>" class="<?= $path === $url ? 'active' : '' ?>"><?= $label ?></a>
         <?php endforeach; ?>
+        <a href="/debug" target="_blank" rel="noopener">Debug Panel</a>
     </nav>
 </div>
 <div class="main">

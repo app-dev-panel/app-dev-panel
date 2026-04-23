@@ -1,5 +1,6 @@
 import {DebugEntry} from '@app-dev-panel/sdk/API/Debug/Debug';
 import {parseFilePath, parseFilename} from '@app-dev-panel/sdk/Helper/filePathParser';
+import {openInNewTabOnModifier} from '@app-dev-panel/sdk/Helper/openInNewTabOnModifier';
 import {panelPagePath} from '@app-dev-panel/sdk/Helper/panelMountPath';
 import {formatFqcn} from '@app-dev-panel/sdk/Helper/phpClassName';
 import {useEditorUrl} from '@app-dev-panel/sdk/Helper/useEditorUrl';
@@ -47,6 +48,7 @@ export const ExceptionItem = ({data}: ExceptionItemProps) => {
     const handleOpen = (event: React.MouseEvent<HTMLElement>) => {
         event.stopPropagation();
         event.preventDefault();
+        if (openInNewTabOnModifier(event, classExplorerUrl)) return;
         setAnchorEl(event.currentTarget);
     };
     const handleClose = () => setAnchorEl(null);

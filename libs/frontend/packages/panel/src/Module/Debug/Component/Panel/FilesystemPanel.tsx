@@ -2,7 +2,6 @@ import {JsonRenderer} from '@app-dev-panel/panel/Module/Debug/Component/JsonRend
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {FileLink} from '@app-dev-panel/sdk/Component/FileLink';
 import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
-import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
 import {TabContext, TabPanel} from '@mui/lab';
 import TabList from '@mui/lab/TabList';
 import {Box, Chip, Icon, IconButton, Tab, Tooltip, Typography} from '@mui/material';
@@ -16,37 +15,6 @@ type FilesystemPanelProps = {data: {[key in Operation]: Information}[]};
 // ---------------------------------------------------------------------------
 // Styled components
 // ---------------------------------------------------------------------------
-
-const SummaryGrid = styled(Box)(({theme}) => ({
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))',
-    gap: theme.spacing(1.5),
-    padding: theme.spacing(2),
-}));
-
-const SummaryCard = styled(Box)(({theme}) => ({
-    padding: theme.spacing(1.5, 2),
-    borderRadius: Number(theme.shape.borderRadius) * 1.5,
-    border: `1px solid ${theme.palette.divider}`,
-    backgroundColor: theme.palette.background.paper,
-    display: 'flex',
-    flexDirection: 'column',
-    gap: theme.spacing(0.5),
-}));
-
-const SummaryLabel = styled(Typography)(({theme}) => ({
-    fontSize: '11px',
-    fontWeight: 600,
-    textTransform: 'uppercase' as const,
-    letterSpacing: '0.5px',
-    color: theme.palette.text.disabled,
-}));
-
-const SummaryValue = styled(Typography)(({theme}) => ({
-    fontFamily: theme.adp.fontFamilyMono,
-    fontWeight: 700,
-    fontSize: '20px',
-}));
 
 const FileRow = styled(Box, {shouldForwardProp: (p) => p !== 'expanded'})<{expanded?: boolean}>(
     ({theme, expanded}) => ({
@@ -142,15 +110,17 @@ const OperationView = ({items, operation, filter}: {items: Information[]; operat
     const visible = filtered.slice(0, visibleCount);
     const hasMore = visibleCount < filtered.length;
 
+    const isFiltered = filtered.length !== items.length;
+
     return (
         <Box>
-            <Box sx={{display: 'flex', alignItems: 'center', gap: 1, py: 1, px: 2}}>
-                <Typography variant="body2" sx={{color: 'text.disabled'}}>
-                    {filtered.length === items.length
-                        ? `${items.length} operation${items.length !== 1 ? 's' : ''}`
-                        : `${filtered.length} of ${items.length} operations`}
-                </Typography>
-            </Box>
+            {isFiltered && (
+                <Box sx={{display: 'flex', alignItems: 'center', gap: 1, py: 1, px: 2}}>
+                    <Typography variant="body2" sx={{color: 'text.disabled'}}>
+                        {`${filtered.length} of ${items.length} operations`}
+                    </Typography>
+                </Box>
+            )}
             {visible.map((item, index) => {
                 const expanded = expandedIndex === index;
                 const hasArgs = Object.keys(item.args).length > 0;
@@ -219,41 +189,17 @@ export const FilesystemPanel = ({data}: FilesystemPanelProps) => {
         return <EmptyState icon="folder_open" title="No filesystem operations found" />;
     }
 
-    const totalOps = tabs.reduce((sum, tab) => sum + ((data as any)[tab]?.length ?? 0), 0);
-
     return (
         <Box>
-            <SummaryGrid>
-                <SummaryCard>
-                    <SummaryLabel>Total Operations</SummaryLabel>
-                    <SummaryValue>{totalOps}</SummaryValue>
-                </SummaryCard>
-                {tabs.map((tab) => {
-                    const count = (data as any)[tab]?.length ?? 0;
-                    const meta = operationMeta(tab);
-                    return (
-                        <SummaryCard key={tab}>
-                            <SummaryLabel>
-                                <Box sx={{display: 'flex', alignItems: 'center', gap: 0.5}}>
-                                    <Icon sx={{fontSize: 14, color: `${meta.color}.main`}}>{meta.icon}</Icon>
-                                    {tab}
-                                </Box>
-                            </SummaryLabel>
-                            <SummaryValue sx={{color: count > 0 ? 'text.primary' : 'text.disabled'}}>
-                                {count}
-                            </SummaryValue>
-                        </SummaryCard>
-                    );
-                })}
-            </SummaryGrid>
-
-            <SectionTitle action={<FilterInput value={filter} onChange={setFilter} placeholder="Filter by path..." />}>
-                Operations
-            </SectionTitle>
-
             <TabContext value={value}>
-                <Box sx={{borderBottom: 1, borderColor: 'divider'}}>
-                    <StyledTabList onChange={handleChange}>
+                <Box sx={{borderBottom: 1, borderColor: 'divider', display: 'flex', alignItems: 'center', gap: 2}}>
+                    <StyledTabList
+                        onChange={handleChange}
+                        variant="scrollable"
+                        scrollButtons="auto"
+                        allowScrollButtonsMobile
+                        sx={{flex: 1, minWidth: 0}}
+                    >
                         {tabs.map((tab) => {
                             const count = (data as any)[tab]?.length ?? 0;
                             const meta = operationMeta(tab);
@@ -288,6 +234,9 @@ export const FilesystemPanel = ({data}: FilesystemPanelProps) => {
                             );
                         })}
                     </StyledTabList>
+                    <Box sx={{flexShrink: 0, pr: 2}}>
+                        <FilterInput value={filter} onChange={setFilter} placeholder="Filter by path..." />
+                    </Box>
                 </Box>
                 {tabs.map((tab) => (
                     <TabPanel value={tab} key={tab} sx={{padding: 0}}>

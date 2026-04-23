@@ -1,5 +1,7 @@
 import {DebugEntry} from '@app-dev-panel/sdk/API/Debug/Debug';
 import {CollectorsMap} from '@app-dev-panel/sdk/Helper/collectors';
+import {openInNewTabOnModifier} from '@app-dev-panel/sdk/Helper/openInNewTabOnModifier';
+import {panelPagePath} from '@app-dev-panel/sdk/Helper/panelMountPath';
 import StorageIcon from '@mui/icons-material/Storage';
 import {Chip, Tooltip} from '@mui/material';
 
@@ -29,7 +31,11 @@ export const DatabaseItem = ({data, iframeUrlHandler}: DatabaseItemProps) => {
                 color={hasErrors ? 'error' : 'default'}
                 variant={hasErrors ? 'filled' : 'outlined'}
                 onClick={(e) => {
-                    iframeUrlHandler(`/debug?collector=${CollectorsMap.DatabaseCollector}&debugEntry=${data.id}`);
+                    const url = panelPagePath(
+                        `/debug?collector=${encodeURIComponent(CollectorsMap.DatabaseCollector)}&debugEntry=${data.id}`,
+                    );
+                    if (openInNewTabOnModifier(e, url)) return;
+                    iframeUrlHandler(url);
                     e.stopPropagation();
                     e.preventDefault();
                 }}

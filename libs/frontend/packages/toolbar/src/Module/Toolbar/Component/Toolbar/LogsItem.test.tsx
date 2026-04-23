@@ -55,9 +55,14 @@ describe('LogsItem', () => {
 
         fireEvent.click(screen.getByText('1'));
         const errClickUrl = handler.mock.calls[handler.mock.calls.length - 1][0] as string;
-        expect(errClickUrl).toContain('collector=AppDevPanel\\Kernel\\Collector\\LogCollector');
-        expect(errClickUrl).toContain('debugEntry=entry-123');
-        expect(errClickUrl).toContain('&level=emergency,alert,critical,error');
+        // The URL must be: {mount}/debug?collector=<encoded>&debugEntry=<id>[&level=...]
+        // The first `/debug` is the ADP mount path (here the default); the second `/debug`
+        // is the panel-internal React Router path (the collector viewer). Losing the second
+        // `/debug` would mean opening the panel home page instead of the Log collector view.
+        expect(errClickUrl).toBe(
+            '/debug/debug?collector=AppDevPanel%5CKernel%5CCollector%5CLogCollector' +
+                '&debugEntry=entry-123&level=emergency,alert,critical,error',
+        );
 
         fireEvent.click(screen.getByText('3'));
         const warnClickUrl = handler.mock.calls[handler.mock.calls.length - 1][0] as string;
@@ -75,6 +80,7 @@ describe('LogsItem', () => {
         fireEvent.click(screen.getByText('Logs'));
         expect(handler).toHaveBeenCalled();
         const url = handler.mock.calls[0][0] as string;
+        expect(url).toBe('/debug/debug?collector=AppDevPanel%5CKernel%5CCollector%5CLogCollector&debugEntry=entry-123');
         expect(url).not.toContain('&level=');
     });
 

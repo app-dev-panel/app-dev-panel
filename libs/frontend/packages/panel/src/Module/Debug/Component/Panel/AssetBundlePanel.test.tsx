@@ -27,10 +27,7 @@ const makeBundle = (overrides: Partial<Bundle> = {}): Bundle => ({
     ...overrides,
 });
 
-const makeData = (bundles: Record<string, Bundle> = {main: makeBundle()}, bundleCount?: number) => ({
-    bundles,
-    bundleCount: bundleCount ?? Object.keys(bundles).length,
-});
+const makeData = (bundles: Record<string, Bundle> = {main: makeBundle()}) => ({bundles});
 
 describe('AssetBundlePanel', () => {
     it('shows empty message when data is null', () => {
@@ -41,12 +38,6 @@ describe('AssetBundlePanel', () => {
     it('shows empty message when bundles is empty object', () => {
         renderWithProviders(<AssetBundlePanel data={makeData({})} />);
         expect(screen.getByText(/No asset bundles found/)).toBeInTheDocument();
-    });
-
-    it('renders total bundles count in summary card', () => {
-        renderWithProviders(<AssetBundlePanel data={makeData({a: makeBundle(), b: makeBundle()}, 2)} />);
-        expect(screen.getByText('Total Bundles')).toBeInTheDocument();
-        expect(screen.getByText('2')).toBeInTheDocument();
     });
 
     it('renders bundle count in section title', () => {
