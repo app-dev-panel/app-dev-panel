@@ -76,4 +76,36 @@ describe('JsonRenderer', () => {
         expect(chip).not.toBeNull();
         expect(window.getComputedStyle(chip as HTMLElement).display).toBe('inline-flex');
     });
+
+    it('renders an alias nested inside an object (JsonView.String path) as an alias chip', () => {
+        renderWithProviders(<JsonRenderer value={{'@src': '@root/src'}} />);
+
+        expect(screen.getByText('alias')).toBeInTheDocument();
+        expect(screen.getByText('@root/src')).toBeInTheDocument();
+    });
+
+    it('renders multiple aliases in the same tree each as a distinct alias chip', () => {
+        renderWithProviders(
+            <JsonRenderer value={{'@src': '@root/src', '@assets': '@root/public/assets', '@vendor': '@root/vendor'}} />,
+        );
+
+        expect(screen.getAllByText('alias')).toHaveLength(3);
+        expect(screen.getByText('@root/src')).toBeInTheDocument();
+        expect(screen.getByText('@root/public/assets')).toBeInTheDocument();
+        expect(screen.getByText('@root/vendor')).toBeInTheDocument();
+    });
+
+    it('renders non-alias primitive strings without the alias chip', () => {
+        renderWithProviders(<JsonRenderer value="just a string" />);
+
+        expect(screen.queryByText('alias')).not.toBeInTheDocument();
+        expect(screen.getByText('just a string')).toBeInTheDocument();
+    });
+
+    it('does not render a string that merely contains @ but does not start with @ as an alias', () => {
+        renderWithProviders(<JsonRenderer value="user@example.com" />);
+
+        expect(screen.queryByText('alias')).not.toBeInTheDocument();
+        expect(screen.getByText('user@example.com')).toBeInTheDocument();
+    });
 });
