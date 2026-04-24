@@ -8,6 +8,7 @@ use AppDevPanel\Cli\Command\FrontendUpdateCommand;
 use GuzzleHttp\Client;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
+use GuzzleHttp\Middleware;
 use GuzzleHttp\Psr7\Response;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Tester\CommandTester;
@@ -277,10 +278,90 @@ final class FrontendUpdateCommandTest extends TestCase
         }
     }
 
-    private function createMockClient(array $responses): Client
+    public function testCheckWithPinnedVersionHitsTagsEndpoint(): void
+    {
+        $release = [
+            'tag_name' => 'v0.2',
+            'published_at' => '2026-04-23T10:00:00Z',
+            'assets' => [
+                ['name' => 'frontend-dist.zip', 'browser_download_url' => 'https://example.com/frontend-dist.zip'],
+            ],
+        ];
+        $history = [];
+        $client = $this->createMockClient([new Response(200, [], json_encode($release))], $history);
+
+        $tester = new CommandTester(new FrontendUpdateCommand($client));
+        $tester->execute(['action' => 'check', '--version' => 'v0.2']);
+
+        $this->assertSame(0, $tester->getStatusCode());
+        $this->assertCount(1, $history);
+        $this->assertSame(
+            'https://api.github.com/repos/app-dev-panel/app-dev-panel/releases/tags/v0.2',
+            (string) $history[0]['request']->getUri(),
+        );
+    }
+
+    public function testCheckWithTokenOptionSendsAuthorizationHeader(): void
+    {
+        $release = ['tag_name' => 'v0.2', 'published_at' => '2026-04-23T10:00:00Z', 'assets' => []];
+        $history = [];
+        $client = $this->createMockClient([new Response(200, [], json_encode($release))], $history);
+
+        $tester = new CommandTester(new FrontendUpdateCommand($client));
+        $tester->execute(['action' => 'check', '--token' => 'ghp_secret']);
+
+        $this->assertSame(0, $tester->getStatusCode());
+        $this->assertSame('Bearer ghp_secret', $history[0]['request']->getHeaderLine('Authorization'));
+    }
+
+    public function testCheckPicksUpGithubTokenEnvVar(): void
+    {
+        $release = ['tag_name' => 'v0.2', 'published_at' => '2026-04-23T10:00:00Z', 'assets' => []];
+        $history = [];
+        $client = $this->createMockClient([new Response(200, [], json_encode($release))], $history);
+
+        $previous = getenv('GITHUB_TOKEN');
+        putenv('GITHUB_TOKEN=env_token_value');
+        try {
+            $tester = new CommandTester(new FrontendUpdateCommand($client));
+            $tester->execute(['action' => 'check']);
+        } finally {
+            putenv($previous === false ? 'GITHUB_TOKEN' : 'GITHUB_TOKEN=' . $previous);
+        }
+
+        $this->assertSame('Bearer env_token_value', $history[0]['request']->getHeaderLine('Authorization'));
+    }
+
+    public function testCheckWithoutTokenSendsNoAuthorizationHeader(): void
+    {
+        $release = ['tag_name' => 'v0.2', 'published_at' => '2026-04-23T10:00:00Z', 'assets' => []];
+        $history = [];
+        $client = $this->createMockClient([new Response(200, [], json_encode($release))], $history);
+
+        $previousGh = getenv('GITHUB_TOKEN');
+        $previousGhShort = getenv('GH_TOKEN');
+        putenv('GITHUB_TOKEN');
+        putenv('GH_TOKEN');
+        try {
+            $tester = new CommandTester(new FrontendUpdateCommand($client));
+            $tester->execute(['action' => 'check']);
+        } finally {
+            putenv($previousGh === false ? 'GITHUB_TOKEN' : 'GITHUB_TOKEN=' . $previousGh);
+            putenv($previousGhShort === false ? 'GH_TOKEN' : 'GH_TOKEN=' . $previousGhShort);
+        }
+
+        $this->assertSame('', $history[0]['request']->getHeaderLine('Authorization'));
+    }
+
+    /**
+     * @param list<Response> $responses
+     * @param list<array{request: \Psr\Http\Message\RequestInterface, response: Response}> $history
+     */
+    private function createMockClient(array $responses, array &$history = []): Client
     {
         $mock = new MockHandler($responses);
         $handlerStack = HandlerStack::create($mock);
+        $handlerStack->push(Middleware::history($history));
         return new Client(['handler' => $handlerStack]);
     }
 }

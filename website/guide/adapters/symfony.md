@@ -27,6 +27,24 @@ return [
 ];
 ```
 
+## Routes
+
+Create `config/routes/app_dev_panel.php` to expose the debug panel and API:
+
+```php
+<?php
+
+declare(strict_types=1);
+
+use Symfony\Component\Routing\Loader\Configurator\RoutingConfigurator;
+
+return static function (RoutingConfigurator $routes): void {
+    $routes->import('@AppDevPanelBundle/config/routes/adp.php');
+};
+```
+
+This mounts `/debug` (panel SPA), `/debug/api/**` (debug data), and `/inspect/api/**` (inspector) under your app.
+
 ## Configuration
 
 Create `config/packages/app_dev_panel.yaml`:
@@ -42,12 +60,12 @@ app_dev_panel:
         exception: true
         log: true
         event: true
-        doctrine: true        # requires doctrine/dbal
+        doctrine: true         # requires doctrine/dbal
         twig: true             # requires twig/twig
         security: true         # requires symfony/security-bundle
         cache: true
         mailer: true           # requires symfony/mailer
-        messenger: true        # requires symfony/messenger
+        queue: true            # requires symfony/messenger
         assets: true           # requires symfony/asset-mapper
         code_coverage: false   # opt-in; requires pcov or xdebug
     ignored_requests:

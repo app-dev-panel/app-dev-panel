@@ -31,6 +31,6 @@ Add the following code to the page to display the toolbar:
 
 ```html
 <div id="app-dev-toolbar" style="flex: 1"></div>
-<script src="https://app-dev-panel.github.io/app-dev-panel/toolbar/bundle.js"></script>
-<link rel="stylesheet" href="https://app-dev-panel.github.io/app-dev-panel/toolbar/bundle.css" />
+<script src="https://app-dev-panel.github.io/app-dev-panel/demo/toolbar/bundle.js"></script>
+<link rel="stylesheet" href="https://app-dev-panel.github.io/app-dev-panel/demo/toolbar/bundle.css" />
 ```

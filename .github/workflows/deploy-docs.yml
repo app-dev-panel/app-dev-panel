@@ -92,8 +92,7 @@ jobs:
           mkdir -p website/.vitepress/dist/demo
           cp -r libs/frontend/packages/panel/dist/* website/.vitepress/dist/demo/
           mkdir -p website/.vitepress/dist/demo/toolbar
-          cp libs/frontend/packages/toolbar/dist/bundle.js website/.vitepress/dist/demo/toolbar/bundle.js
-          cp libs/frontend/packages/toolbar/dist/bundle.css website/.vitepress/dist/demo/toolbar/bundle.css
+          cp -r libs/frontend/packages/toolbar/dist/. website/.vitepress/dist/demo/toolbar/
 
       - name: Setup Pages
         uses: actions/configure-pages@v5

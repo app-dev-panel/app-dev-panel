@@ -9,7 +9,7 @@ namespace AppDevPanel\Api\Panel;
  */
 final class PanelConfig
 {
-    public const DEFAULT_STATIC_URL = 'https://app-dev-panel.github.io/app-dev-panel';
+    public const DEFAULT_STATIC_URL = 'https://app-dev-panel.github.io/app-dev-panel/demo';
 
     public function __construct(
         /**
