@@ -39,7 +39,9 @@ return [
             Route::get('/events')->action(Web\TestFixtures\EventsAction::class)->name('test-events'),
             Route::get('/dump')->action(Web\TestFixtures\DumpAction::class)->name('test-dump'),
             Route::get('/timeline')->action(Web\TestFixtures\TimelineAction::class)->name('test-timeline'),
-            Route::get('/request-info')->action(Web\TestFixtures\RequestInfoAction::class)->name('test-request-info'),
+            Route::methods(['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'], '/request-info')
+                ->action(Web\TestFixtures\RequestInfoAction::class)
+                ->name('test-request-info'),
             Route::get('/exception')->action(Web\TestFixtures\ExceptionAction::class)->name('test-exception'),
             Route::get('/exception-chained')->action(Web\TestFixtures\ExceptionChainedAction::class)->name(
                 'test-exception-chained',

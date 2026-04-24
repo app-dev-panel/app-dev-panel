@@ -13,6 +13,7 @@ use AppDevPanel\Kernel\StartupContext;
 use Yiisoft\ErrorHandler\Event\ApplicationError;
 use Yiisoft\Profiler\ProfilerInterface;
 use Yiisoft\View\Event\WebView\AfterRender;
+use Yiisoft\View\Event\WebView\BeforeRender;
 use Yiisoft\Yii\Http\Event\AfterEmit;
 use Yiisoft\Yii\Http\Event\AfterRequest;
 use Yiisoft\Yii\Http\Event\ApplicationShutdown;
@@ -61,7 +62,10 @@ return [
             $event->getThrowable(),
         ),
     ],
+    BeforeRender::class => [
+        [ViewEventListener::class, 'beforeRender'],
+    ],
     AfterRender::class => [
-        [ViewEventListener::class, 'collect'],
+        [ViewEventListener::class, 'afterRender'],
     ],
 ];
