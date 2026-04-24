@@ -61,18 +61,6 @@ export const ClassName = ({value, methodName, children, sx}: ClassNameProps) => 
     return (
         <span style={{display: 'inline-flex', alignItems: 'center', gap: 2, minWidth: 0, ...sx}}>
             {label}
-            <Tooltip title="Open in File Explorer">
-                <IconButton
-                    size="small"
-                    component={RouterLink}
-                    to={explorerHref}
-                    aria-label="Open in File Explorer"
-                    onClick={(e) => e.stopPropagation()}
-                    sx={{p: 0.25, ml: 0.25}}
-                >
-                    <FolderOpen sx={{fontSize: 14}} />
-                </IconButton>
-            </Tooltip>
             {editorUrl && (
                 <Tooltip title="Open in Editor">
                     <IconButton
@@ -81,12 +69,24 @@ export const ClassName = ({value, methodName, children, sx}: ClassNameProps) => 
                         href={editorUrl}
                         aria-label="Open in Editor"
                         onClick={(e) => e.stopPropagation()}
-                        sx={{p: 0.25}}
+                        sx={{p: 0.25, ml: 0.25}}
                     >
                         <Code sx={{fontSize: 14}} />
                     </IconButton>
                 </Tooltip>
             )}
+            <Tooltip title="Open in File Explorer">
+                <IconButton
+                    size="small"
+                    component={RouterLink}
+                    to={explorerHref}
+                    aria-label="Open in File Explorer"
+                    onClick={(e) => e.stopPropagation()}
+                    sx={{p: 0.25, ml: editorUrl ? 0 : 0.25}}
+                >
+                    <FolderOpen sx={{fontSize: 14}} />
+                </IconButton>
+            </Tooltip>
         </span>
     );
 };
