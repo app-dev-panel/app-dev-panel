@@ -33,6 +33,7 @@
         "app-dev-panel/api": "*",
         "app-dev-panel/kernel": "*",
         "app-dev-panel/cli": "*",
+        "app-dev-panel/frontend-assets": "*",
         "guzzlehttp/psr7": "^2.4",
         "nyholm/psr7": "^1.8",
         "psr/container": "^1.0|^2.0",
@@ -63,6 +64,10 @@
         {
             "type": "path",
             "url": "../../Cli"
+        },
+        {
+            "type": "path",
+            "url": "../../FrontendAssets"
         }
     ],
     "autoload": {

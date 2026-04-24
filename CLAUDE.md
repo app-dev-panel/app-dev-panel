@@ -96,6 +96,7 @@ fully framework-independent. Adapters exist for Yii 3, Symfony, Laravel, Yii 2, 
 │   ├── McpServer/                # MCP server: AI assistant integration (stdio + HTTP)
 │   ├── Cli/                      # CLI commands: debug server, reset, broadcast, query, serve, mcp
 │   ├── Testing/                  # Test fixtures: definitions, runner, CLI command
+│   ├── FrontendAssets/           # Composer package shipping the prebuilt panel SPA (dist/ populated at release time)
 │   ├── Adapter/
 │   │   ├── Yii3/                 # Yii 3 framework adapter
 │   │   ├── Symfony/              # Symfony framework adapter
@@ -286,12 +287,13 @@ Inspired by [VK Modulite](https://github.com/VKCOM/modulite). Enforces that each
 | `kernel` | (none — foundation) |
 | `mcp-server` | `kernel` |
 | `api` | `kernel`, `mcp-server` |
-| `cli` | `kernel`, `api`, `mcp-server` |
+| `cli` | `kernel`, `api`, `mcp-server`, `frontend-assets` |
 | `testing` | (none — independent) |
-| `adapter-yii3` | `kernel`, `api`, `cli`, `mcp-server` |
-| `adapter-symfony` | `kernel`, `api`, `cli`, `mcp-server` |
-| `adapter-laravel` | `kernel`, `api`, `cli`, `mcp-server` |
-| `adapter-yii2` | `kernel`, `api`, `cli`, `mcp-server` |
+| `frontend-assets` | (none — leaf, ships prebuilt SPA) |
+| `adapter-yii3` | `kernel`, `api`, `cli`, `mcp-server`, `frontend-assets` |
+| `adapter-symfony` | `kernel`, `api`, `cli`, `mcp-server`, `frontend-assets` |
+| `adapter-laravel` | `kernel`, `api`, `cli`, `mcp-server`, `frontend-assets` |
+| `adapter-yii2` | `kernel`, `api`, `cli`, `mcp-server`, `frontend-assets` |
 | `adapter-cycle` | `api` |
 
 ### Rules
@@ -469,6 +471,7 @@ Each module under `libs/` has its own `CLAUDE.md` with internal architecture det
 - `libs/McpServer/CLAUDE.md` — MCP server (AI assistant integration)
 - `libs/Cli/CLAUDE.md` — CLI commands
 - `libs/Testing/CLAUDE.md` — Test fixtures and runner
+- `libs/FrontendAssets/CLAUDE.md` — Prebuilt panel SPA Composer package (dist shipping, split-repo flow)
 - `libs/Adapter/Yii3/CLAUDE.md` — Yii 3 adapter integration
 - `libs/Adapter/Symfony/CLAUDE.md` — Symfony adapter integration
 - `libs/Adapter/Laravel/CLAUDE.md` — Laravel adapter integration

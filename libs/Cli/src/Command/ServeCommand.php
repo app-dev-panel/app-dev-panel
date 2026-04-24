@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Cli\Command;
 
+use AppDevPanel\FrontendAssets\FrontendAssets;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -43,7 +44,7 @@ final class ServeCommand extends Command
         $storagePath = $input->getOption('storage-path') ?? sys_get_temp_dir() . '/adp';
         $rootPath = $input->getOption('root-path');
         $runtimePath = $input->getOption('runtime-path') ?? $storagePath;
-        $frontendPath = $input->getOption('frontend-path');
+        $frontendPath = $input->getOption('frontend-path') ?? $this->resolveFrontendPath();
 
         $routerScript = $this->routerScript ?? dirname(__DIR__) . '/Server/server-router.php';
 
@@ -79,16 +80,17 @@ final class ServeCommand extends Command
             $env['ADP_FRONTEND_PATH'] = $frontendPath;
         }
 
-        $process = new Process(
-            [
-                $phpBinary,
-                '-S',
-                "{$host}:{$port}",
-                $routerScript,
-            ],
-            null,
-            $env,
-        );
+        $command = [$phpBinary, '-S', "{$host}:{$port}"];
+        // When a frontend bundle is available, point the built-in server's
+        // document root at it so that `return false` from the router (signalling
+        // "serve this file directly") resolves correctly.
+        if ($frontendPath !== null && is_dir($frontendPath)) {
+            $command[] = '-t';
+            $command[] = $frontendPath;
+        }
+        $command[] = $routerScript;
+
+        $process = new Process($command, null, $env);
 
         $process->setTimeout(null);
 
@@ -97,5 +99,20 @@ final class ServeCommand extends Command
         });
 
         return $process->getExitCode() ?? Command::FAILURE;
+    }
+
+    /**
+     * Auto-resolve the frontend dist path from the `app-dev-panel/frontend-assets`
+     * Composer package when `--frontend-path` is not supplied. Returns `null` if
+     * the package is not installed or the bundle is empty, so the serve command
+     * still works with API-only setups.
+     */
+    private function resolveFrontendPath(): ?string
+    {
+        if (!class_exists(FrontendAssets::class)) {
+            return null;
+        }
+
+        return FrontendAssets::exists() ? FrontendAssets::path() : null;
     }
 }
