@@ -65,8 +65,13 @@ jobs:
       - name: Package toolbar build
         run: cd packages/toolbar && tar -czf ../../toolbar-dist.tar.gz dist/
 
-      - name: Package panel build as frontend-dist.zip
-        run: cd packages/panel/dist && zip -r ../../../frontend-dist.zip .
+      - name: Package panel + toolbar as frontend-dist.zip
+        run: |
+          rm -rf /tmp/frontend-dist
+          mkdir -p /tmp/frontend-dist/toolbar
+          cp -R packages/panel/dist/.   /tmp/frontend-dist/
+          cp -R packages/toolbar/dist/. /tmp/frontend-dist/toolbar/
+          cd /tmp/frontend-dist && zip -r "$GITHUB_WORKSPACE/libs/frontend/frontend-dist.zip" .
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4

@@ -7,6 +7,7 @@ namespace AppDevPanel\Adapter\Laravel;
 use AppDevPanel\Adapter\Laravel\Collector\RouterDataExtractor;
 use AppDevPanel\Adapter\Laravel\Collector\TemplateCollectorCompilerEngine;
 use AppDevPanel\Adapter\Laravel\Controller\AdpApiController;
+use AppDevPanel\Adapter\Laravel\Controller\FrontendAssetsController;
 use AppDevPanel\Adapter\Laravel\EventListener\AuthorizationListener;
 use AppDevPanel\Adapter\Laravel\EventListener\CacheListener;
 use AppDevPanel\Adapter\Laravel\EventListener\ConsoleListener;
@@ -96,6 +97,7 @@ use AppDevPanel\Cli\Command\FrontendUpdateCommand;
 use AppDevPanel\Cli\Command\InspectConfigCommand;
 use AppDevPanel\Cli\Command\InspectDatabaseCommand;
 use AppDevPanel\Cli\Command\InspectRoutesCommand;
+use AppDevPanel\FrontendAssets\FrontendAssets;
 use AppDevPanel\Kernel\Collector\AssetBundleCollector;
 use AppDevPanel\Kernel\Collector\AuthorizationCollector;
 use AppDevPanel\Kernel\Collector\CacheCollector;
@@ -185,10 +187,12 @@ final class AppDevPanelServiceProvider extends ServiceProvider
             __DIR__ . '/../config/app-dev-panel.php' => $this->app->configPath('app-dev-panel.php'),
         ], 'app-dev-panel-config');
 
-        $assetSource = __DIR__ . '/../resources/dist';
-        if (is_dir($assetSource) && file_exists($assetSource . '/bundle.js')) {
+        // Optional: allow users to copy the frontend bundle into their public directory
+        // (useful behind strict CDNs or when serving via a non-PHP worker). Default
+        // delivery is via FrontendAssetsController, no `vendor:publish` required.
+        if (FrontendAssets::exists()) {
             $this->publishes([
-                $assetSource => $this->app->publicPath('vendor/app-dev-panel'),
+                FrontendAssets::path() => $this->app->publicPath('vendor/app-dev-panel'),
             ], ['app-dev-panel-assets', 'laravel-assets']);
         }
 
@@ -566,12 +570,19 @@ final class AppDevPanelServiceProvider extends ServiceProvider
         );
 
         $this->app->singleton(PanelConfig::class, function () {
-            $staticUrl = config('app-dev-panel.panel.static_url', '');
+            $staticUrl = (string) config('app-dev-panel.panel.static_url', '');
             if ($staticUrl === '') {
-                // Auto-detect: if assets were published locally, use them
-                $staticUrl = file_exists($this->app->publicPath('vendor/app-dev-panel/bundle.js'))
-                    ? '/vendor/app-dev-panel'
-                    : PanelConfig::DEFAULT_STATIC_URL;
+                // Auto-detect delivery source:
+                // 1. `vendor:publish` copy already sitting in public/ (fastest, no PHP).
+                // 2. The frontend-assets Composer package — served by FrontendAssetsController.
+                // 3. CDN fallback.
+                if (file_exists($this->app->publicPath('vendor/app-dev-panel/bundle.js'))) {
+                    $staticUrl = '/vendor/app-dev-panel';
+                } elseif (FrontendAssets::exists()) {
+                    $staticUrl = '/vendor/app-dev-panel';
+                } else {
+                    $staticUrl = PanelConfig::DEFAULT_STATIC_URL;
+                }
             }
             return new PanelConfig($staticUrl);
         });

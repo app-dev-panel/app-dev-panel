@@ -6,6 +6,7 @@ namespace AppDevPanel\Adapter\Symfony\DependencyInjection;
 
 use AppDevPanel\Adapter\Symfony\Collector\RouterDataExtractor;
 use AppDevPanel\Adapter\Symfony\Controller\AdpApiController;
+use AppDevPanel\Adapter\Symfony\Controller\FrontendAssetsController;
 use AppDevPanel\Adapter\Symfony\EventSubscriber\AssetMapperSubscriber;
 use AppDevPanel\Adapter\Symfony\EventSubscriber\AuthorizationSubscriber;
 use AppDevPanel\Adapter\Symfony\EventSubscriber\ConsoleSubscriber;
@@ -87,6 +88,7 @@ use AppDevPanel\Cli\Command\FrontendUpdateCommand;
 use AppDevPanel\Cli\Command\InspectConfigCommand;
 use AppDevPanel\Cli\Command\InspectDatabaseCommand;
 use AppDevPanel\Cli\Command\InspectRoutesCommand;
+use AppDevPanel\FrontendAssets\FrontendAssets;
 use AppDevPanel\Kernel\Collector\AssetBundleCollector;
 use AppDevPanel\Kernel\Collector\AuthorizationCollector;
 use AppDevPanel\Kernel\Collector\CacheCollector;
@@ -594,9 +596,18 @@ final class AppDevPanelExtension extends Extension
 
         $panelStaticUrl = $config['panel']['static_url'] ?? '';
         if ($panelStaticUrl === '') {
-            // Auto-detect: if bundle assets were installed locally, use them
+            // Auto-detect delivery source:
+            // 1. `assets:install` copied the bundle to Resources/public/ → webserver serves it.
+            // 2. The frontend-assets Composer package → FrontendAssetsController serves it.
+            // 3. CDN fallback.
             $bundleAssetsPath = \dirname(__DIR__, 2) . '/Resources/public/bundle.js';
-            $panelStaticUrl = file_exists($bundleAssetsPath) ? '/bundles/appdevpanel' : PanelConfig::DEFAULT_STATIC_URL;
+            if (file_exists($bundleAssetsPath)) {
+                $panelStaticUrl = '/bundles/appdevpanel';
+            } elseif (FrontendAssets::exists()) {
+                $panelStaticUrl = '/bundles/appdevpanel';
+            } else {
+                $panelStaticUrl = PanelConfig::DEFAULT_STATIC_URL;
+            }
         }
         $container->register(PanelConfig::class, PanelConfig::class)->setArguments([$panelStaticUrl])->setPublic(false);
 
@@ -932,6 +943,13 @@ final class AppDevPanelExtension extends Extension
         $container
             ->register(AdpApiController::class, AdpApiController::class)
             ->setArguments([new Reference(ApiApplication::class)])
+            ->addTag('controller.service_arguments')
+            ->setPublic(true);
+
+        // Frontend assets controller — serves prebuilt panel + toolbar from the
+        // app-dev-panel/frontend-assets Composer package under /bundles/appdevpanel/*.
+        $container
+            ->register(FrontendAssetsController::class, FrontendAssetsController::class)
             ->addTag('controller.service_arguments')
             ->setPublic(true);
     }
