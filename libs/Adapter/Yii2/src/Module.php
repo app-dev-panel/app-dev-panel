@@ -85,6 +85,7 @@ use AppDevPanel\Api\Project\Controller\ProjectController;
 use AppDevPanel\Api\Project\Controller\SecretsController;
 use AppDevPanel\Api\Toolbar\ToolbarConfig;
 use AppDevPanel\Api\Toolbar\ToolbarInjector;
+use AppDevPanel\FrontendAssets\FrontendAssets;
 use AppDevPanel\Kernel\Collector\AssetBundleCollector;
 use AppDevPanel\Kernel\Collector\AuthorizationCollector;
 use AppDevPanel\Kernel\Collector\CacheCollector;
@@ -515,25 +516,26 @@ class Module extends \yii\base\Module implements BootstrapInterface
     }
 
     /**
-     * Publish bundled panel+toolbar assets shipped by the adapter package.
+     * Publish bundled panel+toolbar assets shipped with the ADP install.
      *
      * Resolution order:
-     * 1. `resources/dist/bundle.js` or `resources/dist/toolbar/` exists ⇒ symlink
-     *    (or copy as a fallback on systems where symlinks fail) into `@webroot/app-dev-panel`
-     *    and return `/app-dev-panel`.
-     * 2. Target already exists and points to the adapter's dist dir ⇒ return the
-     *    existing URL silently.
-     * 3. Target exists but is something else (a regular dir/file not created by us)
-     *    ⇒ warn and do not touch; fall through to the CDN default so the panel still
-     *    loads (from the remote default static URL).
+     * 1. `app-dev-panel/frontend-assets` is installed and its `dist/index.html`
+     *    exists ⇒ that's the canonical, release-pinned location since the
+     *    package is split out of the monorepo and tagged per release.
+     *    Symlink (or recursive-copy as a fallback) into `@webroot/app-dev-panel`.
+     * 2. The legacy in-package `resources/dist/` exists ⇒ used as a local
+     *    override (`make build-panel` copies into it for development).
+     * 3. Target already exists and points to the source ⇒ return silently.
+     * 4. Target exists but is something else ⇒ warn (do not overwrite),
+     *    fall through to {@see PanelConfig::DEFAULT_STATIC_URL}.
      *
      * Returns the published URL prefix, or '' when publishing failed or no bundles
      * are shipped. Caller falls back to `PanelConfig::DEFAULT_STATIC_URL`.
      */
     private function publishBundledAssets(): string
     {
-        $distDir = \dirname(__DIR__) . '/resources/dist';
-        if (!file_exists($distDir . '/bundle.js') && !is_dir($distDir . '/toolbar')) {
+        $distDir = $this->resolveBundledAssetsDir();
+        if ($distDir === null) {
             return '';
         }
 
@@ -579,6 +581,29 @@ class Module extends \yii\base\Module implements BootstrapInterface
         );
 
         return '';
+    }
+
+    /**
+     * Locate the directory holding the prebuilt panel/toolbar bundles.
+     *
+     * Prefers the shared `app-dev-panel/frontend-assets` package — that's where
+     * the release pipeline (`split.yml`) drops the canonical Vite build. When
+     * the package is missing or its `dist/` is empty (typical inside the
+     * monorepo before a release build), falls back to the adapter's own
+     * `resources/dist/` so local `make build-panel` workflows keep working.
+     */
+    private function resolveBundledAssetsDir(): ?string
+    {
+        if (\class_exists(FrontendAssets::class) && FrontendAssets::exists()) {
+            return FrontendAssets::path();
+        }
+
+        $local = \dirname(__DIR__) . '/resources/dist';
+        if (file_exists($local . '/bundle.js') || is_dir($local . '/toolbar')) {
+            return $local;
+        }
+
+        return null;
     }
 
     private function copyDirectory(string $source, string $target): bool

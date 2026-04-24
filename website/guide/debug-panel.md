@@ -134,16 +134,20 @@ make build-install-panel    # Build + publish in one step
 ```
 
 ::: tip Auto-Detection
-When `static_url` is left empty (the default), each adapter automatically checks whether built assets exist in its package directory. If `bundle.js` is found locally, the adapter serves assets from the local path instead of GitHub Pages — **no configuration needed**.
+When `static_url` is left empty (the default), each adapter resolves the panel/toolbar bundles in this order:
 
-| Adapter | Local assets path | Served as |
-|---------|-------------------|-----------|
-| Symfony | `Resources/public/bundle.js` | `/bundles/appdevpanel` |
-| Laravel | `resources/dist/bundle.js` → published to `public/vendor/app-dev-panel/` | `/vendor/app-dev-panel` |
-| Yii 3 | `resources/dist/bundle.js` → symlinked to `@public/app-dev-panel/` | `/app-dev-panel` |
-| Yii 2 | `resources/dist/bundle.js` → symlinked to `@webroot/app-dev-panel/` | `/app-dev-panel` |
+1. **`app-dev-panel/frontend-assets`** — the canonical Composer package, installed transitively by every adapter, populated at release time by `.github/workflows/split.yml` (panel SPA + toolbar bundle). This is what runs in production installs.
+2. **Adapter-local `resources/dist/`** — fallback for monorepo development after `make build-panel`.
+3. **GitHub Pages CDN** — last-resort fallback.
 
-To revert to GitHub Pages, remove the built assets from the adapter directory.
+| Adapter | Source location | Served as |
+|---------|-----------------|-----------|
+| Symfony | `Resources/public/bundle.js` (legacy local only — `assets:install`) | `/bundles/appdevpanel` |
+| Laravel | `FrontendAssets::path()` or `resources/dist/` → `vendor:publish --tag=app-dev-panel-assets` | `/vendor/app-dev-panel` |
+| Yii 3 | `FrontendAssets::path()` or `resources/dist/` → symlinked to `@public/app-dev-panel/` | `/app-dev-panel` |
+| Yii 2 | `FrontendAssets::path()` or `resources/dist/` → symlinked to `@webroot/app-dev-panel/` | `/app-dev-panel` |
+
+To force the CDN fallback, delete the auto-published symlink/dir (e.g. `public/app-dev-panel`) and either uninstall `app-dev-panel/frontend-assets` or set `static_url` explicitly.
 :::
 
 ### Option 4: Vite Dev Server

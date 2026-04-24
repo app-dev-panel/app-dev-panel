@@ -98,6 +98,7 @@ use AppDevPanel\Cli\Command\FrontendUpdateCommand;
 use AppDevPanel\Cli\Command\InspectConfigCommand;
 use AppDevPanel\Cli\Command\InspectDatabaseCommand;
 use AppDevPanel\Cli\Command\InspectRoutesCommand;
+use AppDevPanel\FrontendAssets\FrontendAssets;
 use AppDevPanel\Kernel\Collector\AssetBundleCollector;
 use AppDevPanel\Kernel\Collector\AuthorizationCollector;
 use AppDevPanel\Kernel\Collector\CacheCollector;
@@ -191,8 +192,12 @@ final class AppDevPanelServiceProvider extends ServiceProvider
             __DIR__ . '/../config/app-dev-panel.php' => $this->app->configPath('app-dev-panel.php'),
         ], 'app-dev-panel-config');
 
-        $assetSource = __DIR__ . '/../resources/dist';
-        if (is_dir($assetSource) && file_exists($assetSource . '/bundle.js')) {
+        // Publish prebuilt panel assets. Prefer the shared
+        // `app-dev-panel/frontend-assets` package (canonical, release-pinned,
+        // includes both panel and toolbar bundles); fall back to the legacy
+        // adapter-local `resources/dist/` so `make build-panel` keeps working.
+        $assetSource = $this->resolveAssetSource();
+        if ($assetSource !== null) {
             $this->publishes([
                 $assetSource => $this->app->publicPath('vendor/app-dev-panel'),
             ], ['app-dev-panel-assets', 'laravel-assets']);
@@ -237,6 +242,28 @@ final class AppDevPanelServiceProvider extends ServiceProvider
     private function isEnabled(): bool
     {
         return (bool) $this->app->make('config')->get('app-dev-panel.enabled', false);
+    }
+
+    /**
+     * Locate the directory holding the prebuilt panel/toolbar bundles to publish.
+     *
+     * Prefers the shared `app-dev-panel/frontend-assets` package — its `dist/`
+     * is filled by the release pipeline and contains both panel and toolbar
+     * bundles. Falls back to the adapter's own `resources/dist/` so local
+     * `make build-panel` workflows continue to work inside the monorepo.
+     */
+    private function resolveAssetSource(): ?string
+    {
+        if (\class_exists(FrontendAssets::class) && FrontendAssets::exists()) {
+            return FrontendAssets::path();
+        }
+
+        $local = __DIR__ . '/../resources/dist';
+        if (is_dir($local) && file_exists($local . '/bundle.js')) {
+            return $local;
+        }
+
+        return null;
     }
 
     private function registerCoreServices(): void
@@ -574,7 +601,10 @@ final class AppDevPanelServiceProvider extends ServiceProvider
         $this->app->singleton(PanelConfig::class, function () {
             $staticUrl = config('app-dev-panel.panel.static_url', '');
             if ($staticUrl === '') {
-                // Auto-detect: if assets were published locally, use them
+                // Auto-detect: if assets were published locally
+                // (`vendor:publish --tag=app-dev-panel-assets`), use them. Either the
+                // FrontendAssets-sourced or legacy resources/dist-sourced publish ends up
+                // at the same `public/vendor/app-dev-panel/` path, so the URL is the same.
                 $staticUrl = file_exists($this->app->publicPath('vendor/app-dev-panel/bundle.js'))
                     ? '/vendor/app-dev-panel'
                     : PanelConfig::DEFAULT_STATIC_URL;

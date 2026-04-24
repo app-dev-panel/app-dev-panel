@@ -72,6 +72,7 @@ use AppDevPanel\Api\Project\Controller\ProjectController;
 use AppDevPanel\Api\Project\Controller\SecretsController;
 use AppDevPanel\Api\Toolbar\ToolbarConfig;
 use AppDevPanel\Api\Toolbar\ToolbarInjector;
+use AppDevPanel\FrontendAssets\FrontendAssets;
 use AppDevPanel\Kernel\DebuggerIdGenerator;
 use AppDevPanel\Kernel\Project\FileProjectConfigStorage;
 use AppDevPanel\Kernel\Project\FileSecretsStorage;
@@ -228,14 +229,26 @@ return [
     PanelConfig::class => static function (ContainerInterface $container) use ($params): PanelConfig {
         $staticUrl = $params['app-dev-panel/yii3']['panel']['staticUrl'] ?? '';
         if ($staticUrl === '') {
-            // Auto-detect: if built assets exist in adapter package, symlink them
-            $adapterDist = \dirname(__DIR__) . '/resources/dist/bundle.js';
-            if (file_exists($adapterDist)) {
+            // Resolution order:
+            // 1. Shared `app-dev-panel/frontend-assets` package (canonical, release-pinned).
+            // 2. Adapter-local `resources/dist` (legacy `make build-panel` workflow).
+            // 3. CDN default.
+            $sourceDir = null;
+            if (\class_exists(FrontendAssets::class) && FrontendAssets::exists()) {
+                $sourceDir = FrontendAssets::path();
+            } else {
+                $local = \dirname(__DIR__) . '/resources/dist';
+                if (file_exists($local . '/bundle.js')) {
+                    $sourceDir = $local;
+                }
+            }
+
+            if ($sourceDir !== null) {
                 $aliases = $container->get(Aliases::class);
                 $webroot = $aliases->get('@public');
                 $targetDir = $webroot . '/app-dev-panel';
-                if (!is_dir($targetDir)) {
-                    @symlink(\dirname($adapterDist), $targetDir);
+                if (!is_dir($targetDir) && !is_link($targetDir)) {
+                    @symlink($sourceDir, $targetDir);
                 }
                 if (is_dir($targetDir)) {
                     $staticUrl = '/app-dev-panel';
