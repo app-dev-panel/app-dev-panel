@@ -1,5 +1,20 @@
 # Symfony 7 + ADP installation report (Packagist, v0.2)
 
+> **Update after PR #248 (`app-dev-panel/frontend-assets`)**: the fixes below have been
+> split into two layers. One (docs, CDN fallback `/demo` path, `deploy-docs.yml`
+> toolbar assets, stream wrapper warnings, `frontend:update --token/--version`)
+> applies to users who still point at `github.io` (e.g. users on a released
+> version that predates `frontend-assets`). The other (this branch's second
+> commit) wires `app-dev-panel/frontend-assets` through the Symfony adapter so
+> the CDN is no longer touched at runtime: a new `AdpAssetController` streams
+> `bundle.js` / `bundle.css` / `toolbar/*` from the composer-installed
+> `vendor/app-dev-panel/frontend-assets/dist/` via `/debug-assets/{path}`, and
+> `AppDevPanelExtension` switches both `PanelConfig::$staticUrl` and
+> `ToolbarConfig::$staticUrl` to `/debug-assets` when the package is present.
+> The split workflow (`split.yml`) also now builds the toolbar alongside the
+> panel so `dist/toolbar/bundle.js` ships inside `frontend-assets`. Together
+> this removes the `github.io` 404s (issues #4 and #5) for the integration path.
+
 Scenario reproduced end-to-end:
 
 1. `composer create-project symfony/skeleton:^7.0 demo-app`

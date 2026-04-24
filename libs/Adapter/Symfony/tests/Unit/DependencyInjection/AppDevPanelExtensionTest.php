@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Adapter\Symfony\Tests\Unit\DependencyInjection;
 
+use AppDevPanel\Adapter\Symfony\Controller\AdpAssetController;
 use AppDevPanel\Adapter\Symfony\DependencyInjection\AppDevPanelExtension;
 use AppDevPanel\Adapter\Symfony\EventSubscriber\ConsoleSubscriber;
 use AppDevPanel\Adapter\Symfony\EventSubscriber\HttpSubscriber;
@@ -13,6 +14,9 @@ use AppDevPanel\Adapter\Symfony\Inspector\SymfonyUrlMatcherAdapter;
 use AppDevPanel\Api\Inspector\Controller\DatabaseController;
 use AppDevPanel\Api\Inspector\Controller\RoutingController;
 use AppDevPanel\Api\Inspector\Database\SchemaProviderInterface;
+use AppDevPanel\Api\Panel\PanelConfig;
+use AppDevPanel\Api\Toolbar\ToolbarConfig;
+use AppDevPanel\FrontendAssets\FrontendAssets;
 use AppDevPanel\Kernel\Collector\AssetBundleCollector;
 use AppDevPanel\Kernel\Collector\AuthorizationCollector;
 use AppDevPanel\Kernel\Collector\CacheCollector;
@@ -309,5 +313,58 @@ final class AppDevPanelExtensionTest extends TestCase
 
         $definition = $container->getDefinition(InspectorClient::class);
         $this->assertSame('http://localhost:8080', $definition->getArgument(0));
+    }
+
+    public function testAdpAssetControllerIsRegistered(): void
+    {
+        $container = new ContainerBuilder();
+        new AppDevPanelExtension()->load([['enabled' => true]], $container);
+
+        $this->assertTrue($container->hasDefinition(AdpAssetController::class));
+        $definition = $container->getDefinition(AdpAssetController::class);
+        $this->assertTrue($definition->isPublic());
+        $this->assertTrue($definition->hasTag('controller.service_arguments'));
+    }
+
+    public function testPanelStaticUrlPrefersFrontendAssetsWhenInstalled(): void
+    {
+        $distDir = FrontendAssets::path();
+        if (!is_dir($distDir)) {
+            mkdir($distDir, 0o777, true);
+        }
+        $indexPath = $distDir . '/index.html';
+        $hadIndex = is_file($indexPath);
+        if (!$hadIndex) {
+            file_put_contents($indexPath, '<!doctype html><title>test</title>');
+        }
+
+        try {
+            $container = new ContainerBuilder();
+            new AppDevPanelExtension()->load([['enabled' => true]], $container);
+
+            $panelConfig = $container->getDefinition(PanelConfig::class);
+            $this->assertSame('/debug-assets', $panelConfig->getArgument(0));
+
+            $toolbarConfig = $container->getDefinition(ToolbarConfig::class);
+            $this->assertSame('/debug-assets', $toolbarConfig->getArgument(1));
+        } finally {
+            if (!$hadIndex) {
+                unlink($indexPath);
+            }
+        }
+    }
+
+    public function testExplicitPanelStaticUrlOverridesAutoDetect(): void
+    {
+        $container = new ContainerBuilder();
+        new AppDevPanelExtension()->load([
+            [
+                'enabled' => true,
+                'panel' => ['static_url' => 'https://cdn.example.com/adp'],
+            ],
+        ], $container);
+
+        $panelConfig = $container->getDefinition(PanelConfig::class);
+        $this->assertSame('https://cdn.example.com/adp', $panelConfig->getArgument(0));
     }
 }

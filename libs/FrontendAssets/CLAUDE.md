@@ -45,8 +45,8 @@ Every framework adapter, plus the CLI module itself:
 `dist/` is **not** tracked in the monorepo. It is produced on every push by `.github/workflows/split.yml`:
 
 1. Checkout the monorepo
-2. `npm ci && npm run build -w packages/sdk && npm run build -w packages/panel` inside `libs/frontend/`
-3. Copy `libs/frontend/packages/panel/dist/*` into `libs/FrontendAssets/dist/`
+2. `npm ci && npm run build -w packages/sdk && npm run build -w packages/panel && npm run build -w packages/toolbar` inside `libs/frontend/`
+3. Copy `libs/frontend/packages/panel/dist/*` into `libs/FrontendAssets/dist/` and `libs/frontend/packages/toolbar/dist/*` into `libs/FrontendAssets/dist/toolbar/`
 4. Make a throwaway local commit that `git add -f libs/FrontendAssets/dist`
 5. Run `splitsh-lite --prefix=libs/FrontendAssets` to extract the subtree
 6. Force-push the resulting SHA to [`app-dev-panel/frontend-assets`](https://github.com/app-dev-panel/frontend-assets) (and tag it with `v*` when triggered by a tag)
@@ -59,8 +59,10 @@ To test `adp serve` locally against the real panel:
 
 ```bash
 make install-frontend
-cd libs/frontend && npm run build -w packages/sdk && npm run build -w packages/panel
+cd libs/frontend && npm run build -w packages/sdk && npm run build -w packages/panel && npm run build -w packages/toolbar
+mkdir -p libs/FrontendAssets/dist/toolbar
 cp -R libs/frontend/packages/panel/dist/. libs/FrontendAssets/dist/
+cp -R libs/frontend/packages/toolbar/dist/. libs/FrontendAssets/dist/toolbar/
 ```
 
 The `dist/*` files are gitignored, so nothing leaks into the monorepo.

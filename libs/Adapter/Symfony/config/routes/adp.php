@@ -3,9 +3,18 @@
 declare(strict_types=1);
 
 use AppDevPanel\Adapter\Symfony\Controller\AdpApiController;
+use AppDevPanel\Adapter\Symfony\Controller\AdpAssetController;
 use Symfony\Component\Routing\Loader\Configurator\RoutingConfigurator;
 
 return static function (RoutingConfigurator $routes): void {
+    // Asset route — serves panel/toolbar bundles shipped by app-dev-panel/frontend-assets.
+    // Must come before any /debug/* catch-all.
+    $routes
+        ->add('adp_assets', '/debug-assets/{path}')
+        ->controller(AdpAssetController::class)
+        ->requirements(['path' => '.+'])
+        ->methods(['GET']);
+
     // API routes (must be registered before the panel catch-all)
     $routes
         ->add('adp_debug_api', '/debug/api/{path}')
@@ -39,8 +48,5 @@ return static function (RoutingConfigurator $routes): void {
         ->defaults(['path' => ''])
         ->methods(['GET']);
 
-    $routes
-        ->add('adp_panel_root', '/debug')
-        ->controller(AdpApiController::class)
-        ->methods(['GET']);
+    $routes->add('adp_panel_root', '/debug')->controller(AdpApiController::class)->methods(['GET']);
 };

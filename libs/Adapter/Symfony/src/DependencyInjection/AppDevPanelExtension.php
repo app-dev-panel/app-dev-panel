@@ -6,6 +6,7 @@ namespace AppDevPanel\Adapter\Symfony\DependencyInjection;
 
 use AppDevPanel\Adapter\Symfony\Collector\RouterDataExtractor;
 use AppDevPanel\Adapter\Symfony\Controller\AdpApiController;
+use AppDevPanel\Adapter\Symfony\Controller\AdpAssetController;
 use AppDevPanel\Adapter\Symfony\EventSubscriber\AssetMapperSubscriber;
 use AppDevPanel\Adapter\Symfony\EventSubscriber\AuthorizationSubscriber;
 use AppDevPanel\Adapter\Symfony\EventSubscriber\ConsoleSubscriber;
@@ -594,14 +595,17 @@ final class AppDevPanelExtension extends Extension
 
         $panelStaticUrl = $config['panel']['static_url'] ?? '';
         if ($panelStaticUrl === '') {
-            // Auto-detect: if bundle assets were installed locally, use them
-            $bundleAssetsPath = \dirname(__DIR__, 2) . '/Resources/public/bundle.js';
-            $panelStaticUrl = file_exists($bundleAssetsPath) ? '/bundles/appdevpanel' : PanelConfig::DEFAULT_STATIC_URL;
+            $panelStaticUrl = $this->detectPanelStaticUrl();
         }
         $container->register(PanelConfig::class, PanelConfig::class)->setArguments([$panelStaticUrl])->setPublic(false);
 
         $toolbarEnabled = $config['toolbar']['enabled'] ?? true;
         $toolbarStaticUrl = $config['toolbar']['static_url'] ?? '';
+        if ($toolbarStaticUrl === '' && $this->frontendAssetsAvailable()) {
+            // Toolbar lives alongside the panel under /debug-assets/toolbar/* when we
+            // serve from the FrontendAssets package.
+            $toolbarStaticUrl = '/debug-assets';
+        }
         $container
             ->register(ToolbarConfig::class, ToolbarConfig::class)
             ->setArguments([$toolbarEnabled, $toolbarStaticUrl])
@@ -934,6 +938,12 @@ final class AppDevPanelExtension extends Extension
             ->setArguments([new Reference(ApiApplication::class)])
             ->addTag('controller.service_arguments')
             ->setPublic(true);
+
+        // Static asset controller — serves panel/toolbar bundles from app-dev-panel/frontend-assets.
+        $container
+            ->register(AdpAssetController::class, AdpAssetController::class)
+            ->addTag('controller.service_arguments')
+            ->setPublic(true);
     }
 
     private function registerCliCommands(ContainerBuilder $container): void
@@ -1024,5 +1034,35 @@ final class AppDevPanelExtension extends Extension
     public function getAlias(): string
     {
         return 'app_dev_panel';
+    }
+
+    /**
+     * Resolve the panel static URL when the user has not configured one explicitly.
+     * Preference order:
+     * 1. `app-dev-panel/frontend-assets` installed and populated → `/debug-assets`
+     *    (served by `AdpAssetController` from the package's `dist/`).
+     * 2. Legacy local assets copied to the bundle's `Resources/public/` → `/bundles/appdevpanel`.
+     * 3. CDN fallback (`PanelConfig::DEFAULT_STATIC_URL`).
+     */
+    private function detectPanelStaticUrl(): string
+    {
+        if ($this->frontendAssetsAvailable()) {
+            return '/debug-assets';
+        }
+
+        $bundleAssetsPath = \dirname(__DIR__, 2) . '/Resources/public/bundle.js';
+        if (file_exists($bundleAssetsPath)) {
+            return '/bundles/appdevpanel';
+        }
+
+        return PanelConfig::DEFAULT_STATIC_URL;
+    }
+
+    private function frontendAssetsAvailable(): bool
+    {
+        return (
+            class_exists(\AppDevPanel\FrontendAssets\FrontendAssets::class)
+            && \AppDevPanel\FrontendAssets\FrontendAssets::exists()
+        );
     }
 }
