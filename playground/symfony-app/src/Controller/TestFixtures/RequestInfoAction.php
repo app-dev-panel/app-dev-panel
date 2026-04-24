@@ -7,7 +7,11 @@ namespace App\Controller\TestFixtures;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Attribute\Route;
 
-#[Route('/test/fixtures/request-info', name: 'test_request_info', methods: ['GET'])]
+#[Route(
+    '/test/fixtures/request-info',
+    name: 'test_request_info',
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+)]
 final class RequestInfoAction
 {
     public function __invoke(): JsonResponse

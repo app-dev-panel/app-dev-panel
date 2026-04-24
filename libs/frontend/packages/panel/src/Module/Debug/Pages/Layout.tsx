@@ -296,8 +296,9 @@ const Layout = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
+    const collectorParam = searchParams.get('collector') || '';
     const {data: entriesList} = useGetDebugQuery();
-    const [selectedCollector, setSelectedCollector] = useState<string>(() => searchParams.get('collector') || '');
+    const [selectedCollector, setSelectedCollector] = useState<string>(() => collectorParam);
     const [collectorData, setCollectorData] = useState<any>(undefined);
     const [entryMissingError, setEntryMissingError] = useState<CollectorError | null>(null);
     const [collectorInfo, collectorQueryInfo] = useLazyGetCollectorInfoQuery();
@@ -307,9 +308,12 @@ const Layout = () => {
         setCollectorData(null);
     }, []);
 
+    // Depend on collectorParam (the only URL input this effect cares about) rather than the
+    // whole searchParams object. Otherwise unrelated params like `requestTab` — which the
+    // request panel toggles on every tab switch — would produce a new searchParams reference,
+    // re-run this effect, and trigger a spurious collectorInfo refetch + LinearProgress flash.
     useEffect(() => {
-        const collector = searchParams.get('collector') || '';
-        if (collector.trim() === '') {
+        if (collectorParam.trim() === '') {
             clearCollectorAndData();
             setEntryMissingError(null);
             return;
@@ -318,8 +322,8 @@ const Layout = () => {
             return;
         }
         // Resolve virtual EntryCollector to the real collector based on entry type
-        let resolvedCollector = collector;
-        if (collector === CollectorsMap.EntryCollector) {
+        let resolvedCollector = collectorParam;
+        if (collectorParam === CollectorsMap.EntryCollector) {
             if (isDebugEntryAboutWeb(debugEntry)) {
                 resolvedCollector = CollectorsMap.RequestCollector;
             } else if (isDebugEntryAboutConsole(debugEntry)) {
@@ -333,8 +337,11 @@ const Layout = () => {
         // The lazy trigger returns a promise that always resolves with {error, data, isError};
         // rejection is not possible, so there is no need for a .catch branch. The cancelled
         // flag prevents an in-flight fetch from overwriting state after a newer one started.
+        // `preferCacheValue: true` avoids re-hitting the network when this effect does fire
+        // (e.g. navigating back to the same collector) — collector data for a given debug
+        // entry is immutable, so the cached value is always correct.
         let cancelled = false;
-        collectorInfo({id: debugEntry.id, collector: resolvedCollector}).then(({error, data, isError}) => {
+        collectorInfo({id: debugEntry.id, collector: resolvedCollector}, true).then(({error, data, isError}) => {
             if (cancelled) return;
             if (isError) {
                 // 404 means the entry (or at least this collector for it) has been
@@ -357,7 +364,7 @@ const Layout = () => {
         return () => {
             cancelled = true;
         };
-    }, [searchParams, debugEntry, collectorInfo, clearCollectorAndData]);
+    }, [collectorParam, debugEntry, collectorInfo, clearCollectorAndData]);
 
     const latestEntry = useMemo(() => {
         if (!entriesList || entriesList.length === 0) return undefined;
