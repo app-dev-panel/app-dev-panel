@@ -1,0 +1,24 @@
+{
+    "name": "app-dev-panel/frontend-assets",
+    "type": "library",
+    "description": "ADP Frontend Assets — prebuilt panel SPA shipped as a Composer package and served by the debug panel",
+    "keywords": [
+        "debug",
+        "debug-panel",
+        "frontend",
+        "assets",
+        "spa",
+        "app-dev-panel",
+        "adp"
+    ],
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "require": {
+        "php": "^8.4"
+    },
+    "autoload": {
+        "psr-4": {
+            "AppDevPanel\\FrontendAssets\\": "src"
+        }
+    }
+}

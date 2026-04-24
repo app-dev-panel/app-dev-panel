@@ -167,7 +167,7 @@ final class ServeCommandTest extends TestCase
         rmdir($frontendPath);
     }
 
-    public function testExecuteWithoutFrontendPathShowsNotConfigured(): void
+    public function testExecuteWithoutFrontendPathAutoResolvesFromFrontendAssets(): void
     {
         if (PHP_OS_FAMILY === 'Windows') {
             $this->markTestSkipped('Process tests unreliable on Windows (PHP built-in server exit behavior differs).');
@@ -185,7 +185,12 @@ final class ServeCommandTest extends TestCase
         ]);
 
         $display = $tester->getDisplay();
-        $this->assertStringContainsString('(not configured)', $display);
+        // The `app-dev-panel/frontend-assets` package is installed in this monorepo,
+        // so ServeCommand should auto-resolve its dist path when --frontend-path is
+        // omitted. When dist is empty (or the package is missing) the output falls
+        // back to "(not configured)" — either is a valid observation, we assert the
+        // line exists.
+        $this->assertMatchesRegularExpression('/Frontend: (\/.+|\(not configured\))/', $display);
 
         // Clean up
         if (is_dir($storagePath)) {

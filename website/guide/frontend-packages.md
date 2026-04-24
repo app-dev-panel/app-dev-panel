@@ -86,8 +86,48 @@ Each [GitHub Release](https://github.com/app-dev-panel/app-dev-panel/releases) i
 |-------|----------|
 | `panel-dist.tar.gz` | Production build of the panel SPA |
 | `toolbar-dist.tar.gz` | Production build of the toolbar widget |
+| `frontend-dist.zip` | Same panel build, zip-packaged for the `frontend:update` CLI |
 
 These can be served directly by a web server or embedded into PHP adapter packages.
+
+## Composer Distribution — `app-dev-panel/frontend-assets`
+
+The panel SPA is also shipped as a Composer package so PHP applications get the built frontend automatically when they install an adapter. This is the default channel — every framework adapter (`adapter-yii3`, `adapter-symfony`, `adapter-laravel`, `adapter-yii2`) requires it.
+
+| Package | Namespace | Ships |
+|---------|-----------|-------|
+| `app-dev-panel/frontend-assets` | `AppDevPanel\FrontendAssets\` | Prebuilt `dist/` directory + `FrontendAssets::path()` helper |
+
+### How it's built and released
+
+The source of the bundle lives in `libs/frontend/packages/panel`. The `dist/` directory is **not** committed to the monorepo — it is produced at release time by the `Monorepo Split` workflow (`.github/workflows/split.yml`):
+
+1. On each `push` to `master` / `*.x` / `v*`, the workflow runs `npm ci && npm run build -w packages/sdk && npm run build -w packages/panel` inside `libs/frontend/`.
+2. The Vite output is copied into `libs/FrontendAssets/dist/` and committed to a disposable local commit.
+3. `splitsh-lite` extracts `libs/FrontendAssets/` (including `dist/`) into a subtree SHA.
+4. The subtree is force-pushed to [`app-dev-panel/frontend-assets`](https://github.com/app-dev-panel/frontend-assets) — and tagged with the release version when triggered by a `v*` tag.
+
+The split repository is what Packagist and `composer require` see. The monorepo `libs/FrontendAssets/` itself only tracks `composer.json`, `src/FrontendAssets.php`, and the `.gitkeep` placeholder — everything in `dist/` is git-ignored locally.
+
+### How it's consumed
+
+Installing any adapter pulls `app-dev-panel/frontend-assets` transitively. The `FrontendAssets::path()` helper returns the absolute path to the bundled `dist/`:
+
+```php
+use AppDevPanel\FrontendAssets\FrontendAssets;
+
+FrontendAssets::path();    // /vendor/app-dev-panel/frontend-assets/dist
+FrontendAssets::exists();  // true if dist/index.html is present
+```
+
+The `serve` CLI command uses this helper as the default for `--frontend-path`, so `php vendor/bin/adp serve` works out of the box without any extra flags.
+
+### Updating the frontend
+
+Two channels are supported:
+
+1. **Composer (default)** — `composer update app-dev-panel/frontend-assets` pulls the latest split-repository tag.
+2. **Direct download** — for PHAR-based installs or when Composer is unavailable, use the `frontend:update` CLI command (see the [CLI guide](./cli.md#frontend-update)) to fetch `frontend-dist.zip` from the GitHub Release and extract it in place.
 
 ## Development
 

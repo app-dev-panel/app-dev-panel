@@ -7,7 +7,7 @@ Provides console commands for managing the ADP debug system.
 - Composer: `app-dev-panel/cli`
 - Namespace: `AppDevPanel\Cli\`
 - PHP: 8.4+
-- Dependencies: `app-dev-panel/kernel`, `app-dev-panel/api`, `app-dev-panel/mcp-server`, Symfony Console, Symfony Process
+- Dependencies: `app-dev-panel/kernel`, `app-dev-panel/api`, `app-dev-panel/mcp-server`, `app-dev-panel/frontend-assets`, Symfony Console, Symfony Process
 
 ## Directory Structure
 
@@ -102,14 +102,26 @@ Uses `CollectorRepositoryInterface` to read from storage.
 
 ### `serve` — Standalone ADP API Server
 
-Starts a standalone HTTP server using PHP built-in server, serving the ADP API directly.
+Starts a standalone HTTP server using PHP built-in server, serving the ADP API directly. When `--frontend-path` is omitted, the command auto-resolves the bundle via `AppDevPanel\FrontendAssets\FrontendAssets::path()` (from `app-dev-panel/frontend-assets`), so the full panel SPA is served at `/` out of the box. When a frontend path is available, the process is launched with `php -S host:port -t <frontendPath>` so the built-in server resolves static files from the bundle directory.
 
 ```bash
-serve                                              # Default: 127.0.0.1:8888
+serve                                              # Default: 127.0.0.1:8888, panel auto-resolved from FrontendAssets
 serve --host=0.0.0.0 --port=9000                   # Custom host/port
 serve --storage-path=/path/to/debug/data           # Custom storage
-serve --frontend-path=/path/to/built/assets        # Serve frontend
+serve --frontend-path=/path/to/built/assets        # Override bundle path (e.g. local dev build)
 ```
+
+### `frontend:update` — Download Latest Frontend Build
+
+Fetches `frontend-dist.zip` from the [latest GitHub Release](https://github.com/app-dev-panel/app-dev-panel/releases) and extracts it into `--path`. Intended for PHAR users or environments where Composer is not the update vehicle; composer-based installs update via `composer update app-dev-panel/frontend-assets`.
+
+```bash
+frontend:update check                               # Show current vs latest version
+frontend:update check --json                        # Machine-readable output
+frontend:update download --path=/path/to/dist       # Install latest panel build
+```
+
+Writes a `.adp-version` file next to `index.html` so subsequent `check` invocations can compare installed vs latest. The GitHub API call is capped at 10s; the asset download at 30s.
 
 ### `mcp:serve` — MCP Server
 

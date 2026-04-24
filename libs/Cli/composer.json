@@ -28,6 +28,7 @@
         "app-dev-panel/kernel": "*",
         "app-dev-panel/api": "*",
         "app-dev-panel/mcp-server": "*",
+        "app-dev-panel/frontend-assets": "*",
         "guzzlehttp/guzzle": "^7.5",
         "guzzlehttp/psr7": "^2.4",
         "psr/log": "^3.0",
@@ -47,6 +48,10 @@
         {
             "type": "path",
             "url": "../McpServer"
+        },
+        {
+            "type": "path",
+            "url": "../FrontendAssets"
         }
     ],
     "autoload": {
