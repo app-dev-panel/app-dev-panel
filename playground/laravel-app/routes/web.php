@@ -64,7 +64,7 @@ Route::prefix('test/fixtures')->group(function (): void {
     Route::get('/timeline', TimelineAction::class);
     Route::get('/exception', ExceptionAction::class);
     Route::get('/exception-chained', ExceptionChainedAction::class);
-    Route::get('/request-info', RequestInfoAction::class);
+    Route::match(['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'], '/request-info', RequestInfoAction::class);
     Route::get('/multi', MultiAction::class);
     Route::get('/cache', CacheAction::class);
     Route::get('/cache-heavy', CacheHeavyAction::class);

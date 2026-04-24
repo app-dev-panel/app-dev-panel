@@ -86,8 +86,48 @@ import { useServerSentEvents } from '@app-dev-panel/sdk/Component/useServerSentE
 |------|------------|
 | `panel-dist.tar.gz` | Production-сборка панели |
 | `toolbar-dist.tar.gz` | Production-сборка тулбара |
+| `frontend-dist.zip` | Та же сборка панели, запакованная в zip для CLI `frontend:update` |
 
 Их можно раздавать напрямую веб-сервером или встраивать в PHP-адаптеры.
+
+## Composer-дистрибутив — `app-dev-panel/frontend-assets`
+
+SPA панели также публикуется как Composer-пакет, чтобы PHP-приложения получали собранный фронт автоматически при установке адаптера. Это основной канал — каждый адаптер (`adapter-yii3`, `adapter-symfony`, `adapter-laravel`, `adapter-yii2`) требует его.
+
+| Пакет | Namespace | Содержит |
+|-------|-----------|----------|
+| `app-dev-panel/frontend-assets` | `AppDevPanel\FrontendAssets\` | Предсобранный `dist/` + хелпер `FrontendAssets::path()` |
+
+### Как собирается и релизится
+
+Исходники лежат в `libs/frontend/packages/panel`. Директория `dist/` **не** хранится в монорепе — она генерируется в момент релиза воркфлоу `Monorepo Split` (`.github/workflows/split.yml`):
+
+1. На каждом `push` в `master` / `*.x` / `v*` воркфлоу выполняет `npm ci && npm run build -w packages/sdk && npm run build -w packages/panel` внутри `libs/frontend/`.
+2. Вывод Vite копируется в `libs/FrontendAssets/dist/` и добавляется одноразовым локальным коммитом.
+3. `splitsh-lite` извлекает `libs/FrontendAssets/` (включая `dist/`) как subtree SHA.
+4. Subtree force-пушится в [`app-dev-panel/frontend-assets`](https://github.com/app-dev-panel/frontend-assets) — и тегается версией релиза, если триггером был тег `v*`.
+
+Packagist и `composer require` видят именно этот split-репозиторий. Монорепа `libs/FrontendAssets/` хранит только `composer.json`, `src/FrontendAssets.php` и заглушку `.gitkeep` — всё в `dist/` игнорируется локально.
+
+### Как используется
+
+При установке любого адаптера транзитивно подтягивается `app-dev-panel/frontend-assets`. Хелпер `FrontendAssets::path()` возвращает абсолютный путь к собранному `dist/`:
+
+```php
+use AppDevPanel\FrontendAssets\FrontendAssets;
+
+FrontendAssets::path();    // /vendor/app-dev-panel/frontend-assets/dist
+FrontendAssets::exists();  // true если dist/index.html присутствует
+```
+
+CLI-команда `serve` использует этот хелпер в качестве значения по умолчанию для `--frontend-path`, поэтому `php vendor/bin/adp serve` работает из коробки без дополнительных флагов.
+
+### Обновление фронтенда
+
+Поддерживаются два канала:
+
+1. **Composer (по умолчанию)** — `composer update app-dev-panel/frontend-assets` подтягивает последний тег split-репозитория.
+2. **Прямая загрузка** — для PHAR-установок или когда Composer недоступен, используйте CLI `frontend:update` (см. [CLI](./cli.md#frontend-update)) для скачивания `frontend-dist.zip` из GitHub Release и распаковки на месте.
 
 ## Разработка
 

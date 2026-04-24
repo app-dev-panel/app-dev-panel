@@ -28,14 +28,16 @@ declare(strict_types=1);
  *   API ---------> Kernel, McpServer
  *     ^
  *     |
- *   Cli ---------> Kernel, API, McpServer
+ *   Cli ---------> Kernel, API, McpServer, FrontendAssets
  *
  *   Testing  (independent, no internal deps)
  *
- *   Adapter/Yii3 -----> Kernel, API, Cli, McpServer
- *   Adapter/Symfony ---> Kernel, API, Cli, McpServer
- *   Adapter/Laravel ---> Kernel, API, Cli, McpServer
- *   Adapter/Yii2 -----> Kernel, API, Cli, McpServer
+ *   FrontendAssets  (independent, no internal deps — ships prebuilt panel SPA)
+ *
+ *   Adapter/Yii3 -----> Kernel, API, Cli, McpServer, FrontendAssets
+ *   Adapter/Symfony ---> Kernel, API, Cli, McpServer, FrontendAssets
+ *   Adapter/Laravel ---> Kernel, API, Cli, McpServer, FrontendAssets
+ *   Adapter/Yii2 -----> Kernel, API, Cli, McpServer, FrontendAssets
  *   Adapter/Cycle -----> API
  */
 return [
@@ -64,12 +66,18 @@ return [
     'cli' => [
         'namespace' => 'AppDevPanel\\Cli\\',
         'path' => 'libs/Cli/src',
-        'requires' => ['kernel', 'api', 'mcp-server'],
+        'requires' => ['kernel', 'api', 'mcp-server', 'frontend-assets'],
     ],
 
     'testing' => [
         'namespace' => 'AppDevPanel\\Testing\\',
         'path' => 'libs/Testing/src',
+        'requires' => [],
+    ],
+
+    'frontend-assets' => [
+        'namespace' => 'AppDevPanel\\FrontendAssets\\',
+        'path' => 'libs/FrontendAssets/src',
         'requires' => [],
     ],
 
@@ -80,25 +88,25 @@ return [
     'adapter-yii3' => [
         'namespace' => 'AppDevPanel\\Adapter\\Yii3\\',
         'path' => ['libs/Adapter/Yii3/src', 'libs/Adapter/Yii3/config'],
-        'requires' => ['kernel', 'api', 'cli', 'mcp-server'],
+        'requires' => ['kernel', 'api', 'cli', 'mcp-server', 'frontend-assets'],
     ],
 
     'adapter-symfony' => [
         'namespace' => 'AppDevPanel\\Adapter\\Symfony\\',
         'path' => 'libs/Adapter/Symfony/src',
-        'requires' => ['kernel', 'api', 'cli', 'mcp-server'],
+        'requires' => ['kernel', 'api', 'cli', 'mcp-server', 'frontend-assets'],
     ],
 
     'adapter-laravel' => [
         'namespace' => 'AppDevPanel\\Adapter\\Laravel\\',
         'path' => 'libs/Adapter/Laravel/src',
-        'requires' => ['kernel', 'api', 'cli', 'mcp-server'],
+        'requires' => ['kernel', 'api', 'cli', 'mcp-server', 'frontend-assets'],
     ],
 
     'adapter-yii2' => [
         'namespace' => 'AppDevPanel\\Adapter\\Yii2\\',
         'path' => 'libs/Adapter/Yii2/src',
-        'requires' => ['kernel', 'api', 'cli', 'mcp-server'],
+        'requires' => ['kernel', 'api', 'cli', 'mcp-server', 'frontend-assets'],
     ],
 
     'adapter-cycle' => [

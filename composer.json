@@ -36,6 +36,10 @@
     {
       "type": "path",
       "url": "libs/Testing"
+    },
+    {
+      "type": "path",
+      "url": "libs/FrontendAssets"
     }
   ],
   "require": {
@@ -46,6 +50,7 @@
     "app-dev-panel/adapter-yii2": "*",
     "app-dev-panel/adapter-yii3": "*",
     "app-dev-panel/api": "*",
+    "app-dev-panel/frontend-assets": "*",
     "app-dev-panel/kernel": "*",
     "app-dev-panel/mcp-server": "*",
     "app-dev-panel/testing": "*",
@@ -171,6 +176,7 @@
       "AppDevPanel\\Cli\\": "libs/Cli/src",
       "AppDevPanel\\McpServer\\": "libs/McpServer/src",
       "AppDevPanel\\Testing\\": "libs/Testing/src",
+      "AppDevPanel\\FrontendAssets\\": "libs/FrontendAssets/src",
       "AppDevPanel\\Adapter\\Symfony\\": "libs/Adapter/Symfony/src",
       "AppDevPanel\\Adapter\\Laravel\\": "libs/Adapter/Laravel/src",
       "AppDevPanel\\Adapter\\Yii2\\": "libs/Adapter/Yii2/src",
@@ -198,6 +204,7 @@
     "app-dev-panel/cli": "self.version",
     "app-dev-panel/mcp-server": "self.version",
     "app-dev-panel/testing": "self.version",
+    "app-dev-panel/frontend-assets": "self.version",
     "app-dev-panel/adapter-symfony": "self.version",
     "app-dev-panel/adapter-laravel": "self.version",
     "app-dev-panel/adapter-yii2": "self.version",
