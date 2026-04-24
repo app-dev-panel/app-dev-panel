@@ -69,6 +69,8 @@ https://app-dev-panel.github.io/app-dev-panel/bundle.css
 curl -L https://github.com/app-dev-panel/app-dev-panel/releases/latest/download/panel-dist.tar.gz | tar xz -C public/adp-panel
 ```
 
+Эта же сборка публикуется как `frontend-dist.zip` для встроенного обновлятора (см. [Обновление фронтенда](#обновление-фронтенда) ниже).
+
 Затем настройте адаптер:
 
 :::tabs key:framework
@@ -221,3 +223,56 @@ GET /debug/logs/detail
 ```
 
 Маршруты панели пропускают обёртку JSON-ответов и аутентификацию по токену — через них проходят только CORS и фильтр по IP.
+
+## Фронтенд как Composer-пакет
+
+Каждый адаптер требует `app-dev-panel/frontend-assets` — Composer-пакет, содержащий предсобранную SPA панели. При установке адаптера Composer автоматически подтягивает `vendor/app-dev-panel/frontend-assets/dist/` — никакой отдельной загрузки не требуется.
+
+| Что содержит пакет | Путь после установки |
+|---------------------|----------------------|
+| Предсобранный `dist/` (`index.html`, JS, CSS, ассеты) | `vendor/app-dev-panel/frontend-assets/dist/` |
+| Хелпер `FrontendAssets::path()` | `AppDevPanel\FrontendAssets\FrontendAssets` |
+
+### Автономный сервер — `adp serve`
+
+Команда `adp serve` запускает встроенный PHP-сервер с API на `/debug/api/*` и `/inspect/api/*`, а на остальных путях отдаёт SPA панели. Если `--frontend-path` не указан, команда вызывает `FrontendAssets::path()` и использует сборку, установленную через Composer — полная панель доступна на `http://127.0.0.1:8888/` без дополнительных флагов:
+
+```bash
+php vendor/bin/adp serve --host=127.0.0.1 --port=8888 --storage-path=./var/adp
+```
+
+Чтобы указать другую сборку (например, свою кастомную или dev-копию):
+
+```bash
+php vendor/bin/adp serve --frontend-path=/path/to/my/dist
+```
+
+### Обновление фронтенда
+
+Поддерживаются два канала:
+
+1. **Composer (рекомендуется)** — поднимаем тег из split-репозитория [`frontend-assets`](https://github.com/app-dev-panel/frontend-assets):
+
+   ```bash
+   composer update app-dev-panel/frontend-assets
+   ```
+
+2. **Прямая загрузка (для PHAR-установок)** — CLI `frontend:update` скачивает `frontend-dist.zip` из [последнего GitHub Release](https://github.com/app-dev-panel/app-dev-panel/releases) и распаковывает его на месте:
+
+   ```bash
+   php vendor/bin/adp frontend:update check
+   php vendor/bin/adp frontend:update download --path=/path/to/dist
+   ```
+
+   Команда записывает файл `.adp-version` рядом с `index.html`, чтобы последующие `check` понимали, доступно ли обновление.
+
+### Как собирается пакет
+
+Монорепа **не** хранит `libs/FrontendAssets/dist/` — он генерируется на каждом push воркфлоу `.github/workflows/split.yml`:
+
+1. `npm ci && npm run build -w packages/sdk && npm run build -w packages/panel` (внутри `libs/frontend/`).
+2. Вывод Vite копируется в `libs/FrontendAssets/dist/`.
+3. Локальный одноразовый коммит добавляет файлы `dist/`, затем `splitsh-lite` извлекает `libs/FrontendAssets/` (исходники + dist) как subtree.
+4. Subtree force-пушится в [`app-dev-panel/frontend-assets`](https://github.com/app-dev-panel/frontend-assets) и тегается версией релиза, если триггером был тег `v*`.
+
+Потребители видят только split-репозиторий — `composer require` никогда не заходит в монорепу.

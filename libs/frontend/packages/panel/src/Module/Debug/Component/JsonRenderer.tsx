@@ -1,3 +1,4 @@
+import {ClassName} from '@app-dev-panel/panel/Application/Component/ClassName';
 import {useDebugEntry} from '@app-dev-panel/sdk/API/Debug/Context';
 import {useLazyGetObjectQuery} from '@app-dev-panel/sdk/API/Debug/Debug';
 import {
@@ -5,6 +6,7 @@ import {
     JsonRenderer as OriginalJsonRenderer,
     StringRenderContext,
 } from '@app-dev-panel/sdk/Component/JsonRenderer';
+import {isClassString} from '@app-dev-panel/sdk/Helper/classMatcher';
 import {parseObjectId, toObjectReference} from '@app-dev-panel/sdk/Helper/objectString';
 import {FileDownload} from '@mui/icons-material';
 import {IconButton, Link, Tooltip, Typography} from '@mui/material';
@@ -45,47 +47,53 @@ export const JsonRenderer = React.memo((props: JsonRendererProps) => {
     const navigate = useNavigate();
     const [data, setData] = useState(props.value);
 
-    if (!debugEntry) {
-        return <OriginalJsonRenderer value={data} />;
-    }
-
-    const objectLoader = async (objectString: string) => {
-        const response = await objectQuery({debugEntryId: debugEntry.id, objectId: parseObjectId(objectString)});
-        setData((prev: unknown) => replaceInTree(prev, objectString, response.data.value));
-    };
+    const objectLoader = useCallback(
+        async (objectString: string) => {
+            if (!debugEntry) return;
+            const response = await objectQuery({debugEntryId: debugEntry.id, objectId: parseObjectId(objectString)});
+            setData((prev: unknown) => replaceInTree(prev, objectString, response.data.value));
+        },
+        [debugEntry, objectQuery],
+    );
 
     const renderString = useCallback(
         ({value}: StringRenderContext): ReactElement | undefined => {
-            if (!OBJECT_REFERENCE_PATTERN.test(value)) return undefined;
-
-            return (
-                <Typography
-                    component="span"
-                    variant="body2"
-                    sx={{display: 'inline-flex', alignItems: 'center', gap: 0.25, wordBreak: 'break-word'}}
-                >
-                    <Link
-                        component="button"
-                        onClick={() => navigate(`/debug/object?debugEntry=${debugEntry.id}&id=${parseObjectId(value)}`)}
-                        underline="hover"
-                        color="primary"
-                        sx={{cursor: 'pointer', font: 'inherit', verticalAlign: 'baseline'}}
+            if (debugEntry && OBJECT_REFERENCE_PATTERN.test(value)) {
+                return (
+                    <Typography
+                        component="span"
+                        variant="body2"
+                        sx={{display: 'inline-flex', alignItems: 'center', gap: 0.25, wordBreak: 'break-word'}}
                     >
-                        {toObjectReference(value)}
-                    </Link>
-                    <Tooltip title="Load object state">
-                        <IconButton
-                            size="small"
-                            onClick={() => objectLoader(value)}
-                            sx={{p: 0.25, color: 'text.secondary'}}
+                        <Link
+                            component="button"
+                            onClick={() =>
+                                navigate(`/debug/object?debugEntry=${debugEntry.id}&id=${parseObjectId(value)}`)
+                            }
+                            underline="hover"
+                            color="primary"
+                            sx={{cursor: 'pointer', font: 'inherit', verticalAlign: 'baseline'}}
                         >
-                            <FileDownload sx={{fontSize: 14}} />
-                        </IconButton>
-                    </Tooltip>
-                </Typography>
-            );
+                            {toObjectReference(value)}
+                        </Link>
+                        <Tooltip title="Load object state">
+                            <IconButton
+                                size="small"
+                                onClick={() => objectLoader(value)}
+                                sx={{p: 0.25, color: 'text.secondary'}}
+                            >
+                                <FileDownload sx={{fontSize: 14}} />
+                            </IconButton>
+                        </Tooltip>
+                    </Typography>
+                );
+            }
+            if (isClassString(value)) {
+                return <ClassName value={value} />;
+            }
+            return undefined;
         },
-        [debugEntry.id, navigate],
+        [debugEntry, navigate, objectLoader],
     );
 
     return <OriginalJsonRenderer value={data} renderString={renderString} />;

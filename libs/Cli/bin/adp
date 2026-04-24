@@ -6,13 +6,18 @@ declare(strict_types=1);
 /**
  * ADP — standalone console entry point.
  *
- * Registers the ADP console commands that can run without framework DI:
- *   - debug:fixtures (from app-dev-panel/testing, when installed)
+ * Registers the ADP console commands that do not need framework DI:
+ *   - serve               — standalone HTTP server (panel + API)
+ *   - frontend:update     — download latest panel build from GitHub Release
+ *   - debug:fixtures      — from app-dev-panel/testing, when installed
  *
- * Commands that require live collector/storage wiring (debug:query, debug:reset, serve, etc.)
- * are exposed via the per-framework adapters' own CLI integrations.
+ * Commands that rely on live collector/storage wiring (debug:query, debug:reset,
+ * debug:tail, dev, etc.) are exposed via the per-framework adapters' own CLI
+ * integrations.
  *
  * Usage:
+ *   php vendor/bin/adp serve
+ *   php vendor/bin/adp frontend:update check
  *   php vendor/bin/adp debug:fixtures http://localhost:8080
  */
 
@@ -38,6 +43,9 @@ if (!$autoloaded) {
 }
 
 $application = new Symfony\Component\Console\Application('adp', '1.x-dev');
+
+$application->add(new AppDevPanel\Cli\Command\ServeCommand());
+$application->add(new AppDevPanel\Cli\Command\FrontendUpdateCommand());
 
 // Register DebugFixturesCommand when app-dev-panel/testing is present.
 // The Testing package is not a required dependency of libs/Cli (enforced by modulite),

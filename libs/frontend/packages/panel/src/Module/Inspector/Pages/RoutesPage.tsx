@@ -361,7 +361,8 @@ const RouteChecker = () => {
                     {checkRouteQueryInfo.data.result ? (
                         <AlertTitle>
                             {(() => {
-                                const parsed = parseCallable(checkRouteQueryInfo.data.action);
+                                const action = checkRouteQueryInfo.data.action;
+                                const parsed = parseCallable(action);
                                 if (parsed) {
                                     return (
                                         <ClassName value={parsed.className} methodName={parsed.methodName}>
@@ -373,12 +374,28 @@ const RouteChecker = () => {
                                                     color: 'primary.main',
                                                 })}
                                             >
-                                                {parsed.className + '::' + parsed.methodName}
+                                                {concatClassMethod(parsed.className, parsed.methodName)}
                                             </Typography>
                                         </ClassName>
                                     );
                                 }
-                                return serializeCallable(checkRouteQueryInfo.data.action);
+                                if (typeof action === 'string' && isClassName(action)) {
+                                    return (
+                                        <ClassName value={action}>
+                                            <Typography
+                                                component="span"
+                                                sx={(theme) => ({
+                                                    fontFamily: theme.adp.fontFamilyMono,
+                                                    fontSize: '13px',
+                                                    color: 'primary.main',
+                                                })}
+                                            >
+                                                {action}
+                                            </Typography>
+                                        </ClassName>
+                                    );
+                                }
+                                return serializeCallable(action);
                             })()}
                         </AlertTitle>
                     ) : (
