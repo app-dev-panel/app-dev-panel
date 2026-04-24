@@ -23,6 +23,7 @@ use AppDevPanel\Api\PathResolver;
 use AppDevPanel\Api\PathResolverInterface;
 use AppDevPanel\Api\Toolbar\ToolbarConfig;
 use AppDevPanel\Api\Toolbar\ToolbarInjector;
+use AppDevPanel\Kernel\Collector\CacheCollector;
 use AppDevPanel\Kernel\Collector\CollectorInterface;
 use AppDevPanel\Kernel\Collector\EventCollector;
 use AppDevPanel\Kernel\Collector\EventDispatcherInterfaceProxy;
@@ -31,7 +32,14 @@ use AppDevPanel\Kernel\Collector\HttpClientCollector;
 use AppDevPanel\Kernel\Collector\HttpClientInterfaceProxy;
 use AppDevPanel\Kernel\Collector\LogCollector;
 use AppDevPanel\Kernel\Collector\LoggerInterfaceProxy;
+use AppDevPanel\Kernel\Collector\MailerCollector;
+use AppDevPanel\Kernel\Collector\QueueCollector;
+use AppDevPanel\Kernel\Collector\RouterCollector;
+use AppDevPanel\Kernel\Collector\Stream\FilesystemStreamCollector;
+use AppDevPanel\Kernel\Collector\TemplateCollector;
 use AppDevPanel\Kernel\Collector\TimelineCollector;
+use AppDevPanel\Kernel\Collector\TranslatorCollector;
+use AppDevPanel\Kernel\Collector\ValidatorCollector;
 use AppDevPanel\Kernel\Collector\VarDumperCollector;
 use AppDevPanel\Kernel\Collector\Web\RequestCollector;
 use AppDevPanel\Kernel\Collector\Web\WebAppInfoCollector;
@@ -94,6 +102,14 @@ final class AppDevPanelBootloader extends Bootloader
         HttpClientCollector::class => HttpClientCollector::class,
         VarDumperCollector::class => VarDumperCollector::class,
         TimelineCollector::class => TimelineCollector::class,
+        FilesystemStreamCollector::class => FilesystemStreamCollector::class,
+        CacheCollector::class => CacheCollector::class,
+        RouterCollector::class => RouterCollector::class,
+        ValidatorCollector::class => ValidatorCollector::class,
+        TranslatorCollector::class => TranslatorCollector::class,
+        TemplateCollector::class => TemplateCollector::class,
+        MailerCollector::class => MailerCollector::class,
+        QueueCollector::class => QueueCollector::class,
 
         // API
         CollectorRepositoryInterface::class => [self::class, 'initCollectorRepository'],
@@ -221,6 +237,14 @@ final class AppDevPanelBootloader extends Bootloader
             HttpClientCollector::class,
             VarDumperCollector::class,
             TimelineCollector::class,
+            FilesystemStreamCollector::class,
+            CacheCollector::class,
+            RouterCollector::class,
+            ValidatorCollector::class,
+            TranslatorCollector::class,
+            TemplateCollector::class,
+            MailerCollector::class,
+            QueueCollector::class,
         ];
     }
 

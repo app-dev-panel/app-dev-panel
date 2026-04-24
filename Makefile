@@ -10,6 +10,7 @@
         modulite \
         check check-ci fix \
         install install-php install-frontend install-playgrounds \
+        spiral-panel-sync \
         serve-yii3 serve-symfony serve-yii2 serve-laravel serve-spiral serve \
         fixtures fixtures-yii3 fixtures-symfony fixtures-yii2 fixtures-laravel fixtures-spiral \
         test-fixtures test-fixtures-yii3 test-fixtures-symfony test-fixtures-yii2 test-fixtures-laravel test-fixtures-spiral \
@@ -178,6 +179,8 @@ SYMFONY_ASSETS := $(ROOT_DIR)/libs/Adapter/Symfony/Resources/public
 LARAVEL_ASSETS := $(ROOT_DIR)/libs/Adapter/Laravel/resources/dist
 YII2_ASSETS    := $(ROOT_DIR)/libs/Adapter/Yii2/resources/dist
 YII3_ASSETS := $(ROOT_DIR)/libs/Adapter/Yii3/resources/dist
+FRONTEND_ASSETS_DIST := $(ROOT_DIR)/libs/FrontendAssets/dist
+SPIRAL_PANEL_DIST := $(PLAYGROUND_DIR)/spiral-app/public/panel-dist
 
 build-panel: ## Build panel + toolbar and copy to all adapter asset directories
 	@echo "$(CYAN)Building frontend panel...$(RESET)"
@@ -192,12 +195,24 @@ build-panel: ## Build panel + toolbar and copy to all adapter asset directories
 		cp $(TOOLBAR_DIST)/bundle.js $(TOOLBAR_DIST)/bundle*.css $$dir/toolbar/; \
 		if [ -d "$(TOOLBAR_DIST)/assets" ]; then cp -r $(TOOLBAR_DIST)/assets $$dir/toolbar/assets; fi; \
 	done
+	@echo "$(CYAN)Populating libs/FrontendAssets/dist (Composer-shipped SPA)...$(RESET)"
+	@mkdir -p $(FRONTEND_ASSETS_DIST)
+	@find $(FRONTEND_ASSETS_DIST) -mindepth 1 -maxdepth 1 -not -name '.gitignore' -not -name '.gitkeep' -exec rm -rf {} + 2>/dev/null
+	@cp -r $(PANEL_DIST)/. $(FRONTEND_ASSETS_DIST)/
+	@echo "$(CYAN)Syncing panel to Spiral playground (public/panel-dist)...$(RESET)"
+	@rm -rf $(SPIRAL_PANEL_DIST) && mkdir -p $(SPIRAL_PANEL_DIST)
+	@cp -r $(PANEL_DIST)/. $(SPIRAL_PANEL_DIST)/
 	@echo "$(GREEN)Done. Run 'make install-panel' to publish assets to playgrounds.$(RESET)"
 
 install-panel: ## Publish built panel assets into playground applications
 	@echo "$(CYAN)Publishing panel assets to playgrounds...$(RESET)"
 	cd $(PLAYGROUND_DIR)/symfony-app && rm -rf public/bundles/appdevpanel && php bin/console assets:install public --symlink --relative
 	cd $(PLAYGROUND_DIR)/laravel-app && rm -rf public/vendor/app-dev-panel && php artisan vendor:publish --tag=app-dev-panel-assets --force --ansi
+	@if [ -d "$(FRONTEND_ASSETS_DIST)" ] && [ -f "$(FRONTEND_ASSETS_DIST)/bundle.js" ]; then \
+		rm -rf $(SPIRAL_PANEL_DIST) && mkdir -p $(SPIRAL_PANEL_DIST); \
+		cp -r $(FRONTEND_ASSETS_DIST)/. $(SPIRAL_PANEL_DIST)/; \
+		echo "$(GREEN)[Spiral] Panel published to $(SPIRAL_PANEL_DIST)$(RESET)"; \
+	fi
 	@echo "$(GREEN)Done. Panel available at /debug on each playground.$(RESET)"
 
 build-install-panel: build-panel install-panel ## Build panel + publish to all playgrounds
@@ -396,9 +411,21 @@ serve-laravel: ## Start Laravel playground server (port $(LARAVEL_PORT))
 	@echo "$(CYAN)[Playground: Laravel] Starting server on port $(LARAVEL_PORT)...$(RESET)"
 	cd $(PLAYGROUND_DIR)/laravel-app && bash ../../bin/serve.sh $(LARAVEL_PORT)
 
-serve-spiral: ## Start Spiral playground server (port $(SPIRAL_PORT))
+# Spiral playground has no native asset publishing step (unlike Symfony/Laravel). If the panel
+# has been built but not yet copied in (e.g. someone ran `build-panel` on a stale checkout),
+# sync on demand before starting the server.
+spiral-panel-sync:
+	@if [ ! -f "$(SPIRAL_PANEL_DIST)/bundle.js" ] && [ -f "$(PANEL_DIST)/bundle.js" ]; then \
+		mkdir -p $(SPIRAL_PANEL_DIST); \
+		cp -r $(PANEL_DIST)/. $(SPIRAL_PANEL_DIST)/; \
+		echo "$(GREEN)[Playground: Spiral] Panel SPA synced to public/panel-dist$(RESET)"; \
+	elif [ ! -f "$(SPIRAL_PANEL_DIST)/bundle.js" ]; then \
+		echo "$(YELLOW)[Playground: Spiral] No local panel build — /debug will fall back to the GitHub CDN. Run 'make build-panel' to serve it locally.$(RESET)"; \
+	fi
+
+serve-spiral: spiral-panel-sync ## Start Spiral playground server (port $(SPIRAL_PORT))
 	@echo "$(CYAN)[Playground: Spiral] Starting server on port $(SPIRAL_PORT)...$(RESET)"
-	cd $(PLAYGROUND_DIR)/spiral-app && bash ../../bin/serve.sh $(SPIRAL_PORT)
+	cd $(PLAYGROUND_DIR)/spiral-app && APP_DEV_PANEL_STATIC_URL=/panel-dist bash ../../bin/serve.sh $(SPIRAL_PORT)
 
 serve: ## Start all playground servers in background
 	@echo "$(CYAN)Starting all playground servers...$(RESET)"

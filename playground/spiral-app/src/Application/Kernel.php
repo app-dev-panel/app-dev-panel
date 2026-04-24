@@ -4,21 +4,37 @@ declare(strict_types=1);
 
 namespace App\Application;
 
+use App\Controller\TestFixtures\CacheAction;
+use App\Controller\TestFixtures\CacheHeavyAction;
 use App\Controller\TestFixtures\DumpAction;
 use App\Controller\TestFixtures\EventsAction;
 use App\Controller\TestFixtures\ExceptionAction;
 use App\Controller\TestFixtures\ExceptionChainedAction;
-use App\Controller\TestFixtures\HomeAction;
+use App\Controller\TestFixtures\FilesystemAction;
 use App\Controller\TestFixtures\HttpClientAction;
 use App\Controller\TestFixtures\LogsAction;
 use App\Controller\TestFixtures\LogsContextAction;
 use App\Controller\TestFixtures\LogsHeavyAction;
+use App\Controller\TestFixtures\MailerAction;
 use App\Controller\TestFixtures\MultiAction;
 use App\Controller\TestFixtures\NotFoundAction;
+use App\Controller\TestFixtures\QueueAction;
 use App\Controller\TestFixtures\RequestInfoAction;
 use App\Controller\TestFixtures\ResetAction;
+use App\Controller\TestFixtures\RouterAction;
 use App\Controller\TestFixtures\TestFixtureEvent;
 use App\Controller\TestFixtures\TimelineAction;
+use App\Controller\TestFixtures\TranslatorAction;
+use App\Controller\TestFixtures\ValidatorAction;
+use App\Controller\TestFixtures\ViewAction;
+use App\Controller\Web\ApiPlaygroundPage;
+use App\Controller\Web\ContactPage;
+use App\Controller\Web\ErrorDemoPage;
+use App\Controller\Web\HomePage;
+use App\Controller\Web\LogDemoPage;
+use App\Controller\Web\OpenApiPage;
+use App\Controller\Web\UsersPage;
+use App\Controller\Web\VarDumperPage;
 use AppDevPanel\Adapter\Spiral\Bootloader\AppDevPanelBootloader;
 use AppDevPanel\Adapter\Spiral\Middleware\AdpApiMiddleware;
 use AppDevPanel\Adapter\Spiral\Middleware\DebugMiddleware;
@@ -138,7 +154,20 @@ final class Kernel
         // itself. Avoids a hard dependency on Guzzle while still exercising the proxy.
         $this->container->bindSingleton(ClientInterface::class, new LoopbackHttpClient());
 
-        // Controllers
+        // Shared HTML layout helper for the demo pages
+        $this->container->bindSingleton(Layout::class, new Layout());
+
+        // Demo web pages — human-facing navigation
+        $this->container->bindSingleton(HomePage::class, HomePage::class);
+        $this->container->bindSingleton(UsersPage::class, UsersPage::class);
+        $this->container->bindSingleton(ContactPage::class, ContactPage::class);
+        $this->container->bindSingleton(ApiPlaygroundPage::class, ApiPlaygroundPage::class);
+        $this->container->bindSingleton(ErrorDemoPage::class, ErrorDemoPage::class);
+        $this->container->bindSingleton(LogDemoPage::class, LogDemoPage::class);
+        $this->container->bindSingleton(VarDumperPage::class, VarDumperPage::class);
+        $this->container->bindSingleton(OpenApiPage::class, OpenApiPage::class);
+
+        // Test fixture endpoints — consumed by FixtureRunner / PHPUnit E2E
         $this->container->bindSingleton(ResetAction::class, ResetAction::class);
         $this->container->bindSingleton(LogsAction::class, LogsAction::class);
         $this->container->bindSingleton(LogsContextAction::class, LogsContextAction::class);
@@ -151,7 +180,15 @@ final class Kernel
         $this->container->bindSingleton(ExceptionChainedAction::class, ExceptionChainedAction::class);
         $this->container->bindSingleton(MultiAction::class, MultiAction::class);
         $this->container->bindSingleton(HttpClientAction::class, HttpClientAction::class);
-        $this->container->bindSingleton(HomeAction::class, HomeAction::class);
+        $this->container->bindSingleton(FilesystemAction::class, FilesystemAction::class);
+        $this->container->bindSingleton(RouterAction::class, RouterAction::class);
+        $this->container->bindSingleton(ValidatorAction::class, ValidatorAction::class);
+        $this->container->bindSingleton(CacheAction::class, CacheAction::class);
+        $this->container->bindSingleton(CacheHeavyAction::class, CacheHeavyAction::class);
+        $this->container->bindSingleton(TranslatorAction::class, TranslatorAction::class);
+        $this->container->bindSingleton(ViewAction::class, ViewAction::class);
+        $this->container->bindSingleton(MailerAction::class, MailerAction::class);
+        $this->container->bindSingleton(QueueAction::class, QueueAction::class);
     }
 
     private function registerAdpBootloader(): void
@@ -172,7 +209,17 @@ final class Kernel
             responseFactory: $this->container->get(ResponseFactoryInterface::class),
             streamFactory: $this->container->get(StreamFactoryInterface::class),
             routes: [
-                '/' => HomeAction::class,
+                // Demo web pages
+                '/' => HomePage::class,
+                '/users' => UsersPage::class,
+                '/contact' => ContactPage::class,
+                '/api-playground' => ApiPlaygroundPage::class,
+                '/error' => ErrorDemoPage::class,
+                '/log-demo' => LogDemoPage::class,
+                '/var-dumper' => VarDumperPage::class,
+                '/api/openapi.json' => OpenApiPage::class,
+
+                // Fixture endpoints (machine-consumed by FixtureRunner / PHPUnit E2E)
                 '/test/fixtures/reset' => ResetAction::class,
                 '/test/fixtures/logs' => LogsAction::class,
                 '/test/fixtures/logs-context' => LogsContextAction::class,
@@ -185,6 +232,15 @@ final class Kernel
                 '/test/fixtures/exception-chained' => ExceptionChainedAction::class,
                 '/test/fixtures/multi' => MultiAction::class,
                 '/test/fixtures/http-client' => HttpClientAction::class,
+                '/test/fixtures/filesystem' => FilesystemAction::class,
+                '/test/fixtures/router' => RouterAction::class,
+                '/test/fixtures/validator' => ValidatorAction::class,
+                '/test/fixtures/cache' => CacheAction::class,
+                '/test/fixtures/cache-heavy' => CacheHeavyAction::class,
+                '/test/fixtures/translator' => TranslatorAction::class,
+                '/test/fixtures/view' => ViewAction::class,
+                '/test/fixtures/mailer' => MailerAction::class,
+                '/test/fixtures/queue' => QueueAction::class,
             ],
             fallback: NotFoundAction::class,
         );

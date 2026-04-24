@@ -31,6 +31,12 @@ message = "Unused import: `UriFactoryInterface`."
 count = 1
 
 [[issues]]
+file = "src/Application/Layout.php"
+code = "no-empty"
+message = "Use of the `empty` construct."
+count = 1
+
+[[issues]]
 file = "src/Controller/TestFixtures/LogsAction.php"
 code = "no-debug-symbols"
 message = "Do not commit debug functions."

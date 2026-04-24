@@ -28,7 +28,7 @@ count = 1
 file = "src/Application/Kernel.php"
 code = "invalid-method-access"
 message = 'Attempting to access a method on a non-object type (`unknown-ref(Spiral\Core\Container)`).'
-count = 24
+count = 41
 
 [[issues]]
 file = "src/Application/Kernel.php"
@@ -153,13 +153,13 @@ count = 2
 [[issues]]
 file = "src/Application/Kernel.php"
 code = "non-existent-class-like"
-message = "Class `class@anonymous:8718526727076628416-3382:3809` cannot implement unknown type `ListenerProviderInterface`"
+message = "Class `class@anonymous:8718526727076628416-4056:4483` cannot implement unknown type `ListenerProviderInterface`"
 count = 1
 
 [[issues]]
 file = "src/Application/Kernel.php"
 code = "non-existent-class-like"
-message = "Class `class@anonymous:8718526727076628416-4170:4651` cannot implement unknown type `EventDispatcherInterface`"
+message = "Class `class@anonymous:8718526727076628416-4844:5325` cannot implement unknown type `EventDispatcherInterface`"
 count = 1
 
 [[issues]]
@@ -177,7 +177,7 @@ count = 1
 [[issues]]
 file = "src/Application/Kernel.php"
 code = "possibly-invalid-argument"
-message = 'Possible argument type mismatch for argument #1 of `class@anonymous:8718526727076628416-4170:4651::__construct`: expected `unknown-ref(Psr\EventDispatcher\ListenerProviderInterface)`, but possibly received `class@anonymous:8718526727076628416-3382:3809`.'
+message = 'Possible argument type mismatch for argument #1 of `class@anonymous:8718526727076628416-4844:5325::__construct`: expected `unknown-ref(Psr\EventDispatcher\ListenerProviderInterface)`, but possibly received `class@anonymous:8718526727076628416-4056:4483`.'
 count = 1
 
 [[issues]]
@@ -225,6 +225,18 @@ count = 1
 [[issues]]
 file = "src/Application/PathRouter.php"
 code = "unused-method"
+message = "Method `feedroutercollector()` is never used."
+count = 1
+
+[[issues]]
+file = "src/Application/PathRouter.php"
+code = "unused-method"
+message = "Method `namefor()` is never used."
+count = 1
+
+[[issues]]
+file = "src/Application/PathRouter.php"
+code = "unused-method"
 message = "Method `normalize()` is never used."
 count = 1
 
@@ -259,6 +271,42 @@ message = "Property `$streamFactory` is never used."
 count = 1
 
 [[issues]]
+file = "src/Controller/TestFixtures/CacheAction.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(AppDevPanel\Kernel\Collector\CacheCollector)`).'
+count = 3
+
+[[issues]]
+file = "src/Controller/TestFixtures/CacheAction.php"
+code = "non-existent-class"
+message = 'Class `AppDevPanel\Kernel\Collector\CacheOperationRecord` not found.'
+count = 3
+
+[[issues]]
+file = "src/Controller/TestFixtures/CacheAction.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `AppDevPanel\Kernel\Collector\CacheCollector`.'
+count = 1
+
+[[issues]]
+file = "src/Controller/TestFixtures/CacheHeavyAction.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(AppDevPanel\Kernel\Collector\CacheCollector)`).'
+count = 1
+
+[[issues]]
+file = "src/Controller/TestFixtures/CacheHeavyAction.php"
+code = "non-existent-class"
+message = 'Class `AppDevPanel\Kernel\Collector\CacheOperationRecord` not found.'
+count = 1
+
+[[issues]]
+file = "src/Controller/TestFixtures/CacheHeavyAction.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `AppDevPanel\Kernel\Collector\CacheCollector`.'
+count = 1
+
+[[issues]]
 file = "src/Controller/TestFixtures/DumpAction.php"
 code = "non-existent-method"
 message = 'Method `dump` does not exist on type `Symfony\Component\VarDumper\VarDumper`.'
@@ -286,12 +334,6 @@ count = 3
 file = "src/Controller/TestFixtures/EventsAction.php"
 code = "non-existent-class-like"
 message = 'Cannot find class, interface, enum, or type alias `Psr\EventDispatcher\EventDispatcherInterface`.'
-count = 1
-
-[[issues]]
-file = "src/Controller/TestFixtures/HomeAction.php"
-code = "non-existent-class-like"
-message = 'Cannot find class, interface, enum, or type alias `Psr\Http\Message\ServerRequestInterface`.'
 count = 1
 
 [[issues]]
@@ -373,6 +415,18 @@ message = 'Cannot find class, interface, enum, or type alias `Psr\Log\LoggerInte
 count = 1
 
 [[issues]]
+file = "src/Controller/TestFixtures/MailerAction.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(AppDevPanel\Kernel\Collector\MailerCollector)`).'
+count = 2
+
+[[issues]]
+file = "src/Controller/TestFixtures/MailerAction.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `AppDevPanel\Kernel\Collector\MailerCollector`.'
+count = 1
+
+[[issues]]
 file = "src/Controller/TestFixtures/MultiAction.php"
 code = "invalid-method-access"
 message = 'Attempting to access a method on a non-object type (`unknown-ref(Psr\EventDispatcher\EventDispatcherInterface)`).'
@@ -445,6 +499,24 @@ message = 'Method `create` does not exist on type `Nyholm\Psr7\Stream`.'
 count = 1
 
 [[issues]]
+file = "src/Controller/TestFixtures/QueueAction.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(AppDevPanel\Kernel\Collector\QueueCollector)`).'
+count = 3
+
+[[issues]]
+file = "src/Controller/TestFixtures/QueueAction.php"
+code = "non-existent-class"
+message = 'Class `AppDevPanel\Kernel\Collector\MessageRecord` not found.'
+count = 3
+
+[[issues]]
+file = "src/Controller/TestFixtures/QueueAction.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `AppDevPanel\Kernel\Collector\QueueCollector`.'
+count = 1
+
+[[issues]]
 file = "src/Controller/TestFixtures/RequestInfoAction.php"
 code = "invalid-method-access"
 message = 'Attempting to access a method on a non-object type (`unknown-ref(Psr\Http\Message\ServerRequestInterface)`).'
@@ -491,3 +563,315 @@ file = "src/Controller/TestFixtures/TimelineAction.php"
 code = "non-existent-class-like"
 message = 'Cannot find class, interface, enum, or type alias `Psr\Log\LoggerInterface`.'
 count = 1
+
+[[issues]]
+file = "src/Controller/TestFixtures/TranslatorAction.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(AppDevPanel\Kernel\Collector\TranslatorCollector)`).'
+count = 5
+
+[[issues]]
+file = "src/Controller/TestFixtures/TranslatorAction.php"
+code = "non-existent-class"
+message = 'Class `AppDevPanel\Kernel\Collector\TranslationRecord` not found.'
+count = 5
+
+[[issues]]
+file = "src/Controller/TestFixtures/TranslatorAction.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `AppDevPanel\Kernel\Collector\TranslatorCollector`.'
+count = 1
+
+[[issues]]
+file = "src/Controller/TestFixtures/ValidatorAction.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(AppDevPanel\Kernel\Collector\ValidatorCollector)`).'
+count = 2
+
+[[issues]]
+file = "src/Controller/TestFixtures/ValidatorAction.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `AppDevPanel\Kernel\Collector\ValidatorCollector`.'
+count = 1
+
+[[issues]]
+file = "src/Controller/TestFixtures/ViewAction.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(AppDevPanel\Kernel\Collector\TemplateCollector)`).'
+count = 4
+
+[[issues]]
+file = "src/Controller/TestFixtures/ViewAction.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `AppDevPanel\Kernel\Collector\TemplateCollector`.'
+count = 1
+
+[[issues]]
+file = "src/Controller/Web/ApiPlaygroundPage.php"
+code = "mixed-method-access"
+message = "Attempting to access a method on a non-object type (`mixed`)."
+count = 1
+
+[[issues]]
+file = "src/Controller/Web/ApiPlaygroundPage.php"
+code = "mixed-return-statement"
+message = 'Could not infer a precise return type for function `app\controller\web\apiplaygroundpage::__invoke`. Saw type `mixed`.'
+count = 1
+
+[[issues]]
+file = "src/Controller/Web/ApiPlaygroundPage.php"
+code = "non-existent-class"
+message = 'Class `Nyholm\Psr7\Response` not found.'
+count = 1
+
+[[issues]]
+file = "src/Controller/Web/ApiPlaygroundPage.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Psr\Http\Message\ResponseInterface`.'
+count = 1
+
+[[issues]]
+file = "src/Controller/Web/ApiPlaygroundPage.php"
+code = "non-existent-method"
+message = 'Method `create` does not exist on type `Nyholm\Psr7\Stream`.'
+count = 1
+
+[[issues]]
+file = "src/Controller/Web/ContactPage.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(AppDevPanel\Kernel\Collector\ValidatorCollector)`).'
+count = 1
+
+[[issues]]
+file = "src/Controller/Web/ContactPage.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(Psr\Http\Message\ServerRequestInterface)`).'
+count = 2
+
+[[issues]]
+file = "src/Controller/Web/ContactPage.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 1
+
+[[issues]]
+file = "src/Controller/Web/ContactPage.php"
+code = "mixed-method-access"
+message = "Attempting to access a method on a non-object type (`mixed`)."
+count = 1
+
+[[issues]]
+file = "src/Controller/Web/ContactPage.php"
+code = "mixed-return-statement"
+message = 'Could not infer a precise return type for function `app\controller\web\contactpage::__invoke`. Saw type `mixed`.'
+count = 1
+
+[[issues]]
+file = "src/Controller/Web/ContactPage.php"
+code = "non-existent-class"
+message = 'Class `Nyholm\Psr7\Response` not found.'
+count = 1
+
+[[issues]]
+file = "src/Controller/Web/ContactPage.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `AppDevPanel\Kernel\Collector\ValidatorCollector`.'
+count = 1
+
+[[issues]]
+file = "src/Controller/Web/ContactPage.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Psr\Http\Message\ResponseInterface`.'
+count = 1
+
+[[issues]]
+file = "src/Controller/Web/ContactPage.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Psr\Http\Message\ServerRequestInterface`.'
+count = 1
+
+[[issues]]
+file = "src/Controller/Web/ContactPage.php"
+code = "non-existent-method"
+message = 'Method `create` does not exist on type `Nyholm\Psr7\Stream`.'
+count = 1
+
+[[issues]]
+file = "src/Controller/Web/HomePage.php"
+code = "mixed-method-access"
+message = "Attempting to access a method on a non-object type (`mixed`)."
+count = 1
+
+[[issues]]
+file = "src/Controller/Web/HomePage.php"
+code = "mixed-return-statement"
+message = 'Could not infer a precise return type for function `app\controller\web\homepage::__invoke`. Saw type `mixed`.'
+count = 1
+
+[[issues]]
+file = "src/Controller/Web/HomePage.php"
+code = "non-existent-class"
+message = 'Class `Nyholm\Psr7\Response` not found.'
+count = 1
+
+[[issues]]
+file = "src/Controller/Web/HomePage.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Psr\Http\Message\ResponseInterface`.'
+count = 1
+
+[[issues]]
+file = "src/Controller/Web/HomePage.php"
+code = "non-existent-method"
+message = 'Method `create` does not exist on type `Nyholm\Psr7\Stream`.'
+count = 1
+
+[[issues]]
+file = "src/Controller/Web/LogDemoPage.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(Psr\Log\LoggerInterface)`).'
+count = 6
+
+[[issues]]
+file = "src/Controller/Web/LogDemoPage.php"
+code = "mixed-method-access"
+message = "Attempting to access a method on a non-object type (`mixed`)."
+count = 1
+
+[[issues]]
+file = "src/Controller/Web/LogDemoPage.php"
+code = "mixed-return-statement"
+message = 'Could not infer a precise return type for function `app\controller\web\logdemopage::__invoke`. Saw type `mixed`.'
+count = 1
+
+[[issues]]
+file = "src/Controller/Web/LogDemoPage.php"
+code = "non-existent-class"
+message = 'Class `Nyholm\Psr7\Response` not found.'
+count = 1
+
+[[issues]]
+file = "src/Controller/Web/LogDemoPage.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Psr\Http\Message\ResponseInterface`.'
+count = 1
+
+[[issues]]
+file = "src/Controller/Web/LogDemoPage.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Psr\Log\LoggerInterface`.'
+count = 1
+
+[[issues]]
+file = "src/Controller/Web/LogDemoPage.php"
+code = "non-existent-method"
+message = 'Method `create` does not exist on type `Nyholm\Psr7\Stream`.'
+count = 1
+
+[[issues]]
+file = "src/Controller/Web/OpenApiPage.php"
+code = "mixed-method-access"
+message = "Attempting to access a method on a non-object type (`mixed`)."
+count = 1
+
+[[issues]]
+file = "src/Controller/Web/OpenApiPage.php"
+code = "mixed-return-statement"
+message = 'Could not infer a precise return type for function `app\controller\web\openapipage::__invoke`. Saw type `mixed`.'
+count = 1
+
+[[issues]]
+file = "src/Controller/Web/OpenApiPage.php"
+code = "non-existent-class"
+message = 'Class `Nyholm\Psr7\Response` not found.'
+count = 1
+
+[[issues]]
+file = "src/Controller/Web/OpenApiPage.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Psr\Http\Message\ResponseInterface`.'
+count = 1
+
+[[issues]]
+file = "src/Controller/Web/OpenApiPage.php"
+code = "non-existent-method"
+message = 'Method `create` does not exist on type `Nyholm\Psr7\Stream`.'
+count = 1
+
+[[issues]]
+file = "src/Controller/Web/UsersPage.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(Psr\Log\LoggerInterface)`).'
+count = 1
+
+[[issues]]
+file = "src/Controller/Web/UsersPage.php"
+code = "mixed-method-access"
+message = "Attempting to access a method on a non-object type (`mixed`)."
+count = 1
+
+[[issues]]
+file = "src/Controller/Web/UsersPage.php"
+code = "mixed-return-statement"
+message = 'Could not infer a precise return type for function `app\controller\web\userspage::__invoke`. Saw type `mixed`.'
+count = 1
+
+[[issues]]
+file = "src/Controller/Web/UsersPage.php"
+code = "non-existent-class"
+message = 'Class `Nyholm\Psr7\Response` not found.'
+count = 1
+
+[[issues]]
+file = "src/Controller/Web/UsersPage.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Psr\Http\Message\ResponseInterface`.'
+count = 1
+
+[[issues]]
+file = "src/Controller/Web/UsersPage.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Psr\Log\LoggerInterface`.'
+count = 1
+
+[[issues]]
+file = "src/Controller/Web/UsersPage.php"
+code = "non-existent-method"
+message = 'Method `create` does not exist on type `Nyholm\Psr7\Stream`.'
+count = 1
+
+[[issues]]
+file = "src/Controller/Web/VarDumperPage.php"
+code = "mixed-method-access"
+message = "Attempting to access a method on a non-object type (`mixed`)."
+count = 1
+
+[[issues]]
+file = "src/Controller/Web/VarDumperPage.php"
+code = "mixed-return-statement"
+message = 'Could not infer a precise return type for function `app\controller\web\vardumperpage::__invoke`. Saw type `mixed`.'
+count = 1
+
+[[issues]]
+file = "src/Controller/Web/VarDumperPage.php"
+code = "non-existent-class"
+message = 'Class `Nyholm\Psr7\Response` not found.'
+count = 1
+
+[[issues]]
+file = "src/Controller/Web/VarDumperPage.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Psr\Http\Message\ResponseInterface`.'
+count = 1
+
+[[issues]]
+file = "src/Controller/Web/VarDumperPage.php"
+code = "non-existent-method"
+message = 'Method `create` does not exist on type `Nyholm\Psr7\Stream`.'
+count = 1
+
+[[issues]]
+file = "src/Controller/Web/VarDumperPage.php"
+code = "non-existent-method"
+message = 'Method `dump` does not exist on type `Symfony\Component\VarDumper\VarDumper`.'
+count = 3
