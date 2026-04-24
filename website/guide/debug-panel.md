@@ -47,11 +47,13 @@ PHP_CLI_SERVER_WORKERS=3 php -S 127.0.0.1:8080 -t public
 
 ## Static Assets Source
 
-By default, the panel loads assets from GitHub Pages:
+By default, the panel loads assets from GitHub Pages (next to the live demo so both tracks master):
 
 ```
-https://app-dev-panel.github.io/app-dev-panel/bundle.js
-https://app-dev-panel.github.io/app-dev-panel/bundle.css
+https://app-dev-panel.github.io/app-dev-panel/demo/bundle.js
+https://app-dev-panel.github.io/app-dev-panel/demo/bundle.css
+https://app-dev-panel.github.io/app-dev-panel/demo/toolbar/bundle.js
+https://app-dev-panel.github.io/app-dev-panel/demo/toolbar/bundle.css
 ```
 
 You can change the static URL to load assets from a different source:
@@ -203,7 +205,7 @@ The panel SPA includes the following modules:
 
 | Parameter | Default | Description |
 |-----------|---------|-------------|
-| `static_url` | `https://app-dev-panel.github.io/app-dev-panel` | Base URL for panel static assets (bundle.js, bundle.css) |
+| `static_url` | `https://app-dev-panel.github.io/app-dev-panel/demo` | Base URL for panel static assets (bundle.js, bundle.css) |
 | `viewer_base_path` | `/debug` | Route prefix where the panel is mounted |
 
 ## Architecture

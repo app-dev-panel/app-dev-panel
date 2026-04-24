@@ -111,6 +111,44 @@ final class ModuleRouteRegistrationTest extends TestCase
     }
 
     /**
+     * Verifies that $routePrefix / $inspectorRoutePrefix are honoured so that
+     * users can mount the panel under a non-default path (required to coexist
+     * with yiisoft/yii2-debug which also claims `/debug/*`).
+     */
+    public function testRegisterRoutesHonoursCustomRoutePrefix(): void
+    {
+        $capturedPatterns = [];
+        $urlManager = $this->createMock(UrlManager::class);
+        $urlManager
+            ->expects($this->once())
+            ->method('addRules')
+            ->with($this->callback(static function (array $rules) use (&$capturedPatterns): bool {
+                $capturedPatterns = array_column($rules, 'pattern');
+                return true;
+            }), false);
+
+        $app = $this->createMock(Application::class);
+        $app->method('getUrlManager')->willReturn($urlManager);
+
+        $module = new Module('app-dev-panel', null, [
+            'storagePath' => $this->storagePath . '/debug',
+            'routePrefix' => 'adp',
+            'inspectorRoutePrefix' => 'adp-inspect',
+        ]);
+
+        $method = new \ReflectionMethod($module, 'registerRoutes');
+        $method->invoke($module, $app);
+
+        $this->assertContains('adp/api/<path:.*>', $capturedPatterns);
+        $this->assertContains('adp/api', $capturedPatterns);
+        $this->assertContains('adp-inspect/api/<path:.*>', $capturedPatterns);
+        $this->assertContains('adp-inspect/api', $capturedPatterns);
+        $this->assertContains('adp', $capturedPatterns);
+        $this->assertNotContains('debug/api/<path:.*>', $capturedPatterns);
+        $this->assertNotContains('inspect/api', $capturedPatterns);
+    }
+
+    /**
      * Verifies that disabled module does not register routes even if bootstrapped.
      */
     public function testDisabledModuleDoesNotRegisterRoutes(): void

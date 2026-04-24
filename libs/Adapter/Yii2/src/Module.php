@@ -251,6 +251,19 @@ class Module extends \yii\base\Module implements BootstrapInterface
     public string $panelStaticUrl = '';
 
     /**
+     * @var string URL path prefix where ADP mounts the panel and its API.
+     *             Default 'debug' matches the framework-wide convention. Change it
+     *             (e.g. to 'adp') when you need to coexist with yiisoft/yii2-debug,
+     *             which also claims `debug/*`.
+     */
+    public string $routePrefix = 'debug';
+
+    /**
+     * @var string URL path prefix for the inspector API (paired with `$routePrefix`).
+     */
+    public string $inspectorRoutePrefix = 'inspect';
+
+    /**
      * @var bool Whether to inject the debug toolbar into HTML responses.
      */
     public bool $toolbarEnabled = true;
@@ -501,25 +514,104 @@ class Module extends \yii\base\Module implements BootstrapInterface
         return $containerBridge;
     }
 
+    /**
+     * Publish bundled panel+toolbar assets shipped by the adapter package.
+     *
+     * Resolution order:
+     * 1. `resources/dist/bundle.js` or `resources/dist/toolbar/` exists ⇒ symlink
+     *    (or copy as a fallback on systems where symlinks fail) into `@webroot/app-dev-panel`
+     *    and return `/app-dev-panel`.
+     * 2. Target already exists and points to the adapter's dist dir ⇒ return the
+     *    existing URL silently.
+     * 3. Target exists but is something else (a regular dir/file not created by us)
+     *    ⇒ warn and do not touch; fall through to the CDN default so the panel still
+     *    loads (from the remote default static URL).
+     *
+     * Returns the published URL prefix, or '' when publishing failed or no bundles
+     * are shipped. Caller falls back to `PanelConfig::DEFAULT_STATIC_URL`.
+     */
+    private function publishBundledAssets(): string
+    {
+        $distDir = \dirname(__DIR__) . '/resources/dist';
+        if (!file_exists($distDir . '/bundle.js') && !is_dir($distDir . '/toolbar')) {
+            return '';
+        }
+
+        $webroot = \Yii::getAlias('@webroot', false);
+        if (!is_string($webroot) || !is_dir($webroot)) {
+            return '';
+        }
+
+        $targetDir = $webroot . '/app-dev-panel';
+
+        // Target already exists — make sure it points where we expect.
+        if (is_link($targetDir) || is_dir($targetDir) || is_file($targetDir)) {
+            $resolved = is_link($targetDir) ? readlink($targetDir) : null;
+            if ($resolved !== false && $resolved !== null && realpath($resolved) === realpath($distDir)) {
+                return '/app-dev-panel';
+            }
+            // Not ours — surface the conflict instead of silently overwriting.
+            \Yii::warning(
+                sprintf(
+                    '@webroot/app-dev-panel already exists and does not point to the ADP dist dir (%s). '
+                    . 'Delete it or set $panelStaticUrl on the module to skip auto-publishing.',
+                    $distDir,
+                ),
+                Bootstrap::LOG_CATEGORY,
+            );
+            return '';
+        }
+
+        if (@symlink($distDir, $targetDir)) {
+            return '/app-dev-panel';
+        }
+
+        // Symlinks can fail on Windows or restricted FS — fall back to a recursive copy.
+        if ($this->copyDirectory($distDir, $targetDir)) {
+            return '/app-dev-panel';
+        }
+
+        \Yii::warning(
+            'Failed to publish ADP assets to @webroot/app-dev-panel — falling back to '
+            . 'PanelConfig::DEFAULT_STATIC_URL. Set $panelStaticUrl explicitly to suppress '
+            . 'this warning.',
+            Bootstrap::LOG_CATEGORY,
+        );
+
+        return '';
+    }
+
+    private function copyDirectory(string $source, string $target): bool
+    {
+        if (!@mkdir($target, 0o755, true) && !is_dir($target)) {
+            return false;
+        }
+
+        $iterator = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator($source, \FilesystemIterator::SKIP_DOTS),
+            \RecursiveIteratorIterator::SELF_FIRST,
+        );
+        foreach ($iterator as $entry) {
+            /** @var \SplFileInfo $entry */
+            $dest = $target . '/' . $iterator->getSubPathname();
+            if ($entry->isDir()) {
+                if (!is_dir($dest) && !@mkdir($dest, 0o755, true)) {
+                    return false;
+                }
+                continue;
+            }
+            if (!@copy($entry->getPathname(), $dest)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     private function registerApiApplication(\Psr\Container\ContainerInterface $containerBridge): void
     {
         $panelStaticUrl = $this->panelStaticUrl;
         if ($panelStaticUrl === '') {
-            // Auto-detect: if built assets exist in adapter package, publish them.
-            // Either the panel bundle or the toolbar subdir is enough to trigger publishing.
-            $distDir = \dirname(__DIR__) . '/resources/dist';
-            if (file_exists($distDir . '/bundle.js') || is_dir($distDir . '/toolbar')) {
-                $webroot = \Yii::getAlias('@webroot', false);
-                if (is_string($webroot)) {
-                    $targetDir = $webroot . '/app-dev-panel';
-                    if (!is_dir($targetDir)) {
-                        @symlink($distDir, $targetDir);
-                    }
-                    if (is_dir($targetDir)) {
-                        $panelStaticUrl = '/app-dev-panel';
-                    }
-                }
-            }
+            $panelStaticUrl = $this->publishBundledAssets();
         }
         \Yii::$container->setSingleton(
             PanelConfig::class,
@@ -1378,42 +1470,45 @@ class Module extends \yii\base\Module implements BootstrapInterface
             return;
         }
 
+        $panelPrefix = trim($this->routePrefix, '/') ?: 'debug';
+        $inspectPrefix = trim($this->inspectorRoutePrefix, '/') ?: 'inspect';
+
         $app->getUrlManager()->addRules(
             [
                 // API routes (must be before the panel catch-all)
                 [
                     'class' => \yii\web\UrlRule::class,
-                    'pattern' => 'debug/api/<path:.*>',
+                    'pattern' => $panelPrefix . '/api/<path:.*>',
                     'route' => 'app-dev-panel/adp-api/handle',
                     'defaults' => ['path' => ''],
                 ],
                 [
                     'class' => \yii\web\UrlRule::class,
-                    'pattern' => 'debug/api',
+                    'pattern' => $panelPrefix . '/api',
                     'route' => 'app-dev-panel/adp-api/handle',
                 ],
                 [
                     'class' => \yii\web\UrlRule::class,
-                    'pattern' => 'inspect/api/<path:.*>',
+                    'pattern' => $inspectPrefix . '/api/<path:.*>',
                     'route' => 'app-dev-panel/adp-api/handle',
                     'defaults' => ['path' => ''],
                 ],
                 [
                     'class' => \yii\web\UrlRule::class,
-                    'pattern' => 'inspect/api',
+                    'pattern' => $inspectPrefix . '/api',
                     'route' => 'app-dev-panel/adp-api/handle',
                 ],
                 // Panel SPA routes (catch-all for client-side routing)
                 [
                     'class' => \yii\web\UrlRule::class,
-                    'pattern' => 'debug/<path:(?!api(/|$)).+>',
+                    'pattern' => $panelPrefix . '/<path:(?!api(/|$)).+>',
                     'route' => 'app-dev-panel/adp-api/handle',
                     'defaults' => ['path' => ''],
                     'verb' => ['GET'],
                 ],
                 [
                     'class' => \yii\web\UrlRule::class,
-                    'pattern' => 'debug',
+                    'pattern' => $panelPrefix,
                     'route' => 'app-dev-panel/adp-api/handle',
                     'verb' => ['GET'],
                 ],

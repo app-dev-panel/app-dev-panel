@@ -47,11 +47,13 @@ PHP_CLI_SERVER_WORKERS=3 php -S 127.0.0.1:8080 -t public
 
 ## Источник статических ресурсов
 
-По умолчанию панель загружает ресурсы с GitHub Pages:
+По умолчанию панель загружает ресурсы с GitHub Pages (рядом с live-демо — оба пути обновляются с master):
 
 ```
-https://app-dev-panel.github.io/app-dev-panel/bundle.js
-https://app-dev-panel.github.io/app-dev-panel/bundle.css
+https://app-dev-panel.github.io/app-dev-panel/demo/bundle.js
+https://app-dev-panel.github.io/app-dev-panel/demo/bundle.css
+https://app-dev-panel.github.io/app-dev-panel/demo/toolbar/bundle.js
+https://app-dev-panel.github.io/app-dev-panel/demo/toolbar/bundle.css
 ```
 
 Вы можете изменить URL статики для загрузки ресурсов из другого источника:
@@ -203,7 +205,7 @@ SPA панели включает следующие модули:
 
 | Параметр | По умолчанию | Описание |
 |----------|-------------|----------|
-| `static_url` | `https://app-dev-panel.github.io/app-dev-panel` | Базовый URL для статических ресурсов панели (bundle.js, bundle.css) |
+| `static_url` | `https://app-dev-panel.github.io/app-dev-panel/demo` | Базовый URL для статических ресурсов панели (bundle.js, bundle.css) |
 | `viewer_base_path` | `/debug` | Префикс маршрута, на котором смонтирована панель |
 
 ## Архитектура
