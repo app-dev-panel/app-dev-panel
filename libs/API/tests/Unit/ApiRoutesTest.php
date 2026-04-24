@@ -9,6 +9,7 @@ use AppDevPanel\Api\Debug\Controller\DebugController;
 use AppDevPanel\Api\Debug\Controller\SettingsController;
 use AppDevPanel\Api\Ingestion\Controller\IngestionController;
 use AppDevPanel\Api\Ingestion\Controller\OtlpController;
+use AppDevPanel\Api\Panel\AssetsController;
 use AppDevPanel\Api\Panel\PanelController;
 use AppDevPanel\Api\Router\Route;
 use AppDevPanel\Api\Router\Router;
@@ -148,18 +149,18 @@ final class ApiRoutesTest extends TestCase
         }
     }
 
-    public function testPanelRoutesUsePanelController(): void
+    public function testPanelRoutesUsePanelOrAssetsController(): void
     {
         foreach (ApiRoutes::panelRoutes() as $route) {
-            $this->assertSame(
-                PanelController::class,
+            $this->assertContains(
                 $route->handler[0],
-                "Panel route {$route->pattern} should use PanelController",
+                [PanelController::class, AssetsController::class],
+                "Panel route {$route->pattern} should use PanelController or AssetsController",
             );
         }
     }
 
-    public function testPanelCatchallDoesNotMatchApiPaths(): void
+    public function testPanelCatchallDoesNotMatchApiOrStaticPaths(): void
     {
         $routes = ApiRoutes::panelRoutes();
         $catchall = null;
@@ -174,9 +175,36 @@ final class ApiRoutesTest extends TestCase
         $this->assertNull($catchall->match('GET', '/debug/api'));
         $this->assertNull($catchall->match('GET', '/debug/api/summary'));
         $this->assertNull($catchall->match('GET', '/debug/api/view/123'));
+        $this->assertNull($catchall->match('GET', '/debug/static'));
+        $this->assertNull($catchall->match('GET', '/debug/static/bundle.js'));
 
         $this->assertNotNull($catchall->match('GET', '/debug/logs'));
         $this->assertNotNull($catchall->match('GET', '/debug/inspector/routes'));
         $this->assertNotNull($catchall->match('GET', '/debug/llm'));
+    }
+
+    public function testAssetsRouteMatchesDebugStaticPaths(): void
+    {
+        $routes = ApiRoutes::panelRoutes();
+        $assets = null;
+        foreach ($routes as $route) {
+            if ($route->name === 'debug/panel/assets') {
+                $assets = $route;
+                break;
+            }
+        }
+        $this->assertNotNull($assets, 'Assets route should exist');
+        $this->assertSame(AssetsController::class, $assets->handler[0]);
+
+        $match = $assets->match('GET', '/debug/static/bundle.js');
+        $this->assertNotNull($match);
+        $this->assertSame('bundle.js', $match['path'] ?? null);
+
+        $match = $assets->match('GET', '/debug/static/toolbar/bundle.js');
+        $this->assertNotNull($match);
+        $this->assertSame('toolbar/bundle.js', $match['path'] ?? null);
+
+        $this->assertNull($assets->match('GET', '/debug/api'));
+        $this->assertNull($assets->match('POST', '/debug/static/bundle.js'));
     }
 }
