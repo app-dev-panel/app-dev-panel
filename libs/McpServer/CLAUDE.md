@@ -125,6 +125,12 @@ Client config:
 Environment variables `ADP_STORAGE_PATH` and `ADP_INSPECTOR_URL` also accepted.
 Inspector tools (config, routes, database schema) are only registered when `--inspector-url` is provided.
 
+**Autoloader lookup** (same pattern as `libs/Cli/bin/adp`):
+1. `$GLOBALS['_composer_autoload_path']` — set by the Composer-generated `vendor/bin/adp-mcp` proxy.
+2. `__DIR__ . '/../../../autoload.php'` — Composer install (`vendor/app-dev-panel/mcp-server/bin/`).
+3. `__DIR__ . '/../../../vendor/autoload.php'` — monorepo (`libs/McpServer/bin/`).
+4. `__DIR__ . '/../vendor/autoload.php'` — standalone checkout.
+
 ### HTTP (integrated into ADP server)
 
 Automatically available when ADP server runs via any adapter or `debug:serve`.

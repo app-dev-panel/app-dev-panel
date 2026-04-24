@@ -1,6 +1,10 @@
 # FrontendAssets Module
 
-Ships the prebuilt ADP panel SPA **and** toolbar widget as a Composer package so every framework adapter gets the frontend installed automatically. No runtime download, no CDN dependency.
+Ships the prebuilt ADP panel **and** toolbar bundles as a Composer package so every framework adapter gets the frontend installed automatically. No runtime download, no CDN dependency.
+
+Assets are served in-process by `AppDevPanel\Api\Panel\AssetsController` at `/debug/static/*`. That
+URL is the default `PanelConfig::staticUrl`, so installing the package is all that's needed —
+`PanelController` and `ToolbarInjector` already point at the local bundle.
 
 ## Package
 
@@ -17,9 +21,21 @@ CLAUDE.md
 src/
 └── FrontendAssets.php   # Locator helper for the prebuilt bundle
 dist/
-└── .gitkeep             # Placeholder — real files are populated by CI at release time
+├── .gitkeep             # Placeholder — real files are populated by CI at release time
+├── bundle.js            # Panel SPA entry (populated at release time)
+├── bundle.css
+├── assets/…             # Panel Vite chunks + favicons
+└── toolbar/
+    ├── bundle.js        # Toolbar widget entry
+    ├── bundle.css
+    └── assets/…
 .gitignore               # /dist/* (except .gitkeep)
 ```
+
+`AssetsController` serves these under `/debug/static/*`:
+- `/debug/static/bundle.js` → `dist/bundle.js` (panel)
+- `/debug/static/toolbar/bundle.js` → `dist/toolbar/bundle.js` (toolbar)
+- `/debug/static/assets/<hash>.js` → `dist/assets/<hash>.js` (Vite chunks)
 
 ## Helper
 
@@ -30,34 +46,15 @@ AppDevPanel\FrontendAssets\FrontendAssets::exists();  // true when dist/index.ht
 
 `ServeCommand` (in `app-dev-panel/cli`) calls `FrontendAssets::path()` as the default for `--frontend-path`, so `adp serve` serves the panel with no extra flags whenever this package is installed.
 
-### Layout under `dist/`
-
-```
-dist/
-├── index.html               # Panel SPA entry
-├── bundle.js, bundle.css    # Panel bundle (referenced by PanelController)
-├── assets/                  # Vite-chunked panel sub-bundles
-└── toolbar/
-    ├── bundle.js            # Toolbar widget bundle (referenced by ToolbarInjector)
-    └── bundle.css
-```
-
-The toolbar lives at `dist/toolbar/*` because `AppDevPanel\Api\Toolbar\ToolbarInjector` always injects `<script src="{panel.staticUrl}/toolbar/bundle.js">` — keeping the relative layout stable means each adapter's static URL points at this `dist/` root and both panel and toolbar resolve correctly.
-
 ## Who Requires This Module
 
-Every framework adapter, plus the CLI module itself, with all four adapters wiring `FrontendAssets::path()` into their panel auto-publish path:
+Every framework adapter, plus the CLI module itself:
 
-| Consumer | Hook |
-|----------|------|
-| `app-dev-panel/cli` — `ServeCommand` | `FrontendAssets::path()` is the default `--frontend-path` |
-| `app-dev-panel/adapter-yii2` — `Module::publishBundledAssets()` | Symlinks `FrontendAssets::path()` into `@webroot/app-dev-panel` |
-| `app-dev-panel/adapter-yii3` — `config/di-api.php` (`PanelConfig` factory) | Symlinks `FrontendAssets::path()` into `@public/app-dev-panel` |
-| `app-dev-panel/adapter-laravel` — `AppDevPanelServiceProvider::resolveAssetSource()` | Publishes `FrontendAssets::path()` to `public/vendor/app-dev-panel` via `vendor:publish` |
-| `app-dev-panel/adapter-spiral` | Pulls `FrontendAssets` transitively via the CLI module |
-| `app-dev-panel/adapter-symfony` — `Controller\AdpAssetsController` + `Command\AssetsInstallCommand` | Runtime streams `FrontendAssets::path()/*` at `/_adp-assets`; opt-in `bin/console app-dev-panel:assets:install` copies/symlinks the same dir into `public/bundles/appdevpanel/` for nginx-served setups |
-
-Each adapter falls back to its own `resources/dist/` (legacy `make build-panel` target) when `FrontendAssets::exists()` is `false` — useful for monorepo development before a release build.
+- `app-dev-panel/cli` — `ServeCommand` uses the helper to auto-resolve the bundle
+- `app-dev-panel/adapter-yii3`
+- `app-dev-panel/adapter-symfony`
+- `app-dev-panel/adapter-laravel`
+- `app-dev-panel/adapter-yii2`
 
 ## Build Flow (Release Time)
 
@@ -65,17 +62,16 @@ Each adapter falls back to its own `resources/dist/` (legacy `make build-panel` 
 
 1. Checkout the monorepo
 2. `npm ci && npm run build -w packages/sdk && npm run build -w packages/panel && npm run build -w packages/toolbar` inside `libs/frontend/`
-3. Copy `libs/frontend/packages/panel/dist/*` into `libs/FrontendAssets/dist/`
-4. Copy `libs/frontend/packages/toolbar/dist/*` into `libs/FrontendAssets/dist/toolbar/`
-5. Make a throwaway local commit that `git add -f libs/FrontendAssets/dist`
-6. Run `splitsh-lite --prefix=libs/FrontendAssets` to extract the subtree
-7. Force-push the resulting SHA to [`app-dev-panel/frontend-assets`](https://github.com/app-dev-panel/frontend-assets) (and tag it with `v*` when triggered by a tag)
+3. Copy `libs/frontend/packages/panel/dist/*` into `libs/FrontendAssets/dist/` and `libs/frontend/packages/toolbar/dist/*` into `libs/FrontendAssets/dist/toolbar/`
+4. Make a throwaway local commit that `git add -f libs/FrontendAssets/dist`
+5. Run `splitsh-lite --prefix=libs/FrontendAssets` to extract the subtree
+6. Force-push the resulting SHA to [`app-dev-panel/frontend-assets`](https://github.com/app-dev-panel/frontend-assets) (and tag it with `v*` when triggered by a tag)
 
 The local build commit is never pushed back to the monorepo — only the extracted split remote sees it.
 
 ## Local Development
 
-To test the adapters' auto-publish locally against the real panel + toolbar:
+To test the panel + toolbar locally against a playground:
 
 ```bash
 make install-frontend

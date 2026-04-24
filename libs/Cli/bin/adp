@@ -21,20 +21,27 @@ declare(strict_types=1);
  *   php vendor/bin/adp debug:fixtures http://localhost:8080
  */
 
-// Find autoloader (same pattern as libs/McpServer/bin/adp-mcp)
-$autoloadPaths = [
-    __DIR__ . '/../../../vendor/autoload.php', // From libs/Cli/bin/ when installed from monorepo root
-    __DIR__ . '/../vendor/autoload.php',       // Standalone install
-];
-
+// Find autoloader. `$GLOBALS['_composer_autoload_path']` is set by the Composer-generated
+// bin proxy (vendor/bin/adp) and points at vendor/autoload.php directly — prefer it when
+// available so we don't have to juggle relative paths across install layouts.
 $autoloaded = false;
-foreach ($autoloadPaths as $autoloadPath) {
-    if (!file_exists($autoloadPath)) {
-        continue;
-    }
-    require $autoloadPath;
+if (isset($GLOBALS['_composer_autoload_path']) && file_exists((string) $GLOBALS['_composer_autoload_path'])) {
+    require (string) $GLOBALS['_composer_autoload_path'];
     $autoloaded = true;
-    break;
+} else {
+    $autoloadPaths = [
+        __DIR__ . '/../../../autoload.php',          // Composer install: vendor/app-dev-panel/cli/bin/ → vendor/autoload.php
+        __DIR__ . '/../../../vendor/autoload.php',   // Monorepo: libs/Cli/bin/ → vendor/autoload.php
+        __DIR__ . '/../vendor/autoload.php',         // Standalone checkout with its own vendor/
+    ];
+    foreach ($autoloadPaths as $autoloadPath) {
+        if (!file_exists($autoloadPath)) {
+            continue;
+        }
+        require $autoloadPath;
+        $autoloaded = true;
+        break;
+    }
 }
 
 if (!$autoloaded) {
@@ -44,8 +51,18 @@ if (!$autoloaded) {
 
 $application = new Symfony\Component\Console\Application('adp', '1.x-dev');
 
-$application->add(new AppDevPanel\Cli\Command\ServeCommand());
-$application->add(new AppDevPanel\Cli\Command\FrontendUpdateCommand());
+// Symfony Console renamed Application::add() → Application::addCommand() in 8.0. Support both
+// 7.x and 8.x so the binary works on the full range declared in composer.json (^6 | ^7 | ^8).
+$addCommand = static function (Symfony\Component\Console\Application $app, Symfony\Component\Console\Command\Command $command): void {
+    if (method_exists($app, 'addCommand')) {
+        $app->addCommand($command);
+    } else {
+        $app->add($command);
+    }
+};
+
+$addCommand($application, new AppDevPanel\Cli\Command\ServeCommand());
+$addCommand($application, new AppDevPanel\Cli\Command\FrontendUpdateCommand());
 
 // Register DebugFixturesCommand when app-dev-panel/testing is present.
 // The Testing package is not a required dependency of libs/Cli (enforced by modulite),
@@ -54,7 +71,7 @@ $fixturesCommandClass = 'AppDevPanel\\Testing\\Command\\DebugFixturesCommand';
 if (class_exists($fixturesCommandClass)) {
     /** @var Symfony\Component\Console\Command\Command $command */
     $command = new $fixturesCommandClass();
-    $application->add($command);
+    $addCommand($application, $command);
 }
 
 exit($application->run());
