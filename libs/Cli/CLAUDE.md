@@ -113,15 +113,15 @@ serve --frontend-path=/path/to/built/assets        # Override bundle path (e.g. 
 
 ### `frontend:update` — Download Latest Frontend Build
 
-Fetches `frontend-dist.zip` from the [latest GitHub Release](https://github.com/app-dev-panel/app-dev-panel/releases) and extracts it into `--path`. Intended for PHAR users or environments where Composer is not the update vehicle; composer-based installs update via `composer update app-dev-panel/frontend-assets`.
+Fetches `frontend-dist.zip` from the [latest GitHub Release](https://github.com/app-dev-panel/app-dev-panel/releases) and extracts it into `--path`. The archive contains **both** the panel SPA (`index.html`, `bundle.js`, `assets/`) and the toolbar widget (`toolbar/bundle.js`, `toolbar/bundle.css`). Intended for PHAR users or environments where Composer is not the update vehicle; composer-based installs update via `composer update app-dev-panel/frontend-assets`.
 
 ```bash
 frontend:update check                               # Show current vs latest version
 frontend:update check --json                        # Machine-readable output
-frontend:update download --path=/path/to/dist       # Install latest panel build
+frontend:update download --path=/path/to/dist       # Install latest panel + toolbar build
 ```
 
-Writes a `.adp-version` file next to `index.html` so subsequent `check` invocations can compare installed vs latest. The GitHub API call is capped at 10s; the asset download at 30s.
+Writes a `.adp-version` file next to `index.html` so subsequent `check` invocations can compare installed vs latest. Emits a warning if the installed directory has `index.html` but no `toolbar/bundle.js` — typical for archives produced before toolbar was bundled. The GitHub API call is capped at 10s; the asset download at 30s.
 
 ### `mcp:serve` — MCP Server
 

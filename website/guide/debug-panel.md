@@ -142,7 +142,7 @@ When `static_url` is left empty (the default), each adapter resolves the panel/t
 
 | Adapter | Source location | Served as |
 |---------|-----------------|-----------|
-| Symfony | `Resources/public/bundle.js` (legacy local only — `assets:install`) | `/bundles/appdevpanel` |
+| Symfony | `Resources/public/bundle.js` (after `make build-panel` or `app-dev-panel:assets:install`) → `/bundles/appdevpanel`; otherwise `FrontendAssets::path()` streamed via `AdpAssetsController` → `/_adp-assets` | `/bundles/appdevpanel` or `/_adp-assets` |
 | Laravel | `FrontendAssets::path()` or `resources/dist/` → `vendor:publish --tag=app-dev-panel-assets` | `/vendor/app-dev-panel` |
 | Yii 3 | `FrontendAssets::path()` or `resources/dist/` → symlinked to `@public/app-dev-panel/` | `/app-dev-panel` |
 | Yii 2 | `FrontendAssets::path()` or `resources/dist/` → symlinked to `@webroot/app-dev-panel/` | `/app-dev-panel` |

@@ -86,7 +86,7 @@ import { useServerSentEvents } from '@app-dev-panel/sdk/Component/useServerSentE
 |------|------------|
 | `panel-dist.tar.gz` | Production-сборка панели |
 | `toolbar-dist.tar.gz` | Production-сборка тулбара |
-| `frontend-dist.zip` | Та же сборка панели, запакованная в zip для CLI `frontend:update` |
+| `frontend-dist.zip` | Сборка панели + тулбара (`bundle.{js,css}` в корне, тулбар в `toolbar/`) для CLI `frontend:update` |
 
 Их можно раздавать напрямую веб-сервером или встраивать в PHP-адаптеры.
 

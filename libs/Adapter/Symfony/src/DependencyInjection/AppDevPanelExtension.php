@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace AppDevPanel\Adapter\Symfony\DependencyInjection;
 
 use AppDevPanel\Adapter\Symfony\Collector\RouterDataExtractor;
+use AppDevPanel\Adapter\Symfony\Command\AssetsInstallCommand;
 use AppDevPanel\Adapter\Symfony\Controller\AdpApiController;
+use AppDevPanel\Adapter\Symfony\Controller\AdpAssetsController;
 use AppDevPanel\Adapter\Symfony\EventSubscriber\AssetMapperSubscriber;
 use AppDevPanel\Adapter\Symfony\EventSubscriber\AuthorizationSubscriber;
 use AppDevPanel\Adapter\Symfony\EventSubscriber\ConsoleSubscriber;
@@ -89,6 +91,7 @@ use AppDevPanel\Cli\Command\FrontendUpdateCommand;
 use AppDevPanel\Cli\Command\InspectConfigCommand;
 use AppDevPanel\Cli\Command\InspectDatabaseCommand;
 use AppDevPanel\Cli\Command\InspectRoutesCommand;
+use AppDevPanel\FrontendAssets\FrontendAssets;
 use AppDevPanel\Kernel\Collector\AssetBundleCollector;
 use AppDevPanel\Kernel\Collector\AuthorizationCollector;
 use AppDevPanel\Kernel\Collector\CacheCollector;
@@ -604,9 +607,21 @@ final class AppDevPanelExtension extends Extension
 
         $panelStaticUrl = $config['panel']['static_url'] ?? '';
         if ($panelStaticUrl === '') {
-            // Auto-detect: if bundle assets were installed locally, use them
+            // Resolution order:
+            // 1. Prebaked `public/bundles/appdevpanel/` — produced by `bin/console
+            //    app-dev-panel:assets:install` (or the legacy `make build-panel` + Symfony
+            //    `assets:install` flow). Best for prod where nginx serves static files.
+            // 2. Runtime `/_adp-assets/*` — `AdpAssetsController` streams files directly
+            //    from `app-dev-panel/frontend-assets`, so installs work with no setup step.
+            // 3. CDN default.
             $bundleAssetsPath = \dirname(__DIR__, 2) . '/Resources/public/bundle.js';
-            $panelStaticUrl = file_exists($bundleAssetsPath) ? '/bundles/appdevpanel' : PanelConfig::DEFAULT_STATIC_URL;
+            if (file_exists($bundleAssetsPath)) {
+                $panelStaticUrl = '/bundles/appdevpanel';
+            } elseif (\class_exists(FrontendAssets::class) && FrontendAssets::exists()) {
+                $panelStaticUrl = '/_adp-assets';
+            } else {
+                $panelStaticUrl = PanelConfig::DEFAULT_STATIC_URL;
+            }
         }
         $container->register(PanelConfig::class, PanelConfig::class)->setArguments([$panelStaticUrl])->setPublic(false);
 
@@ -976,10 +991,24 @@ final class AppDevPanelExtension extends Extension
             ->setArguments([new Reference(ApiApplication::class)])
             ->addTag('controller.service_arguments')
             ->setPublic(true);
+
+        // Static assets controller — streams panel + toolbar bundles from
+        // app-dev-panel/frontend-assets. No arguments: the controller reads
+        // FrontendAssets::path() directly (static helper).
+        $container
+            ->register(AdpAssetsController::class, AdpAssetsController::class)
+            ->addTag('controller.service_arguments')
+            ->setPublic(true);
     }
 
     private function registerCliCommands(ContainerBuilder $container): void
     {
+        $container
+            ->register(AssetsInstallCommand::class, AssetsInstallCommand::class)
+            ->setArguments(['%kernel.project_dir%'])
+            ->addTag('console.command')
+            ->setPublic(false);
+
         $container
             ->register(DebugResetCommand::class, DebugResetCommand::class)
             ->setArguments([

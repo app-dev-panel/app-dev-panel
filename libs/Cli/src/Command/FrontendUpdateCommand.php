@@ -100,6 +100,8 @@ final class FrontendUpdateCommand extends Command
             $io->success('Already up to date.');
         }
 
+        $this->warnIfToolbarMissing($input, $io);
+
         return Command::SUCCESS;
     }
 
@@ -147,7 +149,40 @@ final class FrontendUpdateCommand extends Command
 
         $io->success(sprintf('Frontend updated to %s at %s', (string) ($release['tag_name'] ?? 'unknown'), $path));
 
+        $this->warnIfToolbarMissing($input, $io);
+
         return Command::SUCCESS;
+    }
+
+    /**
+     * Emit a notice when the installed frontend is missing the toolbar bundle
+     * — typically a holdover from the pre-0.3 archive that shipped the panel
+     * only. Covers both the `check` and `download` flows so users get the
+     * prompt either way.
+     */
+    private function warnIfToolbarMissing(InputInterface $input, SymfonyStyle $io): void
+    {
+        $path = $input->getOption('path');
+        if (!is_string($path) || $path === '' || !is_dir($path)) {
+            return;
+        }
+
+        if (!is_file(rtrim($path, '/') . '/index.html')) {
+            // Panel itself is missing — `check` is informational, don't nag.
+            return;
+        }
+
+        if (is_file(rtrim($path, '/') . '/toolbar/bundle.js')) {
+            return;
+        }
+
+        $io->warning(sprintf(
+            'Toolbar bundle is missing under %s/toolbar/. '
+            . 'Re-run `frontend:update download --path=%s` to fetch the latest archive '
+            . '(frontend-dist.zip now ships both panel and toolbar).',
+            rtrim($path, '/'),
+            $path,
+        ));
     }
 
     private function getLatestRelease(): array
