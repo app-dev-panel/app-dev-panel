@@ -36,6 +36,7 @@ declare(strict_types=1);
  *   Adapter/Symfony ---> Kernel, API, Cli, McpServer
  *   Adapter/Laravel ---> Kernel, API, Cli, McpServer
  *   Adapter/Yii2 -----> Kernel, API, Cli, McpServer
+ *   Adapter/Spiral ---> Kernel, API, Cli, McpServer
  *   Adapter/Cycle -----> API
  */
 return [
@@ -98,6 +99,12 @@ return [
     'adapter-yii2' => [
         'namespace' => 'AppDevPanel\\Adapter\\Yii2\\',
         'path' => 'libs/Adapter/Yii2/src',
+        'requires' => ['kernel', 'api', 'cli', 'mcp-server'],
+    ],
+
+    'adapter-spiral' => [
+        'namespace' => 'AppDevPanel\\Adapter\\Spiral\\',
+        'path' => 'libs/Adapter/Spiral/src',
         'requires' => ['kernel', 'api', 'cli', 'mcp-server'],
     ],
 
