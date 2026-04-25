@@ -38,6 +38,10 @@ jobs:
           tools: composer:v2
         env:
           COMPOSER_ALLOW_SUPERUSER: 1
+          fail-fast: 'true'
+
+      - name: Verify required PHP extensions
+        run: php -r 'foreach (["redis", "pcov", "mbstring", "sockets", "zip"] as $e) { if (!extension_loaded($e)) { fwrite(STDERR, "Missing PHP extension: $e\n"); exit(1); } }'
 
       - name: Get Composer cache directory
         id: composer-cache
