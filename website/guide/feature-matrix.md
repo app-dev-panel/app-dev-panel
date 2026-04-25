@@ -1,6 +1,6 @@
 ---
 title: Feature Matrix
-description: "Collector and inspector support comparison across ADP adapters for Symfony, Laravel, Yii 3, and Yii 2."
+description: "Collector and inspector support comparison across ADP adapters for Symfony, Laravel, Yii 3, Yii 2, and Spiral."
 ---
 
 # Feature Matrix
@@ -13,7 +13,7 @@ All collectors live in the Kernel and are framework-independent. Adapters regist
 
 ### Universal Collectors
 
-These collectors are registered in **all four adapters**:
+These collectors are registered in **all five full adapters**:
 
 | Collector | Frontend Panel | Description |
 |-----------|---------------|-------------|
@@ -40,20 +40,26 @@ These collectors are registered in **all four adapters**:
 
 ### Collector Availability Matrix
 
-| Collector | Yii 3 | Symfony | Laravel | Yii2 | Frontend Panel |
-|-----------|:-------:|:-------:|:-------:|:----:|---------------|
-| Database | ✅ | ✅ | ✅ | ✅ | Database |
-| Cache | ✅ | ✅ | ✅ | ✅ | Cache |
-| Mailer | ✅ | ✅ | ✅ | ✅ | Mailer |
-| Queue | ✅ | ✅ | ✅ | ✅ | Queue |
-| Redis | ✅ | ✅ | ✅ | ✅ | Redis |
-| Elasticsearch | ✅ | ✅ | ✅ | ✅ | Elasticsearch |
-| View | ✅ | — | — | ✅ | WebView |
-| Templates | — | ✅ | ✅ | ✅ | Templates |
-| Code Coverage | ✅ | ✅ | ✅ | ✅ | Coverage |
-| Asset Bundles | ✅ | ✅ | ✅ | ✅ | Asset Bundles |
-| Middleware | ✅ | — | — | — | Middleware |
-| Messenger | — | ✅ | — | — | Messenger |
+| Collector | Yii 3 | Symfony | Laravel | Yii2 | Spiral | Frontend Panel |
+|-----------|:-----:|:-------:|:-------:|:----:|:------:|---------------|
+| Database | ✅ | ✅ | ✅ | ✅ | — | Database |
+| Cache | ✅ | ✅ | ✅ | ✅ | ✅ (manual) | Cache |
+| Mailer | ✅ | ✅ | ✅ | ✅ | ✅ (manual) | Mailer |
+| Queue | ✅ | ✅ | ✅ | ✅ | ✅ (manual) | Queue |
+| Redis | ✅ | ✅ | ✅ | ✅ | — | Redis |
+| Elasticsearch | ✅ | ✅ | ✅ | ✅ | — | Elasticsearch |
+| View | ✅ | — | — | ✅ | — | WebView |
+| Templates | — | ✅ | ✅ | ✅ | ✅ (manual) | Templates |
+| Code Coverage | ✅ | ✅ | ✅ | ✅ | — | Coverage |
+| Asset Bundles | ✅ | ✅ | ✅ | ✅ | — | Asset Bundles |
+| Middleware | ✅ | — | — | — | — | Middleware |
+| Messenger | — | ✅ | — | — | — | Messenger |
+
+::: info Spiral "manual"
+Spiral collectors are wired but framework-side calls (`logCacheOperation()`,
+`collectMessage()`, `logMessage()`, `beginRender()` …) must be made by the
+application code. The MVP playground demonstrates each via `/test/fixtures/*`.
+:::
 
 ### Collector Totals by Adapter
 
@@ -63,16 +69,17 @@ These collectors are registered in **all four adapters**:
 | Symfony | 20 | 10 | **30** |
 | Yii2 | 20 | 10 | **30** |
 | Laravel | 20 | 10 | **30** |
+| Spiral | 16 | 0 | **16** |
 
 ## Proxy / Interception Mechanisms
 
 Each adapter uses different strategies to intercept framework internals and feed data into collectors:
 
-| Interface | Yii 3 | Symfony | Laravel | Yii2 |
-|-----------|---------|---------|---------|------|
-| PSR-3 Logger | <class>AppDevPanel\Kernel\Collector\LoggerInterfaceProxy</class> | <class>AppDevPanel\Kernel\Collector\LoggerInterfaceProxy</class> | <class>AppDevPanel\Kernel\Collector\LoggerInterfaceProxy</class> | <class>AppDevPanel\Adapter\Yii2\Collector\DebugLogTarget</class> |
-| PSR-14 Events | <class>AppDevPanel\Kernel\Collector\EventDispatcherInterfaceProxy</class> | <class>AppDevPanel\Adapter\Symfony\Proxy\SymfonyEventDispatcherProxy</class> | <class>AppDevPanel\Adapter\Laravel\Proxy\LaravelEventDispatcherProxy</class> | Wildcard `Event::on('*')` |
-| PSR-18 HTTP Client | <class>AppDevPanel\Kernel\Collector\HttpClientInterfaceProxy</class> | <class>AppDevPanel\Kernel\Collector\HttpClientInterfaceProxy</class> | <class>AppDevPanel\Kernel\Collector\HttpClientInterfaceProxy</class> | <class>AppDevPanel\Kernel\Collector\HttpClientInterfaceProxy</class> |
+| Interface | Yii 3 | Symfony | Laravel | Yii2 | Spiral |
+|-----------|---------|---------|---------|------|--------|
+| PSR-3 Logger | <class>AppDevPanel\Kernel\Collector\LoggerInterfaceProxy</class> | <class>AppDevPanel\Kernel\Collector\LoggerInterfaceProxy</class> | <class>AppDevPanel\Kernel\Collector\LoggerInterfaceProxy</class> | <class>AppDevPanel\Adapter\Yii2\Collector\DebugLogTarget</class> | <class>AppDevPanel\Kernel\Collector\LoggerInterfaceProxy</class> |
+| PSR-14 Events | <class>AppDevPanel\Kernel\Collector\EventDispatcherInterfaceProxy</class> | <class>AppDevPanel\Adapter\Symfony\Proxy\SymfonyEventDispatcherProxy</class> | <class>AppDevPanel\Adapter\Laravel\Proxy\LaravelEventDispatcherProxy</class> | Wildcard `Event::on('*')` | <class>AppDevPanel\Kernel\Collector\EventDispatcherInterfaceProxy</class> |
+| PSR-18 HTTP Client | <class>AppDevPanel\Kernel\Collector\HttpClientInterfaceProxy</class> | <class>AppDevPanel\Kernel\Collector\HttpClientInterfaceProxy</class> | <class>AppDevPanel\Kernel\Collector\HttpClientInterfaceProxy</class> | <class>AppDevPanel\Kernel\Collector\HttpClientInterfaceProxy</class> | <class>AppDevPanel\Kernel\Collector\HttpClientInterfaceProxy</class> |
 | PSR-11 Container | <class>AppDevPanel\Adapter\Yii3\Proxy\ContainerInterfaceProxy</class> | Compiler pass | — | — |
 | VarDumper | <class>AppDevPanel\Adapter\Yii3\Proxy\VarDumperHandlerInterfaceProxy</class> | Handler hook | Handler hook | Handler hook |
 | Database | <class>AppDevPanel\Adapter\Yii3\Collector\Db\ConnectionInterfaceProxy</class> | DBAL middleware | Event listener | <class>AppDevPanel\Adapter\Yii2\Collector\DbProfilingTarget</class> |
