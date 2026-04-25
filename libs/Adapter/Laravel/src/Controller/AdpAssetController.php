@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace AppDevPanel\Adapter\Symfony\Controller;
+namespace AppDevPanel\Adapter\Laravel\Controller;
 
 use AppDevPanel\FrontendAssets\FrontendAssets;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
@@ -10,13 +10,12 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
- * Streams panel + toolbar bundles from the `app-dev-panel/frontend-assets`
- * package over `/debug-assets/{path}`. Path safety, MIME mapping, and
- * cache-control selection live in {@see FrontendAssets}.
+ * Laravel mirror of the Symfony AdpAssetController — streams panel + toolbar
+ * bundles from `app-dev-panel/frontend-assets` over `/debug-assets/{path}`.
  */
 final class AdpAssetController
 {
-    public function __invoke(string $path): Response
+    public function __invoke(string $path = ''): Response
     {
         $resolved = FrontendAssets::resolve($path);
         if ($resolved === null) {

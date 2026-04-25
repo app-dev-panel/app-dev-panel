@@ -13,25 +13,9 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  split:
-    name: "Split ${{ matrix.package.name }}"
+  split-frontend-assets:
+    name: "Split frontend-assets (must run first)"
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        package:
-          - { name: "kernel",           local_path: "libs/Kernel",          split_repository: "kernel" }
-          - { name: "api",              local_path: "libs/API",             split_repository: "api" }
-          - { name: "cli",              local_path: "libs/Cli",             split_repository: "cli" }
-          - { name: "mcp-server",       local_path: "libs/McpServer",       split_repository: "mcp-server" }
-          - { name: "testing",          local_path: "libs/Testing",         split_repository: "testing" }
-          - { name: "adapter-symfony",  local_path: "libs/Adapter/Symfony", split_repository: "adapter-symfony" }
-          - { name: "adapter-laravel",  local_path: "libs/Adapter/Laravel", split_repository: "adapter-laravel" }
-          - { name: "adapter-yii2",     local_path: "libs/Adapter/Yii2",    split_repository: "adapter-yii2" }
-          - { name: "adapter-cycle",    local_path: "libs/Adapter/Cycle",   split_repository: "adapter-cycle" }
-          - { name: "adapter-yii3",     local_path: "libs/Adapter/Yii3",    split_repository: "adapter-yii3" }
-          - { name: "frontend-assets",  local_path: "libs/FrontendAssets",  split_repository: "frontend-assets", needs_frontend_build: true }
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -40,15 +24,13 @@ jobs:
           persist-credentials: false
 
       - name: Setup Node.js
-        if: matrix.package.needs_frontend_build
         uses: actions/setup-node@v4
         with:
           node-version: '22'
           cache: 'npm'
           cache-dependency-path: libs/frontend/package-lock.json
 
-      - name: Build panel SPA into FrontendAssets/dist
-        if: matrix.package.needs_frontend_build
+      - name: Build panel SPA + toolbar into FrontendAssets/dist
         run: |
           cd libs/frontend
           npm ci
@@ -66,6 +48,72 @@ jobs:
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git add -f libs/FrontendAssets/dist
           git commit -m "ci: bundle panel SPA into FrontendAssets/dist"
+
+      - name: Install splitsh-lite
+        env:
+          SPLITSH_VERSION: v1.0.1
+        run: |
+          curl -sLf "https://github.com/splitsh/lite/releases/download/${SPLITSH_VERSION}/lite_linux_amd64.tar.gz" | tar xz
+          sudo mv splitsh-lite /usr/local/bin/splitsh-lite
+          splitsh-lite --version || echo "splitsh-lite installed (no --version flag)"
+
+      - name: Configure git
+        run: |
+          git config --local user.name "xepozz"
+          git config --local user.email "xepozz@list.ru"
+
+      - name: Split frontend-assets
+        env:
+          GITHUB_TOKEN: ${{ secrets.SPLIT_TOKEN }}
+          LOCAL_PATH: libs/FrontendAssets
+          SPLIT_REPO: frontend-assets
+          REF_NAME: ${{ github.ref_name }}
+          IS_TAG: ${{ startsWith(github.ref, 'refs/tags/') }}
+        run: |
+          REMOTE_URL="https://x-access-token:${GITHUB_TOKEN}@github.com/app-dev-panel/${SPLIT_REPO}.git"
+
+          echo "Splitting ${LOCAL_PATH} → ${SPLIT_REPO} (ref: ${REF_NAME}, tag: ${IS_TAG})"
+
+          SHA=$(splitsh-lite --prefix="${LOCAL_PATH}")
+          echo "Split SHA: ${SHA}"
+
+          git remote add split "${REMOTE_URL}" 2>/dev/null || true
+
+          if [ "${IS_TAG}" = "true" ]; then
+            git push split "${SHA}:refs/heads/master" --force
+            git push split "${SHA}:refs/tags/${REF_NAME}" --force
+          else
+            git push split "${SHA}:refs/heads/${REF_NAME}" --force
+          fi
+
+  split:
+    name: "Split ${{ matrix.package.name }}"
+    runs-on: ubuntu-latest
+    # Adapters require app-dev-panel/frontend-assets — make sure it is published
+    # before their tag lands on Packagist. Kernel/API/etc. don't depend on it but
+    # grouping them here keeps the job topology simple.
+    needs: split-frontend-assets
+    strategy:
+      fail-fast: false
+      matrix:
+        package:
+          - { name: "kernel",           local_path: "libs/Kernel",          split_repository: "kernel" }
+          - { name: "api",              local_path: "libs/API",             split_repository: "api" }
+          - { name: "cli",              local_path: "libs/Cli",             split_repository: "cli" }
+          - { name: "mcp-server",       local_path: "libs/McpServer",       split_repository: "mcp-server" }
+          - { name: "testing",          local_path: "libs/Testing",         split_repository: "testing" }
+          - { name: "adapter-symfony",  local_path: "libs/Adapter/Symfony", split_repository: "adapter-symfony" }
+          - { name: "adapter-laravel",  local_path: "libs/Adapter/Laravel", split_repository: "adapter-laravel" }
+          - { name: "adapter-yii2",     local_path: "libs/Adapter/Yii2",    split_repository: "adapter-yii2" }
+          - { name: "adapter-cycle",    local_path: "libs/Adapter/Cycle",   split_repository: "adapter-cycle" }
+          - { name: "adapter-yii3",     local_path: "libs/Adapter/Yii3",    split_repository: "adapter-yii3" }
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
 
       - name: Install splitsh-lite
         env:

@@ -15,6 +15,7 @@ use Psr\Http\Server\RequestHandlerInterface;
  * and delegates them to the ADP ApiApplication.
  *
  * Yii uses PSR-7 natively, so no request/response conversion is needed.
+ * Static-asset serving lives in {@see AdpAssetMiddleware}.
  */
 final class YiiApiMiddleware implements MiddlewareInterface
 {

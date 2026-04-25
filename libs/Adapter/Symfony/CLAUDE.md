@@ -44,12 +44,19 @@ src/
 │   ├── SymfonyUrlMatcherAdapter.php                # URL matching adapter
 │   └── SymfonyMatchResult.php                      # Match result DTO
 └── Controller/
-    └── AdpApiController.php                        # Symfony controller bridging to ADP ApiApplication
+    ├── AdpApiController.php                        # Symfony controller bridging to ADP ApiApplication
+    └── AdpAssetController.php                      # Streams panel + toolbar files from app-dev-panel/frontend-assets
+config/
+└── routes/
+    └── adp.php                                     # Route definitions (auto-imported via routing.loader decorator)
+src/Routing/
+└── AdpRoutingLoaderDecorator.php                   # Decorates Symfony's routing.loader, appends adp.php to user RouteCollection
 tests/
 ├── Integration/
 │   ├── BundleBootstrapTest.php                     # Full container compilation + lifecycle
 │   ├── LoggerProxyIntegrationTest.php              # Logger/event proxy wiring in compiled container
-│   └── ConsoleProcessIntegrationTest.php           # Runs bin/console, verifies storage output
+│   ├── ConsoleProcessIntegrationTest.php           # Runs bin/console, verifies storage output
+│   └── RouteOrderTest.php                          # Asserts /debug-assets/* resolves to adp_assets, not adp_panel
 └── Unit/
     ├── DependencyInjection/                        # Extension, CompilerPass, Configuration tests
     ├── EventSubscriber/                            # HttpSubscriber, ConsoleSubscriber tests
@@ -156,6 +163,27 @@ Conditionally registered only when `symfony/security-http` is installed and the 
 | `roleHierarchy` | Container parameter `security.role_hierarchy.roles` |
 | `voters` | Services tagged `security.voter` (injected via `TaggedIteratorArgument`) |
 | `config` | `security.access_control`, `security.access.decision_manager.strategy`, `security.user.provider.concrete.*`, firewall names list |
+
+### 8. Static Assets (Panel + Toolbar Bundle)
+
+`AdpAssetController` (registered as `controller.service_arguments`) streams the prebuilt panel SPA + toolbar bundle from `\AppDevPanel\FrontendAssets\FrontendAssets::path()` over `/debug-assets/{path}`. The route is registered in `config/routes/adp.php` ahead of the `/debug/{path}` panel catch-all so asset requests don't fall into the SPA route. Path traversal is blocked via `realpath` boundary check (`tests/Integration/RouteOrderTest`).
+
+`AppDevPanelExtension::detectPanelStaticUrl()` picks the panel `staticUrl` in this order:
+1. **`/debug-assets`** — `app-dev-panel/frontend-assets` installed and `dist/index.html` present.
+2. **`/bundles/appdevpanel`** — legacy: bundle assets copied to the adapter's own `Resources/public/`.
+3. **`PanelConfig::DEFAULT_STATIC_URL`** — CDN fallback (`https://app-dev-panel.github.io/app-dev-panel/demo`).
+
+Toolbar `staticUrl` follows rule 1 the same way; explicit `app_dev_panel.toolbar.static_url` overrides everything.
+
+### 9. Auto-Registered Routes (`AdpRoutingLoaderDecorator`)
+
+`AdpRoutingLoaderDecorator` decorates Symfony's `routing.loader` (the `DelegatingLoader`). On every `load()` it delegates to the inner loader, then loads `config/routes/adp.php` via the inner resolver and appends the resulting collection. A `FileResource` is added so `cache:clear` rewarms when `adp.php` changes.
+
+Effect: `composer require app-dev-panel/adapter-symfony` + bundle registration in `config/bundles.php` is enough — no `config/routes/app_dev_panel.php` needed on the user side.
+
+Disable via `app_dev_panel.api.register_routes: false` if you want to wire routes manually (e.g. mount under a custom prefix).
+
+The decorator no-ops when `routing.loader` is not in the container (standalone container builds in `BundleBootstrapTest`) — `setDecoratedService(..., IGNORE_ON_INVALID_REFERENCE)` keeps it transparent.
 
 ## Collectors
 

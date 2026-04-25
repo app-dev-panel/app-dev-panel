@@ -2,17 +2,13 @@
 
 declare(strict_types=1);
 
-namespace AppDevPanel\Adapter\Symfony\Tests\Unit\Controller;
+namespace AppDevPanel\Adapter\Laravel\Tests\Unit\Controller;
 
-use AppDevPanel\Adapter\Symfony\Controller\AdpAssetController;
+use AppDevPanel\Adapter\Laravel\Controller\AdpAssetController;
 use AppDevPanel\FrontendAssets\FrontendAssets;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
-/**
- * Tests for AdpAssetController — verifies safe file streaming from the
- * FrontendAssets package with directory-traversal protection.
- */
 final class AdpAssetControllerTest extends TestCase
 {
     private string $backupFile;
@@ -26,8 +22,7 @@ final class AdpAssetControllerTest extends TestCase
         }
 
         $indexPath = $distDir . '/index.html';
-        // Preserve any real index.html (e.g. from a local dev build) so we don't clobber it.
-        $this->backupFile = sys_get_temp_dir() . '/adp-asset-test-' . uniqid() . '.bak';
+        $this->backupFile = sys_get_temp_dir() . '/adp-asset-test-laravel-' . uniqid() . '.bak';
         if (is_file($indexPath)) {
             copy($indexPath, $this->backupFile);
         } else {
@@ -48,7 +43,6 @@ final class AdpAssetControllerTest extends TestCase
             @unlink($indexPath);
         }
 
-        // Clean up test-created assets.
         foreach (['bundle.js', 'bundle.css', 'toolbar/bundle.js'] as $rel) {
             $path = $distDir . '/' . $rel;
             if (is_file($path) && str_contains(file_get_contents($path), 'test-fixture-payload')) {
@@ -98,16 +92,5 @@ final class AdpAssetControllerTest extends TestCase
         $this->expectException(NotFoundHttpException::class);
 
         (new AdpAssetController())('does-not-exist.js');
-    }
-
-    public function testMimeTypeForCss(): void
-    {
-        $distDir = FrontendAssets::path();
-        file_put_contents($distDir . '/bundle.css', '/* test-fixture-payload */');
-
-        $response = (new AdpAssetController())('bundle.css');
-
-        $this->assertSame(200, $response->getStatusCode());
-        $this->assertSame('text/css; charset=utf-8', $response->headers->get('Content-Type'));
     }
 }

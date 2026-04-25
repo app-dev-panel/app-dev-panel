@@ -207,6 +207,12 @@ final class Configuration implements ConfigurationInterface
                 'Base URL of the application for MCP inspector tools (e.g. http://localhost:8080). If null, inspector tools are disabled in the HTTP MCP endpoint.',
             )
             ->end()
+            ->booleanNode('register_routes')
+            ->defaultTrue()
+            ->info(
+                'Auto-register /debug, /debug/api, /inspect/api and /debug-assets routes. Set to false to wire them manually in config/routes/.',
+            )
+            ->end()
             ->end()
             ->end()
             ->end();

@@ -195,6 +195,7 @@
       "AppDevPanel\\Adapter\\Yii3\\Tests\\": "libs/Adapter/Yii3/tests",
       "AppDevPanel\\Adapter\\Yii2\\Tests\\": "libs/Adapter/Yii2/tests",
       "AppDevPanel\\Testing\\Tests\\": "libs/Testing/tests",
+      "AppDevPanel\\FrontendAssets\\Tests\\": "libs/FrontendAssets/tests",
       "AppDevPanel\\Tests\\": "tests"
     }
   },

@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use AppDevPanel\Adapter\Laravel\Controller\AdpApiController;
+use AppDevPanel\Adapter\Laravel\Controller\AdpAssetController;
 use Illuminate\Support\Facades\Route;
 
 /**
@@ -17,6 +18,11 @@ use Illuminate\Support\Facades\Route;
 $csrfMiddleware = class_exists(\Illuminate\Foundation\Http\Middleware\PreventRequestForgery::class)
     ? \Illuminate\Foundation\Http\Middleware\PreventRequestForgery::class
     : \Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class;
+
+// Static asset route — must be registered before the /debug/{path?} catch-all.
+Route::get('/debug-assets/{path}', AdpAssetController::class)->where('path', '.+')->withoutMiddleware([
+    $csrfMiddleware,
+]);
 
 Route::any('/debug/api/{path?}', AdpApiController::class)
     ->where('path', '.*')

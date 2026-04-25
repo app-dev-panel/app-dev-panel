@@ -566,23 +566,23 @@ final class AppDevPanelServiceProvider extends ServiceProvider
         );
 
         $this->app->singleton(PanelConfig::class, function () {
-            $staticUrl = config('app-dev-panel.panel.static_url', '');
+            $staticUrl = (string) config('app-dev-panel.panel.static_url', '');
             if ($staticUrl === '') {
-                // Auto-detect: if assets were published locally, use them
-                $staticUrl = file_exists($this->app->publicPath('vendor/app-dev-panel/bundle.js'))
-                    ? '/vendor/app-dev-panel'
-                    : PanelConfig::DEFAULT_STATIC_URL;
+                $staticUrl = $this->detectPanelStaticUrl();
             }
             return new PanelConfig($staticUrl);
         });
 
-        $this->app->singleton(
-            ToolbarConfig::class,
-            fn() => new ToolbarConfig(
+        $this->app->singleton(ToolbarConfig::class, function () {
+            $staticUrl = (string) config('app-dev-panel.toolbar.static_url', '');
+            if ($staticUrl === '' && \AppDevPanel\FrontendAssets\FrontendAssets::isAvailable()) {
+                $staticUrl = \AppDevPanel\FrontendAssets\FrontendAssets::URL_PREFIX;
+            }
+            return new ToolbarConfig(
                 enabled: (bool) config('app-dev-panel.toolbar.enabled', true),
-                staticUrl: (string) config('app-dev-panel.toolbar.static_url', ''),
-            ),
-        );
+                staticUrl: $staticUrl,
+            );
+        });
 
         $this->app->singleton(
             ToolbarInjector::class,
@@ -1109,5 +1109,26 @@ final class AppDevPanelServiceProvider extends ServiceProvider
             }
             return new SpanProcessorInterfaceProxy($processor, $this->app->make(OpenTelemetryCollector::class));
         });
+    }
+
+    /**
+     * Resolve the panel static URL when the user has not configured one explicitly.
+     * Preference order:
+     * 1. `app-dev-panel/frontend-assets` installed and populated → `/debug-assets`
+     *    (served by `AdpAssetController` from the package's `dist/`).
+     * 2. Legacy local publish to `public/vendor/app-dev-panel/` → `/vendor/app-dev-panel`.
+     * 3. CDN fallback (`PanelConfig::DEFAULT_STATIC_URL`).
+     */
+    private function detectPanelStaticUrl(): string
+    {
+        if (\AppDevPanel\FrontendAssets\FrontendAssets::isAvailable()) {
+            return \AppDevPanel\FrontendAssets\FrontendAssets::URL_PREFIX;
+        }
+
+        if (file_exists($this->app->publicPath('vendor/app-dev-panel/bundle.js'))) {
+            return '/vendor/app-dev-panel';
+        }
+
+        return PanelConfig::DEFAULT_STATIC_URL;
     }
 }

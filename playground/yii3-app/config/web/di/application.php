@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Web\NotFound\NotFoundHandler;
+use AppDevPanel\Adapter\Yii3\Api\AdpAssetMiddleware;
 use AppDevPanel\Adapter\Yii3\Api\ToolbarMiddleware;
 use AppDevPanel\Adapter\Yii3\Api\YiiApiMiddleware;
 use AppDevPanel\Api\Debug\Middleware\DebugHeaders;
@@ -33,6 +34,7 @@ return [
                         DebugHeaders::class,
                         ToolbarMiddleware::class,
                         ErrorCatcher::class,
+                        AdpAssetMiddleware::class,
                         YiiApiMiddleware::class,
                         SessionMiddleware::class,
                         CsrfTokenMiddleware::class,

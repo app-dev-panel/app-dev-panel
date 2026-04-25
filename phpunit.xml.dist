@@ -77,6 +77,9 @@
         <testsuite name="Fixtures">
             <directory>libs/Testing/tests/E2E</directory>
         </testsuite>
+        <testsuite name="FrontendAssets">
+            <directory>libs/FrontendAssets/tests</directory>
+        </testsuite>
     </testsuites>
 
     <source>

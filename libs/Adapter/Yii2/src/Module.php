@@ -492,9 +492,11 @@ class Module extends \yii\base\Module implements BootstrapInterface
     private function registerApiApplication(\Psr\Container\ContainerInterface $containerBridge): void
     {
         $panelStaticUrl = $this->panelStaticUrl;
+        if ($panelStaticUrl === '' && \AppDevPanel\FrontendAssets\FrontendAssets::isAvailable()) {
+            $panelStaticUrl = \AppDevPanel\FrontendAssets\FrontendAssets::URL_PREFIX;
+        }
         if ($panelStaticUrl === '') {
-            // Auto-detect: if built assets exist in adapter package, publish them.
-            // Either the panel bundle or the toolbar subdir is enough to trigger publishing.
+            // 2. Legacy: built assets in adapter package, exposed via @webroot symlink.
             $distDir = \dirname(__DIR__) . '/resources/dist';
             if (file_exists($distDir . '/bundle.js') || is_dir($distDir . '/toolbar')) {
                 $webroot = \Yii::getAlias('@webroot', false);
@@ -1334,6 +1336,13 @@ class Module extends \yii\base\Module implements BootstrapInterface
 
         $app->getUrlManager()->addRules(
             [
+                // Static asset route — must be before the panel catch-all so it is not swallowed.
+                [
+                    'class' => \yii\web\UrlRule::class,
+                    'pattern' => 'debug-assets/<path:.+>',
+                    'route' => 'app-dev-panel/asset/handle',
+                    'verb' => ['GET'],
+                ],
                 // API routes (must be before the panel catch-all)
                 [
                     'class' => \yii\web\UrlRule::class,
@@ -1424,7 +1433,11 @@ class Module extends \yii\base\Module implements BootstrapInterface
         }
 
         $panelConfig = \Yii::$container->get(PanelConfig::class);
-        $toolbarConfig = new ToolbarConfig(enabled: $this->toolbarEnabled, staticUrl: $this->toolbarStaticUrl);
+        $toolbarStaticUrl = $this->toolbarStaticUrl;
+        if ($toolbarStaticUrl === '' && \AppDevPanel\FrontendAssets\FrontendAssets::isAvailable()) {
+            $toolbarStaticUrl = \AppDevPanel\FrontendAssets\FrontendAssets::URL_PREFIX;
+        }
+        $toolbarConfig = new ToolbarConfig(enabled: $this->toolbarEnabled, staticUrl: $toolbarStaticUrl);
 
         return new ToolbarInjector($panelConfig, $toolbarConfig);
     }

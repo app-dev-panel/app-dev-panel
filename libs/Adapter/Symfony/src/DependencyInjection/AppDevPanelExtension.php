@@ -19,6 +19,7 @@ use AppDevPanel\Adapter\Symfony\Inspector\SymfonyConfigProvider;
 use AppDevPanel\Adapter\Symfony\Inspector\SymfonyRouteCollectionAdapter;
 use AppDevPanel\Adapter\Symfony\Inspector\SymfonyUrlMatcherAdapter;
 use AppDevPanel\Adapter\Symfony\Proxy\MessengerCollectorMiddleware;
+use AppDevPanel\Adapter\Symfony\Routing\AdpRoutingLoaderDecorator;
 use AppDevPanel\Api\ApiApplication;
 use AppDevPanel\Api\Debug\Controller\DebugController;
 use AppDevPanel\Api\Debug\Controller\SettingsController;
@@ -136,6 +137,7 @@ use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Http\Message\UriFactoryInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Extension\Extension;
 use Symfony\Component\DependencyInjection\Reference;
 
@@ -485,6 +487,33 @@ final class AppDevPanelExtension extends Extension
         $this->registerApiControllers($container, $config);
         $this->registerInspectorServices($container);
         $this->registerApiApplication($container);
+
+        if ($config['api']['register_routes'] ?? true) {
+            $this->registerRouteLoaderDecorator($container);
+        }
+    }
+
+    /**
+     * Decorate Symfony's `routing.loader` so ADP routes are appended to the app's
+     * main RouteCollection automatically — no `config/routes/app_dev_panel.php`
+     * needed on the user side.
+     *
+     * No-op when `routing.loader` is absent (standalone container builds in
+     * `BundleBootstrapTest`). `ContainerInterface::IGNORE_ON_INVALID_REFERENCE`
+     * keeps the inner reference optional.
+     */
+    private function registerRouteLoaderDecorator(ContainerBuilder $container): void
+    {
+        $routesPath = \dirname(__DIR__, 2) . '/config/routes/adp.php';
+
+        $container
+            ->register('app_dev_panel.routing.loader', AdpRoutingLoaderDecorator::class)
+            ->setDecoratedService('routing.loader', null, 0, ContainerInterface::IGNORE_ON_INVALID_REFERENCE)
+            ->setArguments([
+                new Reference('app_dev_panel.routing.loader.inner', ContainerInterface::IGNORE_ON_INVALID_REFERENCE),
+                $routesPath,
+            ])
+            ->setPublic(false);
     }
 
     private function registerPsrFactories(ContainerBuilder $container): void
@@ -601,10 +630,8 @@ final class AppDevPanelExtension extends Extension
 
         $toolbarEnabled = $config['toolbar']['enabled'] ?? true;
         $toolbarStaticUrl = $config['toolbar']['static_url'] ?? '';
-        if ($toolbarStaticUrl === '' && $this->frontendAssetsAvailable()) {
-            // Toolbar lives alongside the panel under /debug-assets/toolbar/* when we
-            // serve from the FrontendAssets package.
-            $toolbarStaticUrl = '/debug-assets';
+        if ($toolbarStaticUrl === '' && \AppDevPanel\FrontendAssets\FrontendAssets::isAvailable()) {
+            $toolbarStaticUrl = \AppDevPanel\FrontendAssets\FrontendAssets::URL_PREFIX;
         }
         $container
             ->register(ToolbarConfig::class, ToolbarConfig::class)
@@ -1046,8 +1073,8 @@ final class AppDevPanelExtension extends Extension
      */
     private function detectPanelStaticUrl(): string
     {
-        if ($this->frontendAssetsAvailable()) {
-            return '/debug-assets';
+        if (\AppDevPanel\FrontendAssets\FrontendAssets::isAvailable()) {
+            return \AppDevPanel\FrontendAssets\FrontendAssets::URL_PREFIX;
         }
 
         $bundleAssetsPath = \dirname(__DIR__, 2) . '/Resources/public/bundle.js';
@@ -1056,13 +1083,5 @@ final class AppDevPanelExtension extends Extension
         }
 
         return PanelConfig::DEFAULT_STATIC_URL;
-    }
-
-    private function frontendAssetsAvailable(): bool
-    {
-        return (
-            class_exists(\AppDevPanel\FrontendAssets\FrontendAssets::class)
-            && \AppDevPanel\FrontendAssets\FrontendAssets::exists()
-        );
     }
 }

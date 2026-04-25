@@ -367,4 +367,41 @@ final class AppDevPanelExtensionTest extends TestCase
         $panelConfig = $container->getDefinition(PanelConfig::class);
         $this->assertSame('https://cdn.example.com/adp', $panelConfig->getArgument(0));
     }
+
+    public function testRoutingLoaderDecoratorIsRegisteredByDefault(): void
+    {
+        $container = new ContainerBuilder();
+        new AppDevPanelExtension()->load([['enabled' => true]], $container);
+
+        $this->assertTrue(
+            $container->hasDefinition('app_dev_panel.routing.loader'),
+            'routing.loader decorator should be registered by default',
+        );
+
+        $definition = $container->getDefinition('app_dev_panel.routing.loader');
+        $decoratedService = $definition->getDecoratedService();
+        $this->assertNotNull($decoratedService);
+        $this->assertSame('routing.loader', $decoratedService[0]);
+
+        $routesPath = $definition->getArgument(1);
+        $this->assertIsString($routesPath);
+        $this->assertStringEndsWith('/config/routes/adp.php', $routesPath);
+        $this->assertFileExists($routesPath);
+    }
+
+    public function testRoutingLoaderDecoratorDisabledWhenRegisterRoutesFalse(): void
+    {
+        $container = new ContainerBuilder();
+        new AppDevPanelExtension()->load([
+            [
+                'enabled' => true,
+                'api' => ['register_routes' => false],
+            ],
+        ], $container);
+
+        $this->assertFalse(
+            $container->hasDefinition('app_dev_panel.routing.loader'),
+            'routing.loader decorator should be skipped when api.register_routes is false',
+        );
+    }
 }

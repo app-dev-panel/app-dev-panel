@@ -221,8 +221,14 @@ return [
     // Panel
     PanelConfig::class => static function (ContainerInterface $container) use ($params): PanelConfig {
         $staticUrl = $params['app-dev-panel/yii3']['panel']['staticUrl'] ?? '';
+        // 1. Preferred: frontend-assets composer package installed + populated.
+        //    AdpAssetMiddleware serves /debug-assets/* from FrontendAssets::path().
+        if ($staticUrl === '' && \AppDevPanel\FrontendAssets\FrontendAssets::isAvailable()) {
+            $staticUrl = \AppDevPanel\FrontendAssets\FrontendAssets::URL_PREFIX;
+        }
         if ($staticUrl === '') {
-            // Auto-detect: if built assets exist in adapter package, symlink them
+            // 2. Legacy: built assets copied into the adapter package, exposed as a
+            //    symlink under @public/app-dev-panel.
             $adapterDist = \dirname(__DIR__) . '/resources/dist/bundle.js';
             if (file_exists($adapterDist)) {
                 $aliases = $container->get(Aliases::class);
@@ -247,10 +253,11 @@ return [
     // Toolbar
     ToolbarConfig::class => static function () use ($params): ToolbarConfig {
         $toolbarParams = $params['app-dev-panel/yii3']['toolbar'] ?? [];
-        return new ToolbarConfig(
-            enabled: $toolbarParams['enabled'] ?? true,
-            staticUrl: $toolbarParams['staticUrl'] ?? '',
-        );
+        $staticUrl = $toolbarParams['staticUrl'] ?? '';
+        if ($staticUrl === '' && \AppDevPanel\FrontendAssets\FrontendAssets::isAvailable()) {
+            $staticUrl = \AppDevPanel\FrontendAssets\FrontendAssets::URL_PREFIX;
+        }
+        return new ToolbarConfig(enabled: $toolbarParams['enabled'] ?? true, staticUrl: $staticUrl);
     },
     ToolbarInjector::class => static fn(PanelConfig $panelConfig, ToolbarConfig $toolbarConfig) => new ToolbarInjector(
         $panelConfig,
@@ -435,4 +442,10 @@ return [
 
     // Bridge middleware
     YiiApiMiddleware::class => static fn(ApiApplication $apiApplication) => new YiiApiMiddleware($apiApplication),
+
+    // Static-asset middleware — serves /debug-assets/* from app-dev-panel/frontend-assets.
+    \AppDevPanel\Adapter\Yii3\Api\AdpAssetMiddleware::class => static fn(
+        ResponseFactoryInterface $responseFactory,
+        StreamFactoryInterface $streamFactory,
+    ) => new \AppDevPanel\Adapter\Yii3\Api\AdpAssetMiddleware($responseFactory, $streamFactory),
 ];

@@ -123,14 +123,15 @@ The adapter provides three middleware classes that must be added to the applicat
 |-----------|---------|
 | `DebugHeaders` (from `AppDevPanel\Api`) | Adds `X-Debug-Id` response header linking each response to its debug entry |
 | `ToolbarMiddleware` | Injects the ADP debug toolbar into HTML responses (before `</body>`) |
-| `YiiApiMiddleware` | Routes requests matching `/debug/api/*` to the ADP API application, bypassing normal app routing |
+| `YiiApiMiddleware` | Routes requests matching `/debug/api/*` and `/inspect/api/*` to the ADP API application, bypassing normal app routing |
+| `AdpAssetMiddleware` | Streams panel + toolbar bundles from `app-dev-panel/frontend-assets` over `/debug-assets/*` |
 
 **Required middleware stack order** (in `config/web/di/application.php`):
 ```
-DebugHeaders → ToolbarMiddleware → ErrorCatcher → YiiApiMiddleware → SessionMiddleware → CsrfTokenMiddleware → FormatDataResponse → RequestCatcherMiddleware → Router
+DebugHeaders → ToolbarMiddleware → ErrorCatcher → AdpAssetMiddleware → YiiApiMiddleware → SessionMiddleware → CsrfTokenMiddleware → FormatDataResponse → RequestCatcherMiddleware → Router
 ```
 
-`DebugHeaders` must be outermost (before `ErrorCatcher`) to attach the debug ID even on error responses. `ToolbarMiddleware` must be after `DebugHeaders` (needs the debug ID) and before `ErrorCatcher` so the toolbar appears even on error pages. `YiiApiMiddleware` must be before `Router` to intercept API requests early.
+`DebugHeaders` must be outermost (before `ErrorCatcher`) to attach the debug ID even on error responses. `ToolbarMiddleware` must be after `DebugHeaders` (needs the debug ID) and before `ErrorCatcher` so the toolbar appears even on error pages. `AdpAssetMiddleware` and `YiiApiMiddleware` must both be before `Router` to intercept ADP requests early; `AdpAssetMiddleware` is cheap (single string compare) so order between the two is irrelevant.
 
 ## Inspector
 
