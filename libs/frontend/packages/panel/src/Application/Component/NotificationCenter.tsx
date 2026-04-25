@@ -1,4 +1,5 @@
 import {useSelector} from '@app-dev-panel/panel/store';
+import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {
     clearAll,
     markAllAsRead,
@@ -26,15 +27,6 @@ const NotificationItem = styled(Alert)(({theme}) => ({
         paddingTop: theme.spacing(0.5),
     },
     '& .MuiAlert-action': {padding: 0, marginRight: 0, alignItems: 'flex-start'},
-}));
-
-const EmptyState = styled(Box)(({theme}) => ({
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: theme.spacing(5, 2),
-    color: theme.palette.text.secondary,
 }));
 
 const formatTimestamp = (timestamp: number): string => {
@@ -225,13 +217,11 @@ export const NotificationCenter = React.memo(({anchorEl, open, onClose}: Notific
             <Divider />
             <Box sx={{overflowY: 'auto', flex: 1}}>
                 {notifications.length === 0 ? (
-                    <EmptyState>
-                        <Icon sx={{fontSize: 40, mb: 1, opacity: 0.4}}>notifications_none</Icon>
-                        <Typography variant="body2">No notifications</Typography>
-                        <Typography variant="caption" color="text.disabled" sx={{mt: 0.5}}>
-                            API errors and backend updates will appear here
-                        </Typography>
-                    </EmptyState>
+                    <EmptyState
+                        icon="notifications_none"
+                        title="No notifications"
+                        description="API errors and backend updates will appear here"
+                    />
                 ) : (
                     <Box sx={{display: 'flex', flexDirection: 'column', gap: 0.5, p: 1}}>
                         {notifications.map((notification) => (

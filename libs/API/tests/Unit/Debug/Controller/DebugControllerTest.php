@@ -204,40 +204,29 @@ final class DebugControllerTest extends TestCase
         $this->assertInstanceOf(\AppDevPanel\Api\ServerSentEventsStream::class, $response->getBody());
     }
 
-    public function testEventStreamEmitsEventWhenStorageChanges(): void
+    #[\PHPUnit\Framework\Attributes\RequiresPhpExtension('sockets')]
+    public function testEventStreamEmitsEventOnBroadcast(): void
     {
-        $callCount = 0;
-        $storage = $this->createMock(StorageInterface::class);
-        $storage
-            ->method('read')
-            ->willReturnCallback(static function () use (&$callCount): array {
-                $callCount++;
-                // Call 1: initial hash captured in eventStream()
-                // Call 2: first read() — data changed
-                if ($callCount === 1) {
-                    return ['entry1' => ['id' => '1']];
-                }
-                return ['entry1' => ['id' => '1'], 'entry2' => ['id' => '2']];
-            });
-
-        $controller = $this->createController(storage: $storage);
+        $controller = $this->createController();
         $request = new ServerRequest('GET', '/debug/api/event-stream');
         $response = $controller->eventStream($request);
+
+        // Broadcast a message so the stream picks it up
+        $broadcaster = new \AppDevPanel\Kernel\DebugServer\Broadcaster();
+        $broadcaster->broadcast(\AppDevPanel\Kernel\DebugServer\Connection::MESSAGE_TYPE_ENTRY_CREATED, 'test-id');
 
         $body = $response->getBody();
         $output = $body->read(8192);
         $body->close();
 
         $this->assertStringContainsString('data: ', $output);
-        $this->assertStringContainsString('"type":"debug-updated"', $output);
+        $this->assertStringContainsString('"type":"entry-created"', $output);
     }
 
-    public function testEventStreamNoEventWhenStorageUnchanged(): void
+    #[\PHPUnit\Framework\Attributes\RequiresPhpExtension('sockets')]
+    public function testEventStreamNoEventWhenNoBroadcast(): void
     {
-        $storage = $this->createMock(StorageInterface::class);
-        $storage->method('read')->willReturn(['entry1' => ['id' => '1']]);
-
-        $controller = $this->createController(storage: $storage);
+        $controller = $this->createController();
         $request = new ServerRequest('GET', '/debug/api/event-stream');
         $response = $controller->eventStream($request);
 
@@ -245,17 +234,15 @@ final class DebugControllerTest extends TestCase
         $output = $body->read(8192);
         $body->close();
 
-        $this->assertStringNotContainsString('"type":"debug-updated"', $output);
+        // Only heartbeat newlines, no data events
+        $this->assertStringNotContainsString('"type":', $output);
     }
 
-    public function testEventStreamCallbackReadsSummaryType(): void
+    #[\PHPUnit\Framework\Attributes\RequiresPhpExtension('sockets')]
+    public function testEventStreamDoesNotReadStorage(): void
     {
         $storage = $this->createMock(StorageInterface::class);
-        $storage
-            ->expects($this->atLeast(2))
-            ->method('read')
-            ->with(StorageInterface::TYPE_SUMMARY, null)
-            ->willReturn([]);
+        $storage->expects($this->never())->method('read');
 
         $controller = $this->createController(storage: $storage);
         $request = new ServerRequest('GET', '/debug/api/event-stream');
@@ -266,20 +253,18 @@ final class DebugControllerTest extends TestCase
         $body->close();
     }
 
+    #[\PHPUnit\Framework\Attributes\RequiresPhpExtension('sockets')]
     public function testEventStreamPayloadFormat(): void
     {
-        $callCount = 0;
-        $storage = $this->createMock(StorageInterface::class);
-        $storage
-            ->method('read')
-            ->willReturnCallback(static function () use (&$callCount): array {
-                $callCount++;
-                return ['entry' => ['id' => (string) $callCount]];
-            });
-
-        $controller = $this->createController(storage: $storage);
+        $controller = $this->createController();
         $request = new ServerRequest('GET', '/debug/api/event-stream');
         $response = $controller->eventStream($request);
+
+        $broadcaster = new \AppDevPanel\Kernel\DebugServer\Broadcaster();
+        $broadcaster->broadcast(
+            \AppDevPanel\Kernel\DebugServer\Connection::MESSAGE_TYPE_ENTRY_CREATED,
+            'payload-test-id',
+        );
 
         $body = $response->getBody();
         $output = $body->read(8192);
@@ -290,8 +275,22 @@ final class DebugControllerTest extends TestCase
         $this->assertNotEmpty($matches);
 
         $payload = json_decode($matches[1], true);
-        $this->assertSame('debug-updated', $payload['type']);
-        $this->assertSame([], $payload['payload']);
+        $this->assertSame('entry-created', $payload['type']);
+        $this->assertSame(['id' => 'payload-test-id'], $payload['payload']);
+    }
+
+    public function testDumpWithoutCollector(): void
+    {
+        $dumpData = ['collector1' => ['data'], 'collector2' => ['other']];
+
+        $repository = $this->createMock(CollectorRepositoryInterface::class);
+        $repository->expects($this->once())->method('getDumpObject')->with('123')->willReturn($dumpData);
+
+        $controller = $this->createController($repository);
+        $request = new ServerRequest('GET', '/test')->withAttribute('id', '123');
+        $response = $controller->dump($request);
+
+        $this->assertSame(200, $response->getStatusCode());
     }
 
     private function createJsonResponseFactory(): JsonResponseFactoryInterface

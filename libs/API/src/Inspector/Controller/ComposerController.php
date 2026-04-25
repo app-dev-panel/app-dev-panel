@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Api\Inspector\Controller;
 
+use AppDevPanel\Api\ApiSecurityConfig;
 use AppDevPanel\Api\Http\JsonResponseFactoryInterface;
 use AppDevPanel\Api\Inspector\Command\BashCommand;
 use AppDevPanel\Api\Inspector\CommandResponse;
@@ -18,6 +19,7 @@ final class ComposerController
     public function __construct(
         private readonly JsonResponseFactoryInterface $responseFactory,
         private readonly PathResolverInterface $pathResolver,
+        private readonly ApiSecurityConfig $securityConfig = new ApiSecurityConfig(),
     ) {}
 
     public function index(ServerRequestInterface $request): ResponseInterface
@@ -49,14 +51,38 @@ final class ComposerController
         return $this->responseFactory->createJsonResponse([
             'status' => $result->getStatus(),
             'result' => $result->getStatus() === CommandResponse::STATUS_OK
-                ? json_decode($result->getResult(), true, 512, JSON_THROW_ON_ERROR)
+                ? json_decode(self::extractJsonObject($result->getResult()), true, 512, JSON_THROW_ON_ERROR)
                 : null,
             'errors' => $result->getErrors(),
         ]);
     }
 
+    /**
+     * Extracts the first JSON object from a `composer` command output, stripping any
+     * leading or trailing notices that composer prints to stderr (e.g. "Do not run
+     * Composer as root" warnings) which `BashCommand` concatenates with stdout.
+     */
+    private static function extractJsonObject(string $output): string
+    {
+        $start = strpos($output, '{');
+        $end = strrpos($output, '}');
+        if ($start === false || $end === false || $end < $start) {
+            return $output;
+        }
+        return substr($output, $start, $end - $start + 1);
+    }
+
     public function require(ServerRequestInterface $request): ResponseInterface
     {
+        if (!$this->securityConfig->allowDestructiveOperations) {
+            return $this->responseFactory->createJsonResponse([
+                'status' => CommandResponse::STATUS_ERROR,
+                'errors' => [
+                    'Composer require is disabled because allowDestructiveOperations is false. Composer package installation can execute arbitrary code via post-install scripts — enable it only on a trusted, authenticated deployment.',
+                ],
+            ], 403);
+        }
+
         $parsedBody = json_decode($request->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR);
         $package = $parsedBody['package'] ?? null;
         $version = $parsedBody['version'] ?? null;

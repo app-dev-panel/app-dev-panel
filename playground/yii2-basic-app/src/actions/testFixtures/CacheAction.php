@@ -4,54 +4,39 @@ declare(strict_types=1);
 
 namespace App\actions\testFixtures;
 
-use AppDevPanel\Kernel\Collector\CacheCollector;
-use AppDevPanel\Kernel\Collector\CacheOperationRecord;
 use yii\base\Action;
 
+/**
+ * Exercises the real `Yii::$app->cache` component so `CacheProxy` (registered by
+ * the Yii 2 adapter) captures the operations into `CacheCollector`.
+ *
+ * No direct collector calls — the proxy does the recording.
+ */
 final class CacheAction extends Action
 {
     public function run(): array
     {
-        /** @var \AppDevPanel\Adapter\Yii2\Module $module */
-        $module = \Yii::$app->getModule('debug-panel');
+        $cache = \Yii::$app->cache ?? null;
 
-        /** @var CacheCollector|null $cacheCollector */
-        $cacheCollector = $module->getCollector(CacheCollector::class);
-
-        if ($cacheCollector === null) {
-            return ['fixture' => 'cache:basic', 'status' => 'error', 'message' => 'CacheCollector not found'];
+        if ($cache === null) {
+            return ['fixture' => 'cache:basic', 'status' => 'error', 'message' => 'cache component not configured'];
         }
 
-        $cacheCollector->logCacheOperation(new CacheOperationRecord(
-            pool: 'default',
-            operation: 'set',
-            key: 'user:42',
-            duration: 0.001,
-            value: ['id' => 42, 'name' => 'John Doe', 'email' => 'john@example.com'],
-        ));
+        $userData = ['id' => 42, 'name' => 'John Doe', 'email' => 'john@example.com'];
 
-        $cacheCollector->logCacheOperation(new CacheOperationRecord(
-            pool: 'default',
-            operation: 'get',
-            key: 'user:42',
-            hit: true,
-            duration: 0.0005,
-            value: ['id' => 42, 'name' => 'John Doe', 'email' => 'john@example.com'],
-        ));
+        // Store and fetch the same key to demonstrate a hit.
+        $cache->set('user:42', $userData);
+        $cache->get('user:42');
 
-        $cacheCollector->logCacheOperation(new CacheOperationRecord(
-            pool: 'default',
-            operation: 'get',
-            key: 'user:99',
-            duration: 0.0003,
-        ));
+        // Fetch a missing key — proxy records it as a miss.
+        $cache->get('user:99');
 
-        $cacheCollector->logCacheOperation(new CacheOperationRecord(
-            pool: 'default',
-            operation: 'delete',
-            key: 'user:42',
-            duration: 0.0002,
-        ));
+        // exists() demonstrates the `exists` operation.
+        $cache->exists('user:42');
+
+        // delete() shows the `delete` operation; subsequent get is a miss.
+        $cache->delete('user:42');
+        $cache->get('user:42');
 
         return ['fixture' => 'cache:basic', 'status' => 'ok'];
     }

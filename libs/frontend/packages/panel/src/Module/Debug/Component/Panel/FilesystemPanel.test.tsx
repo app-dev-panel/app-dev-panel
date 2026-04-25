@@ -43,9 +43,22 @@ describe('FilesystemPanel', () => {
         expect(screen.getAllByText('Open').length).toBeGreaterThanOrEqual(1);
     });
 
-    it('renders operations count', () => {
+    it('does not show operations count when unfiltered', () => {
         renderWithProviders(<FilesystemPanel data={makeData() as any} />);
-        expect(screen.getByText('1 operation')).toBeInTheDocument();
+        expect(screen.queryByText(/^\d+ operation/)).not.toBeInTheDocument();
+    });
+
+    it('shows filtered operations count when a filter is applied', async () => {
+        const user = userEvent.setup();
+        const bundles = {
+            read: [
+                {path: '/a/config.php', args: {}},
+                {path: '/b/other.php', args: {}},
+            ],
+        };
+        renderWithProviders(<FilesystemPanel data={bundles as any} />);
+        await user.type(screen.getByPlaceholderText('Filter by path...'), 'config');
+        expect(screen.getByText('1 of 2 operations')).toBeInTheDocument();
     });
 
     it('switches tab on click', async () => {
@@ -70,16 +83,6 @@ describe('FilesystemPanel', () => {
         const tablist = screen.getByRole('tablist');
         await user.click(within(tablist).getByText('readdir'));
         expect(screen.getByText(/No readdir operations found/)).toBeInTheDocument();
-    });
-
-    it('renders summary cards with total operations', () => {
-        renderWithProviders(<FilesystemPanel data={makeData() as any} />);
-        expect(screen.getByText('Total Operations')).toBeInTheDocument();
-    });
-
-    it('renders section title', () => {
-        renderWithProviders(<FilesystemPanel data={makeData() as any} />);
-        expect(screen.getByText('Operations')).toBeInTheDocument();
     });
 
     it('renders filter input', () => {

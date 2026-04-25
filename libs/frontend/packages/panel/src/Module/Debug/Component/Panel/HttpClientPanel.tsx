@@ -5,6 +5,7 @@ import {BodyPreview} from '@app-dev-panel/sdk/Component/BodyPreview';
 import {CodeHighlight} from '@app-dev-panel/sdk/Component/CodeHighlight';
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {FileLink} from '@app-dev-panel/sdk/Component/FileLink';
+import {FilterChip} from '@app-dev-panel/sdk/Component/FilterChip';
 import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
 import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
 import {monoFontFamily} from '@app-dev-panel/sdk/Component/Theme/DefaultTheme';
@@ -716,58 +717,27 @@ const HttpClientTabContent = ({data}: HttpClientPanelProps) => {
 
             {(badgeCounts.length > 1 || statusBadgeCounts.length > 1) && (
                 <Box sx={{display: 'flex', flexWrap: 'wrap', gap: 0.75, mb: 2}}>
-                    {statusBadgeCounts.map(([group, count]) => {
-                        const isActive = activeFilters.has(group);
-                        return (
-                            <Chip
-                                key={group}
-                                label={`${group} (${count})`}
-                                size="small"
-                                onClick={() => toggleFilter(group)}
-                                sx={{
-                                    fontSize: '11px',
-                                    height: 24,
-                                    borderRadius: 1,
-                                    fontWeight: 600,
-                                    cursor: 'pointer',
-                                    backgroundColor: isActive ? statusBadgeBg(group) : 'transparent',
-                                    color: isActive ? 'common.white' : statusBadgeBg(group),
-                                    border: `1px solid ${statusBadgeBg(group)}`,
-                                }}
-                            />
-                        );
-                    })}
-                    {badgeCounts.map(([method, count]) => {
-                        const isActive = activeFilters.has(method);
-                        const color = methodColor(method, theme);
-                        return (
-                            <Chip
-                                key={method}
-                                label={`${method} (${count})`}
-                                size="small"
-                                onClick={() => toggleFilter(method)}
-                                sx={{
-                                    fontSize: '11px',
-                                    height: 24,
-                                    borderRadius: 1,
-                                    fontWeight: 600,
-                                    cursor: 'pointer',
-                                    backgroundColor: isActive ? color : 'transparent',
-                                    color: isActive ? 'common.white' : color,
-                                    border: `1px solid ${color}`,
-                                }}
-                            />
-                        );
-                    })}
-                    {activeFilters.size > 0 && (
-                        <Chip
-                            label="Clear"
-                            size="small"
-                            onClick={() => setActiveFilters(new Set())}
-                            variant="outlined"
-                            sx={{fontSize: '11px', height: 24, borderRadius: 1}}
+                    {statusBadgeCounts.map(([group, count]) => (
+                        <FilterChip
+                            key={group}
+                            label={group}
+                            count={count}
+                            color={statusBadgeBg(group)}
+                            active={activeFilters.has(group)}
+                            onClick={() => toggleFilter(group)}
                         />
-                    )}
+                    ))}
+                    {badgeCounts.map(([method, count]) => (
+                        <FilterChip
+                            key={method}
+                            label={method}
+                            count={count}
+                            color={methodColor(method, theme)}
+                            active={activeFilters.has(method)}
+                            onClick={() => toggleFilter(method)}
+                        />
+                    ))}
+                    {activeFilters.size > 0 && <FilterChip label="Clear" onClick={() => setActiveFilters(new Set())} />}
                 </Box>
             )}
 

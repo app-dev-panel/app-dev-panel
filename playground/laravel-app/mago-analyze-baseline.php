@@ -1,6 +1,12 @@
 variant = "loose"
 
 [[issues]]
+file = "app/Auth/ArrayUserProvider.php"
+code = "non-existent-class-like"
+message = 'Class `App\Auth\ArrayUserProvider` cannot implement unknown type `UserProvider`'
+count = 1
+
+[[issues]]
 file = "app/Http/Controllers/HomeController.php"
 code = "invalid-method-access"
 message = 'Attempting to access a method on a non-object type (`unknown-ref(Illuminate\Contracts\Translation\Translator)`).'
@@ -17,6 +23,18 @@ file = "app/Http/Controllers/HomeController.php"
 code = "never-return"
 message = "Cannot return value with type 'never' from this function."
 count = 2
+
+[[issues]]
+file = "app/Http/Controllers/HomeController.php"
+code = "non-existent-attribute-class"
+message = 'Attribute class `OpenApi\Attributes\Get` not found or could not be autoloaded.'
+count = 3
+
+[[issues]]
+file = "app/Http/Controllers/HomeController.php"
+code = "non-existent-attribute-class"
+message = 'Attribute class `OpenApi\Attributes\Info` not found or could not be autoloaded.'
+count = 1
 
 [[issues]]
 file = "app/Http/Controllers/HomeController.php"
@@ -43,22 +61,64 @@ message = 'Cannot find class, interface, enum, or type alias `Psr\Log\LoggerInte
 count = 1
 
 [[issues]]
+file = "app/Http/Controllers/OpenApiController.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 1
+
+[[issues]]
+file = "app/Http/Controllers/OpenApiController.php"
+code = "mixed-method-access"
+message = "Attempting to access a method on a non-object type (`mixed`)."
+count = 3
+
+[[issues]]
+file = "app/Http/Controllers/OpenApiController.php"
+code = "mixed-return-statement"
+message = 'Could not infer a precise return type for function `app\http\controllers\openapicontroller::__invoke`. Saw type `mixed`.'
+count = 1
+
+[[issues]]
+file = "app/Http/Controllers/OpenApiController.php"
+code = "non-existent-class"
+message = 'Class `Illuminate\Http\JsonResponse` not found.'
+count = 1
+
+[[issues]]
+file = "app/Http/Controllers/OpenApiController.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Illuminate\Http\JsonResponse`.'
+count = 1
+
+[[issues]]
+file = "app/Http/Controllers/OpenApiController.php"
+code = "non-existent-function"
+message = 'Could not find definition for function `App\Http\Controllers\app_path` (also tried as `app_path` in a broader scope).'
+count = 1
+
+[[issues]]
+file = "app/Http/Controllers/OpenApiController.php"
+code = "non-existent-method"
+message = 'Method `scan` does not exist on type `OpenApi\Generator`.'
+count = 1
+
+[[issues]]
 file = "app/Http/Controllers/PageController.php"
 code = "invalid-method-access"
 message = 'Attempting to access a method on a non-object type (`unknown-ref(Illuminate\Http\Request)`).'
-count = 2
+count = 7
 
 [[issues]]
 file = "app/Http/Controllers/PageController.php"
 code = "invalid-method-access"
 message = 'Attempting to access a method on a non-object type (`unknown-ref(Psr\Log\LoggerInterface)`).'
-count = 4
+count = 5
 
 [[issues]]
 file = "app/Http/Controllers/PageController.php"
 code = "mixed-assignment"
 message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
-count = 1
+count = 2
 
 [[issues]]
 file = "app/Http/Controllers/PageController.php"
@@ -81,20 +141,32 @@ count = 1
 [[issues]]
 file = "app/Http/Controllers/PageController.php"
 code = "mixed-return-statement"
+message = 'Could not infer a precise return type for function `app\http\controllers\pagecontroller::logdemo`. Saw type `mixed`.'
+count = 1
+
+[[issues]]
+file = "app/Http/Controllers/PageController.php"
+code = "mixed-return-statement"
 message = 'Could not infer a precise return type for function `app\http\controllers\pagecontroller::users`. Saw type `mixed`.'
+count = 1
+
+[[issues]]
+file = "app/Http/Controllers/PageController.php"
+code = "mixed-return-statement"
+message = 'Could not infer a precise return type for function `app\http\controllers\pagecontroller::vardumper`. Saw type `mixed`.'
 count = 1
 
 [[issues]]
 file = "app/Http/Controllers/PageController.php"
 code = "non-existent-class-like"
 message = 'Cannot find class, interface, enum, or type alias `Illuminate\Contracts\View\View`.'
-count = 4
+count = 6
 
 [[issues]]
 file = "app/Http/Controllers/PageController.php"
 code = "non-existent-class-like"
 message = 'Cannot find class, interface, enum, or type alias `Illuminate\Http\Request`.'
-count = 1
+count = 3
 
 [[issues]]
 file = "app/Http/Controllers/PageController.php"
@@ -105,8 +177,14 @@ count = 1
 [[issues]]
 file = "app/Http/Controllers/PageController.php"
 code = "non-existent-function"
+message = 'Could not find definition for function `App\Http\Controllers\dump` (also tried as `dump` in a broader scope).'
+count = 1
+
+[[issues]]
+file = "app/Http/Controllers/PageController.php"
+code = "non-existent-function"
 message = 'Could not find definition for function `App\Http\Controllers\view` (also tried as `view` in a broader scope).'
-count = 4
+count = 6
 
 [[issues]]
 file = "app/Http/Controllers/PageController.php"
@@ -115,10 +193,34 @@ message = "Redundant null coalesce: left-hand side can never be `null` or undefi
 count = 1
 
 [[issues]]
-file = "app/Http/Controllers/TestFixtures/CacheAction.php"
-code = "invalid-method-access"
-message = 'Attempting to access a method on a non-object type (`unknown-ref(AppDevPanel\Kernel\Collector\CacheCollector)`).'
-count = 4
+file = "app/Http/Controllers/TestFixtures/AssetAction.php"
+code = "mixed-method-access"
+message = "Attempting to access a method on a non-object type (`mixed`)."
+count = 1
+
+[[issues]]
+file = "app/Http/Controllers/TestFixtures/AssetAction.php"
+code = "mixed-return-statement"
+message = 'Could not infer a precise return type for function `app\http\controllers\testfixtures\assetaction::__invoke`. Saw type `mixed`.'
+count = 1
+
+[[issues]]
+file = "app/Http/Controllers/TestFixtures/AssetAction.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Illuminate\Http\Response`.'
+count = 1
+
+[[issues]]
+file = "app/Http/Controllers/TestFixtures/AssetAction.php"
+code = "non-existent-function"
+message = 'Could not find definition for function `App\Http\Controllers\TestFixtures\response` (also tried as `response` in a broader scope).'
+count = 1
+
+[[issues]]
+file = "app/Http/Controllers/TestFixtures/AssetAction.php"
+code = "non-existent-function"
+message = 'Could not find definition for function `App\Http\Controllers\TestFixtures\view` (also tried as `view` in a broader scope).'
+count = 1
 
 [[issues]]
 file = "app/Http/Controllers/TestFixtures/CacheAction.php"
@@ -129,19 +231,7 @@ count = 1
 [[issues]]
 file = "app/Http/Controllers/TestFixtures/CacheAction.php"
 code = "non-existent-class"
-message = 'Class `AppDevPanel\Kernel\Collector\CacheOperationRecord` not found.'
-count = 4
-
-[[issues]]
-file = "app/Http/Controllers/TestFixtures/CacheAction.php"
-code = "non-existent-class"
 message = 'Class `Illuminate\Http\JsonResponse` not found.'
-count = 1
-
-[[issues]]
-file = "app/Http/Controllers/TestFixtures/CacheAction.php"
-code = "non-existent-class-like"
-message = 'Cannot find class, interface, enum, or type alias `AppDevPanel\Kernel\Collector\CacheCollector`.'
 count = 1
 
 [[issues]]
@@ -151,9 +241,21 @@ message = 'Cannot find class, interface, enum, or type alias `Illuminate\Http\Js
 count = 1
 
 [[issues]]
-file = "app/Http/Controllers/TestFixtures/CacheHeavyAction.php"
-code = "invalid-method-access"
-message = 'Attempting to access a method on a non-object type (`unknown-ref(AppDevPanel\Kernel\Collector\CacheCollector)`).'
+file = "app/Http/Controllers/TestFixtures/CacheAction.php"
+code = "non-existent-method"
+message = 'Method `forget` does not exist on type `Illuminate\Support\Facades\Cache`.'
+count = 1
+
+[[issues]]
+file = "app/Http/Controllers/TestFixtures/CacheAction.php"
+code = "non-existent-method"
+message = 'Method `get` does not exist on type `Illuminate\Support\Facades\Cache`.'
+count = 2
+
+[[issues]]
+file = "app/Http/Controllers/TestFixtures/CacheAction.php"
+code = "non-existent-method"
+message = 'Method `put` does not exist on type `Illuminate\Support\Facades\Cache`.'
 count = 1
 
 [[issues]]
@@ -165,25 +267,37 @@ count = 1
 [[issues]]
 file = "app/Http/Controllers/TestFixtures/CacheHeavyAction.php"
 code = "non-existent-class"
-message = 'Class `AppDevPanel\Kernel\Collector\CacheOperationRecord` not found.'
-count = 1
-
-[[issues]]
-file = "app/Http/Controllers/TestFixtures/CacheHeavyAction.php"
-code = "non-existent-class"
 message = 'Class `Illuminate\Http\JsonResponse` not found.'
 count = 1
 
 [[issues]]
 file = "app/Http/Controllers/TestFixtures/CacheHeavyAction.php"
 code = "non-existent-class-like"
-message = 'Cannot find class, interface, enum, or type alias `AppDevPanel\Kernel\Collector\CacheCollector`.'
+message = 'Cannot find class, interface, enum, or type alias `Illuminate\Http\JsonResponse`.'
 count = 1
 
 [[issues]]
 file = "app/Http/Controllers/TestFixtures/CacheHeavyAction.php"
-code = "non-existent-class-like"
-message = 'Cannot find class, interface, enum, or type alias `Illuminate\Http\JsonResponse`.'
+code = "non-existent-method"
+message = 'Method `forget` does not exist on type `Illuminate\Support\Facades\Cache`.'
+count = 1
+
+[[issues]]
+file = "app/Http/Controllers/TestFixtures/CacheHeavyAction.php"
+code = "non-existent-method"
+message = 'Method `get` does not exist on type `Illuminate\Support\Facades\Cache`.'
+count = 1
+
+[[issues]]
+file = "app/Http/Controllers/TestFixtures/CacheHeavyAction.php"
+code = "non-existent-method"
+message = 'Method `has` does not exist on type `Illuminate\Support\Facades\Cache`.'
+count = 1
+
+[[issues]]
+file = "app/Http/Controllers/TestFixtures/CacheHeavyAction.php"
+code = "non-existent-method"
+message = 'Method `put` does not exist on type `Illuminate\Support\Facades\Cache`.'
 count = 1
 
 [[issues]]
@@ -206,8 +320,14 @@ count = 1
 
 [[issues]]
 file = "app/Http/Controllers/TestFixtures/DatabaseAction.php"
-code = "invalid-method-access"
-message = 'Attempting to access a method on a non-object type (`unknown-ref(AppDevPanel\Kernel\Collector\DatabaseCollector)`).'
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 1
+
+[[issues]]
+file = "app/Http/Controllers/TestFixtures/DatabaseAction.php"
+code = "mixed-method-access"
+message = "Attempting to access a method on a non-object type (`mixed`)."
 count = 1
 
 [[issues]]
@@ -219,25 +339,31 @@ count = 1
 [[issues]]
 file = "app/Http/Controllers/TestFixtures/DatabaseAction.php"
 code = "non-existent-class"
-message = 'Class `AppDevPanel\Kernel\Collector\QueryRecord` not found.'
-count = 1
-
-[[issues]]
-file = "app/Http/Controllers/TestFixtures/DatabaseAction.php"
-code = "non-existent-class"
 message = 'Class `Illuminate\Http\JsonResponse` not found.'
 count = 1
 
 [[issues]]
 file = "app/Http/Controllers/TestFixtures/DatabaseAction.php"
 code = "non-existent-class-like"
-message = 'Cannot find class, interface, enum, or type alias `AppDevPanel\Kernel\Collector\DatabaseCollector`.'
+message = 'Cannot find class, interface, enum, or type alias `Illuminate\Http\JsonResponse`.'
 count = 1
 
 [[issues]]
 file = "app/Http/Controllers/TestFixtures/DatabaseAction.php"
-code = "non-existent-class-like"
-message = 'Cannot find class, interface, enum, or type alias `Illuminate\Http\JsonResponse`.'
+code = "non-existent-method"
+message = 'Method `select` does not exist on type `Illuminate\Support\Facades\DB`.'
+count = 1
+
+[[issues]]
+file = "app/Http/Controllers/TestFixtures/DatabaseAction.php"
+code = "non-existent-method"
+message = 'Method `statement` does not exist on type `Illuminate\Support\Facades\DB`.'
+count = 1
+
+[[issues]]
+file = "app/Http/Controllers/TestFixtures/DatabaseAction.php"
+code = "non-existent-method"
+message = 'Method `table` does not exist on type `Illuminate\Support\Facades\DB`.'
 count = 1
 
 [[issues]]
@@ -326,24 +452,6 @@ count = 1
 
 [[issues]]
 file = "app/Http/Controllers/TestFixtures/EventsAction.php"
-code = "non-existent-class-like"
-message = 'Cannot find class, interface, enum, or type alias `Illuminate\Http\JsonResponse`.'
-count = 1
-
-[[issues]]
-file = "app/Http/Controllers/TestFixtures/FileStreamAction.php"
-code = "never-return"
-message = "Cannot return value with type 'never' from this function."
-count = 1
-
-[[issues]]
-file = "app/Http/Controllers/TestFixtures/FileStreamAction.php"
-code = "non-existent-class"
-message = 'Class `Illuminate\Http\JsonResponse` not found.'
-count = 1
-
-[[issues]]
-file = "app/Http/Controllers/TestFixtures/FileStreamAction.php"
 code = "non-existent-class-like"
 message = 'Cannot find class, interface, enum, or type alias `Illuminate\Http\JsonResponse`.'
 count = 1
@@ -536,9 +644,9 @@ count = 1
 
 [[issues]]
 file = "app/Http/Controllers/TestFixtures/MailerAction.php"
-code = "invalid-method-access"
-message = 'Attempting to access a method on a non-object type (`unknown-ref(AppDevPanel\Kernel\Collector\MailerCollector)`).'
-count = 1
+code = "mixed-method-access"
+message = "Attempting to access a method on a non-object type (`mixed`)."
+count = 3
 
 [[issues]]
 file = "app/Http/Controllers/TestFixtures/MailerAction.php"
@@ -555,13 +663,13 @@ count = 1
 [[issues]]
 file = "app/Http/Controllers/TestFixtures/MailerAction.php"
 code = "non-existent-class-like"
-message = 'Cannot find class, interface, enum, or type alias `AppDevPanel\Kernel\Collector\MailerCollector`.'
+message = 'Cannot find class, interface, enum, or type alias `Illuminate\Http\JsonResponse`.'
 count = 1
 
 [[issues]]
 file = "app/Http/Controllers/TestFixtures/MailerAction.php"
-code = "non-existent-class-like"
-message = 'Cannot find class, interface, enum, or type alias `Illuminate\Http\JsonResponse`.'
+code = "non-existent-method"
+message = 'Method `raw` does not exist on type `Illuminate\Support\Facades\Mail`.'
 count = 1
 
 [[issues]]
@@ -609,8 +717,20 @@ count = 1
 [[issues]]
 file = "app/Http/Controllers/TestFixtures/OpenTelemetryAction.php"
 code = "invalid-method-access"
-message = 'Attempting to access a method on a non-object type (`unknown-ref(AppDevPanel\Kernel\Collector\OpenTelemetryCollector)`).'
-count = 4
+message = 'Attempting to access a method on a non-object type (`unknown-ref(OpenTelemetry\SDK\Trace\TracerProviderInterface)`).'
+count = 1
+
+[[issues]]
+file = "app/Http/Controllers/TestFixtures/OpenTelemetryAction.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 6
+
+[[issues]]
+file = "app/Http/Controllers/TestFixtures/OpenTelemetryAction.php"
+code = "mixed-method-access"
+message = "Attempting to access a method on a non-object type (`mixed`)."
+count = 31
 
 [[issues]]
 file = "app/Http/Controllers/TestFixtures/OpenTelemetryAction.php"
@@ -621,19 +741,7 @@ count = 1
 [[issues]]
 file = "app/Http/Controllers/TestFixtures/OpenTelemetryAction.php"
 code = "non-existent-class"
-message = 'Class `AppDevPanel\Kernel\Collector\SpanRecord` not found.'
-count = 4
-
-[[issues]]
-file = "app/Http/Controllers/TestFixtures/OpenTelemetryAction.php"
-code = "non-existent-class"
 message = 'Class `Illuminate\Http\JsonResponse` not found.'
-count = 1
-
-[[issues]]
-file = "app/Http/Controllers/TestFixtures/OpenTelemetryAction.php"
-code = "non-existent-class-like"
-message = 'Cannot find class, interface, enum, or type alias `AppDevPanel\Kernel\Collector\OpenTelemetryCollector`.'
 count = 1
 
 [[issues]]
@@ -643,10 +751,22 @@ message = 'Cannot find class, interface, enum, or type alias `Illuminate\Http\Js
 count = 1
 
 [[issues]]
-file = "app/Http/Controllers/TestFixtures/QueueAction.php"
-code = "invalid-method-access"
-message = 'Attempting to access a method on a non-object type (`unknown-ref(AppDevPanel\Kernel\Collector\QueueCollector)`).'
-count = 2
+file = "app/Http/Controllers/TestFixtures/OpenTelemetryAction.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `OpenTelemetry\SDK\Trace\TracerProviderInterface`.'
+count = 1
+
+[[issues]]
+file = "app/Http/Controllers/TestFixtures/OpenTelemetryAction.php"
+code = "non-existent-class-like"
+message = 'Class, interface, enum, or trait `OpenTelemetry\API\Trace\SpanKind` not found.'
+count = 4
+
+[[issues]]
+file = "app/Http/Controllers/TestFixtures/OpenTelemetryAction.php"
+code = "non-existent-class-like"
+message = 'Class, interface, enum, or trait `OpenTelemetry\API\Trace\StatusCode` not found.'
+count = 4
 
 [[issues]]
 file = "app/Http/Controllers/TestFixtures/QueueAction.php"
@@ -657,25 +777,25 @@ count = 1
 [[issues]]
 file = "app/Http/Controllers/TestFixtures/QueueAction.php"
 code = "non-existent-class"
-message = 'Class `AppDevPanel\Kernel\Collector\MessageRecord` not found.'
-count = 2
-
-[[issues]]
-file = "app/Http/Controllers/TestFixtures/QueueAction.php"
-code = "non-existent-class"
 message = 'Class `Illuminate\Http\JsonResponse` not found.'
 count = 1
 
 [[issues]]
 file = "app/Http/Controllers/TestFixtures/QueueAction.php"
 code = "non-existent-class-like"
-message = 'Cannot find class, interface, enum, or type alias `AppDevPanel\Kernel\Collector\QueueCollector`.'
+message = 'Cannot find class, interface, enum, or type alias `Illuminate\Http\JsonResponse`.'
 count = 1
 
 [[issues]]
 file = "app/Http/Controllers/TestFixtures/QueueAction.php"
-code = "non-existent-class-like"
-message = 'Cannot find class, interface, enum, or type alias `Illuminate\Http\JsonResponse`.'
+code = "non-existent-method"
+message = 'Method `dispatchSync` does not exist on type `App\Jobs\TestFixtureFailingJob`.'
+count = 1
+
+[[issues]]
+file = "app/Http/Controllers/TestFixtures/QueueAction.php"
+code = "non-existent-method"
+message = 'Method `dispatchSync` does not exist on type `App\Jobs\TestFixtureJob`.'
 count = 1
 
 [[issues]]
@@ -806,69 +926,69 @@ count = 1
 
 [[issues]]
 file = "app/Http/Controllers/TestFixtures/RouterAction.php"
-code = "invalid-method-access"
-message = 'Attempting to access a method on a non-object type (`unknown-ref(AppDevPanel\Kernel\Collector\RouterCollector)`).'
+code = "never-return"
+message = "Cannot return value with type 'never' from this function."
+count = 1
+
+[[issues]]
+file = "app/Http/Controllers/TestFixtures/RouterAction.php"
+code = "non-existent-class"
+message = 'Class `Illuminate\Http\JsonResponse` not found.'
+count = 1
+
+[[issues]]
+file = "app/Http/Controllers/TestFixtures/RouterAction.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Illuminate\Http\JsonResponse`.'
+count = 1
+
+[[issues]]
+file = "app/Http/Controllers/TestFixtures/SecurityAction.php"
+code = "never-return"
+message = "Cannot return value with type 'never' from this function."
+count = 1
+
+[[issues]]
+file = "app/Http/Controllers/TestFixtures/SecurityAction.php"
+code = "non-existent-class"
+message = 'Class `Illuminate\Http\JsonResponse` not found.'
+count = 1
+
+[[issues]]
+file = "app/Http/Controllers/TestFixtures/SecurityAction.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Illuminate\Http\JsonResponse`.'
+count = 1
+
+[[issues]]
+file = "app/Http/Controllers/TestFixtures/SecurityAction.php"
+code = "non-existent-method"
+message = 'Method `check` does not exist on type `Illuminate\Support\Facades\Gate`.'
 count = 2
 
 [[issues]]
-file = "app/Http/Controllers/TestFixtures/RouterAction.php"
-code = "never-return"
-message = "Cannot return value with type 'never' from this function."
-count = 1
+file = "app/Http/Controllers/TestFixtures/SecurityAction.php"
+code = "non-existent-method"
+message = 'Method `define` does not exist on type `Illuminate\Support\Facades\Gate`.'
+count = 2
 
 [[issues]]
-file = "app/Http/Controllers/TestFixtures/RouterAction.php"
-code = "non-existent-class"
-message = 'Class `Illuminate\Http\JsonResponse` not found.'
-count = 1
-
-[[issues]]
-file = "app/Http/Controllers/TestFixtures/RouterAction.php"
-code = "non-existent-class-like"
-message = 'Cannot find class, interface, enum, or type alias `AppDevPanel\Kernel\Collector\RouterCollector`.'
-count = 1
-
-[[issues]]
-file = "app/Http/Controllers/TestFixtures/RouterAction.php"
-code = "non-existent-class-like"
-message = 'Cannot find class, interface, enum, or type alias `Illuminate\Http\JsonResponse`.'
+file = "app/Http/Controllers/TestFixtures/SecurityAction.php"
+code = "non-existent-method"
+message = 'Method `login` does not exist on type `Illuminate\Support\Facades\Auth`.'
 count = 1
 
 [[issues]]
 file = "app/Http/Controllers/TestFixtures/SecurityAction.php"
-code = "invalid-method-access"
-message = 'Attempting to access a method on a non-object type (`unknown-ref(AppDevPanel\Kernel\Collector\AuthorizationCollector)`).'
-count = 9
-
-[[issues]]
-file = "app/Http/Controllers/TestFixtures/SecurityAction.php"
-code = "never-return"
-message = "Cannot return value with type 'never' from this function."
-count = 1
-
-[[issues]]
-file = "app/Http/Controllers/TestFixtures/SecurityAction.php"
-code = "non-existent-class"
-message = 'Class `Illuminate\Http\JsonResponse` not found.'
-count = 1
-
-[[issues]]
-file = "app/Http/Controllers/TestFixtures/SecurityAction.php"
-code = "non-existent-class-like"
-message = 'Cannot find class, interface, enum, or type alias `AppDevPanel\Kernel\Collector\AuthorizationCollector`.'
-count = 1
-
-[[issues]]
-file = "app/Http/Controllers/TestFixtures/SecurityAction.php"
-code = "non-existent-class-like"
-message = 'Cannot find class, interface, enum, or type alias `Illuminate\Http\JsonResponse`.'
+code = "non-existent-method"
+message = 'Method `logout` does not exist on type `Illuminate\Support\Facades\Auth`.'
 count = 1
 
 [[issues]]
 file = "app/Http/Controllers/TestFixtures/TemplateAction.php"
-code = "invalid-method-access"
-message = 'Attempting to access a method on a non-object type (`unknown-ref(AppDevPanel\Kernel\Collector\TemplateCollector)`).'
-count = 3
+code = "mixed-method-access"
+message = "Attempting to access a method on a non-object type (`mixed`)."
+count = 1
 
 [[issues]]
 file = "app/Http/Controllers/TestFixtures/TemplateAction.php"
@@ -885,13 +1005,13 @@ count = 1
 [[issues]]
 file = "app/Http/Controllers/TestFixtures/TemplateAction.php"
 code = "non-existent-class-like"
-message = 'Cannot find class, interface, enum, or type alias `AppDevPanel\Kernel\Collector\TemplateCollector`.'
+message = 'Cannot find class, interface, enum, or type alias `Illuminate\Http\JsonResponse`.'
 count = 1
 
 [[issues]]
 file = "app/Http/Controllers/TestFixtures/TemplateAction.php"
-code = "non-existent-class-like"
-message = 'Cannot find class, interface, enum, or type alias `Illuminate\Http\JsonResponse`.'
+code = "non-existent-function"
+message = 'Could not find definition for function `App\Http\Controllers\TestFixtures\view` (also tried as `view` in a broader scope).'
 count = 1
 
 [[issues]]
@@ -956,8 +1076,14 @@ count = 1
 
 [[issues]]
 file = "app/Http/Controllers/TestFixtures/ValidatorAction.php"
-code = "invalid-method-access"
-message = 'Attempting to access a method on a non-object type (`unknown-ref(AppDevPanel\Kernel\Collector\ValidatorCollector)`).'
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 1
+
+[[issues]]
+file = "app/Http/Controllers/TestFixtures/ValidatorAction.php"
+code = "mixed-method-access"
+message = "Attempting to access a method on a non-object type (`mixed`)."
 count = 2
 
 [[issues]]
@@ -975,19 +1101,19 @@ count = 1
 [[issues]]
 file = "app/Http/Controllers/TestFixtures/ValidatorAction.php"
 code = "non-existent-class-like"
-message = 'Cannot find class, interface, enum, or type alias `AppDevPanel\Kernel\Collector\ValidatorCollector`.'
-count = 1
-
-[[issues]]
-file = "app/Http/Controllers/TestFixtures/ValidatorAction.php"
-code = "non-existent-class-like"
 message = 'Cannot find class, interface, enum, or type alias `Illuminate\Http\JsonResponse`.'
 count = 1
 
 [[issues]]
+file = "app/Http/Controllers/TestFixtures/ValidatorAction.php"
+code = "non-existent-method"
+message = 'Method `make` does not exist on type `Illuminate\Support\Facades\Validator`.'
+count = 2
+
+[[issues]]
 file = "app/Http/Controllers/TestFixtures/ViewAction.php"
-code = "invalid-method-access"
-message = 'Attempting to access a method on a non-object type (`unknown-ref(AppDevPanel\Kernel\Collector\TemplateCollector)`).'
+code = "mixed-method-access"
+message = "Attempting to access a method on a non-object type (`mixed`)."
 count = 3
 
 [[issues]]
@@ -1005,13 +1131,67 @@ count = 1
 [[issues]]
 file = "app/Http/Controllers/TestFixtures/ViewAction.php"
 code = "non-existent-class-like"
-message = 'Cannot find class, interface, enum, or type alias `AppDevPanel\Kernel\Collector\TemplateCollector`.'
+message = 'Cannot find class, interface, enum, or type alias `Illuminate\Http\JsonResponse`.'
 count = 1
 
 [[issues]]
 file = "app/Http/Controllers/TestFixtures/ViewAction.php"
+code = "non-existent-function"
+message = 'Could not find definition for function `App\Http\Controllers\TestFixtures\view` (also tried as `view` in a broader scope).'
+count = 3
+
+[[issues]]
+file = "app/Jobs/TestFixtureFailingJob.php"
 code = "non-existent-class-like"
-message = 'Cannot find class, interface, enum, or type alias `Illuminate\Http\JsonResponse`.'
+message = 'Class `App\Jobs\TestFixtureFailingJob` cannot implement unknown type `ShouldQueue`'
+count = 1
+
+[[issues]]
+file = "app/Jobs/TestFixtureFailingJob.php"
+code = "non-existent-class-like"
+message = 'Class `App\Jobs\TestFixtureFailingJob` cannot use unknown type `Dispatchable`'
+count = 1
+
+[[issues]]
+file = "app/Jobs/TestFixtureFailingJob.php"
+code = "non-existent-class-like"
+message = 'Class `App\Jobs\TestFixtureFailingJob` cannot use unknown type `InteractsWithQueue`'
+count = 1
+
+[[issues]]
+file = "app/Jobs/TestFixtureFailingJob.php"
+code = "non-existent-class-like"
+message = 'Class `App\Jobs\TestFixtureFailingJob` cannot use unknown type `Queueable`'
+count = 1
+
+[[issues]]
+file = "app/Jobs/TestFixtureJob.php"
+code = "non-existent-class-like"
+message = 'Class `App\Jobs\TestFixtureJob` cannot implement unknown type `ShouldQueue`'
+count = 1
+
+[[issues]]
+file = "app/Jobs/TestFixtureJob.php"
+code = "non-existent-class-like"
+message = 'Class `App\Jobs\TestFixtureJob` cannot use unknown type `Dispatchable`'
+count = 1
+
+[[issues]]
+file = "app/Jobs/TestFixtureJob.php"
+code = "non-existent-class-like"
+message = 'Class `App\Jobs\TestFixtureJob` cannot use unknown type `InteractsWithQueue`'
+count = 1
+
+[[issues]]
+file = "app/Jobs/TestFixtureJob.php"
+code = "non-existent-class-like"
+message = 'Class `App\Jobs\TestFixtureJob` cannot use unknown type `Queueable`'
+count = 1
+
+[[issues]]
+file = "app/Models/User.php"
+code = "non-existent-class-like"
+message = 'Class `App\Models\User` cannot extend unknown type `GenericUser`'
 count = 1
 
 [[issues]]
@@ -1162,19 +1342,19 @@ count = 1
 file = "routes/web.php"
 code = "mixed-method-access"
 message = "Attempting to access a method on a non-object type (`mixed`)."
-count = 1
+count = 2
 
 [[issues]]
 file = "routes/web.php"
 code = "non-existent-method"
 message = 'Method `get` does not exist on type `Illuminate\Support\Facades\Route`.'
-count = 35
+count = 37
 
 [[issues]]
 file = "routes/web.php"
 code = "non-existent-method"
 message = 'Method `match` does not exist on type `Illuminate\Support\Facades\Route`.'
-count = 3
+count = 5
 
 [[issues]]
 file = "routes/web.php"

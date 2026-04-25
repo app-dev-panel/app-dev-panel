@@ -1,8 +1,12 @@
 import {renderWithProviders} from '@app-dev-panel/sdk/test-utils';
 import {screen, waitFor} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import {describe, expect, it} from 'vitest';
+import {describe, expect, it, vi} from 'vitest';
 import {JsonRenderer} from './JsonRenderer';
+
+vi.mock('@app-dev-panel/panel/Module/Inspector/API/Inspector', () => ({
+    useGetClassQuery: vi.fn(() => ({data: undefined})),
+}));
 
 const debugEntry = {id: 'entry-1', collectors: []};
 
@@ -60,5 +64,33 @@ describe('JsonRenderer', () => {
     it('renders boolean values', () => {
         renderWithEntry(true);
         expect(screen.getByText('true')).toBeInTheDocument();
+    });
+
+    it('renders a FQCN string as the ClassName component with a File Explorer button', async () => {
+        renderWithEntry({service: 'App\\Service\\UserService'});
+
+        expect(await screen.findByText('App\\Service\\UserService')).toBeInTheDocument();
+        expect(screen.getByLabelText('Open in File Explorer')).toBeInTheDocument();
+    });
+
+    it('renders a nested FQCN inside an array as ClassName', async () => {
+        renderWithEntry({handlers: ['App\\Handler\\Foo', 'App\\Handler\\Bar']});
+
+        expect(await screen.findByText('App\\Handler\\Foo')).toBeInTheDocument();
+        expect(screen.getByText('App\\Handler\\Bar')).toBeInTheDocument();
+        expect(screen.getAllByLabelText('Open in File Explorer')).toHaveLength(2);
+    });
+
+    it('does not render a plain string as ClassName', () => {
+        renderWithEntry({message: 'just a regular string'});
+
+        expect(screen.getByText('just a regular string')).toBeInTheDocument();
+        expect(screen.queryByLabelText('Open in File Explorer')).not.toBeInTheDocument();
+    });
+
+    it('does not render a short non-namespaced identifier as ClassName', () => {
+        renderWithEntry({handler: 'UserService'});
+
+        expect(screen.queryByLabelText('Open in File Explorer')).not.toBeInTheDocument();
     });
 });

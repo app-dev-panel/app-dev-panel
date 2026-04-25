@@ -34,6 +34,23 @@ final class ToolbarInjector
     }
 
     /**
+     * Check if a request path targets the embedded panel SPA.
+     *
+     * When the toolbar opens the panel in an iframe, the iframe loads an HTML page
+     * served from the panel's base path. Re-injecting the toolbar into that HTML
+     * stacks a second toolbar inside the panel itself.
+     */
+    public function isPanelRequest(string $path): bool
+    {
+        $panelPath = rtrim($this->panelConfig->viewerBasePath, '/');
+        if ($panelPath === '') {
+            return false;
+        }
+
+        return $path === $panelPath || str_starts_with($path, $panelPath . '/');
+    }
+
+    /**
      * Inject toolbar HTML into response body.
      *
      * Inserts the toolbar widget before </body>. If no </body> tag is found,
@@ -60,11 +77,13 @@ final class ToolbarInjector
         $escapedStaticUrl = htmlspecialchars($staticUrl, ENT_QUOTES, 'UTF-8');
         $jsBackendUrl = addslashes($backendUrl);
         $jsDebugId = addslashes($debugId);
+        $jsPanelPath = addslashes(rtrim($this->panelConfig->viewerBasePath, '/'));
 
         return <<<HTML
             <div id="app-dev-toolbar" style="flex: 1"></div>
             <link rel="stylesheet" href="{$escapedStaticUrl}/toolbar/bundle.css" />
             <script>
+                window['__adp_panel_url'] = '{$jsPanelPath}';
                 window['AppDevPanelToolbarWidget'] = {
                     config: {
                         containerId: 'app-dev-toolbar',
@@ -76,6 +95,7 @@ final class ToolbarInjector
                                 usePreferredUrl: true,
                                 debugId: '{$jsDebugId}',
                             },
+                            panelPath: '{$jsPanelPath}',
                         },
                     },
                 };

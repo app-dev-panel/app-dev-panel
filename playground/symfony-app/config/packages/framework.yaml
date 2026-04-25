@@ -2,5 +2,9 @@ framework:
     secret: '%env(APP_SECRET)%'
     http_method_override: false
     handle_all_throwables: true
+    session:
+        handler_id: null
+        cookie_secure: auto
+        cookie_samesite: lax
     php_errors:
         log: true

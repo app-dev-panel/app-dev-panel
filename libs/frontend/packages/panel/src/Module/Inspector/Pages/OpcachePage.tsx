@@ -2,6 +2,7 @@ import {useGetOpcacheQuery} from '@app-dev-panel/panel/Module/Inspector/API/Insp
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {FullScreenCircularProgress} from '@app-dev-panel/sdk/Component/FullScreenCircularProgress';
 import {JsonRenderer} from '@app-dev-panel/sdk/Component/JsonRenderer';
+import {QueryErrorState} from '@app-dev-panel/sdk/Component/QueryErrorState';
 import {formatBytes} from '@app-dev-panel/sdk/Helper/formatBytes';
 import {Box, Chip, Tab, Tabs, Typography} from '@mui/material';
 import {styled} from '@mui/material/styles';
@@ -141,7 +142,7 @@ function formatNumber(value: number): string {
 
 const MetricCard = ({
     title,
-    icon,
+    icon: _icon,
     metrics,
 }: {
     title: string;
@@ -466,7 +467,7 @@ const ConfigurationTab = ({configuration}: {configuration: Record<string, unknow
 // ---------------------------------------------------------------------------
 
 export const OpcachePage = () => {
-    const {data, isLoading} = useGetOpcacheQuery();
+    const {data, isLoading, isError, error, refetch} = useGetOpcacheQuery();
     const [tab, setTab] = useState(0);
 
     const {status, jit, scripts, configuration} = useMemo(() => {
@@ -481,6 +482,17 @@ export const OpcachePage = () => {
     }, [data]);
 
     if (isLoading) return <FullScreenCircularProgress />;
+
+    if (isError) {
+        return (
+            <QueryErrorState
+                error={error}
+                title="Failed to load Opcache data"
+                fallback="Failed to load Opcache data."
+                onRetry={refetch}
+            />
+        );
+    }
 
     if (!data)
         return (

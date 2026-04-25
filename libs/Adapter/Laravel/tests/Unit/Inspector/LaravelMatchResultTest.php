@@ -39,4 +39,116 @@ final class LaravelMatchResultTest extends TestCase
 
         $this->assertSame($result, $result->route());
     }
+
+    public function testFailedMatchWithController(): void
+    {
+        $result = new LaravelMatchResult(false, 'App\\Http\\Controllers\\FallbackController@handle');
+
+        $this->assertFalse($result->isSuccess());
+        $this->assertSame(['App\\Http\\Controllers\\FallbackController@handle'], $result->middlewares);
+    }
+
+    public function testMiddlewaresIsListType(): void
+    {
+        $result = new LaravelMatchResult(true, 'App\\Http\\Controllers\\UserController@show');
+
+        $this->assertCount(1, $result->middlewares);
+        $this->assertSame('App\\Http\\Controllers\\UserController@show', $result->middlewares[0]);
+    }
+
+    public function testRouteChainability(): void
+    {
+        $result = new LaravelMatchResult(true, 'Controller@action');
+
+        // route() returns self, so middlewares should be accessible
+        $this->assertSame(['Controller@action'], $result->route()->middlewares);
+        $this->assertTrue($result->route()->isSuccess());
+    }
+
+    public function testNullControllerExplicit(): void
+    {
+        $result = new LaravelMatchResult(true, null);
+
+        $this->assertTrue($result->isSuccess());
+        $this->assertSame([], $result->middlewares);
+    }
+
+    public function testRouteReturnsInstanceOfLaravelMatchResult(): void
+    {
+        $result = new LaravelMatchResult(true, 'Controller@action');
+
+        $route = $result->route();
+        $this->assertInstanceOf(LaravelMatchResult::class, $route);
+    }
+
+    public function testFailedMatchRouteChain(): void
+    {
+        $result = new LaravelMatchResult(false);
+
+        $this->assertFalse($result->route()->isSuccess());
+        $this->assertSame([], $result->route()->middlewares);
+    }
+
+    public function testMiddlewaresPropertyIsDirectlyAccessible(): void
+    {
+        $result = new LaravelMatchResult(true, 'App\\Controller@show');
+
+        // Test that middlewares is a public property
+        $this->assertIsArray($result->middlewares);
+        $this->assertSame('App\\Controller@show', $result->middlewares[0]);
+    }
+
+    public function testSuccessWithControllerRouteMiddlewares(): void
+    {
+        $result = new LaravelMatchResult(true, 'ClosureHandler');
+
+        // Chained access: route() returns self, middlewares accessible
+        $this->assertSame(['ClosureHandler'], $result->route()->middlewares);
+        $this->assertTrue($result->route()->isSuccess());
+    }
+
+    public function testMiddlewaresPropertyAccessibleViaReflection(): void
+    {
+        // RoutingController::checkRoute() uses reflection to read the middlewares property.
+        // Verify the property exists and is accessible.
+        $result = new LaravelMatchResult(true, 'App\\Controller@action');
+        $route = $result->route();
+
+        $reflection = new \ReflectionObject($route);
+        $this->assertTrue($reflection->hasProperty('middlewares'));
+
+        $property = $reflection->getProperty('middlewares');
+        $middlewares = $property->getValue($route);
+        $this->assertSame(['App\\Controller@action'], $middlewares);
+    }
+
+    public function testMiddlewaresEmptyWhenNoController(): void
+    {
+        $result = new LaravelMatchResult(true);
+        $route = $result->route();
+
+        $reflection = new \ReflectionObject($route);
+        $property = $reflection->getProperty('middlewares');
+        $middlewares = $property->getValue($route);
+        $this->assertSame([], $middlewares);
+    }
+
+    public function testMultipleRouteCallsReturnSameInstance(): void
+    {
+        $result = new LaravelMatchResult(true, 'Controller@show');
+
+        $route1 = $result->route();
+        $route2 = $result->route();
+
+        $this->assertSame($route1, $route2);
+    }
+
+    public function testSuccessWithNullControllerExplicitMiddlewares(): void
+    {
+        $result = new LaravelMatchResult(false, null);
+
+        $this->assertFalse($result->isSuccess());
+        $this->assertSame([], $result->middlewares);
+        $this->assertSame($result, $result->route());
+    }
 }

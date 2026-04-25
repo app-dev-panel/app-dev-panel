@@ -32,7 +32,7 @@ use AppDevPanel\Kernel\Collector\Web\RequestCollector;
 use AppDevPanel\Kernel\Collector\Web\WebAppInfoCollector;
 use AppDevPanel\Kernel\Debugger;
 use AppDevPanel\Kernel\DebuggerIdGenerator;
-use AppDevPanel\Kernel\Storage\FileStorage;
+use AppDevPanel\Kernel\Storage\BroadcastingStorage;
 use AppDevPanel\Kernel\Storage\StorageInterface;
 use PHPUnit\Framework\Attributes\CoversNothing;
 use PHPUnit\Framework\TestCase;
@@ -80,7 +80,7 @@ final class BundleBootstrapTest extends TestCase
         $container = $this->buildContainer();
 
         $this->assertInstanceOf(DebuggerIdGenerator::class, $container->get(DebuggerIdGenerator::class));
-        $this->assertInstanceOf(FileStorage::class, $container->get(StorageInterface::class));
+        $this->assertInstanceOf(BroadcastingStorage::class, $container->get(StorageInterface::class));
         $this->assertInstanceOf(TimelineCollector::class, $container->get(TimelineCollector::class));
     }
 
@@ -170,7 +170,7 @@ final class BundleBootstrapTest extends TestCase
         $this->assertSame($debugId, $response->headers->get('X-Debug-Id'));
         $this->assertSame(200, $requestCollector->getCollected()['responseStatusCode']);
 
-        // 3. kernel.terminate — flushes to FileStorage
+        // 3. kernel.terminate — flushes to SqliteStorage
         $httpSubscriber->onKernelTerminate(new \Symfony\Component\HttpKernel\Event\TerminateEvent(
             $kernel,
             $request,

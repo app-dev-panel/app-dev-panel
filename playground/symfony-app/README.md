@@ -34,7 +34,7 @@ php bin/console
 ## Debug Data
 
 After making requests, debug entries are stored in `var/debug/`.
-The ADP API is available at `/debug/api/` (when API routes are wired).
+The ADP API is available at `/debug/` (when API routes are wired).
 
 ## Configuration
 

@@ -6,6 +6,7 @@ return [
     'enabled' => (bool) env('APP_DEV_PANEL_ENABLED', env('APP_DEBUG', true)),
 
     'storage' => [
+        'driver' => env('APP_DEV_PANEL_STORAGE_DRIVER', 'file'),
         'path' => storage_path('debug'),
         'history_size' => 50,
     ],
@@ -35,6 +36,7 @@ return [
         'security' => true,
         'assets' => true,
         'template' => true,
+        'elasticsearch' => true,
         'code_coverage' => false,
     ],
 
@@ -66,17 +68,18 @@ return [
     'path_mapping' => [],
 
     'panel' => [
-        'static_url' => '',  // Base URL for panel assets (empty = GitHub Pages default). Use http://localhost:3000 for Vite dev with HMR.
+        'static_url' => '', // Base URL for panel assets (empty = GitHub Pages default). Use http://localhost:3000 for Vite dev with HMR.
     ],
 
     'toolbar' => [
-        'enabled' => true,  // Inject the debug toolbar into HTML responses.
-        'static_url' => '',  // Base URL for toolbar assets (empty = uses panel static_url). Use http://localhost:3001 for Vite dev server.
+        'enabled' => true, // Inject the debug toolbar into HTML responses.
+        'static_url' => '', // Base URL for toolbar assets (empty = uses panel static_url). Use http://localhost:3001 for Vite dev server.
     ],
 
     'api' => [
         'enabled' => true,
         'allowed_ips' => ['127.0.0.1', '::1'],
         'auth_token' => env('APP_DEV_PANEL_TOKEN', ''),
+        'inspector_url' => env('APP_DEV_PANEL_INSPECTOR_URL'),
     ],
 ];

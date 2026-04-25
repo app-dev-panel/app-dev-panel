@@ -11,10 +11,14 @@ use AppDevPanel\Adapter\Laravel\EventListener\AuthorizationListener;
 use AppDevPanel\Adapter\Laravel\EventListener\CacheListener;
 use AppDevPanel\Adapter\Laravel\EventListener\ConsoleListener;
 use AppDevPanel\Adapter\Laravel\EventListener\DatabaseListener;
+use AppDevPanel\Adapter\Laravel\EventListener\GateListener;
 use AppDevPanel\Adapter\Laravel\EventListener\HttpClientListener;
 use AppDevPanel\Adapter\Laravel\EventListener\MailListener;
 use AppDevPanel\Adapter\Laravel\EventListener\QueueListener;
+use AppDevPanel\Adapter\Laravel\EventListener\RedisListener;
+use AppDevPanel\Adapter\Laravel\EventListener\ValidatorListener;
 use AppDevPanel\Adapter\Laravel\EventListener\ViteAssetListener;
+use AppDevPanel\Adapter\Laravel\Inspector\LaravelAuthorizationConfigProvider;
 use AppDevPanel\Adapter\Laravel\Inspector\LaravelConfigProvider;
 use AppDevPanel\Adapter\Laravel\Inspector\LaravelRouteCollectionAdapter;
 use AppDevPanel\Adapter\Laravel\Inspector\LaravelSchemaProvider;
@@ -35,16 +39,17 @@ use AppDevPanel\Api\Http\JsonResponseFactory;
 use AppDevPanel\Api\Http\JsonResponseFactoryInterface;
 use AppDevPanel\Api\Ingestion\Controller\IngestionController;
 use AppDevPanel\Api\Inspector\Authorization\AuthorizationConfigProviderInterface;
-use AppDevPanel\Api\Inspector\Authorization\NullAuthorizationConfigProvider;
 use AppDevPanel\Api\Inspector\Controller\AuthorizationController;
 use AppDevPanel\Api\Inspector\Controller\CacheController as InspectorCacheController;
 use AppDevPanel\Api\Inspector\Controller\CodeCoverageController;
 use AppDevPanel\Api\Inspector\Controller\CommandController;
 use AppDevPanel\Api\Inspector\Controller\ComposerController;
 use AppDevPanel\Api\Inspector\Controller\DatabaseController;
+use AppDevPanel\Api\Inspector\Controller\ElasticsearchController;
 use AppDevPanel\Api\Inspector\Controller\FileController;
 use AppDevPanel\Api\Inspector\Controller\GitController;
 use AppDevPanel\Api\Inspector\Controller\GitRepositoryProvider;
+use AppDevPanel\Api\Inspector\Controller\HttpMockController;
 use AppDevPanel\Api\Inspector\Controller\InspectController;
 use AppDevPanel\Api\Inspector\Controller\OpcacheController;
 use AppDevPanel\Api\Inspector\Controller\RequestController;
@@ -52,7 +57,15 @@ use AppDevPanel\Api\Inspector\Controller\RoutingController;
 use AppDevPanel\Api\Inspector\Controller\ServiceController;
 use AppDevPanel\Api\Inspector\Controller\TranslationController;
 use AppDevPanel\Api\Inspector\Database\SchemaProviderInterface;
+use AppDevPanel\Api\Inspector\Elasticsearch\ElasticsearchProviderInterface;
+use AppDevPanel\Api\Inspector\Elasticsearch\NullElasticsearchProvider;
+use AppDevPanel\Api\Inspector\HttpMock\HttpMockProviderInterface;
+use AppDevPanel\Api\Inspector\HttpMock\NullHttpMockProvider;
 use AppDevPanel\Api\Inspector\Middleware\InspectorProxyMiddleware;
+use AppDevPanel\Api\Llm\Acp\AcpCommandVerifier;
+use AppDevPanel\Api\Llm\Acp\AcpCommandVerifierInterface;
+use AppDevPanel\Api\Llm\Acp\AcpDaemonManager;
+use AppDevPanel\Api\Llm\Acp\AcpDaemonManagerInterface;
 use AppDevPanel\Api\Llm\Controller\LlmController;
 use AppDevPanel\Api\Llm\FileLlmHistoryStorage;
 use AppDevPanel\Api\Llm\FileLlmSettings;
@@ -75,6 +88,8 @@ use AppDevPanel\Api\Toolbar\ToolbarInjector;
 use AppDevPanel\Cli\Command\DebugDumpCommand;
 use AppDevPanel\Cli\Command\DebugQueryCommand;
 use AppDevPanel\Cli\Command\DebugResetCommand;
+use AppDevPanel\Cli\Command\DebugServerBroadcastCommand;
+use AppDevPanel\Cli\Command\DebugServerCommand;
 use AppDevPanel\Cli\Command\DebugSummaryCommand;
 use AppDevPanel\Cli\Command\DebugTailCommand;
 use AppDevPanel\Cli\Command\FrontendUpdateCommand;
@@ -89,6 +104,7 @@ use AppDevPanel\Kernel\Collector\Console\CommandCollector;
 use AppDevPanel\Kernel\Collector\Console\ConsoleAppInfoCollector;
 use AppDevPanel\Kernel\Collector\DatabaseCollector;
 use AppDevPanel\Kernel\Collector\DeprecationCollector;
+use AppDevPanel\Kernel\Collector\ElasticsearchCollector;
 use AppDevPanel\Kernel\Collector\EnvironmentCollector;
 use AppDevPanel\Kernel\Collector\EventCollector;
 use AppDevPanel\Kernel\Collector\ExceptionCollector;
@@ -99,6 +115,7 @@ use AppDevPanel\Kernel\Collector\LoggerInterfaceProxy;
 use AppDevPanel\Kernel\Collector\MailerCollector;
 use AppDevPanel\Kernel\Collector\OpenTelemetryCollector;
 use AppDevPanel\Kernel\Collector\QueueCollector;
+use AppDevPanel\Kernel\Collector\RedisCollector;
 use AppDevPanel\Kernel\Collector\RouterCollector;
 use AppDevPanel\Kernel\Collector\ServiceCollector;
 use AppDevPanel\Kernel\Collector\SpanProcessorInterfaceProxy;
@@ -114,10 +131,15 @@ use AppDevPanel\Kernel\Collector\Web\WebAppInfoCollector;
 use AppDevPanel\Kernel\Debugger;
 use AppDevPanel\Kernel\DebuggerIdGenerator;
 use AppDevPanel\Kernel\DebuggerIgnoreConfig;
+use AppDevPanel\Kernel\DebugServer\Broadcaster;
+use AppDevPanel\Kernel\DebugServer\Connection;
+use AppDevPanel\Kernel\DebugServer\LoggerDecorator;
 use AppDevPanel\Kernel\Service\FileServiceRegistry;
 use AppDevPanel\Kernel\Service\ServiceRegistryInterface;
-use AppDevPanel\Kernel\Storage\FileStorage;
+use AppDevPanel\Kernel\Storage\BroadcastingStorage;
+use AppDevPanel\Kernel\Storage\StorageFactory;
 use AppDevPanel\Kernel\Storage\StorageInterface;
+use AppDevPanel\McpServer\Inspector\InspectorClient;
 use AppDevPanel\McpServer\McpServer;
 use AppDevPanel\McpServer\McpToolRegistryFactory;
 use GuzzleHttp\Client;
@@ -167,7 +189,7 @@ final class AppDevPanelServiceProvider extends ServiceProvider
         if (is_dir($assetSource) && file_exists($assetSource . '/bundle.js')) {
             $this->publishes([
                 $assetSource => $this->app->publicPath('vendor/app-dev-panel'),
-            ], 'app-dev-panel-assets');
+            ], ['app-dev-panel-assets', 'laravel-assets']);
         }
 
         $this->loadRoutesFrom(__DIR__ . '/../routes/adp.php');
@@ -177,6 +199,33 @@ final class AppDevPanelServiceProvider extends ServiceProvider
         $this->decoratePsrServices();
         $this->decorateBladeEngine();
         $this->decorateSpanProcessor();
+        $this->registerExceptionReporter();
+    }
+
+    private function registerExceptionReporter(): void
+    {
+        $collectors = $this->app->make('config')->get('app-dev-panel.collectors', []);
+        if (!($collectors['exception'] ?? true)) {
+            return;
+        }
+        if (!$this->app->bound(\Illuminate\Contracts\Debug\ExceptionHandler::class)) {
+            return;
+        }
+
+        $handler = $this->app->make(\Illuminate\Contracts\Debug\ExceptionHandler::class);
+        if (!method_exists($handler, 'reportable')) {
+            return;
+        }
+
+        $app = $this->app;
+        $handler->reportable(static function (\Throwable $e) use ($app): void {
+            if (!$app->bound(ExceptionCollector::class)) {
+                return;
+            }
+            /** @var ExceptionCollector $collector */
+            $collector = $app->make(ExceptionCollector::class);
+            $collector->collect($e);
+        });
     }
 
     private function isEnabled(): bool
@@ -190,12 +239,15 @@ final class AppDevPanelServiceProvider extends ServiceProvider
 
         $this->app->singleton(DebuggerIdGenerator::class);
 
-        $this->app->singleton(StorageInterface::class, function () use ($config): FileStorage {
-            return new FileStorage(
+        $this->app->singleton(StorageInterface::class, function () use ($config): BroadcastingStorage {
+            $storage = StorageFactory::create(
+                $config->get('app-dev-panel.storage.driver', 'file'),
                 $config->get('app-dev-panel.storage.path'),
                 $this->app->make(DebuggerIdGenerator::class),
                 $config->get('app-dev-panel.dumper.excluded_classes', []),
             );
+
+            return new BroadcastingStorage($storage);
         });
 
         $this->app->singleton(TimelineCollector::class);
@@ -260,6 +312,8 @@ final class AppDevPanelServiceProvider extends ServiceProvider
             'opentelemetry' => OpenTelemetryCollector::class,
             'assets' => AssetBundleCollector::class,
             'template' => TemplateCollector::class,
+            'redis' => RedisCollector::class,
+            'elasticsearch' => ElasticsearchCollector::class,
         ];
 
         foreach ($timelineCollectors as $key => $class) {
@@ -619,11 +673,22 @@ final class AppDevPanelServiceProvider extends ServiceProvider
             ),
         );
 
-        $this->app->singleton(McpSettings::class, fn() => new McpSettings($config->get('app-dev-panel.storage.path')));
+        $mcpConfig = $this->app->make('config');
+
+        $this->app->singleton(
+            McpSettings::class,
+            fn() => new McpSettings($mcpConfig->get('app-dev-panel.storage.path')),
+        );
+
+        $rawInspectorUrl = $mcpConfig->get('app-dev-panel.api.inspector_url');
+        $inspectorUrl = is_string($rawInspectorUrl) ? $rawInspectorUrl : null;
 
         $this->app->singleton(
             McpServer::class,
-            fn() => new McpServer(McpToolRegistryFactory::create($this->app->make(StorageInterface::class))),
+            fn() => new McpServer(McpToolRegistryFactory::create(
+                $this->app->make(StorageInterface::class),
+                InspectorClient::fromOptionalUrl($inspectorUrl),
+            )),
         );
 
         $this->app->singleton(
@@ -653,6 +718,12 @@ final class AppDevPanelServiceProvider extends ServiceProvider
             fn() => new FileLlmHistoryStorage($this->app->make('config')->get('app-dev-panel.storage.path')),
         );
 
+        $this->app->singleton(AcpCommandVerifierInterface::class, fn() => new AcpCommandVerifier());
+        $this->app->singleton(
+            AcpDaemonManagerInterface::class,
+            fn() => new AcpDaemonManager($this->app->make('config')->get('app-dev-panel.storage.path')),
+        );
+
         $this->app->singleton(
             LlmProviderService::class,
             fn() => new LlmProviderService(
@@ -660,6 +731,7 @@ final class AppDevPanelServiceProvider extends ServiceProvider
                 $this->app->make(ClientInterface::class),
                 $this->app->make(RequestFactoryInterface::class),
                 $this->app->make(StreamFactoryInterface::class),
+                $this->app->make(AcpDaemonManagerInterface::class),
             ),
         );
         $this->app->singleton(
@@ -672,6 +744,8 @@ final class AppDevPanelServiceProvider extends ServiceProvider
                 $this->app->make(RequestFactoryInterface::class),
                 $this->app->make(StreamFactoryInterface::class),
                 $this->app->make(ClientInterface::class),
+                $this->app->make(AcpCommandVerifierInterface::class),
+                $this->app->make(AcpDaemonManagerInterface::class),
             ),
         );
     }
@@ -702,13 +776,31 @@ final class AppDevPanelServiceProvider extends ServiceProvider
 
         $this->app->singleton(
             AuthorizationConfigProviderInterface::class,
-            fn() => new NullAuthorizationConfigProvider(),
+            fn() => new LaravelAuthorizationConfigProvider($this->app),
         );
         $this->app->singleton(
             AuthorizationController::class,
             fn() => new AuthorizationController(
                 $this->app->make(JsonResponseFactoryInterface::class),
                 $this->app->make(AuthorizationConfigProviderInterface::class),
+            ),
+        );
+
+        $this->app->singleton(HttpMockProviderInterface::class, fn() => new NullHttpMockProvider());
+        $this->app->singleton(
+            HttpMockController::class,
+            fn() => new HttpMockController(
+                $this->app->make(JsonResponseFactoryInterface::class),
+                $this->app->make(HttpMockProviderInterface::class),
+            ),
+        );
+
+        $this->app->singleton(ElasticsearchProviderInterface::class, fn() => new NullElasticsearchProvider());
+        $this->app->singleton(
+            ElasticsearchController::class,
+            fn() => new ElasticsearchController(
+                $this->app->make(JsonResponseFactoryInterface::class),
+                $this->app->make(ElasticsearchProviderInterface::class),
             ),
         );
 
@@ -792,6 +884,8 @@ final class AppDevPanelServiceProvider extends ServiceProvider
             DebugDumpCommand::class,
             DebugSummaryCommand::class,
             DebugTailCommand::class,
+            DebugServerCommand::class,
+            DebugServerBroadcastCommand::class,
             InspectDatabaseCommand::class,
             InspectRoutesCommand::class,
             InspectConfigCommand::class,
@@ -844,6 +938,7 @@ final class AppDevPanelServiceProvider extends ServiceProvider
             'mailer' => [MailListener::class, MailerCollector::class],
             'queue' => [QueueListener::class, QueueCollector::class],
             'http_client' => [HttpClientListener::class, HttpClientCollector::class],
+            'redis' => [RedisListener::class, RedisCollector::class],
         ];
 
         foreach ($simpleListeners as $key => [$listenerClass, $collectorClass]) {
@@ -859,9 +954,17 @@ final class AppDevPanelServiceProvider extends ServiceProvider
             }
         }
 
+        if ($collectors['validator'] ?? true) {
+            $listener = new ValidatorListener(fn() => $this->app->make(ValidatorCollector::class));
+            $listener->register($this->app->make('validator'));
+        }
+
         if ($collectors['security'] ?? true) {
             $listener = new AuthorizationListener(fn() => $this->app->make(AuthorizationCollector::class));
             $listener->register($events);
+
+            $gateListener = new GateListener(fn() => $this->app->make(AuthorizationCollector::class));
+            $gateListener->register($events);
         }
 
         if ($collectors['command'] ?? true) {
@@ -899,7 +1002,8 @@ final class AppDevPanelServiceProvider extends ServiceProvider
             if ($logger instanceof LoggerInterfaceProxy) {
                 return $logger;
             }
-            return new LoggerInterfaceProxy($logger, $this->app->make(LogCollector::class));
+            // Wrap with LoggerDecorator for Live Feed broadcasting, then LoggerInterfaceProxy for collection
+            return new LoggerInterfaceProxy(new LoggerDecorator($logger), $this->app->make(LogCollector::class));
         });
     }
 

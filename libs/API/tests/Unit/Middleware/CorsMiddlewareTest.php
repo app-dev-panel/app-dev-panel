@@ -71,6 +71,48 @@ final class CorsMiddlewareTest extends TestCase
         $this->assertSame('*', $response->getHeaderLine('Access-Control-Allow-Origin'));
     }
 
+    public function testAllowlistedOriginIsEchoedBack(): void
+    {
+        $middleware = new CorsMiddleware(new HttpFactory(), ['http://allowed.example']);
+        $request = new ServerRequest('GET', '/test')->withHeader('Origin', 'http://allowed.example');
+
+        $response = $middleware->process($request, $this->createHandler());
+
+        $this->assertSame('http://allowed.example', $response->getHeaderLine('Access-Control-Allow-Origin'));
+        $this->assertSame('Origin', $response->getHeaderLine('Vary'));
+    }
+
+    public function testNonAllowlistedOriginGetsNoCorsHeader(): void
+    {
+        $middleware = new CorsMiddleware(new HttpFactory(), ['http://allowed.example']);
+        $request = new ServerRequest('GET', '/test')->withHeader('Origin', 'http://attacker.example');
+
+        $response = $middleware->process($request, $this->createHandler());
+
+        $this->assertFalse($response->hasHeader('Access-Control-Allow-Origin'));
+    }
+
+    public function testEmptyAllowlistDisablesCorsEntirely(): void
+    {
+        $middleware = new CorsMiddleware(new HttpFactory(), []);
+        $request = new ServerRequest('GET', '/test')->withHeader('Origin', 'http://any.example');
+
+        $response = $middleware->process($request, $this->createHandler());
+
+        $this->assertFalse($response->hasHeader('Access-Control-Allow-Origin'));
+        $this->assertFalse($response->hasHeader('Access-Control-Allow-Methods'));
+    }
+
+    public function testWildcardConstantAllowsAnyOrigin(): void
+    {
+        $middleware = new CorsMiddleware(new HttpFactory(), [CorsMiddleware::WILDCARD]);
+        $request = new ServerRequest('GET', '/test')->withHeader('Origin', 'http://any.example');
+
+        $response = $middleware->process($request, $this->createHandler());
+
+        $this->assertSame('*', $response->getHeaderLine('Access-Control-Allow-Origin'));
+    }
+
     private function createHandler(): RequestHandlerInterface
     {
         return new class() implements RequestHandlerInterface {

@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Tests\E2E;
 
+use PHPUnit\Framework\Attributes\DataProvider;
+
 /**
  * E2E tests for Inspector module pages.
  * Covers: /inspector/* pages, navigation, API interactions.
  */
 final class InspectorPageTest extends BrowserTestCase
 {
-    /**
-     * @dataProvider inspectorPagesProvider
-     */
+    #[DataProvider('inspectorPagesProvider')]
     public function testInspectorPageLoads(string $path, string $expectedContent): void
     {
         $this->navigate($path);
@@ -22,7 +22,8 @@ final class InspectorPageTest extends BrowserTestCase
         $this->assertNotEmpty($body, "Page {$path} should render content");
 
         // Either shows expected content or an error/disconnected message
-        $loaded = str_contains($body, $expectedContent)
+        $loaded =
+            str_contains($body, $expectedContent)
             || str_contains($body, 'disconnected')
             || str_contains($body, 'error')
             || str_contains($body, 'Error')
@@ -57,7 +58,8 @@ final class InspectorPageTest extends BrowserTestCase
         $body = $this->getRenderedBodyText();
 
         // Config page might show configuration groups or an error
-        $hasContent = str_contains($body, 'Config')
+        $hasContent =
+            str_contains($body, 'Config')
             || str_contains($body, 'Parameters')
             || str_contains($body, 'di')
             || str_contains($body, 'error');
@@ -96,7 +98,8 @@ final class InspectorPageTest extends BrowserTestCase
         $body = $this->getRenderedBodyText();
 
         // Git page should show branch info, or error/disconnected
-        $hasGitInfo = str_contains($body, 'branch')
+        $hasGitInfo =
+            str_contains($body, 'branch')
             || str_contains($body, 'Branch')
             || str_contains($body, 'commit')
             || str_contains($body, 'Commit');
@@ -127,10 +130,7 @@ final class InspectorPageTest extends BrowserTestCase
         $hasError = str_contains($body, 'error') || str_contains($body, 'disconnected');
         $hasCommandList = str_contains($body, 'Command') || str_contains($body, 'command');
 
-        $this->assertTrue(
-            $hasRunButton || $hasError || $hasCommandList,
-            'Commands page should show commands or error',
-        );
+        $this->assertTrue($hasRunButton || $hasError || $hasCommandList, 'Commands page should show commands or error');
     }
 
     public function testInspectorFilesPageFileTree(): void
@@ -160,11 +160,13 @@ final class InspectorPageTest extends BrowserTestCase
         $errors = $this->getConsoleErrors();
         $criticalErrors = array_filter(
             $errors,
-            static fn(string $error) => !str_contains($error, 'net::ERR_')
+            static fn(string $error) => (
+                !str_contains($error, 'net::ERR_')
                 && !str_contains($error, 'Failed to fetch')
                 && !str_contains($error, 'NetworkError')
                 && !str_contains($error, '404')
-                && !str_contains($error, '500'),
+                && !str_contains($error, '500')
+            ),
         );
 
         $this->assertEmpty($criticalErrors, 'No critical JS errors: ' . implode("\n", $criticalErrors));

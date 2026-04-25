@@ -23,7 +23,9 @@ $this->beginPage() ?>
 <head>
     <meta charset="<?= Html::encode($applicationParams->charset) ?>">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title><?= Html::encode($this->getTitle()) ? Html::encode($this->getTitle()) . ' — ' : '' ?>ADP Yii 3 Playground</title>
+    <title><?= Html::encode($this->getTitle())
+        ? Html::encode($this->getTitle()) . ' — '
+        : '' ?>ADP Yii 3 Playground</title>
     <?php $this->head() ?>
     <style>
     :root {
@@ -134,6 +136,10 @@ $this->beginPage() ?>
         <a href="/contact"<?= $currentPath === '/contact' ? ' class="active"' : '' ?>>Contact</a>
         <a href="/api-playground"<?= $currentPath === '/api-playground' ? ' class="active"' : '' ?>>API Playground</a>
         <a href="/error"<?= $currentPath === '/error' ? ' class="active"' : '' ?>>Error Demo</a>
+        <a href="/log-demo"<?= $currentPath === '/log-demo' ? ' class="active"' : '' ?>>Log Demo</a>
+        <a href="/var-dumper"<?= $currentPath === '/var-dumper' ? ' class="active"' : '' ?>>Var Dumper</a>
+        <a href="/api/openapi.json"<?= $currentPath === '/api/openapi.json' ? ' class="active"' : '' ?>>OpenAPI</a>
+        <a href="/debug" target="_blank" rel="noopener">Debug Panel</a>
     </nav>
 </div>
 

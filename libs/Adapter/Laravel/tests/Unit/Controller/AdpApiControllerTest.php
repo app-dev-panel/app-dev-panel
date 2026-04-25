@@ -123,6 +123,53 @@ final class AdpApiControllerTest extends TestCase
     }
 
     /**
+     * Verifies headers from the Laravel request are forwarded to PSR-7.
+     */
+    public function testRequestHeadersForwardedToPsr7Request(): void
+    {
+        $capturedRequest = null;
+        $controller = $this->createCapturingController($capturedRequest);
+
+        $request = Request::create('/debug/api/test', 'GET');
+        $request->headers->set('X-Custom-Header', 'custom-value');
+
+        $controller($request);
+
+        $this->assertNotNull($capturedRequest);
+        $this->assertSame('custom-value', $capturedRequest->getHeaderLine('x-custom-header'));
+    }
+
+    /**
+     * Verifies that request method is correctly forwarded to the PSR-7 request.
+     */
+    public function testRequestMethodForwardedToPsr7Request(): void
+    {
+        $capturedRequest = null;
+        $controller = $this->createCapturingController($capturedRequest);
+
+        $request = Request::create('/debug/api/test', 'GET');
+
+        $controller($request);
+
+        $this->assertNotNull($capturedRequest);
+        $this->assertSame('GET', $capturedRequest->getMethod());
+    }
+
+    /**
+     * Verifies non-SSE content types produce standard Response.
+     */
+    public function testNonSseContentTypeReturnsStandardResponse(): void
+    {
+        $controller = $this->createController('text/html', '<h1>Test</h1>');
+        $request = Request::create('/debug/api/test', 'GET');
+        $response = $controller($request);
+
+        $this->assertInstanceOf(Response::class, $response);
+        $this->assertNotInstanceOf(StreamedResponse::class, $response);
+        $this->assertSame('<h1>Test</h1>', $response->getContent());
+    }
+
+    /**
      * Create a controller that captures the PSR-7 request for inspection.
      */
     private function createCapturingController(?ServerRequestInterface &$capturedRequest): AdpApiController

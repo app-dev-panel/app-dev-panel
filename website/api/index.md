@@ -23,8 +23,7 @@ All responses (except SSE and MCP) are wrapped in a standard envelope:
     "id": "debug-entry-id",
     "data": { ... },
     "error": null,
-    "success": true,
-    "status": 200
+    "success": true
 }
 ```
 
@@ -34,10 +33,10 @@ On error, `success` is `false`, `error` contains the error message, and `data` i
 
 Every API request passes through:
 
-1. **<class>AppDevPanel\Api\Middleware\IpFilterMiddleware</class>** -- validates request IP against allowed IPs (default: `127.0.0.1`, `::1`)
-2. **<class>AppDevPanel\Api\Middleware\CorsMiddleware</class>** -- adds permissive CORS headers
-3. **<class>AppDevPanel\Api\Debug\Middleware\ResponseDataWrapper</class>** -- wraps responses in the standard envelope
-4. **<class>AppDevPanel\Api\Debug\Middleware\DebugHeaders</class>** -- adds `X-Debug-Id` and `X-Debug-Link` response headers
+1. **<class>AppDevPanel\Api\Middleware\CorsMiddleware</class>** -- adds permissive CORS headers
+2. **<class>AppDevPanel\Api\Middleware\IpFilterMiddleware</class>** -- validates request IP against allowed IPs (default: `127.0.0.1`, `::1`)
+3. **<class>AppDevPanel\Api\Debug\Middleware\TokenAuthMiddleware</class>** -- optional token-based authentication
+4. **<class>AppDevPanel\Api\Debug\Middleware\ResponseDataWrapper</class>** -- wraps responses in the standard envelope
 
 Inspector endpoints additionally pass through:
 

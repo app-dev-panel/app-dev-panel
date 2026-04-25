@@ -41,4 +41,12 @@ final class TimelineCollectorTest extends AbstractCollectorTestCase
         $this->assertSame('345', $data[1][1]);
         $this->assertSame(['context2', __FILE__ . ':' . (123)], $data[1][3]);
     }
+
+    protected function checkSummaryData(array $data): void
+    {
+        parent::checkSummaryData($data);
+
+        $this->assertArrayHasKey('timeline', $data);
+        $this->assertSame(2, $data['timeline']['total']);
+    }
 }

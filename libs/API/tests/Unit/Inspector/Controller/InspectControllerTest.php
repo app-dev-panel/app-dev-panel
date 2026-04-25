@@ -206,4 +206,28 @@ final class InspectControllerTest extends ControllerTestCase
         $this->assertArrayHasKey('web', $data);
         $this->assertSame([], $data['console']);
     }
+
+    public function testConfigWithoutFrameworkReturns501(): void
+    {
+        // Container without 'config' service
+        $controller = $this->createController();
+        $response = $controller->config($this->get());
+
+        $this->assertSame(501, $response->getStatusCode());
+        $data = $this->responseData($response);
+        $this->assertArrayHasKey('error', $data);
+        $this->assertStringContainsString('framework integration', $data['error']);
+    }
+
+    public function testEventListenersWithoutFrameworkReturns501(): void
+    {
+        // Container without 'config' service
+        $controller = $this->createController();
+        $response = $controller->eventListeners($this->get());
+
+        $this->assertSame(501, $response->getStatusCode());
+        $data = $this->responseData($response);
+        $this->assertArrayHasKey('error', $data);
+        $this->assertStringContainsString('framework integration', $data['error']);
+    }
 }

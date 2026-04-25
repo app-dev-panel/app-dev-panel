@@ -1,9 +1,11 @@
+import {ClassName} from '@app-dev-panel/panel/Application/Component/ClassName';
 import {useGetRoutesQuery, useLazyGetCheckRouteQuery} from '@app-dev-panel/panel/Module/Inspector/API/Inspector';
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
-import {FileLink} from '@app-dev-panel/sdk/Component/FileLink';
+import {FilterChip} from '@app-dev-panel/sdk/Component/FilterChip';
 import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
 import {FullScreenCircularProgress} from '@app-dev-panel/sdk/Component/FullScreenCircularProgress';
 import {PageHeader} from '@app-dev-panel/sdk/Component/PageHeader';
+import {QueryErrorState} from '@app-dev-panel/sdk/Component/QueryErrorState';
 import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
 import {serializeCallable} from '@app-dev-panel/sdk/Helper/callableSerializer';
 import {concatClassMethod} from '@app-dev-panel/sdk/Helper/classMethodConcater';
@@ -25,6 +27,7 @@ import {
 import {styled, useTheme} from '@mui/material/styles';
 import clipboardCopy from 'clipboard-copy';
 import React, {useCallback, useDeferredValue, useEffect, useMemo, useState} from 'react';
+import {Link as RouterLink} from 'react-router';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -183,44 +186,38 @@ const MiddlewareItem = ({mw}: {mw: any}) => {
     const parsed = parseCallable(mw);
     if (parsed) {
         return (
-            <FileLink className={parsed.className} methodName={parsed.methodName}>
+            <ClassName value={parsed.className} methodName={parsed.methodName}>
                 <Typography
                     component="span"
-                    onClick={(e: React.MouseEvent) => e.stopPropagation()}
                     sx={(theme) => ({
                         display: 'block',
                         fontFamily: theme.adp.fontFamilyMono,
                         fontSize: '12px',
                         color: 'primary.main',
-                        textDecoration: 'none',
                         py: 0.25,
-                        '&:hover': {textDecoration: 'underline'},
                     })}
                 >
                     {concatClassMethod(parsed.className, parsed.methodName)}
                 </Typography>
-            </FileLink>
+            </ClassName>
         );
     }
     if (typeof mw === 'string' && isClassName(mw)) {
         return (
-            <FileLink className={mw}>
+            <ClassName value={mw}>
                 <Typography
                     component="span"
-                    onClick={(e: React.MouseEvent) => e.stopPropagation()}
                     sx={(theme) => ({
                         display: 'block',
                         fontFamily: theme.adp.fontFamilyMono,
                         fontSize: '12px',
                         color: 'primary.main',
-                        textDecoration: 'none',
                         py: 0.25,
-                        '&:hover': {textDecoration: 'underline'},
                     })}
                 >
                     {mw}
                 </Typography>
-            </FileLink>
+            </ClassName>
         );
     }
     return (
@@ -252,22 +249,19 @@ const RouteDetail = ({route}: {route: RouteType}) => {
                         Action
                     </Typography>
                     <Box sx={{mt: 0.5, display: 'flex', alignItems: 'center', gap: 0.5}}>
-                        <FileLink className={action.className} methodName={action.methodName}>
+                        <ClassName value={action.className} methodName={action.methodName}>
                             <Typography
                                 component="span"
-                                onClick={(e: React.MouseEvent) => e.stopPropagation()}
                                 sx={(theme) => ({
                                     fontFamily: theme.adp.fontFamilyMono,
                                     fontSize: '12px',
                                     wordBreak: 'break-all',
                                     color: 'primary.main',
-                                    textDecoration: 'none',
-                                    '&:hover': {textDecoration: 'underline'},
                                 })}
                             >
                                 {actionFull}
                             </Typography>
-                        </FileLink>
+                        </ClassName>
                         <Tooltip title="Copy">
                             <IconButton
                                 size="small"
@@ -282,8 +276,9 @@ const RouteDetail = ({route}: {route: RouteType}) => {
                         <Tooltip title="Examine as a container entry">
                             <IconButton
                                 size="small"
-                                href={'/inspector/container/view?class=' + action.className}
-                                onClick={(e) => e.stopPropagation()}
+                                component={RouterLink}
+                                to={'/inspector/container/view?class=' + action.className}
+                                onClick={(e: React.MouseEvent) => e.stopPropagation()}
                             >
                                 <OpenInNew sx={{fontSize: 14}} />
                             </IconButton>
@@ -366,26 +361,41 @@ const RouteChecker = () => {
                     {checkRouteQueryInfo.data.result ? (
                         <AlertTitle>
                             {(() => {
-                                const parsed = parseCallable(checkRouteQueryInfo.data.action);
+                                const action = checkRouteQueryInfo.data.action;
+                                const parsed = parseCallable(action);
                                 if (parsed) {
                                     return (
-                                        <FileLink className={parsed.className} methodName={parsed.methodName}>
+                                        <ClassName value={parsed.className} methodName={parsed.methodName}>
                                             <Typography
                                                 component="span"
                                                 sx={(theme) => ({
                                                     fontFamily: theme.adp.fontFamilyMono,
                                                     fontSize: '13px',
                                                     color: 'primary.main',
-                                                    textDecoration: 'none',
-                                                    '&:hover': {textDecoration: 'underline'},
                                                 })}
                                             >
-                                                {parsed.className + '::' + parsed.methodName}
+                                                {concatClassMethod(parsed.className, parsed.methodName)}
                                             </Typography>
-                                        </FileLink>
+                                        </ClassName>
                                     );
                                 }
-                                return serializeCallable(checkRouteQueryInfo.data.action);
+                                if (typeof action === 'string' && isClassName(action)) {
+                                    return (
+                                        <ClassName value={action}>
+                                            <Typography
+                                                component="span"
+                                                sx={(theme) => ({
+                                                    fontFamily: theme.adp.fontFamilyMono,
+                                                    fontSize: '13px',
+                                                    color: 'primary.main',
+                                                })}
+                                            >
+                                                {action}
+                                            </Typography>
+                                        </ClassName>
+                                    );
+                                }
+                                return serializeCallable(action);
                             })()}
                         </AlertTitle>
                     ) : (
@@ -403,7 +413,7 @@ const RouteChecker = () => {
 
 export const RoutesPage = () => {
     const theme = useTheme();
-    const {data, isLoading, isSuccess, isError, error} = useGetRoutesQuery();
+    const {data, isLoading, isSuccess, isError, error, refetch} = useGetRoutesQuery();
     const [routes, setRoutes] = useState<RouteType[]>([]);
     const [filter, setFilter] = useState('');
     const deferredFilter = useDeferredValue(filter);
@@ -462,30 +472,28 @@ export const RoutesPage = () => {
         return <FullScreenCircularProgress />;
     }
 
-    const errorMessage =
-        isError && error
-            ? 'status' in error && typeof (error as any).data === 'object' && (error as any).data?.data?.error
-                ? (error as any).data.data.error
-                : 'status' in error && (error as any).status === 'FETCH_ERROR'
-                  ? 'Unable to connect to the server. Make sure the application is running.'
-                  : 'Failed to load routes.'
-            : null;
+    if (isError) {
+        return (
+            <>
+                <PageHeader title="Routes" icon="alt_route" description="View and check application routes" />
+                <QueryErrorState
+                    error={error}
+                    title="Failed to load routes"
+                    fallback="Failed to load routes."
+                    onRetry={refetch}
+                />
+            </>
+        );
+    }
 
     return (
         <>
             <PageHeader title="Routes" icon="alt_route" description="View and check application routes" />
 
-            {isError && (
-                <Alert severity="error" sx={{mb: 2}}>
-                    <AlertTitle>Error loading routes</AlertTitle>
-                    {errorMessage}
-                </Alert>
-            )}
-
             <RouteChecker />
 
             {/* Routes list */}
-            {!isError && routes.length === 0 ? (
+            {routes.length === 0 ? (
                 <EmptyState icon="alt_route" title="No routes found" />
             ) : (
                 <Box>
@@ -496,36 +504,18 @@ export const RoutesPage = () => {
                     {/* Method filter badges */}
                     {badgeCounts.length > 1 && (
                         <Box sx={{display: 'flex', flexWrap: 'wrap', gap: 0.75, mb: 2}}>
-                            {badgeCounts.map(([method, count]) => {
-                                const isActive = activeFilters.has(method);
-                                const color = methodColor(method, theme);
-                                return (
-                                    <Chip
-                                        key={method}
-                                        label={`${method} (${count})`}
-                                        size="small"
-                                        onClick={() => toggleFilter(method)}
-                                        sx={{
-                                            fontSize: '11px',
-                                            height: 24,
-                                            borderRadius: 1,
-                                            fontWeight: 600,
-                                            cursor: 'pointer',
-                                            backgroundColor: isActive ? color : 'transparent',
-                                            color: isActive ? 'common.white' : color,
-                                            border: `1px solid ${color}`,
-                                        }}
-                                    />
-                                );
-                            })}
-                            {activeFilters.size > 0 && (
-                                <Chip
-                                    label="Clear"
-                                    size="small"
-                                    onClick={() => setActiveFilters(new Set())}
-                                    variant="outlined"
-                                    sx={{fontSize: '11px', height: 24, borderRadius: 1}}
+                            {badgeCounts.map(([method, count]) => (
+                                <FilterChip
+                                    key={method}
+                                    label={method}
+                                    count={count}
+                                    color={methodColor(method, theme)}
+                                    active={activeFilters.has(method)}
+                                    onClick={() => toggleFilter(method)}
                                 />
+                            ))}
+                            {activeFilters.size > 0 && (
+                                <FilterChip label="Clear" onClick={() => setActiveFilters(new Set())} />
                             )}
                         </Box>
                     )}
@@ -568,27 +558,14 @@ export const RoutesPage = () => {
                                     />
                                     <PatternCell>{route.pattern}</PatternCell>
                                     {actionShort && route.action && (
-                                        <FileLink
-                                            className={route.action.className}
-                                            methodName={route.action.methodName}
-                                        >
-                                            <ActionInlineLink
-                                                as="span"
-                                                onClick={(e: React.MouseEvent) => e.stopPropagation()}
-                                            >
-                                                {actionShort}
-                                            </ActionInlineLink>
-                                        </FileLink>
+                                        <ClassName value={route.action.className} methodName={route.action.methodName}>
+                                            <ActionInlineLink as="span">{actionShort}</ActionInlineLink>
+                                        </ClassName>
                                     )}
-                                    {firstClassMwShort && (
-                                        <FileLink className={firstClassMw}>
-                                            <ActionInlineLink
-                                                as="span"
-                                                onClick={(e: React.MouseEvent) => e.stopPropagation()}
-                                            >
-                                                {firstClassMwShort}
-                                            </ActionInlineLink>
-                                        </FileLink>
+                                    {firstClassMwShort && typeof firstClassMw === 'string' && (
+                                        <ClassName value={firstClassMw}>
+                                            <ActionInlineLink as="span">{firstClassMwShort}</ActionInlineLink>
+                                        </ClassName>
                                     )}
                                     {route.name && <NameCell>{route.name}</NameCell>}
                                     {hasDetails && (

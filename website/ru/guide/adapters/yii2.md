@@ -12,7 +12,11 @@ description: "Установка и настройка ADP для Yii 2.0.50+. B
 composer require app-dev-panel/adapter-yii2
 ```
 
-Пакет автоматически регистрируется через `extra.bootstrap` в composer.json. Класс <class>AppDevPanel\Adapter\Yii2\Bootstrap</class> регистрирует модуль `debug-panel` автоматически при включенном `YII_DEBUG`.
+::: info Package
+<pkg>app-dev-panel/adapter-yii2</pkg>
+:::
+
+Пакет автоматически регистрируется через `extra.bootstrap` в composer.json. Класс <class>AppDevPanel\Adapter\Yii2\Bootstrap</class> регистрирует модуль `app-dev-panel` автоматически при включенном `YII_DEBUG`.
 
 ## Конфигурация
 
@@ -20,7 +24,7 @@ composer require app-dev-panel/adapter-yii2
 
 ```php
 'modules' => [
-    'debug-panel' => [
+    'app-dev-panel' => [
         'class' => \AppDevPanel\Adapter\Yii2\Module::class,
         'storagePath' => '@runtime/debug',
         'historySize' => 50,

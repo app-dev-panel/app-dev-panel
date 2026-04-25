@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "0573f059e8c093d7004e3df4eb05d9bb",
+    "content-hash": "3f841233ad5796ebb7d7595e94291a84",
     "packages": [
         {
             "name": "alexkart/curl-builder",
@@ -55,11 +55,11 @@
         },
         {
             "name": "app-dev-panel/adapter-yii3",
-            "version": "dev-claude/improve-playgrounds-api-pFqYT",
+            "version": "dev-claude/research-page-frameworks-KSGaI",
             "dist": {
                 "type": "path",
                 "url": "../../libs/Adapter/Yii3",
-                "reference": "7773fa673613e6db850488f16c7c18f6de0fddf6"
+                "reference": "2b010d4d332dffca03e05379afcf857f75927f18"
             },
             "require": {
                 "app-dev-panel/api": "*",
@@ -83,7 +83,7 @@
                 "yiisoft/files": "^2.0",
                 "yiisoft/json": "^1.0",
                 "yiisoft/profiler": "^3.0",
-                "yiisoft/proxy": "^1.0.1",
+                "yiisoft/proxy": "^1.2",
                 "yiisoft/strings": "^2.2",
                 "yiisoft/var-dumper": "^1.7"
             },
@@ -102,6 +102,12 @@
                 "yiisoft/log": "^2.0",
                 "yiisoft/yii-console": "^2.0",
                 "yiisoft/yii-http": "^1.0"
+            },
+            "suggest": {
+                "yiisoft/access": "Required to list the active access checker in the Authorization inspector",
+                "yiisoft/auth": "Required to list configured authentication methods (guards) in the Authorization inspector",
+                "yiisoft/rbac": "Required for role/permission hierarchy in the Authorization inspector",
+                "yiisoft/user": "Required to show current identity and guest state in the Authorization inspector"
             },
             "type": "library",
             "extra": {
@@ -173,7 +179,7 @@
         },
         {
             "name": "app-dev-panel/api",
-            "version": "dev-claude/improve-playgrounds-api-pFqYT",
+            "version": "dev-claude/research-page-frameworks-KSGaI",
             "dist": {
                 "type": "path",
                 "url": "../../libs/API",
@@ -252,11 +258,11 @@
         },
         {
             "name": "app-dev-panel/cli",
-            "version": "dev-claude/improve-playgrounds-api-pFqYT",
+            "version": "dev-claude/research-page-frameworks-KSGaI",
             "dist": {
                 "type": "path",
                 "url": "../../libs/Cli",
-                "reference": "cf351e47fd7e13960c0ec31290a44c6018a895d1"
+                "reference": "726d3259f708ad0cc9c689edd069a599eb01e115"
             },
             "require": {
                 "app-dev-panel/api": "*",
@@ -269,6 +275,9 @@
                 "symfony/console": "^6.4|^7.0|^8.0",
                 "symfony/process": "^6.4|^7.0|^8.0"
             },
+            "bin": [
+                "bin/adp"
+            ],
             "type": "library",
             "autoload": {
                 "psr-4": {
@@ -312,25 +321,25 @@
         },
         {
             "name": "app-dev-panel/kernel",
-            "version": "dev-claude/improve-playgrounds-api-pFqYT",
+            "version": "dev-claude/research-page-frameworks-KSGaI",
             "dist": {
                 "type": "path",
                 "url": "../../libs/Kernel",
-                "reference": "5ba6139a3914137d63ccac12dbc9935b1b791262"
+                "reference": "76f3e8de024b4ec8478dfa2202d8b402c1e69406"
             },
             "require": {
                 "ext-mbstring": "*",
                 "guzzlehttp/psr7": "^2.4",
-                "php": "^8.2",
+                "php": "^8.4",
                 "psr/container": "^2.0",
                 "psr/event-dispatcher": "^1.0",
                 "psr/http-client": "^1.0",
                 "psr/http-message": "^1.0|^2.0",
                 "psr/log": "^1.0|^2.0|^3.0",
+                "psr/simple-cache": "^3.0",
                 "symfony/console": "^6.0|^7.0|^8.0",
                 "symfony/var-dumper": "^6.4|^7.0|^8.0",
                 "yiisoft/files": "^2.0",
-                "yiisoft/json": "^1.0",
                 "yiisoft/strings": "^2.2",
                 "yiisoft/var-dumper": "^1.7"
             },
@@ -384,7 +393,7 @@
         },
         {
             "name": "app-dev-panel/mcp-server",
-            "version": "dev-claude/improve-playgrounds-api-pFqYT",
+            "version": "dev-claude/research-page-frameworks-KSGaI",
             "dist": {
                 "type": "path",
                 "url": "../../libs/McpServer",
@@ -2629,6 +2638,70 @@
             "time": "2026-03-30T15:21:58+00:00"
         },
         {
+            "name": "yiisoft/access",
+            "version": "2.0.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/yiisoft/access.git",
+                "reference": "434612e7a26108d0ec97223c882f3c4cafded037"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/yiisoft/access/zipball/434612e7a26108d0ec97223c882f3c4cafded037",
+                "reference": "434612e7a26108d0ec97223c882f3c4cafded037",
+                "shasum": ""
+            },
+            "require": {
+                "php": "8.0 - 8.5"
+            },
+            "require-dev": {
+                "friendsofphp/php-cs-fixer": "^3.66",
+                "maglnet/composer-require-checker": "^4.4",
+                "phpunit/phpunit": "^9.6.22",
+                "rector/rector": "^2.0.8",
+                "roave/infection-static-analysis-plugin": "^1.25",
+                "spatie/phpunit-watcher": "^1.23.6",
+                "vimeo/psalm": "^4.30 || ^5.26.1 || ^6.5"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Yiisoft\\Access\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "description": "An interface for checking access",
+            "homepage": "https://www.yiiframework.com/",
+            "keywords": [
+                "access",
+                "interface",
+                "rbac",
+                "yii"
+            ],
+            "support": {
+                "chat": "https://t.me/yii3en",
+                "forum": "https://www.yiiframework.com/forum/",
+                "irc": "ircs://irc.libera.chat:6697/yii",
+                "issues": "https://github.com/yiisoft/access/issues?state=open",
+                "source": "https://github.com/yiisoft/access",
+                "wiki": "https://www.yiiframework.com/wiki/"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/sponsors/yiisoft",
+                    "type": "github"
+                },
+                {
+                    "url": "https://opencollective.com/yiisoft",
+                    "type": "opencollective"
+                }
+            ],
+            "time": "2025-12-13T10:12:01+00:00"
+        },
+        {
             "name": "yiisoft/aliases",
             "version": "3.1.1",
             "source": {
@@ -2858,6 +2931,84 @@
                 }
             ],
             "time": "2025-12-13T10:04:14+00:00"
+        },
+        {
+            "name": "yiisoft/auth",
+            "version": "3.2.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/yiisoft/auth.git",
+                "reference": "30f591448b96b7998c8ce66776aa178b53eee83e"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/yiisoft/auth/zipball/30f591448b96b7998c8ce66776aa178b53eee83e",
+                "reference": "30f591448b96b7998c8ce66776aa178b53eee83e",
+                "shasum": ""
+            },
+            "require": {
+                "php": "8.0 - 8.5",
+                "psr/http-factory": "^1.0",
+                "psr/http-message": "^1.0 || ^2.0",
+                "psr/http-server-handler": "^1.0",
+                "psr/http-server-middleware": "^1.0",
+                "yiisoft/http": "^1.2",
+                "yiisoft/strings": "^2.0"
+            },
+            "require-dev": {
+                "jetbrains/phpstorm-attributes": "^1.2",
+                "maglnet/composer-require-checker": "^4.4",
+                "nyholm/psr7": "^1.8.2",
+                "phpunit/phpunit": "^9.6.22",
+                "rector/rector": "^2.0.9",
+                "roave/infection-static-analysis-plugin": "^1.25",
+                "spatie/phpunit-watcher": "^1.23.6",
+                "vimeo/psalm": "^4.30 || ^5.26.1 || ^6.10",
+                "yiisoft/yii-debug": "dev-master || dev-php80"
+            },
+            "type": "library",
+            "extra": {
+                "config-plugin": {
+                    "params": "params.php"
+                },
+                "config-plugin-options": {
+                    "source-directory": "config"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Yiisoft\\Auth\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "description": "Yii auth",
+            "homepage": "https://www.yiiframework.com/",
+            "keywords": [
+                "auth",
+                "middleware"
+            ],
+            "support": {
+                "chat": "https://t.me/yii3en",
+                "forum": "https://www.yiiframework.com/forum/",
+                "irc": "ircs://irc.libera.chat:6697/yii",
+                "issues": "https://github.com/yiisoft/auth/issues?state=open",
+                "source": "https://github.com/yiisoft/auth",
+                "wiki": "https://www.yiiframework.com/wiki/"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/sponsors/yiisoft",
+                    "type": "github"
+                },
+                {
+                    "url": "https://opencollective.com/yiisoft",
+                    "type": "opencollective"
+                }
+            ],
+            "time": "2025-12-17T13:13:44+00:00"
         },
         {
             "name": "yiisoft/cache",
@@ -4647,6 +4798,92 @@
             "time": "2025-12-13T11:57:57+00:00"
         },
         {
+            "name": "yiisoft/mailer",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/yiisoft/mailer.git",
+                "reference": "b3516fb25d37e51903df3682a10ec84b5c60f2d9"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/yiisoft/mailer/zipball/b3516fb25d37e51903df3682a10ec84b5c60f2d9",
+                "reference": "b3516fb25d37e51903df3682a10ec84b5c60f2d9",
+                "shasum": ""
+            },
+            "require": {
+                "php": "8.1 - 8.5"
+            },
+            "require-dev": {
+                "bamarni/composer-bin-plugin": "^1.8.3",
+                "friendsofphp/php-cs-fixer": "^3.93",
+                "phpunit/phpunit": "^10.5.45",
+                "psr/event-dispatcher": "^1.0",
+                "rector/rector": "^2.0.10",
+                "roave/infection-static-analysis-plugin": "^1.35",
+                "vimeo/psalm": "^5.26.1 || ^6.9.4",
+                "yiisoft/aliases": "^3.0",
+                "yiisoft/code-style": "^1.0",
+                "yiisoft/definitions": "^3.4",
+                "yiisoft/di": "^1.3",
+                "yiisoft/files": "^2.0",
+                "yiisoft/test-support": "^3.0.2",
+                "yiisoft/yii-debug": "dev-master"
+            },
+            "suggest": {
+                "psr/event-dispatcher": "Use PSR Event Dispatcher implementation for process before/after send events",
+                "yiisoft/event-dispatcher": "Yii Event Dispatcher",
+                "yiisoft/mailer-symfony": "`symfony/mailer` based driver for send emails"
+            },
+            "default-branch": true,
+            "type": "library",
+            "extra": {
+                "bamarni-bin": {
+                    "bin-links": true,
+                    "forward-command": true,
+                    "target-directory": "tools"
+                },
+                "config-plugin": {
+                    "di": "config/di.php",
+                    "params": "config/params.php"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Yiisoft\\Mailer\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "description": "Sending email abstraction",
+            "homepage": "https://www.yiiframework.com/",
+            "keywords": [
+                "mailer",
+                "yii"
+            ],
+            "support": {
+                "chat": "https://t.me/yii3en",
+                "forum": "https://www.yiiframework.com/forum/",
+                "irc": "ircs://irc.libera.chat:6697/yii",
+                "issues": "https://github.com/yiisoft/mailer/issues?state=open",
+                "source": "https://github.com/yiisoft/mailer",
+                "wiki": "https://www.yiiframework.com/wiki/"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/sponsors/yiisoft",
+                    "type": "github"
+                },
+                {
+                    "url": "https://opencollective.com/yiisoft",
+                    "type": "opencollective"
+                }
+            ],
+            "time": "2026-02-27T19:04:16+00:00"
+        },
+        {
             "name": "yiisoft/middleware-dispatcher",
             "version": "5.4.0",
             "source": {
@@ -4873,26 +5110,25 @@
         },
         {
             "name": "yiisoft/proxy",
-            "version": "1.1.0",
+            "version": "1.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/yiisoft/proxy.git",
-                "reference": "752a4de3c39e90b23dd3ac12b1d5298f8b86916f"
+                "reference": "7f316620e7b3c00ed3fe74812f1a4f5193de38b4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/yiisoft/proxy/zipball/752a4de3c39e90b23dd3ac12b1d5298f8b86916f",
-                "reference": "752a4de3c39e90b23dd3ac12b1d5298f8b86916f",
+                "url": "https://api.github.com/repos/yiisoft/proxy/zipball/7f316620e7b3c00ed3fe74812f1a4f5193de38b4",
+                "reference": "7f316620e7b3c00ed3fe74812f1a4f5193de38b4",
                 "shasum": ""
             },
             "require": {
-                "php": "8.1 - 8.4",
+                "php": "8.1 - 8.5",
                 "yiisoft/files": "^1.0.2 || ^2.0.0"
             },
             "require-dev": {
                 "phpunit/phpunit": "^10.5.47",
                 "roave/infection-static-analysis-plugin": "^1.35",
-                "spatie/phpunit-watcher": "^1.24",
                 "vimeo/psalm": "^5.26.1 || ^6.12"
             },
             "type": "library",
@@ -4928,7 +5164,7 @@
                     "type": "opencollective"
                 }
             ],
-            "time": "2025-09-23T12:47:50+00:00"
+            "time": "2026-04-02T12:11:35+00:00"
         },
         {
             "name": "yiisoft/psr-emitter",
@@ -4999,6 +5235,155 @@
                 }
             ],
             "time": "2025-12-20T05:12:53+00:00"
+        },
+        {
+            "name": "yiisoft/rbac",
+            "version": "2.1.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/yiisoft/rbac.git",
+                "reference": "229a47e0af4ede19dfe6da2220af7cabee724dbf"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/yiisoft/rbac/zipball/229a47e0af4ede19dfe6da2220af7cabee724dbf",
+                "reference": "229a47e0af4ede19dfe6da2220af7cabee724dbf",
+                "shasum": ""
+            },
+            "require": {
+                "php": "8.1 - 8.5",
+                "yiisoft/access": "^2.0",
+                "yiisoft/friendly-exception": "^1.1"
+            },
+            "require-dev": {
+                "friendsofphp/php-cs-fixer": "^3.91",
+                "maglnet/composer-require-checker": "^4.7.1",
+                "phpunit/phpunit": "^10.5.45",
+                "psr/clock": "^1.0",
+                "rector/rector": "^2.0.10",
+                "roave/infection-static-analysis-plugin": "^1.35",
+                "spatie/phpunit-watcher": "^1.24",
+                "vimeo/psalm": "^5.26.1 || ^6.9.2",
+                "yiisoft/di": "^1.3"
+            },
+            "suggest": {
+                "psr/clock": "For using custom clock",
+                "yiisoft/rbac-cycle-db": "For using Cycle as a storage",
+                "yiisoft/rbac-db": "For using Yii Database as a storage",
+                "yiisoft/rbac-php": "For using PHP files as a storage",
+                "yiisoft/rbac-rules-container": "To create rules via Yii Factory"
+            },
+            "type": "library",
+            "extra": {
+                "config-plugin": {
+                    "di": "di.php"
+                },
+                "config-plugin-options": {
+                    "source-directory": "config"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Yiisoft\\Rbac\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "description": "Yii Role-Based Access Control",
+            "homepage": "https://www.yiiframework.com/",
+            "keywords": [
+                "rbac",
+                "yii"
+            ],
+            "support": {
+                "chat": "https://t.me/yii3en",
+                "forum": "https://www.yiiframework.com/forum/",
+                "irc": "ircs://irc.libera.chat:6697/yii",
+                "issues": "https://github.com/yiisoft/rbac/issues?state=open",
+                "source": "https://github.com/yiisoft/rbac",
+                "wiki": "https://www.yiiframework.com/wiki/"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/sponsors/yiisoft",
+                    "type": "github"
+                },
+                {
+                    "url": "https://opencollective.com/yiisoft",
+                    "type": "opencollective"
+                }
+            ],
+            "time": "2025-12-19T12:14:21+00:00"
+        },
+        {
+            "name": "yiisoft/rbac-php",
+            "version": "2.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/yiisoft/rbac-php.git",
+                "reference": "02aa4e1cc08ca0d1ce9cdf67da8e6690d1059d3b"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/yiisoft/rbac-php/zipball/02aa4e1cc08ca0d1ce9cdf67da8e6690d1059d3b",
+                "reference": "02aa4e1cc08ca0d1ce9cdf67da8e6690d1059d3b",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^8.1",
+                "yiisoft/rbac": "^2.0",
+                "yiisoft/var-dumper": "^1.7"
+            },
+            "require-dev": {
+                "ext-uopz": "*",
+                "maglnet/composer-require-checker": "^4.3",
+                "phpunit/phpunit": "^10.5.2",
+                "psr/log": "^1.1.3",
+                "rector/rector": "^1.0.0",
+                "roave/infection-static-analysis-plugin": "^1.18",
+                "slope-it/clock-mock": "0.4.0",
+                "spatie/phpunit-watcher": "^1.23",
+                "vimeo/psalm": "^4.30|^5.17",
+                "yiisoft/files": "^1.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Yiisoft\\Rbac\\Php\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "description": "Yii RBAC PHP File Storage",
+            "homepage": "https://www.yiiframework.com/",
+            "keywords": [
+                "rbac",
+                "storage",
+                "yii"
+            ],
+            "support": {
+                "chat": "https://t.me/yii3en",
+                "forum": "https://www.yiiframework.com/forum/",
+                "irc": "irc://irc.freenode.net/yii",
+                "issues": "https://github.com/yiisoft/rbac/issues",
+                "source": "https://github.com/yiisoft/rbac",
+                "wiki": "https://www.yiiframework.com/wiki/"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/sponsors/yiisoft",
+                    "type": "github"
+                },
+                {
+                    "url": "https://opencollective.com/yiisoft",
+                    "type": "opencollective"
+                }
+            ],
+            "time": "2024-03-07T10:52:17+00:00"
         },
         {
             "name": "yiisoft/request-provider",
@@ -5569,6 +5954,90 @@
                 }
             ],
             "time": "2025-12-06T05:18:44+00:00"
+        },
+        {
+            "name": "yiisoft/user",
+            "version": "2.3.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/yiisoft/user.git",
+                "reference": "f982e9faa3acac8a04299968b1c74e5123e4cc14"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/yiisoft/user/zipball/f982e9faa3acac8a04299968b1c74e5123e4cc14",
+                "reference": "f982e9faa3acac8a04299968b1c74e5123e4cc14",
+                "shasum": ""
+            },
+            "require": {
+                "php": "8.1 - 8.5",
+                "psr/event-dispatcher": "^1.0",
+                "psr/http-factory": "^1.0",
+                "psr/http-message": "^1.0 || ^2.0",
+                "psr/http-server-handler": "^1.0",
+                "psr/http-server-middleware": "^1.0",
+                "psr/log": "^1.1 || ^2.0 || ^3.0",
+                "yiisoft/access": "^2.0",
+                "yiisoft/auth": "^2.0 || ^3.0",
+                "yiisoft/cookies": "^1.2",
+                "yiisoft/http": "^1.2",
+                "yiisoft/session": "^1.0 || ^2.0 || ^3.0"
+            },
+            "require-dev": {
+                "httpsoft/http-message": "^1.1.6",
+                "maglnet/composer-require-checker": "^4.7.1",
+                "phpunit/phpunit": "^10.5.45",
+                "rector/rector": "^2.0.10",
+                "roave/infection-static-analysis-plugin": "^1.35",
+                "spatie/phpunit-watcher": "^1.24",
+                "vimeo/psalm": "^5.26.1 || ^6.8.8",
+                "yiisoft/di": "^1.3",
+                "yiisoft/test-support": "^3.0.2"
+            },
+            "type": "library",
+            "extra": {
+                "config-plugin": {
+                    "di-web": "di-web.php",
+                    "params": "params.php"
+                },
+                "config-plugin-options": {
+                    "source-directory": "config"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Yiisoft\\User\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "description": "Convenient user identity management and access checking",
+            "homepage": "https://www.yiiframework.com/",
+            "keywords": [
+                "user",
+                "yiisoft"
+            ],
+            "support": {
+                "chat": "https://t.me/yii3en",
+                "forum": "https://www.yiiframework.com/forum/",
+                "irc": "ircs://irc.libera.chat:6697/yii",
+                "issues": "https://github.com/yiisoft/user/issues?state=open",
+                "source": "https://github.com/yiisoft/user",
+                "wiki": "https://www.yiiframework.com/wiki/"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/sponsors/yiisoft",
+                    "type": "github"
+                },
+                {
+                    "url": "https://opencollective.com/yiisoft",
+                    "type": "opencollective"
+                }
+            ],
+            "time": "2025-12-23T06:15:18+00:00"
         },
         {
             "name": "yiisoft/validator",
@@ -9985,7 +10454,9 @@
     ],
     "aliases": [],
     "minimum-stability": "dev",
-    "stability-flags": {},
+    "stability-flags": {
+        "yiisoft/mailer": 20
+    },
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {

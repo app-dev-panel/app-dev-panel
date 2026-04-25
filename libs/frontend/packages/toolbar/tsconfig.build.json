@@ -9,6 +9,7 @@
     "composite": true
   },
   "include": ["src"],
+  "exclude": ["src/**/*.test.ts", "src/**/*.test.tsx", "src/__e2e__"],
   "references": [
     {"path": "../sdk/tsconfig.build.json"}
   ]

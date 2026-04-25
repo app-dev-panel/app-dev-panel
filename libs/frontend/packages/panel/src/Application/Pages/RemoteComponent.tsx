@@ -45,17 +45,15 @@ const loadComponent = (scope: string, module: string) => async () => {
     /**
      * Initializes the shared scope. This fills it with known provided modules from this build and all remotes
      */
-    // @ts-ignore
+    // @ts-expect-error -- webpack module federation runtime globals
     await __webpack_init_sharing__('default');
-    // @ts-ignore
-    const container = window[scope];
+    const container = (window as any)[scope];
     /**
      * Initialize the container, it may provide shared modules
      */
-    // @ts-ignore
+    // @ts-expect-error -- webpack module federation runtime globals
     await container.init(__webpack_share_scopes__.default);
-    // @ts-ignore
-    const factory = await window[scope].get(module);
+    const factory = await (window as any)[scope].get(module);
     const Module = factory();
     return Module;
 };

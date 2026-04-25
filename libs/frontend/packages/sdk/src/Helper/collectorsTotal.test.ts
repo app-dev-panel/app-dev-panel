@@ -11,6 +11,16 @@ describe('getCollectedCountByCollector', () => {
         expect(getCollectedCountByCollector(CollectorsMap.LogCollector, entry)).toBe(15);
     });
 
+    it('sums logger, deprecation and var-dumper totals for LogCollector', () => {
+        const entry = makeEntry({logger: {total: 2}, deprecation: {total: 14}, 'var-dumper': {total: 3}});
+        expect(getCollectedCountByCollector(CollectorsMap.LogCollector, entry)).toBe(19);
+    });
+
+    it('returns 0 for LogCollector when no log-related data present', () => {
+        const entry = makeEntry();
+        expect(getCollectedCountByCollector(CollectorsMap.LogCollector, entry)).toBe(0);
+    });
+
     it('returns event count', () => {
         const entry = makeEntry({event: {total: 7}});
         expect(getCollectedCountByCollector(CollectorsMap.EventCollector, entry)).toBe(7);

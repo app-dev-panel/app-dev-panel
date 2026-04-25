@@ -1,6 +1,6 @@
+import {ClassName} from '@app-dev-panel/panel/Application/Component/ClassName';
 import {JsonRenderer} from '@app-dev-panel/panel/Module/Debug/Component/JsonRenderer';
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
-import {FileLink} from '@app-dev-panel/sdk/Component/FileLink';
 import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
 import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
 import {monoFontFamily} from '@app-dev-panel/sdk/Component/Theme/DefaultTheme';
@@ -20,7 +20,7 @@ type CurrentRoute = {
     action: any;
     middlewares: any[];
 };
-type Route = {name?: string; pattern?: string; methods?: string[]; host?: string};
+type Route = {name?: string; pattern?: string; methods?: string[]; host?: string; matched?: boolean};
 type RouterPanelProps = {
     data: {currentRoute: CurrentRoute | null; routesTree?: any; routes?: Route[]; routeTime?: number};
 };
@@ -155,46 +155,40 @@ export const RouterPanel = ({data}: RouterPanelProps) => {
                     {currentRoute.arguments &&
                         typeof currentRoute.arguments === 'object' &&
                         !Array.isArray(currentRoute.arguments) &&
-                        Object.keys(currentRoute.arguments).length > 0 && (
-                            <Box sx={{mt: 1.5}}>
-                                <Typography sx={{fontSize: '11px', fontWeight: 600, color: 'text.disabled', mb: 0.5}}>
-                                    Arguments
-                                </Typography>
-                                {Object.entries(currentRoute.arguments).map(([key, val]) => (
-                                    <Box key={key} sx={{display: 'flex', gap: 1, ml: 1, mb: 0.25}}>
-                                        <Typography
-                                            sx={{fontFamily: monoFontFamily, fontSize: '12px', color: 'primary.main'}}
-                                        >
-                                            {key}:
-                                        </Typography>
-                                        <Typography
-                                            sx={{fontFamily: monoFontFamily, fontSize: '12px', color: 'text.secondary'}}
-                                        >
-                                            {val}
-                                        </Typography>
-                                    </Box>
-                                ))}
-                            </Box>
-                        )}
+                        Object.keys(currentRoute.arguments).length > 0 &&
+                        Object.entries(currentRoute.arguments).map(([key, val], i) => (
+                            <FieldRow key={key}>
+                                <FieldLabel>{i === 0 ? 'Arguments' : ''}</FieldLabel>
+                                <FieldValue sx={{fontFamily: monoFontFamily, display: 'flex', gap: 0.75}}>
+                                    <Typography
+                                        component="span"
+                                        sx={{fontFamily: monoFontFamily, fontSize: '12px', color: 'primary.main'}}
+                                    >
+                                        {key}:
+                                    </Typography>
+                                    <Typography
+                                        component="span"
+                                        sx={{fontFamily: monoFontFamily, fontSize: '12px', color: 'text.secondary'}}
+                                    >
+                                        {val || '\u2014'}
+                                    </Typography>
+                                </FieldValue>
+                            </FieldRow>
+                        ))}
 
                     {currentRoute.action && (
                         <FieldRow>
                             <FieldLabel>Action</FieldLabel>
                             <FieldValue sx={{fontFamily: monoFontFamily}}>
                                 {typeof currentRoute.action === 'string' ? (
-                                    <FileLink className={currentRoute.action}>
+                                    <ClassName value={currentRoute.action}>
                                         <Typography
                                             component="span"
-                                            sx={{
-                                                fontFamily: monoFontFamily,
-                                                fontSize: '12px',
-                                                color: 'primary.main',
-                                                '&:hover': {textDecoration: 'underline'},
-                                            }}
+                                            sx={{fontFamily: monoFontFamily, fontSize: '12px', color: 'primary.main'}}
                                         >
                                             {currentRoute.action}
                                         </Typography>
-                                    </FileLink>
+                                    </ClassName>
                                 ) : (
                                     <JsonRenderer value={currentRoute.action} />
                                 )}
@@ -233,7 +227,32 @@ export const RouterPanel = ({data}: RouterPanelProps) => {
                     >{`${filteredRoutes.length} routes`}</SectionTitle>
 
                     {filteredRoutes.map((route, index) => (
-                        <RouteRow key={index}>
+                        <RouteRow
+                            key={index}
+                            sx={
+                                route.matched === true
+                                    ? {
+                                          backgroundColor:
+                                              theme.palette.mode === 'dark'
+                                                  ? 'rgba(76, 175, 80, 0.08)'
+                                                  : 'rgba(76, 175, 80, 0.06)',
+                                      }
+                                    : route.matched === false
+                                      ? {opacity: 0.5}
+                                      : undefined
+                            }
+                        >
+                            {route.matched !== undefined && (
+                                <Box
+                                    sx={{
+                                        width: 7,
+                                        height: 7,
+                                        borderRadius: '50%',
+                                        flexShrink: 0,
+                                        backgroundColor: route.matched ? 'success.main' : 'text.disabled',
+                                    }}
+                                />
+                            )}
                             <PatternCell>{route.pattern ?? '-'}</PatternCell>
                             {route.name && <NameCell>{route.name}</NameCell>}
                             {route.methods && route.methods.length > 0 && (

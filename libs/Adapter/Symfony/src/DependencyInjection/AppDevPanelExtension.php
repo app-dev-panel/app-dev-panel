@@ -12,10 +12,12 @@ use AppDevPanel\Adapter\Symfony\EventSubscriber\ConsoleSubscriber;
 use AppDevPanel\Adapter\Symfony\EventSubscriber\CorsSubscriber;
 use AppDevPanel\Adapter\Symfony\EventSubscriber\HttpSubscriber;
 use AppDevPanel\Adapter\Symfony\EventSubscriber\HttpSubscriberCollectors;
+use AppDevPanel\Adapter\Symfony\EventSubscriber\MailerSubscriber;
 use AppDevPanel\Adapter\Symfony\Inspector\NullSchemaProvider;
 use AppDevPanel\Adapter\Symfony\Inspector\SymfonyConfigProvider;
 use AppDevPanel\Adapter\Symfony\Inspector\SymfonyRouteCollectionAdapter;
 use AppDevPanel\Adapter\Symfony\Inspector\SymfonyUrlMatcherAdapter;
+use AppDevPanel\Adapter\Symfony\Proxy\MessengerCollectorMiddleware;
 use AppDevPanel\Api\ApiApplication;
 use AppDevPanel\Api\Debug\Controller\DebugController;
 use AppDevPanel\Api\Debug\Controller\SettingsController;
@@ -34,9 +36,11 @@ use AppDevPanel\Api\Inspector\Controller\CodeCoverageController;
 use AppDevPanel\Api\Inspector\Controller\CommandController;
 use AppDevPanel\Api\Inspector\Controller\ComposerController;
 use AppDevPanel\Api\Inspector\Controller\DatabaseController;
+use AppDevPanel\Api\Inspector\Controller\ElasticsearchController;
 use AppDevPanel\Api\Inspector\Controller\FileController;
 use AppDevPanel\Api\Inspector\Controller\GitController;
 use AppDevPanel\Api\Inspector\Controller\GitRepositoryProvider;
+use AppDevPanel\Api\Inspector\Controller\HttpMockController;
 use AppDevPanel\Api\Inspector\Controller\InspectController;
 use AppDevPanel\Api\Inspector\Controller\OpcacheController;
 use AppDevPanel\Api\Inspector\Controller\RequestController;
@@ -44,7 +48,15 @@ use AppDevPanel\Api\Inspector\Controller\RoutingController;
 use AppDevPanel\Api\Inspector\Controller\ServiceController;
 use AppDevPanel\Api\Inspector\Controller\TranslationController;
 use AppDevPanel\Api\Inspector\Database\SchemaProviderInterface;
+use AppDevPanel\Api\Inspector\Elasticsearch\ElasticsearchProviderInterface;
+use AppDevPanel\Api\Inspector\Elasticsearch\NullElasticsearchProvider;
+use AppDevPanel\Api\Inspector\HttpMock\HttpMockProviderInterface;
+use AppDevPanel\Api\Inspector\HttpMock\NullHttpMockProvider;
 use AppDevPanel\Api\Inspector\Middleware\InspectorProxyMiddleware;
+use AppDevPanel\Api\Llm\Acp\AcpCommandVerifier;
+use AppDevPanel\Api\Llm\Acp\AcpCommandVerifierInterface;
+use AppDevPanel\Api\Llm\Acp\AcpDaemonManager;
+use AppDevPanel\Api\Llm\Acp\AcpDaemonManagerInterface;
 use AppDevPanel\Api\Llm\Controller\LlmController;
 use AppDevPanel\Api\Llm\FileLlmHistoryStorage;
 use AppDevPanel\Api\Llm\FileLlmSettings;
@@ -67,6 +79,8 @@ use AppDevPanel\Api\Toolbar\ToolbarInjector;
 use AppDevPanel\Cli\Command\DebugDumpCommand;
 use AppDevPanel\Cli\Command\DebugQueryCommand;
 use AppDevPanel\Cli\Command\DebugResetCommand;
+use AppDevPanel\Cli\Command\DebugServerBroadcastCommand;
+use AppDevPanel\Cli\Command\DebugServerCommand;
 use AppDevPanel\Cli\Command\DebugSummaryCommand;
 use AppDevPanel\Cli\Command\DebugTailCommand;
 use AppDevPanel\Cli\Command\FrontendUpdateCommand;
@@ -106,8 +120,10 @@ use AppDevPanel\Kernel\Debugger;
 use AppDevPanel\Kernel\DebuggerIdGenerator;
 use AppDevPanel\Kernel\Service\FileServiceRegistry;
 use AppDevPanel\Kernel\Service\ServiceRegistryInterface;
-use AppDevPanel\Kernel\Storage\FileStorage;
+use AppDevPanel\Kernel\Storage\BroadcastingStorage;
+use AppDevPanel\Kernel\Storage\StorageFactory;
 use AppDevPanel\Kernel\Storage\StorageInterface;
+use AppDevPanel\McpServer\Inspector\InspectorClient;
 use AppDevPanel\McpServer\McpServer;
 use AppDevPanel\McpServer\McpToolRegistryFactory;
 use AppDevPanel\McpServer\Tool\ToolRegistry;
@@ -135,6 +151,7 @@ final class AppDevPanelExtension extends Extension
 
         $container->setParameter('app_dev_panel.enabled', true);
         $container->setParameter('app_dev_panel.storage.path', $config['storage']['path']);
+        $container->setParameter('app_dev_panel.storage.driver', $config['storage']['driver']);
         $container->setParameter('app_dev_panel.storage.history_size', $config['storage']['history_size']);
         $container->setParameter('app_dev_panel.ignored_requests', $config['ignored_requests']);
         $container->setParameter('app_dev_panel.ignored_commands', $config['ignored_commands']);
@@ -153,12 +170,19 @@ final class AppDevPanelExtension extends Extension
         $container->register(DebuggerIdGenerator::class, DebuggerIdGenerator::class)->setPublic(false);
 
         $container
-            ->register(StorageInterface::class, FileStorage::class)
+            ->register('app_dev_panel.storage.file', StorageInterface::class)
+            ->setFactory([StorageFactory::class, 'create'])
             ->setArguments([
+                '%app_dev_panel.storage.driver%',
                 '%app_dev_panel.storage.path%',
                 new Reference(DebuggerIdGenerator::class),
                 '%app_dev_panel.dumper.excluded_classes%',
             ])
+            ->setPublic(false);
+
+        $container
+            ->register(StorageInterface::class, BroadcastingStorage::class)
+            ->setArguments([new Reference('app_dev_panel.storage.file')])
             ->setPublic(false);
 
         $container
@@ -389,10 +413,11 @@ final class AppDevPanelExtension extends Extension
             ->addTag('kernel.event_subscriber')
             ->setPublic(false);
 
-        // Asset mapper subscriber — only when symfony/asset-mapper is available and collector is enabled
+        // Asset mapper subscriber — only when symfony/asset-mapper is available and service is registered
         if (
             $container->has(AssetBundleCollector::class)
             && interface_exists(\Symfony\Component\AssetMapper\AssetMapperInterface::class)
+            && $container->has(\Symfony\Component\AssetMapper\AssetMapperInterface::class)
         ) {
             $container
                 ->register(AssetMapperSubscriber::class, AssetMapperSubscriber::class)
@@ -413,6 +438,28 @@ final class AppDevPanelExtension extends Extension
                 ->register(AuthorizationSubscriber::class, AuthorizationSubscriber::class)
                 ->setArguments([new Reference(AuthorizationCollector::class)])
                 ->addTag('kernel.event_subscriber')
+                ->setPublic(false);
+        }
+
+        // Mailer subscriber — only when symfony/mailer is available and collector is enabled
+        if (
+            $container->has(MailerCollector::class) && class_exists(\Symfony\Component\Mailer\Event\MessageEvent::class)
+        ) {
+            $container
+                ->register(MailerSubscriber::class, MailerSubscriber::class)
+                ->setArguments([new Reference(MailerCollector::class)])
+                ->addTag('kernel.event_subscriber')
+                ->setPublic(false);
+        }
+
+        // Messenger middleware — only when symfony/messenger is available and collector is enabled
+        if (
+            $container->has(QueueCollector::class)
+            && interface_exists(\Symfony\Component\Messenger\Middleware\MiddlewareInterface::class)
+        ) {
+            $container
+                ->register(MessengerCollectorMiddleware::class, MessengerCollectorMiddleware::class)
+                ->setArguments([new Reference(QueueCollector::class)])
                 ->setPublic(false);
         }
     }
@@ -584,10 +631,21 @@ final class AppDevPanelExtension extends Extension
             ])
             ->setPublic(true);
 
+        $inspectorUrl = $config['api']['inspector_url'] ?? null;
+        if (is_string($inspectorUrl) && $inspectorUrl !== '') {
+            $container
+                ->register(InspectorClient::class, InspectorClient::class)
+                ->setArguments([$inspectorUrl])
+                ->setPublic(false);
+        }
+
         $container
             ->register(ToolRegistry::class, ToolRegistry::class)
             ->setFactory([McpToolRegistryFactory::class, 'create'])
-            ->setArguments([new Reference(StorageInterface::class)])
+            ->setArguments([
+                new Reference(StorageInterface::class),
+                new Reference(InspectorClient::class, ContainerBuilder::NULL_ON_INVALID_REFERENCE),
+            ])
             ->setPublic(false);
 
         $container
@@ -683,6 +741,34 @@ final class AppDevPanelExtension extends Extension
             ])
             ->setPublic(true);
 
+        // HTTP mock inspector: register NullHttpMockProvider as default.
+        if (!$container->has(HttpMockProviderInterface::class)) {
+            $container->register(HttpMockProviderInterface::class, NullHttpMockProvider::class)->setPublic(false);
+        }
+
+        $container
+            ->register(HttpMockController::class, HttpMockController::class)
+            ->setArguments([
+                new Reference(JsonResponseFactoryInterface::class),
+                new Reference(HttpMockProviderInterface::class),
+            ])
+            ->setPublic(true);
+
+        // Elasticsearch inspector: register NullElasticsearchProvider as default.
+        if (!$container->has(ElasticsearchProviderInterface::class)) {
+            $container
+                ->register(ElasticsearchProviderInterface::class, NullElasticsearchProvider::class)
+                ->setPublic(false);
+        }
+
+        $container
+            ->register(ElasticsearchController::class, ElasticsearchController::class)
+            ->setArguments([
+                new Reference(JsonResponseFactoryInterface::class),
+                new Reference(ElasticsearchProviderInterface::class),
+            ])
+            ->setPublic(true);
+
         $container
             ->register(CodeCoverageController::class, CodeCoverageController::class)
             ->setArguments([
@@ -725,6 +811,13 @@ final class AppDevPanelExtension extends Extension
             ->setArguments(['%app_dev_panel.storage.path%'])
             ->setPublic(true);
 
+        // ACP daemon manager and command verifier
+        $container->register(AcpCommandVerifierInterface::class, AcpCommandVerifier::class)->setPublic(true);
+        $container
+            ->register(AcpDaemonManagerInterface::class, AcpDaemonManager::class)
+            ->setArguments(['%app_dev_panel.storage.path%'])
+            ->setPublic(true);
+
         // LLM provider service
         $container
             ->register(LlmProviderService::class, LlmProviderService::class)
@@ -733,6 +826,7 @@ final class AppDevPanelExtension extends Extension
                 new Reference(ClientInterface::class),
                 new Reference(RequestFactoryInterface::class),
                 new Reference(StreamFactoryInterface::class),
+                new Reference(AcpDaemonManagerInterface::class),
             ])
             ->setPublic(true);
 
@@ -747,6 +841,8 @@ final class AppDevPanelExtension extends Extension
                 new Reference(RequestFactoryInterface::class),
                 new Reference(StreamFactoryInterface::class),
                 new Reference(ClientInterface::class),
+                new Reference(AcpCommandVerifierInterface::class),
+                new Reference(AcpDaemonManagerInterface::class),
             ])
             ->setPublic(true);
     }
@@ -911,6 +1007,16 @@ final class AppDevPanelExtension extends Extension
 
         $container
             ->register(FrontendUpdateCommand::class, FrontendUpdateCommand::class)
+            ->addTag('console.command')
+            ->setPublic(false);
+
+        $container
+            ->register(DebugServerCommand::class, DebugServerCommand::class)
+            ->addTag('console.command')
+            ->setPublic(false);
+
+        $container
+            ->register(DebugServerBroadcastCommand::class, DebugServerBroadcastCommand::class)
             ->addTag('console.command')
             ->setPublic(false);
     }

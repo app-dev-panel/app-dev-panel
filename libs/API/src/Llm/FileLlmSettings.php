@@ -4,16 +4,24 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Api\Llm;
 
+use SensitiveParameter;
+
 final class FileLlmSettings implements LlmSettingsInterface
 {
     private const int DEFAULT_TIMEOUT = 30;
     private const string DEFAULT_CUSTOM_PROMPT = 'Reply in English. Be concise and actionable — focus on root causes and fixes, not descriptions of what the code does.';
+    private const string DEFAULT_ACP_COMMAND = 'claude';
 
     private ?string $apiKey = null;
     private string $provider = 'openrouter';
     private ?string $model = null;
     private int $timeout = self::DEFAULT_TIMEOUT;
     private string $customPrompt = self::DEFAULT_CUSTOM_PROMPT;
+    private string $acpCommand = self::DEFAULT_ACP_COMMAND;
+    /** @var list<string> */
+    private array $acpArgs = [];
+    /** @var array<string, string> */
+    private array $acpEnv = [];
     private bool $loaded = false;
 
     public function __construct(
@@ -27,7 +35,7 @@ final class FileLlmSettings implements LlmSettingsInterface
         return $this->apiKey;
     }
 
-    public function setApiKey(?string $apiKey): void
+    public function setApiKey(#[SensitiveParameter] ?string $apiKey): void
     {
         $this->load();
         $this->apiKey = $apiKey;
@@ -90,11 +98,62 @@ final class FileLlmSettings implements LlmSettingsInterface
         $this->save();
     }
 
+    public function getAcpCommand(): string
+    {
+        $this->load();
+
+        return $this->acpCommand;
+    }
+
+    public function setAcpCommand(string $command): void
+    {
+        $this->load();
+        $this->acpCommand = $command;
+        $this->save();
+    }
+
+    public function getAcpArgs(): array
+    {
+        $this->load();
+
+        return $this->acpArgs;
+    }
+
+    public function setAcpArgs(array $args): void
+    {
+        $this->load();
+        $this->acpArgs = array_values($args);
+        $this->save();
+    }
+
+    public function getAcpEnv(): array
+    {
+        $this->load();
+
+        return $this->acpEnv;
+    }
+
+    public function setAcpEnv(array $env): void
+    {
+        $this->load();
+        $this->acpEnv = $env;
+        $this->save();
+    }
+
     public function isConnected(): bool
     {
         $this->load();
 
+        if ($this->provider === 'acp') {
+            return $this->acpCommand !== '';
+        }
+
         return $this->apiKey !== null && $this->apiKey !== '';
+    }
+
+    public function getStoragePath(): string
+    {
+        return $this->storagePath;
     }
 
     public function clear(): void
@@ -104,6 +163,9 @@ final class FileLlmSettings implements LlmSettingsInterface
         $this->provider = 'openrouter';
         $this->timeout = self::DEFAULT_TIMEOUT;
         $this->customPrompt = self::DEFAULT_CUSTOM_PROMPT;
+        $this->acpCommand = self::DEFAULT_ACP_COMMAND;
+        $this->acpArgs = [];
+        $this->acpEnv = [];
         $this->loaded = true;
 
         $file = $this->filePath();
@@ -125,6 +187,9 @@ final class FileLlmSettings implements LlmSettingsInterface
             'model' => $this->model,
             'timeout' => $this->timeout,
             'customPrompt' => $this->customPrompt,
+            'acpCommand' => $this->acpCommand,
+            'acpArgs' => $this->acpArgs,
+            'acpEnv' => $this->acpEnv,
         ];
     }
 
@@ -145,7 +210,7 @@ final class FileLlmSettings implements LlmSettingsInterface
             return;
         }
 
-        /** @var array{apiKey?: string, provider?: string, model?: string, timeout?: int, customPrompt?: string} $data */
+        /** @var array{apiKey?: string, provider?: string, model?: string, timeout?: int, customPrompt?: string, acpCommand?: string, acpArgs?: list<string>, acpEnv?: array<string, string>} $data */
         $data = json_decode($contents, true, 512, JSON_THROW_ON_ERROR);
 
         $this->apiKey = isset($data['apiKey']) && is_string($data['apiKey']) ? $data['apiKey'] : null;
@@ -155,6 +220,11 @@ final class FileLlmSettings implements LlmSettingsInterface
         $this->customPrompt = isset($data['customPrompt']) && is_string($data['customPrompt'])
             ? $data['customPrompt']
             : self::DEFAULT_CUSTOM_PROMPT;
+        $this->acpCommand = isset($data['acpCommand']) && is_string($data['acpCommand'])
+            ? $data['acpCommand']
+            : self::DEFAULT_ACP_COMMAND;
+        $this->acpArgs = isset($data['acpArgs']) && is_array($data['acpArgs']) ? $data['acpArgs'] : [];
+        $this->acpEnv = isset($data['acpEnv']) && is_array($data['acpEnv']) ? $data['acpEnv'] : [];
     }
 
     private function save(): void
@@ -172,6 +242,9 @@ final class FileLlmSettings implements LlmSettingsInterface
                 'model' => $this->model,
                 'timeout' => $this->timeout,
                 'customPrompt' => $this->customPrompt,
+                'acpCommand' => $this->acpCommand,
+                'acpArgs' => $this->acpArgs,
+                'acpEnv' => $this->acpEnv,
             ], JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES),
             LOCK_EX,
         );

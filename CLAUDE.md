@@ -1,5 +1,69 @@
 # ADP — Application Development Panel
 
+## Zero Tolerance — Skipped, Risky, Deprecated, Warning Tests Are FAILURES
+
+A passing `.` is the only acceptable result. **Every** other PHPUnit marker — `S` (skipped),
+`I` (incomplete), `R` (risky), `D` (deprecation), `N` (notice), `W` (warning) — is a FAIL.
+All `phpunit.xml.dist` files set these attributes to `true` and they **must never be flipped off**:
+
+```
+failOnRisky, failOnWarning, failOnNotice, failOnDeprecation,
+failOnPhpunitDeprecation, failOnPhpunitWarning,
+failOnIncomplete, failOnSkipped, failOnEmptyTestSuite,
+beStrictAboutOutputDuringTests,
+beStrictAboutTestsThatDoNotTestAnything,
+beStrictAboutChangesToGlobalState
+```
+
+Rules:
+- **Never** call `markTestSkipped()`, `markTestIncomplete()`, or `$this->expectDeprecation*()` as a
+  way to make a red test green. If the dependency/extension/environment is missing, either (a) mock
+  it, (b) make it a required dev-dep, or (c) delete the test. Skipping is not an option.
+- **Never** downgrade the fail flags above in any `phpunit.xml*` file. Not even temporarily.
+- **Never** write tests that depend on ambient state (network, env vars, filesystem) without a mock.
+  Ambient-state tests are the reason we used to see `S` markers — they are banned.
+- **Any** PHP warning, notice, or deprecation raised during a test must fail the test. The listed
+  attributes enforce this for the PHPUnit process. For HTTP E2E tests against playground servers,
+  the playground entry points install a strict error handler that converts warnings/notices into
+  `ErrorException`, turning them into HTTP 500s that fail the fixture assertion.
+- CI runs the suite **once**, with coverage on the primary matrix cell (ubuntu-latest / PHP 8.4)
+  and without coverage on the rest. Never add a second "run tests without coverage" step.
+
+If you see yourself reaching for `markTestSkipped`, stop and ask for help writing a proper mock.
+
+## Hard Timeouts — NEVER RAISE
+
+The test infrastructure is aggressively time-boxed so that nothing — PHPUnit, Vitest, fixtures,
+network calls, socket reads — can hang a Claude Code hook or a CI run. These limits are the
+**ceiling, not a target**. You are **forbidden** from raising any of them. If a test or command
+breaches a limit, fix the slow code (mock I/O, reduce fixture data, split the test, skip a broken
+service) — do not edit the ceiling.
+
+| Scope | Limit | Where |
+|-------|------:|-------|
+| Full test suite (PHPUnit / Vitest) | `180s` | `Makefile` — `TEST_TIMEOUT` |
+| Single playground fixture / scenario run | `120s` | `Makefile` — `FIXTURE_TIMEOUT` |
+| Helper poll / daemon ping | `15s` | `Makefile` — `HELPER_TIMEOUT` |
+| PHPUnit — small / medium / large / default test | `2s / 5s / 10s / 10s` | all `phpunit.xml.dist` |
+| PHPUnit — PHP `max_execution_time` / `default_socket_timeout` | `15s / 10s` | all `phpunit.xml.dist` `<ini>` |
+| Vitest — `testTimeout` / `hookTimeout` (jsdom) | `10s / 10s` | `libs/frontend/vitest.config.ts` |
+| Vitest — `testTimeout` / `hookTimeout` (browser) | `15s / 15s` | `libs/frontend/vitest.browser.config.ts` |
+| `FixtureRunner` HTTP timeout | `15s` hard cap | `libs/Testing/src/Runner/FixtureRunner.php` |
+| `DebugDataFetcher` retry deadline | `15s` | `libs/Testing/src/Runner/DebugDataFetcher.php` |
+| `InspectorClient` HTTP timeout | `15s` hard cap | `libs/McpServer/src/Inspector/InspectorClient.php` |
+| `AcpDaemonManager` session-start / prompt | `30s / 30s` hard cap | `libs/API/src/Llm/Acp/AcpDaemonManager.php` |
+| `RequestController::request` re-execute client | `15s` (connect 5s) | `libs/API/src/Inspector/Controller/RequestController.php` |
+| `FrontendUpdateCommand` GitHub release check | `10s` (connect 5s) | `libs/Cli/src/Command/FrontendUpdateCommand.php` |
+| `FrontendUpdateCommand` ZIP download | `30s` (connect 5s) | `libs/Cli/src/Command/FrontendUpdateCommand.php` |
+
+Rules:
+- **Never** bump a number in the table above to make something pass. Fix the underlying code.
+- **Never** add a new network/socket/subprocess call without an explicit timeout ≤ the matching limit.
+- New tests must finish well under `defaultTimeLimit` (10s). If a test legitimately takes longer,
+  it belongs in `@group e2e` or `@group playground`, which are excluded from the default suite.
+- The `timeout` wrapper in the Makefile (`$(call with_timeout,…)`) is mandatory for any Make target
+  that invokes PHPUnit, Vitest, or a playground fixture run.
+
 ## Project Overview
 
 ADP (Application Development Panel) is a **framework-agnostic, language-agnostic** debugging and development panel.
@@ -12,10 +76,10 @@ fully framework-independent. Adapters exist for Yii 3, Symfony, Laravel, Yii 2, 
 ## Tech Stack
 
 - **Backend**: PHP 8.4, PSR standards (PSR-3, PSR-7, PSR-11, PSR-14, PSR-15, PSR-16, PSR-17, PSR-18)
-- **Frontend**: React 19, TypeScript 5.5, Vite, Material-UI 5, Redux Toolkit
+- **Frontend**: React 19, TypeScript 6, Vite 8, Material-UI (MUI) 7, Redux Toolkit 2
 - **Build**: Composer (PHP), npm workspaces + Lerna (JS), Docker
 - **Testing**: PHPUnit 11 (backend), Vitest (frontend)
-- **Code Quality**: [Mago](https://mago.carthage.software/) (linter + formatter + static analyzer, written in Rust)
+- **Code Quality**: [Mago](https://mago.carthage.software/) (linter + formatter + static analyzer, written in Rust), Modulite (module boundary checker, inspired by [VK Modulite](https://github.com/VKCOM/modulite))
 
 ## Repository Structure
 
@@ -24,7 +88,7 @@ fully framework-independent. Adapters exist for Yii 3, Symfony, Laravel, Yii 2, 
 ├── playground/                    # Demo/reference applications per framework
 │   ├── yii3-app/                 # Yii 3 reference application
 │   ├── symfony-app/        # Symfony 7 minimal demo
-│   ├── laravel-app/              # Laravel 12 minimal demo
+│   ├── laravel-app/              # Laravel 11/12/13 minimal demo
 │   └── yii2-basic-app/          # Yii 2 minimal demo
 ├── libs/
 │   ├── Kernel/                   # Core: debugger lifecycle, collectors, storage, proxies
@@ -32,6 +96,7 @@ fully framework-independent. Adapters exist for Yii 3, Symfony, Laravel, Yii 2, 
 │   ├── McpServer/                # MCP server: AI assistant integration (stdio + HTTP)
 │   ├── Cli/                      # CLI commands: debug server, reset, broadcast, query, serve, mcp
 │   ├── Testing/                  # Test fixtures: definitions, runner, CLI command
+│   ├── FrontendAssets/           # Composer package shipping the prebuilt panel SPA (dist/ populated at release time)
 │   ├── Adapter/
 │   │   ├── Yii3/                 # Yii 3 framework adapter
 │   │   ├── Symfony/              # Symfony framework adapter
@@ -51,6 +116,9 @@ fully framework-independent. Adapters exist for Yii 3, Symfony, Laravel, Yii 2, 
 │   ├── api/                      # API reference docs (EN)
 │   ├── blog/                     # Blog posts (EN)
 │   └── ru/                       # Russian translations (guide/, api/, blog/)
+├── modulite.php                   # Module boundary rules (dependency graph)
+├── tools/
+│   └── modulite-check.php        # Module boundary validator script
 ├── CLAUDE.md                     # This file
 └── docs/
     ├── mcp-server-plan.md        # MCP server remaining phases (3-6)
@@ -164,8 +232,11 @@ make mago-playgrounds-fix           # Fix formatting in all playgrounds (paralle
 make frontend-check                 # Run frontend checks (Prettier + ESLint)
 make frontend-fix                   # Fix frontend code quality issues
 
+# Modulite — Module boundary validation
+make modulite                       # Check module boundary violations
+
 # Combined
-make check                          # Run ALL code quality checks (core + playgrounds + frontend)
+make check                          # Run ALL code quality checks (core + playgrounds + frontend + modulite)
 make fix                            # Fix all code (core + playgrounds + frontend)
 make all                            # Run everything: checks + tests
 
@@ -202,12 +273,55 @@ composer fix                        # PHP fix (same as make mago-fix)
 cd libs/frontend && npm run check   # Frontend check (same as make frontend-check)
 ```
 
+## Modulite — Module Boundary Validation
+
+Inspired by [VK Modulite](https://github.com/VKCOM/modulite). Enforces that each module only imports from its declared dependencies.
+
+**Configuration**: `modulite.php` — defines modules, namespaces, paths, and allowed `requires`.
+**Validator**: `tools/modulite-check.php` — scans `use` statements, reports violations.
+
+### Dependency Rules
+
+| Module | Requires |
+|--------|----------|
+| `kernel` | (none — foundation) |
+| `mcp-server` | `kernel` |
+| `api` | `kernel`, `mcp-server` |
+| `cli` | `kernel`, `api`, `mcp-server`, `frontend-assets` |
+| `testing` | (none — independent) |
+| `frontend-assets` | (none — leaf, ships prebuilt SPA) |
+| `adapter-yii3` | `kernel`, `api`, `cli`, `mcp-server`, `frontend-assets` |
+| `adapter-symfony` | `kernel`, `api`, `cli`, `mcp-server`, `frontend-assets` |
+| `adapter-laravel` | `kernel`, `api`, `cli`, `mcp-server`, `frontend-assets` |
+| `adapter-yii2` | `kernel`, `api`, `cli`, `mcp-server`, `frontend-assets` |
+| `adapter-cycle` | `api` |
+
+### Rules
+
+- **No circular dependencies**: the graph is strictly acyclic
+- **Kernel is the foundation**: all core modules depend on Kernel (directly or transitively)
+- **Adapters depend on core**: adapters may use Kernel + API + Cli, never other adapters
+- **Testing is independent**: no internal dependencies
+- **Cycle is minimal**: only depends on API (for `SchemaProviderInterface`)
+- External (vendor) namespaces are not governed by these rules
+
+### Usage
+
+```bash
+make modulite                              # Human-readable output
+php tools/modulite-check.php --format=github   # GitHub Actions annotations
+php tools/modulite-check.php --format=json     # JSON output
+```
+
+To add a new dependency: edit `requires` in `modulite.php`. To add a new module: add a new entry with `namespace`, `path`, `requires`.
+
 ## CI/CD
 
 GitHub Actions runs on every push and PR:
 
 - **Tests**: Matrix of PHP 8.4/8.5 on Linux and Windows
 - **Mago**: Format check, lint, and static analysis
+- **Modulite**: Module boundary validation
 - **PR Reports**: Coverage report and Mago analysis posted as PR comments
 
 ## Test Coverage Summary
@@ -222,7 +336,7 @@ GitHub Actions runs on every push and PR:
 | Adapter-Laravel | `libs/Adapter/Laravel` | 86 | 0 | 0.1s | — |
 | Adapter-Yii2 | `libs/Adapter/Yii2` | 95 | 0 | 0.1s | **57.3%** (373/651) |
 | Adapter-Cycle | `libs/Adapter/Cycle` | 10 | 0 | 0.02s | — |
-| Cli | `libs/Cli` | 6 | 0 | 0.02s | **41.1%** (30/73) |
+| Cli | `libs/Cli` | 198 | 0 | ~14s | — |
 | McpServer | `libs/McpServer` | 48 | 0 | 0.02s | — |
 | McpServer (API) | `libs/API` (Mcp controller) | 6 | 0 | 0.02s | — |
 | **Total** | **all libs** | **755** | **16** | **~1m 22s** | — |
@@ -283,6 +397,7 @@ make mago-playgrounds-fix           # Playgrounds only
 make frontend-fix                   # Frontend only
 make test-php                       # PHP tests only
 make test-frontend                  # Frontend tests only
+make modulite                       # Module boundary check only
 ```
 All checks must be green. Fix any failures before proceeding — **including pre-existing test failures from other branches**. If tests were broken before your branch, fix them anyway.
 
@@ -356,6 +471,7 @@ Each module under `libs/` has its own `CLAUDE.md` with internal architecture det
 - `libs/McpServer/CLAUDE.md` — MCP server (AI assistant integration)
 - `libs/Cli/CLAUDE.md` — CLI commands
 - `libs/Testing/CLAUDE.md` — Test fixtures and runner
+- `libs/FrontendAssets/CLAUDE.md` — Prebuilt panel SPA Composer package (dist shipping, split-repo flow)
 - `libs/Adapter/Yii3/CLAUDE.md` — Yii 3 adapter integration
 - `libs/Adapter/Symfony/CLAUDE.md` — Symfony adapter integration
 - `libs/Adapter/Laravel/CLAUDE.md` — Laravel adapter integration

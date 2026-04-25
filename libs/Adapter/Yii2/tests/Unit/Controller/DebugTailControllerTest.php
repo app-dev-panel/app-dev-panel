@@ -1,0 +1,475 @@
+<?php
+
+declare(strict_types=1);
+
+namespace AppDevPanel\Adapter\Yii2\Tests\Unit\Controller;
+
+use AppDevPanel\Adapter\Yii2\Controller\DebugTailController;
+use AppDevPanel\Api\Debug\Repository\CollectorRepositoryInterface;
+use PHPUnit\Framework\Attributes\PreserveGlobalState;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
+use PHPUnit\Framework\TestCase;
+use yii\console\Application;
+use yii\console\ExitCode;
+
+/**
+ * Tests for DebugTailController.
+ *
+ * Since actionIndex() runs an infinite loop, we test the private helper methods
+ * (getEntryIds, renderEntry) via reflection to verify rendering logic,
+ * and test actionIndex() by breaking the loop with an exception from the repository.
+ */
+#[RunTestsInSeparateProcesses]
+#[PreserveGlobalState(false)]
+final class DebugTailControllerTest extends TestCase
+{
+    private string $basePath;
+
+    protected function setUp(): void
+    {
+        if (!in_array('null', stream_get_filters(), true)) {
+            stream_filter_register('null', \NullFilter::class);
+        }
+        stream_filter_append(\STDERR, 'null', STREAM_FILTER_WRITE);
+
+        \Yii::$container = new \yii\di\Container();
+
+        $this->basePath = sys_get_temp_dir() . '/adp_tail_test_' . bin2hex(random_bytes(4));
+        mkdir($this->basePath, 0o777, true);
+
+        new Application([
+            'id' => 'test',
+            'basePath' => $this->basePath,
+        ]);
+    }
+
+    protected function tearDown(): void
+    {
+        \Yii::$container = new \yii\di\Container();
+        \Yii::$app = null;
+
+        if (is_dir($this->basePath)) {
+            $items = new \RecursiveIteratorIterator(
+                new \RecursiveDirectoryIterator($this->basePath, \FilesystemIterator::SKIP_DOTS),
+                \RecursiveIteratorIterator::CHILD_FIRST,
+            );
+            foreach ($items as $item) {
+                $item->isDir() ? rmdir($item->getPathname()) : unlink($item->getPathname());
+            }
+            rmdir($this->basePath);
+        }
+    }
+
+    public function testGetEntryIdsReturnsStringIds(): void
+    {
+        $repository = $this->createMock(CollectorRepositoryInterface::class);
+        $repository
+            ->method('getSummary')
+            ->with(null)
+            ->willReturn([
+                ['id' => 'entry-1'],
+                ['id' => 'entry-2'],
+            ]);
+
+        $controller = $this->createController($repository);
+        $ids = $this->invokeGetEntryIds($controller);
+
+        $this->assertSame(['entry-1', 'entry-2'], $ids);
+    }
+
+    public function testGetEntryIdsSkipsNonArrayEntries(): void
+    {
+        $repository = $this->createMock(CollectorRepositoryInterface::class);
+        $repository
+            ->method('getSummary')
+            ->with(null)
+            ->willReturn([
+                'not-an-array',
+                ['id' => 'valid'],
+            ]);
+
+        $controller = $this->createController($repository);
+        $ids = $this->invokeGetEntryIds($controller);
+
+        $this->assertSame(['valid'], $ids);
+    }
+
+    public function testGetEntryIdsSkipsEntriesWithoutId(): void
+    {
+        $repository = $this->createMock(CollectorRepositoryInterface::class);
+        $repository
+            ->method('getSummary')
+            ->with(null)
+            ->willReturn([
+                ['no-id' => true],
+                ['id' => 'valid'],
+            ]);
+
+        $controller = $this->createController($repository);
+        $ids = $this->invokeGetEntryIds($controller);
+
+        $this->assertSame(['valid'], $ids);
+    }
+
+    public function testGetEntryIdsSkipsNonStringId(): void
+    {
+        $repository = $this->createMock(CollectorRepositoryInterface::class);
+        $repository
+            ->method('getSummary')
+            ->with(null)
+            ->willReturn([
+                ['id' => 123],
+                ['id' => 'valid'],
+            ]);
+
+        $controller = $this->createController($repository);
+        $ids = $this->invokeGetEntryIds($controller);
+
+        $this->assertSame(['valid'], $ids);
+    }
+
+    public function testGetEntryIdsReturnsEmptyForNoEntries(): void
+    {
+        $repository = $this->createMock(CollectorRepositoryInterface::class);
+        $repository->method('getSummary')->with(null)->willReturn([]);
+
+        $controller = $this->createController($repository);
+        $ids = $this->invokeGetEntryIds($controller);
+
+        $this->assertSame([], $ids);
+    }
+
+    public function testRenderEntryFormattedWithRequestSummary(): void
+    {
+        $repository = $this->createMock(CollectorRepositoryInterface::class);
+        $repository
+            ->expects($this->once())
+            ->method('getSummary')
+            ->with('entry-1')
+            ->willReturn([
+                'request' => ['method' => 'GET', 'url' => '/api/test', 'responseStatusCode' => '200'],
+            ]);
+
+        $controller = $this->createController($repository);
+
+        ob_start();
+        $this->invokeRenderEntry($controller, 'entry-1', false);
+        ob_end_clean();
+    }
+
+    public function testRenderEntryJsonOutput(): void
+    {
+        $summaryData = [
+            'request' => ['method' => 'GET', 'url' => '/test', 'responseStatusCode' => '200'],
+        ];
+        $repository = $this->createMock(CollectorRepositoryInterface::class);
+        $repository->expects($this->once())->method('getSummary')->with('entry-1')->willReturn($summaryData);
+
+        $controller = $this->createController($repository);
+
+        ob_start();
+        $this->invokeRenderEntry($controller, 'entry-1', true);
+        ob_end_clean();
+    }
+
+    public function testRenderEntryWithWebSummary(): void
+    {
+        $repository = $this->createMock(CollectorRepositoryInterface::class);
+        $repository
+            ->expects($this->once())
+            ->method('getSummary')
+            ->with('entry-1')
+            ->willReturn([
+                'web' => ['method' => 'POST', 'url' => '/submit', 'responseStatusCode' => '302'],
+            ]);
+
+        $controller = $this->createController($repository);
+
+        ob_start();
+        $this->invokeRenderEntry($controller, 'entry-1', false);
+        ob_end_clean();
+    }
+
+    public function testRenderEntryWithCommandSummary(): void
+    {
+        $repository = $this->createMock(CollectorRepositoryInterface::class);
+        $repository
+            ->expects($this->once())
+            ->method('getSummary')
+            ->with('entry-1')
+            ->willReturn([
+                'command' => ['method' => 'CLI', 'url' => 'migrate/up', 'responseStatusCode' => '0'],
+            ]);
+
+        $controller = $this->createController($repository);
+
+        ob_start();
+        $this->invokeRenderEntry($controller, 'entry-1', false);
+        ob_end_clean();
+    }
+
+    public function testRenderEntryWithExceptionHighlight(): void
+    {
+        $repository = $this->createMock(CollectorRepositoryInterface::class);
+        $repository
+            ->expects($this->once())
+            ->method('getSummary')
+            ->with('entry-1')
+            ->willReturn([
+                'request' => ['method' => 'GET', 'url' => '/error', 'responseStatusCode' => '500'],
+                'exception' => ['class' => 'RuntimeException'],
+            ]);
+
+        $controller = $this->createController($repository);
+
+        ob_start();
+        $this->invokeRenderEntry($controller, 'entry-1', false);
+        ob_end_clean();
+    }
+
+    public function testRenderEntryWith4xxStatus(): void
+    {
+        $repository = $this->createMock(CollectorRepositoryInterface::class);
+        $repository
+            ->expects($this->once())
+            ->method('getSummary')
+            ->with('entry-1')
+            ->willReturn([
+                'request' => ['method' => 'GET', 'url' => '/missing', 'responseStatusCode' => '404'],
+            ]);
+
+        $controller = $this->createController($repository);
+
+        ob_start();
+        $this->invokeRenderEntry($controller, 'entry-1', false);
+        ob_end_clean();
+    }
+
+    public function testRenderEntryWith3xxStatus(): void
+    {
+        $repository = $this->createMock(CollectorRepositoryInterface::class);
+        $repository
+            ->expects($this->once())
+            ->method('getSummary')
+            ->with('entry-1')
+            ->willReturn([
+                'request' => ['method' => 'GET', 'url' => '/old', 'responseStatusCode' => '301'],
+            ]);
+
+        $controller = $this->createController($repository);
+
+        ob_start();
+        $this->invokeRenderEntry($controller, 'entry-1', false);
+        ob_end_clean();
+    }
+
+    public function testRenderEntryWithNoSummaryKeys(): void
+    {
+        $repository = $this->createMock(CollectorRepositoryInterface::class);
+        $repository->expects($this->once())->method('getSummary')->with('entry-1')->willReturn([]);
+
+        $controller = $this->createController($repository);
+
+        ob_start();
+        $this->invokeRenderEntry($controller, 'entry-1', false);
+        ob_end_clean();
+    }
+
+    public function testRenderEntryJsonOutputStructure(): void
+    {
+        $summaryData = [
+            'request' => ['method' => 'DELETE', 'url' => '/resource/1', 'responseStatusCode' => '204'],
+        ];
+        $repository = $this->createMock(CollectorRepositoryInterface::class);
+        $repository->expects($this->once())->method('getSummary')->with('entry-1')->willReturn($summaryData);
+
+        $controller = $this->createController($repository);
+
+        ob_start();
+        $this->invokeRenderEntry($controller, 'entry-1', true);
+        ob_end_clean();
+    }
+
+    public function testRenderEntryWith5xxStatusWithoutException(): void
+    {
+        $repository = $this->createMock(CollectorRepositoryInterface::class);
+        $repository
+            ->expects($this->once())
+            ->method('getSummary')
+            ->with('entry-1')
+            ->willReturn([
+                'request' => ['method' => 'GET', 'url' => '/error', 'responseStatusCode' => '503'],
+            ]);
+
+        $controller = $this->createController($repository);
+
+        ob_start();
+        $this->invokeRenderEntry($controller, 'entry-1', false);
+        ob_end_clean();
+    }
+
+    public function testRenderEntryWithUnknownStatusCode(): void
+    {
+        $repository = $this->createMock(CollectorRepositoryInterface::class);
+        $repository
+            ->expects($this->once())
+            ->method('getSummary')
+            ->with('entry-1')
+            ->willReturn([
+                'request' => ['method' => 'GET', 'url' => '/custom', 'responseStatusCode' => '100'],
+            ]);
+
+        $controller = $this->createController($repository);
+
+        ob_start();
+        $this->invokeRenderEntry($controller, 'entry-1', false);
+        ob_end_clean();
+    }
+
+    public function testGetEntryIdsCalledByRepository(): void
+    {
+        $repository = $this->createMock(CollectorRepositoryInterface::class);
+        $repository
+            ->expects($this->once())
+            ->method('getSummary')
+            ->with(null)
+            ->willReturn([['id' => 'abc']]);
+
+        $controller = $this->createController($repository);
+        $ids = $this->invokeGetEntryIds($controller);
+
+        $this->assertSame(['abc'], $ids);
+    }
+
+    public function testRenderEntryCallsRepositoryWithId(): void
+    {
+        $repository = $this->createMock(CollectorRepositoryInterface::class);
+        $repository->expects($this->once())->method('getSummary')->with('specific-id')->willReturn([]);
+
+        $controller = $this->createController($repository);
+
+        ob_start();
+        $this->invokeRenderEntry($controller, 'specific-id', false);
+        ob_end_clean();
+    }
+
+    public function testActionIndexOutputsHeaderAndDetectsNewEntries(): void
+    {
+        $callCount = 0;
+        $repository = $this->createMock(CollectorRepositoryInterface::class);
+        $repository
+            ->method('getSummary')
+            ->willReturnCallback(function (?string $id = null) use (&$callCount) {
+                $callCount++;
+                if ($id !== null) {
+                    // renderEntry call
+                    return [
+                        'request' => ['method' => 'GET', 'url' => '/test', 'responseStatusCode' => '200'],
+                    ];
+                }
+                // getEntryIds calls
+                return match ($callCount) {
+                    1 => [], // initial known IDs (empty)
+                    2 => [['id' => 'new-entry-1']], // first poll: new entry found
+                    default => throw new \RuntimeException('Break loop'),
+                };
+            });
+
+        $controller = $this->createController($repository);
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Break loop');
+
+        ob_start();
+        try {
+            $controller->actionIndex(interval: 1);
+        } finally {
+            ob_end_clean();
+        }
+    }
+
+    public function testActionIndexNoNewEntriesContinuesLoop(): void
+    {
+        $callCount = 0;
+        $repository = $this->createMock(CollectorRepositoryInterface::class);
+        $repository
+            ->method('getSummary')
+            ->willReturnCallback(function (?string $id = null) use (&$callCount) {
+                if ($id !== null) {
+                    return [];
+                }
+                $callCount++;
+                return match ($callCount) {
+                    1 => [['id' => 'existing-1']], // initial known IDs
+                    2 => [['id' => 'existing-1']], // first poll: same IDs, no new entries
+                    default => throw new \RuntimeException('Break loop'),
+                };
+            });
+
+        $controller = $this->createController($repository);
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Break loop');
+
+        ob_start();
+        try {
+            $controller->actionIndex(interval: 1);
+        } finally {
+            ob_end_clean();
+        }
+    }
+
+    public function testActionIndexJsonRendersNewEntries(): void
+    {
+        $callCount = 0;
+        $repository = $this->createMock(CollectorRepositoryInterface::class);
+        $repository
+            ->method('getSummary')
+            ->willReturnCallback(function (?string $id = null) use (&$callCount) {
+                $callCount++;
+                if ($id !== null) {
+                    return [
+                        'request' => ['method' => 'POST', 'url' => '/api/data', 'responseStatusCode' => '201'],
+                    ];
+                }
+                // `match(true)` avoids a static-analyzer false positive: with
+                // `match($callCount)` the analyzer treats the first increment
+                // as the only possible value (1) and flags arms 2/default as
+                // unreachable, even though the callback runs multiple times.
+                return match (true) {
+                    $callCount === 1 => [], // initial: empty
+                    $callCount === 2 => [['id' => 'json-entry-1']], // new entry
+                    default => throw new \RuntimeException('Break loop'),
+                };
+            });
+
+        $controller = $this->createController($repository);
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Break loop');
+
+        ob_start();
+        try {
+            $controller->actionIndex(interval: 1, json: true);
+        } finally {
+            ob_end_clean();
+        }
+    }
+
+    private function createController(CollectorRepositoryInterface $repository): DebugTailController
+    {
+        return new DebugTailController('debug-tail', \Yii::$app, $repository);
+    }
+
+    private function invokeGetEntryIds(DebugTailController $controller): array
+    {
+        $method = new \ReflectionMethod($controller, 'getEntryIds');
+        return $method->invoke($controller);
+    }
+
+    private function invokeRenderEntry(DebugTailController $controller, string $id, bool $json): void
+    {
+        $method = new \ReflectionMethod($controller, 'renderEntry');
+        $method->invoke($controller, $id, $json);
+    }
+}

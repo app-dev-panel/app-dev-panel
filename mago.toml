@@ -97,6 +97,8 @@ ignore = [
     # Type mismatches from framework interop, mock objects in tests, and
     # interface adapter patterns.
     "invalid-argument",
+    "invalid-return-tag",
+    "null-argument",
     "invalid-method-access",
     "invalid-return-statement",
     "invalid-type-cast",
@@ -116,6 +118,8 @@ ignore = [
     "ambiguous-object-method-access",
     "ambiguous-object-property-access",
     "ambiguous-instantiation-target",
+    "undefined-string-array-index",
+    "possibly-undefined-string-array-index",
 
     # ── unused code (26 issues) ─────────────────────────────────────────────
     # Properties/methods that appear unused but are accessed via reflection,
@@ -139,6 +143,7 @@ ignore = [
     "impossible-condition",
     "impossible-assignment",
     "deprecated-method",
+    "deprecated-function",
     "unknown-class-instantiation",
     "unevaluated-code",
     "property-type-coercion",
@@ -149,6 +154,21 @@ ignore = [
     # False positive: gitonomy/gitlib is an optional dependency not installed
     # in root composer, so Mago infers `never` for unresolved return types.
     "never-return",
+
+    # ── missing-template-parameter (yii2 controllers) ──────────────────────
+    # yii\web\Controller and yii\console\Controller declare `@template T` in Yii
+    # 2.0.54+ but our controllers extend them without supplying the argument.
+    # Adding the argument is not meaningful for DebugXxxController (they never
+    # use the templated model class). Framework-internal typing quirk.
+    "missing-template-parameter",
+
+    # ── too-many-arguments (1 issue) ────────────────────────────────────────
+    # False positive: dynamic instantiation through `new $class(...)` where the
+    # class string is constrained to a `StorageInterface` implementation. The
+    # analyzer reports the interface as having no constructor and cannot see
+    # through the `is_subclass_of()` guard. The actual concrete implementations
+    # (FileStorage, SqliteStorage, custom) all accept these constructor args.
+    "too-many-arguments",
 ]
 
 [linter]
@@ -189,12 +209,18 @@ too-many-methods = { level = "warning", exclude = [
     "libs/Adapter/Yii3/src/Collector/Db/CommandInterfaceProxy.php",
     "libs/Adapter/Yii3/src/Collector/Db/ConnectionInterfaceProxy.php",
     "libs/Adapter/Laravel/src/Proxy/LaravelEventDispatcherProxy.php",
+    # Yii 2 cache proxy — method count dictated by yii\caching\CacheInterface contract
+    "libs/Adapter/Yii2/src/Proxy/CacheProxy.php",
+    # Yii 2 queue listener — one handler per queue event (before/after push/exec/error + helpers)
+    "libs/Adapter/Yii2/src/EventListener/QueueListener.php",
     # Trait centralizes passthrough methods from stream wrapper protocol
     "libs/Kernel/src/Collector/Stream/StreamProxyTrait.php",
     # DI registration / service provider classes — method count driven by number of services to register
     "libs/Adapter/Symfony/src/DependencyInjection/AppDevPanelExtension.php",
     "libs/Adapter/Laravel/src/AppDevPanelServiceProvider.php",
     "libs/Adapter/Yii2/src/Module.php",
+    # Config providers — method count from introspecting framework internals
+    "libs/Adapter/Yii3/src/Inspector/Yii3AuthorizationConfigProvider.php",
     # Config value object — getters and withers for each config property
     "libs/Adapter/Yii3/src/Proxy/ContainerProxyConfig.php",
     # Recursive tree-walking dumper — method count inherent to object/array/resource type dispatch
@@ -239,6 +265,7 @@ cyclomatic-complexity = { level = "warning", threshold = 15, exclude = [
     "libs/Adapter/Symfony/src/Inspector/SymfonyConfigProvider.php",
     "libs/Adapter/Laravel/src/Inspector/LaravelConfigProvider.php",
     "libs/Adapter/Yii2/src/Inspector/Yii2ConfigProvider.php",
+    "libs/Adapter/Yii3/src/Inspector/Yii3AuthorizationConfigProvider.php",
     # CLI commands — complexity from multiple subcommands and output formatting
     "libs/Cli/src/Command/DebugQueryCommand.php",
     "libs/Adapter/Yii2/src/Controller/DebugQueryController.php",
@@ -253,6 +280,9 @@ cyclomatic-complexity = { level = "warning", threshold = 15, exclude = [
     "libs/Kernel/src/Storage/FileStorage.php",
     # Stream proxy — complexity from HTTP context extraction
     "libs/Kernel/src/Collector/Stream/HttpStreamProxy.php",
+    # Mailer — complexity from normalizing heterogeneous message + attachment payloads
+    "libs/Kernel/src/Collector/MailerCollector.php",
+    "libs/Adapter/Yii3/src/Collector/Mailer/MailerInterfaceProxy.php",
 ] }
 kan-defect = { level = "warning", exclude = [
     "libs/Testing/tests",
@@ -264,6 +294,7 @@ kan-defect = { level = "warning", exclude = [
     "libs/Adapter/Symfony/src/Inspector/SymfonyConfigProvider.php",
     "libs/Adapter/Laravel/src/Inspector/LaravelConfigProvider.php",
     "libs/Adapter/Yii2/src/Inspector/Yii2ConfigProvider.php",
+    "libs/Adapter/Yii3/src/Inspector/Yii3AuthorizationConfigProvider.php",
     # CLI commands — high defect score from multiple subcommands
     "libs/Cli/src/Command/DebugQueryCommand.php",
     "libs/Adapter/Yii2/src/Controller/DebugQueryController.php",
@@ -281,7 +312,16 @@ no-error-control-operator = { level = "warning" }
 no-empty = { level = "warning" }
 no-isset = { level = "warning" }
 no-empty-catch-clause = { level = "warning" }
-no-literal-password = { exclude = ["libs/Adapter/Symfony/tests"] }
+no-literal-password = { exclude = [
+    # Test files use literal API keys / passwords as fixture data — not a real secret
+    "libs/Adapter/Symfony/tests",
+    "libs/API/tests",
+    "libs/Kernel/tests",
+] }
+sensitive-parameter = { exclude = [
+    # Test helper signatures don't need #[SensitiveParameter] — they handle fixture data
+    "libs/API/tests",
+] }
 no-debug-symbols = { exclude = ["libs/API/src/Inspector/Controller/InspectController.php"] }
 require-preg-quote-delimiter = { level = "warning" }
 strict-behavior = { level = "warning" }

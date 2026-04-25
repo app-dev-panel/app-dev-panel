@@ -78,25 +78,64 @@ When expanded, the toolbar shows these metrics for the selected debug entry:
 | Validation errors | ✓ | ✓ | `entry.validator.total` |
 | Timestamp | ✓ | ✓ | `entry.web.request.startTime` |
 
-## UI Components
+## Layout Modes
 
-### SpeedDial FAB
+The toolbar supports multiple layout modes. Drag it to a screen edge to snap, or drag away to float.
 
-The floating action button (bottom-right) provides quick actions:
+### Collapsed Pill
 
-| Action | Description |
-|--------|-------------|
-| **Toggle toolbar** | Click the FAB to expand/collapse the metric buttons |
-| **Open debug panel** | Opens the full `/debug` panel in a new browser window |
-| **List entries** | Opens a modal to browse and select from all debug entries |
-| **Toggle iframe** | Shows/hides an embedded iframe with the full debug panel (resizable) |
+When collapsed, the toolbar appears as a small pill in the bottom-right corner showing the status code and response time. Click to expand.
+
+![Toolbar collapsed pill](/images/features/toolbar-collapsed.png)
+
+### Bottom Bar
+
+The default expanded mode. A single-row horizontal bar at the bottom of the page with all metric chips and action buttons.
+
+![Toolbar bottom bar](/images/features/toolbar-bottom.png)
+
+### Floating Widget
+
+Drag the toolbar away from the bottom edge to make it a floating card. Includes a request summary bar, wrapped metric chips, and action buttons. Resizable via the top-left grip.
+
+![Toolbar floating widget](/images/features/toolbar-float.png)
+
+### Side Rail
+
+Drag the toolbar to the right or left edge to dock it as a vertical panel. Metrics are displayed as full-width rows with labels and values.
+
+![Toolbar side rail](/images/features/toolbar-right.png)
+
+### AI Chat
+
+Click the duck icon button to open the Debug Duck chat popup. When an [LLM provider is connected](/guide/ai-chat), the toolbar sends messages to the backend AI and displays responses inline. The current debug entry's context (request, timing, queries, exceptions) is automatically included, so you can ask questions like "Why is this slow?" without pasting data.
+
+If no provider is connected, the chat shows a warning banner with a link to configure the connection in the panel. See [AI Chat](/guide/ai-chat) for full setup instructions.
+
+Features: multi-turn conversations, suggestion chips, draggable/resizable popup, shared chat history with the panel, connection status indicator.
+
+![Toolbar with AI chat](/images/features/toolbar-chat.png)
+
+## Snap & Drag
+
+The toolbar position is persisted across page reloads. Drag behaviors:
+
+| From | Action | Result |
+|------|--------|--------|
+| Any mode | Drag to bottom edge | Snap to bottom bar |
+| Any mode | Drag to right edge | Snap to right rail |
+| Any mode | Drag to left edge | Snap to left rail |
+| Bottom/Side | Drag away from edge | Float as card |
+| Float | Drag top-left grip | Resize widget |
+
+Blue snap zone indicators appear when dragging near screen edges.
 
 ### Embedded Iframe
 
-When the iframe is enabled, the toolbar loads the full debug panel inside a resizable iframe at the bottom of the page. The iframe communicates with the toolbar via `postMessage`:
+When the iframe is enabled (via the Panel button), the toolbar loads the full debug panel inside a resizable iframe at the bottom of the page:
 
 - **Entry selection** — Selecting an entry in the toolbar navigates the iframe to that entry
-- **Collector navigation** — Clicking a metric button (e.g., Logs) navigates the iframe to the corresponding collector view
+- **Collector navigation** — Clicking a metric chip navigates the iframe to the corresponding collector view
 - **Resizable** — Drag the separator bar to resize the iframe height
 
 ### Redux State Sync
@@ -104,6 +143,7 @@ When the iframe is enabled, the toolbar loads the full debug panel inside a resi
 The toolbar uses `redux-state-sync` to synchronize state between the toolbar and the main debug panel (if both are open):
 
 - `toolbarOpen` — Whether the toolbar is expanded
+- `toolbarPosition` — Current layout mode (bottom, right, left, float)
 - `baseUrl` — The backend API URL
 
 This ensures consistent behavior when using the toolbar alongside the panel in a separate window.
@@ -148,7 +188,7 @@ app_dev_panel:
 ```php
 // config/web.php
 'modules' => [
-    'debug-panel' => [
+    'app-dev-panel' => [
         'class' => \AppDevPanel\Adapter\Yii2\Module::class,
         'toolbarEnabled' => true,
         'toolbarStaticUrl' => '',  // Uses panelStaticUrl by default
@@ -185,7 +225,7 @@ app_dev_panel:
 == Yii 2
 ```php
 'modules' => [
-    'debug-panel' => [
+    'app-dev-panel' => [
         'class' => \AppDevPanel\Adapter\Yii2\Module::class,
         'toolbarEnabled' => false,
     ],
@@ -274,7 +314,7 @@ app_dev_panel:
 == Yii 2
 ```php
 'modules' => [
-    'debug-panel' => [
+    'app-dev-panel' => [
         'class' => \AppDevPanel\Adapter\Yii2\Module::class,
         'toolbarStaticUrl' => 'http://localhost:3001',
     ],

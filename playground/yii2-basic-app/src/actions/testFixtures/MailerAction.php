@@ -4,39 +4,49 @@ declare(strict_types=1);
 
 namespace App\actions\testFixtures;
 
-use AppDevPanel\Kernel\Collector\MailerCollector;
 use yii\base\Action;
 
 final class MailerAction extends Action
 {
     public function run(): array
     {
-        /** @var \AppDevPanel\Adapter\Yii2\Module $module */
-        $module = \Yii::$app->getModule('debug-panel');
+        $mailer = \Yii::$app->mailer;
 
-        /** @var MailerCollector|null $mailerCollector */
-        $mailerCollector = $module->getCollector(MailerCollector::class);
+        $plain = $mailer
+            ->compose()
+            ->setFrom('noreply@example.com')
+            ->setTo('user@example.com')
+            ->setSubject('ADP fixture — plain text')
+            ->setTextBody("Hello!\n\nThis is a plain-text email sent from the ADP Yii 2 fixture.\n\nCheers,\nADP");
 
-        if ($mailerCollector === null) {
-            return ['fixture' => 'mailer:basic', 'status' => 'error', 'message' => 'MailerCollector not found'];
-        }
+        $table = $mailer
+            ->compose()
+            ->setFrom('noreply@example.com')
+            ->setTo('user@example.com')
+            ->setSubject('ADP fixture — HTML table report')
+            ->setTextBody("Weekly report:\n- Requests: 1240\n- Errors: 12\n- Avg response: 84ms")
+            ->setHtmlBody(MailerFixtureContent::tableHtml());
 
-        // Simulate a sent email by calling the collector directly.
-        // This tests the MailerCollector without requiring a real mailer component.
-        $mailerCollector->collectMessage([
-            'from' => ['noreply@example.com' => 'ADP Test'],
-            'to' => ['user@example.com' => 'Test User'],
-            'cc' => [],
-            'bcc' => [],
-            'replyTo' => [],
-            'subject' => 'ADP Test Fixture Email',
-            'textBody' => 'This is a test email from the ADP mailer fixture.',
-            'htmlBody' => '<p>This is a test email from the ADP mailer fixture.</p>',
-            'raw' => '',
-            'charset' => 'utf-8',
-            'date' => date('r'),
-        ]);
+        $rich = $mailer
+            ->compose()
+            ->setFrom('noreply@example.com')
+            ->setTo('user@example.com')
+            ->setSubject('ADP fixture — newsletter with attachments')
+            ->setTextBody('Please see the attached TXT and PDF files.')
+            ->setHtmlBody(MailerFixtureContent::newsletterHtml())
+            ->attachContent(
+                MailerFixtureContent::textAttachment(),
+                ['fileName' => 'release-notes.txt', 'contentType' => 'text/plain'],
+            )
+            ->attachContent(
+                MailerFixtureContent::pdfAttachment(),
+                ['fileName' => 'adp-fixture.pdf', 'contentType' => 'application/pdf'],
+            );
 
-        return ['fixture' => 'mailer:basic', 'status' => 'ok'];
+        $plain->send();
+        $table->send();
+        $rich->send();
+
+        return ['fixture' => 'mailer:basic', 'status' => 'ok', 'sent' => 3];
     }
 }

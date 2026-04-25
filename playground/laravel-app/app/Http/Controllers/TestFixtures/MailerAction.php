@@ -4,31 +4,54 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\TestFixtures;
 
-use AppDevPanel\Kernel\Collector\MailerCollector;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Mail\Message;
+use Illuminate\Support\Facades\Mail;
 
-final readonly class MailerAction
+final class MailerAction
 {
-    public function __construct(
-        private MailerCollector $mailerCollector,
-    ) {}
-
     public function __invoke(): JsonResponse
     {
-        $this->mailerCollector->collectMessage([
-            'from' => ['noreply@example.com' => 'ADP Test'],
-            'to' => ['user@example.com' => 'Test User'],
-            'cc' => [],
-            'bcc' => [],
-            'replyTo' => [],
-            'subject' => 'ADP Test Fixture Email',
-            'textBody' => 'This is a test email from the ADP mailer fixture.',
-            'htmlBody' => '<p>This is a test email from the ADP mailer fixture.</p>',
-            'raw' => '',
-            'charset' => 'utf-8',
-            'date' => date('r'),
-        ]);
+        Mail::raw(
+            "Hello!\n\nThis is a plain-text email sent from the ADP Laravel fixture.\n\nCheers,\nADP",
+            static function (Message $message): void {
+                $message
+                    ->from('noreply@example.com', 'ADP')
+                    ->to('user@example.com', 'Test User')
+                    ->subject('ADP fixture — plain text');
+            },
+        );
 
-        return new JsonResponse(['fixture' => 'mailer:basic', 'status' => 'ok']);
+        Mail::html(
+            MailerFixtureContent::tableHtml(),
+            static function (Message $message): void {
+                $message
+                    ->from('noreply@example.com', 'ADP')
+                    ->to('user@example.com', 'Test User')
+                    ->subject('ADP fixture — HTML table report');
+            },
+        );
+
+        Mail::html(
+            MailerFixtureContent::newsletterHtml(),
+            static function (Message $message): void {
+                $message
+                    ->from('noreply@example.com', 'ADP')
+                    ->to('user@example.com', 'Test User')
+                    ->subject('ADP fixture — newsletter with attachments')
+                    ->attachData(
+                        MailerFixtureContent::textAttachment(),
+                        'release-notes.txt',
+                        ['mime' => 'text/plain'],
+                    )
+                    ->attachData(
+                        MailerFixtureContent::pdfAttachment(),
+                        'adp-fixture.pdf',
+                        ['mime' => 'application/pdf'],
+                    );
+            },
+        );
+
+        return new JsonResponse(['fixture' => 'mailer:basic', 'status' => 'ok', 'sent' => 3]);
     }
 }

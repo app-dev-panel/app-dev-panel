@@ -1,22 +1,23 @@
-import {JsonRenderer} from '@app-dev-panel/panel/Module/Debug/Component/JsonRenderer';
+import {TimelineDetailCard} from '@app-dev-panel/panel/Module/Debug/Component/Panel/TimelineDetailCard';
+import {TimelineListView} from '@app-dev-panel/panel/Module/Debug/Component/Panel/TimelineListView';
+import {
+    type TimelineItem,
+    getCollectorColor as getCollectorColorFromTheme,
+    parseLogLevel,
+} from '@app-dev-panel/panel/Module/Debug/Component/Panel/timelineTypes';
+import {useTimelineEnrichment} from '@app-dev-panel/panel/Module/Debug/Component/Panel/useTimelineEnrichment';
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
-import {FileLink} from '@app-dev-panel/sdk/Component/FileLink';
+import {FilterChip} from '@app-dev-panel/sdk/Component/FilterChip';
 import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
 import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
-import {isClassString} from '@app-dev-panel/sdk/Helper/classMatcher';
-import {formatMicrotime} from '@app-dev-panel/sdk/Helper/formatDate';
-import {toObjectString} from '@app-dev-panel/sdk/Helper/objectString';
-import {Box, Chip, Collapse, Tooltip, Typography} from '@mui/material';
+import {getCollectorLabel} from '@app-dev-panel/sdk/Helper/collectorMeta';
+import {Box, Collapse, IconButton, Tooltip, Typography} from '@mui/material';
 import {styled, useTheme} from '@mui/material/styles';
 import {useCallback, useDeferredValue, useMemo, useState} from 'react';
 
-// Data format from PHP: [microtime, reference, collectorClass, additionalData?]
-// row[0] = microtime(true) — start timestamp
-// row[1] = reference — object ID or count (NOT a duration)
-// row[2] = collector class name
-// row[3] = additional data (optional)
-type Item = [number, number, string] | [number, number, string, string];
-type TimelinePanelProps = {data: Item[]};
+type TimelinePanelProps = {data: TimelineItem[]};
+
+type ViewMode = 'waterfall' | 'list';
 
 // ---------------------------------------------------------------------------
 // Styled components
@@ -83,21 +84,78 @@ const Duration = styled(Typography)(({theme}) => ({
     [theme.breakpoints.down('sm')]: {display: 'none'},
 }));
 
-const DetailBox = styled(Box)(({theme}) => ({
-    padding: theme.spacing(1.5, 2, 1.5, 23),
-    backgroundColor: theme.palette.action.hover,
-    borderBottom: `1px solid ${theme.palette.divider}`,
-    fontSize: '12px',
+const WaterfallDetail = styled(Typography)(({theme}) => ({
+    fontSize: '11px',
+    fontFamily: theme.adp.fontFamilyMono,
+    color: theme.palette.text.secondary,
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    minWidth: 0,
+    flex: 1,
+    paddingLeft: 8,
+    [theme.breakpoints.down('sm')]: {display: 'none'},
 }));
+
+// ---------------------------------------------------------------------------
+// View toggle button
+// ---------------------------------------------------------------------------
+
+const ViewToggle = ({mode, onChange}: {mode: ViewMode; onChange: (mode: ViewMode) => void}) => {
+    return (
+        <Box sx={{display: 'flex', gap: 0.25}}>
+            <Tooltip title="Waterfall view">
+                <IconButton
+                    size="small"
+                    onClick={() => onChange('waterfall')}
+                    sx={{
+                        borderRadius: 1,
+                        color: mode === 'waterfall' ? 'primary.main' : 'text.disabled',
+                        backgroundColor: mode === 'waterfall' ? 'action.selected' : 'transparent',
+                        '&:hover': {backgroundColor: 'action.hover'},
+                        width: 28,
+                        height: 28,
+                    }}
+                >
+                    <span className="material-icons" style={{fontSize: 18}}>
+                        waterfall_chart
+                    </span>
+                </IconButton>
+            </Tooltip>
+            <Tooltip title="List view">
+                <IconButton
+                    size="small"
+                    onClick={() => onChange('list')}
+                    sx={{
+                        borderRadius: 1,
+                        color: mode === 'list' ? 'primary.main' : 'text.disabled',
+                        backgroundColor: mode === 'list' ? 'action.selected' : 'transparent',
+                        '&:hover': {backgroundColor: 'action.hover'},
+                        width: 28,
+                        height: 28,
+                    }}
+                >
+                    <span className="material-icons" style={{fontSize: 18}}>
+                        view_list
+                    </span>
+                </IconButton>
+            </Tooltip>
+        </Box>
+    );
+};
 
 export const TimelinePanel = ({data}: TimelinePanelProps) => {
     const theme = useTheme();
-    const chartColors = theme.adp.chartColors;
-    const getBarColor = (index: number): string => chartColors[index % chartColors.length];
     const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
     const [filter, setFilter] = useState('');
     const deferredFilter = useDeferredValue(filter);
     const [activeFilters, setActiveFilters] = useState<Set<string>>(new Set());
+    const [viewMode, setViewMode] = useState<ViewMode>('list');
+
+    const getCollectorColor = useCallback(
+        (collectorClass: string) => getCollectorColorFromTheme(theme, collectorClass),
+        [theme],
+    );
 
     const toggleFilter = useCallback((name: string) => {
         setActiveFilters((prev) => {
@@ -111,11 +169,19 @@ export const TimelinePanel = ({data}: TimelinePanelProps) => {
         });
     }, []);
 
-    // Unique labels for legend
-    const uniqueLabels = useMemo(
-        () => (!data || data.length === 0 ? [] : [...new Set(data.map((r) => r[2].split('\\').pop() ?? r[2]))]),
-        [data],
-    );
+    // Unique collector classes for legend (stores FQCN for color lookup, short name for filtering)
+    const uniqueCollectors = useMemo(() => {
+        if (!data || data.length === 0) return [];
+        const seen = new Set<string>();
+        return data
+            .filter((r) => {
+                const cls = r[2];
+                if (seen.has(cls)) return false;
+                seen.add(cls);
+                return true;
+            })
+            .map((r) => ({fqcn: r[2], shortName: r[2].split('\\').pop() ?? r[2], label: getCollectorLabel(r[2])}));
+    }, [data]);
 
     const filtered = useMemo(() => {
         if (!data || !Array.isArray(data)) return [];
@@ -132,6 +198,9 @@ export const TimelinePanel = ({data}: TimelinePanelProps) => {
         }
         return result;
     }, [data, deferredFilter, activeFilters]);
+
+    // Shared enrichment hook — used by both views
+    const enrichedDetails = useTimelineEnrichment(data ?? [], filtered);
 
     if (!data || !Array.isArray(data) || data.length === 0) {
         return <EmptyState icon="timeline" title="No timeline items found" />;
@@ -161,120 +230,99 @@ export const TimelinePanel = ({data}: TimelinePanelProps) => {
     return (
         <Box>
             <SectionTitle
-                action={<FilterInput value={filter} onChange={setFilter} placeholder="Filter timeline..." />}
+                action={
+                    <Box sx={{display: 'flex', alignItems: 'center', gap: 1.5}}>
+                        <ViewToggle mode={viewMode} onChange={setViewMode} />
+                        <FilterInput value={filter} onChange={setFilter} placeholder="Filter timeline..." />
+                    </Box>
+                }
             >{`${filtered.length} timeline events`}</SectionTitle>
 
             <Box sx={{display: 'flex', flexWrap: 'wrap', gap: 0.75, mb: 2}}>
-                {uniqueLabels.map((label, i) => {
-                    const isActive = activeFilters.has(label);
-                    const color = getBarColor(i);
+                {uniqueCollectors.map((col) => {
+                    const isActive = activeFilters.has(col.shortName);
+                    const color = getCollectorColor(col.fqcn);
+                    const clickable = uniqueCollectors.length > 1;
                     return (
-                        <Chip
-                            key={label}
-                            label={label}
-                            size="small"
-                            onClick={() => uniqueLabels.length > 1 && toggleFilter(label)}
-                            sx={{
-                                fontSize: '11px',
-                                height: 24,
-                                borderRadius: 1,
-                                fontWeight: 600,
-                                cursor: uniqueLabels.length > 1 ? 'pointer' : 'default',
-                                backgroundColor: isActive ? color : 'transparent',
-                                color: isActive ? 'common.white' : color,
-                                border: `1px solid ${color}`,
-                            }}
+                        <FilterChip
+                            key={col.shortName}
+                            label={col.label !== 'Unknown' ? col.label : col.shortName}
+                            color={color.fg}
+                            active={isActive}
+                            onClick={clickable ? () => toggleFilter(col.shortName) : undefined}
                         />
                     );
                 })}
-                {activeFilters.size > 0 && (
-                    <Chip
-                        label="Clear"
-                        size="small"
-                        onClick={() => setActiveFilters(new Set())}
-                        variant="outlined"
-                        sx={{fontSize: '11px', height: 24, borderRadius: 1}}
-                    />
-                )}
+                {activeFilters.size > 0 && <FilterChip label="Clear" onClick={() => setActiveFilters(new Set())} />}
             </Box>
 
-            <TimeAxis>
-                {ticks.map((tick, i) => (
-                    <span key={i}>{tick}</span>
-                ))}
-            </TimeAxis>
+            {viewMode === 'list' ? (
+                <TimelineListView data={data} filtered={filtered} enrichedDetails={enrichedDetails} />
+            ) : (
+                <>
+                    <TimeAxis>
+                        {ticks.map((tick, i) => (
+                            <span key={i}>{tick}</span>
+                        ))}
+                    </TimeAxis>
 
-            {filtered.map((row, index) => {
-                const shortName = row[2].split('\\').pop() ?? row[2];
-                const relativeTime = row[0] - minTime;
-                const offset = (relativeTime / totalSpan) * 100;
-                const colorIdx = uniqueLabels.indexOf(shortName);
-                const expanded = expandedIndex === index;
+                    {filtered.map((row, index) => {
+                        const collectorClass = row[2];
+                        const shortName = collectorClass.split('\\').pop() ?? collectorClass;
+                        const relativeTime = row[0] - minTime;
+                        const offset = (relativeTime / totalSpan) * 100;
+                        const expanded = expandedIndex === index;
+                        const enriched = enrichedDetails[index];
+                        const color = getCollectorColor(collectorClass);
+                        const label = getCollectorLabel(collectorClass);
 
-                // Format relative time offset
-                const offsetLabel =
-                    relativeTime < 0.001
-                        ? `${(relativeTime * 1000000).toFixed(0)}µs`
-                        : relativeTime < 1
-                          ? `${(relativeTime * 1000).toFixed(1)}ms`
-                          : `${relativeTime.toFixed(3)}s`;
+                        const parsed = enriched ? parseLogLevel(enriched.preview) : null;
+                        const detail = parsed ? parsed.message : (enriched?.preview ?? null);
+                        const fullDetail = parsed ? enriched!.full.replace(/^\[\w+] /, '') : (enriched?.full ?? null);
 
-                return (
-                    <Box key={index}>
-                        <Row selected={expanded} onClick={() => setExpandedIndex(expanded ? null : index)}>
-                            <Tooltip title={row[2]} placement="left">
-                                <Label sx={{color: 'text.secondary'}}>{shortName}</Label>
-                            </Tooltip>
-                            <BarArea>
-                                <Bar
-                                    sx={{
-                                        left: `${offset}%`,
-                                        width: 6,
-                                        minWidth: 6,
-                                        backgroundColor: getBarColor(colorIdx),
-                                    }}
-                                />
-                            </BarArea>
-                            <Duration>{offsetLabel}</Duration>
-                        </Row>
-                        <Collapse in={expanded}>
-                            <DetailBox>
-                                <Box sx={{display: 'flex', gap: 3, mb: 1}}>
-                                    <Typography variant="caption" sx={{color: 'text.disabled'}}>
-                                        Time: {formatMicrotime(row[0])}
-                                    </Typography>
-                                    <Typography variant="caption" sx={{color: 'text.disabled'}}>
-                                        Offset: +{offsetLabel}
-                                    </Typography>
-                                    {row[1] != null && (
-                                        <Typography variant="caption" sx={{color: 'text.disabled'}}>
-                                            Ref: {String(row[1])}
-                                        </Typography>
-                                    )}
-                                </Box>
-                                <FileLink className={row[2]}>
-                                    <Typography
-                                        variant="caption"
-                                        component="span"
-                                        sx={(theme) => ({
-                                            fontFamily: theme.adp.fontFamilyMono,
-                                            color: 'primary.main',
-                                            '&:hover': {textDecoration: 'underline'},
-                                        })}
-                                    >
-                                        {row[2]}
-                                    </Typography>
-                                </FileLink>
-                                {!!row[3] && (
-                                    <JsonRenderer
-                                        value={isClassString(row[3]) ? toObjectString(row[3], row[1]) : row[3]}
+                        // Format relative time offset
+                        const offsetLabel =
+                            relativeTime < 0.001
+                                ? `${(relativeTime * 1000000).toFixed(0)}µs`
+                                : relativeTime < 1
+                                  ? `${(relativeTime * 1000).toFixed(1)}ms`
+                                  : `${relativeTime.toFixed(3)}s`;
+
+                        return (
+                            <Box key={index}>
+                                <Row
+                                    selected={expanded}
+                                    onClick={() => setExpandedIndex(expanded ? null : index)}
+                                    sx={{borderLeft: `3px solid ${color.fg}`}}
+                                >
+                                    <Tooltip title={collectorClass} placement="left">
+                                        <Label sx={{color: color.fg, fontWeight: 600}}>
+                                            {label !== 'Unknown' ? label : shortName}
+                                        </Label>
+                                    </Tooltip>
+                                    <BarArea>
+                                        <Bar
+                                            sx={{left: `${offset}%`, width: 6, minWidth: 6, backgroundColor: color.fg}}
+                                        />
+                                    </BarArea>
+                                    {detail && <WaterfallDetail title={detail}>{detail}</WaterfallDetail>}
+                                    <Duration>{offsetLabel}</Duration>
+                                </Row>
+                                <Collapse in={expanded}>
+                                    <TimelineDetailCard
+                                        row={row}
+                                        fullDetail={fullDetail}
+                                        logLevel={parsed?.level ?? null}
+                                        accentColor={color.fg}
+                                        offsetLabel={`+${offsetLabel}`}
+                                        rawValue={enriched?.rawValue}
                                     />
-                                )}
-                            </DetailBox>
-                        </Collapse>
-                    </Box>
-                );
-            })}
+                                </Collapse>
+                            </Box>
+                        );
+                    })}
+                </>
+            )}
         </Box>
     );
 };

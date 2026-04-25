@@ -1,39 +1,45 @@
 # McpServer — MCP Protocol Server for ADP
 
-## Overview
-
-MCP (Model Context Protocol) server that exposes ADP debug data to AI assistants.
+MCP (Model Context Protocol) server that exposes ADP debug data and live application state to AI assistants.
 Supports two transports: **stdio** (JSON-RPC over stdin/stdout) and **HTTP** (JSON-RPC over POST).
+Two tool categories: **Debug** (read stored debug entries) and **Inspector** (query live app via HTTP).
 
 ## Dependencies
 
 - `app-dev-panel/kernel` — StorageInterface for reading debug data
+- Inspector API (HTTP) — Inspector tools query live app via `InspectorClient` (optional, no package dependency)
 
 No external PHP packages required.
 
 ## Architecture
 
 ```
-┌─────────────────────────────────────────────┐
-│              McpServer                       │
-│                                              │
-│  process(message) → response                 │
-│  run() → stdio loop (optional)               │
-│                                              │
-│  ┌──────────────────────────────────┐       │
-│  │         ToolRegistry             │       │
-│  │                                   │       │
-│  │  ┌─────────────────────────────┐ │       │
-│  │  │  Debug Tools (6)            │ │       │
-│  │  │  - list_debug_entries       │ │       │
-│  │  │  - view_debug_entry         │ │       │
-│  │  │  - search_logs              │ │       │
-│  │  │  - analyze_exception        │ │       │
-│  │  │  - view_database_queries    │ │       │
-│  │  │  - view_timeline            │ │       │
-│  │  └─────────────────────────────┘ │       │
-│  └──────────────────────────────────┘       │
-└─────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────┐
+│              McpServer                           │
+│                                                  │
+│  process(message) → response                     │
+│  run() → stdio loop (optional)                   │
+│                                                  │
+│  ┌──────────────────────────────────────────┐   │
+│  │         ToolRegistry                      │   │
+│  │                                           │   │
+│  │  ┌─────────────────────────────┐         │   │
+│  │  │  Debug Tools (6)            │         │   │
+│  │  │  - list_debug_entries       │         │   │
+│  │  │  - view_debug_entry         │         │   │
+│  │  │  - search_logs              │         │   │
+│  │  │  - analyze_exception        │         │   │
+│  │  │  - view_database_queries    │         │   │
+│  │  │  - view_timeline            │         │   │
+│  │  └─────────────────────────────┘         │   │
+│  │  ┌─────────────────────────────┐         │   │
+│  │  │  Inspector Tools (3)        │         │   │
+│  │  │  - inspect_config           │─────────┼───┼──▶ Inspector API
+│  │  │  - inspect_routes           │         │   │    (GET /inspect/api/*)
+│  │  │  - inspect_database_schema  │         │   │
+│  │  └─────────────────────────────┘         │   │
+│  └──────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────┘
          ▲                    ▲
          │                    │
     StdioTransport      McpController
@@ -50,20 +56,26 @@ libs/McpServer/
 │   └── adp-mcp                          # Standalone stdio entry point
 ├── src/
 │   ├── McpServer.php                    # Protocol handler (initialize, tools/list, tools/call, ping)
-│   ├── McpToolRegistryFactory.php       # Creates ToolRegistry with all debug tools
+│   ├── McpToolRegistryFactory.php       # Creates ToolRegistry with all debug + inspector tools
+│   ├── Inspector/
+│   │   └── InspectorClient.php          # HTTP client for Inspector API (file_get_contents)
 │   ├── Transport/
 │   │   └── StdioTransport.php           # JSON-RPC over stdin/stdout (newline-delimited)
 │   └── Tool/
 │       ├── ToolInterface.php            # Tool contract: getName, getDescription, getInputSchema, execute
 │       ├── ToolRegistry.php             # Registration + dispatch by name
 │       ├── ToolResultTrait.php          # Shared text()/error() result builders
-│       └── Debug/
-│           ├── ListEntriesTool.php      # list_debug_entries
-│           ├── ViewEntryTool.php        # view_debug_entry
-│           ├── SearchLogsTool.php       # search_logs
-│           ├── AnalyzeExceptionTool.php # analyze_exception
-│           ├── ViewDatabaseQueriesTool.php # view_database_queries
-│           └── ViewTimelineTool.php     # view_timeline
+│       ├── Debug/
+│       │   ├── ListEntriesTool.php      # list_debug_entries
+│       │   ├── ViewEntryTool.php        # view_debug_entry
+│       │   ├── SearchLogsTool.php       # search_logs
+│       │   ├── AnalyzeExceptionTool.php # analyze_exception
+│       │   ├── ViewDatabaseQueriesTool.php # view_database_queries
+│       │   └── ViewTimelineTool.php     # view_timeline
+│       └── Inspector/
+│           ├── InspectConfigTool.php    # inspect_config
+│           ├── InspectRoutesTool.php     # inspect_routes
+│           └── InspectDatabaseSchemaTool.php # inspect_database_schema
 └── tests/
     └── Unit/
         ├── McpServerTest.php            # Protocol handler tests (10 tests)
@@ -71,13 +83,17 @@ libs/McpServer/
         │   └── StdioTransportTest.php   # Transport tests (5 tests)
         └── Tool/
             ├── ToolRegistryTest.php     # Registry tests (4 tests)
-            └── Debug/
-                ├── ListEntriesToolTest.php       # 5 tests
-                ├── ViewEntryToolTest.php          # 4 tests
-                ├── SearchLogsToolTest.php         # 5 tests
-                ├── AnalyzeExceptionToolTest.php   # 6 tests
-                ├── ViewDatabaseQueriesToolTest.php # 5 tests
-                └── ViewTimelineToolTest.php       # 4 tests
+            ├── Debug/
+            │   ├── ListEntriesToolTest.php       # 5 tests
+            │   ├── ViewEntryToolTest.php          # 4 tests
+            │   ├── SearchLogsToolTest.php         # 5 tests
+            │   ├── AnalyzeExceptionToolTest.php   # 6 tests
+            │   ├── ViewDatabaseQueriesToolTest.php # 5 tests
+            │   └── ViewTimelineToolTest.php       # 4 tests
+            └── Inspector/
+                ├── InspectConfigToolTest.php          # 9 tests
+                ├── InspectRoutesToolTest.php           # 9 tests
+                └── InspectDatabaseSchemaToolTest.php   # 11 tests
 ```
 
 ## Transports
@@ -88,8 +104,10 @@ For AI clients that launch a local process (Claude Code, Cursor):
 
 ```bash
 php vendor/bin/adp-mcp --storage=/path/to/debug-data
+# With inspector tools (live app queries):
+php vendor/bin/adp-mcp --storage=/path/to/debug-data --inspector-url=http://localhost:8080
 # or
-php yii mcp:serve --storage-path=/path/to/debug-data
+php yii mcp:serve --storage-path=/path/to/debug-data --inspector-url=http://localhost:8080
 ```
 
 Client config:
@@ -104,7 +122,8 @@ Client config:
 }
 ```
 
-Environment variable `ADP_STORAGE_PATH` also accepted.
+Environment variables `ADP_STORAGE_PATH` and `ADP_INSPECTOR_URL` also accepted.
+Inspector tools (config, routes, database schema) are only registered when `--inspector-url` is provided.
 
 ### HTTP (integrated into ADP server)
 
@@ -244,6 +263,48 @@ Performance timeline from all collectors.
 
 Shows first 100 events with offset from first event in milliseconds.
 
+### `inspect_config` (Inspector)
+
+View application configuration, parameters, and event listeners from the live app.
+
+| Parameter | Type | Required | Default |
+|-----------|------|----------|---------|
+| `action` | string (enum: params, config, events) | no | params |
+| `group` | string | no | — |
+| `filter` | string | no | — |
+| `service` | string | no | — |
+
+Actions: `params` → `GET /inspect/api/params`, `config` → `GET /inspect/api/config`, `events` → `GET /inspect/api/events`.
+Filter applies case-insensitive text search on keys. Truncates output at 15,000 chars.
+
+### `inspect_routes` (Inspector)
+
+List application routes or check if a specific path matches a route.
+
+| Parameter | Type | Required | Default |
+|-----------|------|----------|---------|
+| `action` | string (enum: list, check) | no | list |
+| `path` | string | no (required for check) | — |
+| `filter` | string | no | — |
+| `service` | string | no | — |
+
+List: `GET /inspect/api/routes` → markdown table (Methods | Pattern | Name).
+Check: `GET /inspect/api/route/check?route=<path>` → match result with handler action.
+
+### `inspect_database_schema` (Inspector)
+
+Browse database tables and view column/index details.
+
+| Parameter | Type | Required | Default |
+|-----------|------|----------|---------|
+| `table` | string | no | — |
+| `filter` | string | no | — |
+| `service` | string | no | — |
+
+Without `table`: `GET /inspect/api/table` → table list with row counts and sizes.
+With `table`: `GET /inspect/api/table/{name}?limit=0` → columns (name, type, nullable, default, PK) and indexes.
+Filter applies case-insensitive search on table names (list mode only).
+
 ## Key Classes
 
 | Class | Purpose |
@@ -252,8 +313,9 @@ Shows first 100 events with offset from first event in milliseconds.
 | `StdioTransport` | Newline-delimited JSON-RPC over stdin/stdout |
 | `ToolInterface` | Contract: `getName()`, `getDescription()`, `getInputSchema()`, `execute(array): array` |
 | `ToolRegistry` | Stores tools by name, returns `list()` for MCP, dispatches `get()` by name |
-| `McpToolRegistryFactory` | Static `create(StorageInterface)` — builds registry with all debug tools |
+| `McpToolRegistryFactory` | Static `create(StorageInterface, ?InspectorClient)` — builds registry with debug + inspector tools |
 | `ToolResultTrait` | `text(string)` and `error(string)` helpers for MCP tool responses |
+| `InspectorClient` | HTTP client for Inspector API. `get(path, query)` / `post(path, body)` via `file_get_contents` |
 
 ## Adding New Tools
 
@@ -270,14 +332,15 @@ Shows first 100 events with offset from first event in milliseconds.
 | **API** | `McpSettingsController` at `GET/PUT /inspect/api/mcp/settings` |
 | **API** | `McpSettings` — file-based enabled/disabled persistence (`mcp-settings.json`) |
 | **API** | `ApiApplication::buildPipeline()` skips `ResponseDataWrapper` for MCP path |
-| **Cli** | `McpServeCommand` (`mcp:serve`) for stdio standalone |
-| **Cli** | `server-router.php` registers `McpController` + `McpSettingsController` in standalone server DI |
-| **Kernel** | All tools read from `StorageInterface` (FileStorage in production) |
+| **Cli** | `McpServeCommand` (`mcp:serve`) for stdio standalone, `--inspector-url` option |
+| **Cli** | `server-router.php` registers `McpController` + `McpSettingsController` with `InspectorClient` |
+| **Kernel** | Debug tools read from `StorageInterface` (FileStorage in production) |
+| **Adapters** | Yii3, Symfony, Laravel, Yii2 — wire `InspectorClient` with app's own base URL |
 | **Frontend** | MCP Server toggle in Settings dialog, RTK Query for `getMcpSettings`/`updateMcpSettings` |
 
 ## Test Summary
 
-54 tests, 104 assertions. All tests use `MemoryStorage` — no I/O.
+83 tests, 173 assertions. Debug tests use `MemoryStorage`, Inspector tests use mocked `InspectorClient` — no I/O.
 
 | Suite | Tests |
 |-------|------:|
@@ -285,5 +348,6 @@ Shows first 100 events with offset from first event in milliseconds.
 | StdioTransportTest | 5 |
 | ToolRegistryTest | 4 |
 | Debug tool tests (6 files) | 29 |
+| Inspector tool tests (3 files) | 29 |
 | McpControllerTest (in API) | 6 |
-| **Total** | **54** |
+| **Total** | **83** |

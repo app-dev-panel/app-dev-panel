@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Kernel;
 
+use AppDevPanel\Kernel\Inspector\ClosureDescriptor;
+
 final class Dumper
 {
     private readonly DumpContext $context;
@@ -63,6 +65,54 @@ final class Dumper
             $options |= JSON_PRETTY_PRINT;
         }
 
-        return json_encode($data, $options);
+        return json_encode(self::sanitizeForJson($data), $options);
+    }
+
+    /**
+     * Recursively replace any value that json_encode cannot represent with
+     * a descriptive placeholder string. Handles resources, NAN, INF, closures,
+     * and other non-encodable types without silently dropping data.
+     */
+    private static function sanitizeForJson(mixed $value): mixed
+    {
+        if (is_resource($value)) {
+            return sprintf('(resource: %s, id=%d)', get_resource_type($value), (int) $value);
+        }
+
+        if ($value === null || is_bool($value) || is_int($value) || is_string($value)) {
+            return $value;
+        }
+
+        if (is_float($value)) {
+            if (is_nan($value)) {
+                return '(nan)';
+            }
+            if (!is_finite($value)) {
+                return $value > 0 ? '(inf)' : '(-inf)';
+            }
+            return $value;
+        }
+
+        if (is_array($value)) {
+            $out = [];
+            foreach ($value as $k => $v) {
+                $out[$k] = self::sanitizeForJson($v);
+            }
+            return $out;
+        }
+
+        if ($value instanceof \Closure) {
+            return ClosureDescriptor::describe($value);
+        }
+
+        if (is_object($value)) {
+            // Any object reaching this point (Dumper normally converts objects to arrays)
+            // is a stray reference — serialize as a description rather than letting
+            // json_encode attempt (and possibly fail on) its properties.
+            return sprintf('(object: %s#%d)', $value::class, spl_object_id($value));
+        }
+
+        // __PHP_Incomplete_Class and anything else unknown.
+        return sprintf('(unserializable: %s)', gettype($value));
     }
 }

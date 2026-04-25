@@ -16,7 +16,7 @@ use PHPUnit\Framework\TestCase;
  *  1. Symfony boots with ADP bundle
  *  2. Console events are intercepted
  *  3. Debugger starts and stops
- *  4. Data is flushed to FileStorage as JSON
+ *  4. Data is flushed to SqliteStorage
  *
  * Requires: playground/symfony-app with `composer install` completed.
  */
@@ -211,8 +211,12 @@ final class ConsoleProcessIntegrationTest extends TestCase
             ['APP_ENV' => 'dev', 'APP_DEBUG' => '1'],
         );
 
-        $stdout = stream_get_contents($pipes[1]);
-        $stderr = stream_get_contents($pipes[2]);
+        if (!is_resource($process) || !isset($pipes[1], $pipes[2])) {
+            throw new \RuntimeException('Failed to spawn console subprocess or open stdio pipes.');
+        }
+
+        $stdout = (string) stream_get_contents($pipes[1]);
+        $stderr = (string) stream_get_contents($pipes[2]);
         fclose($pipes[1]);
         fclose($pipes[2]);
 
@@ -237,7 +241,7 @@ final class ConsoleProcessIntegrationTest extends TestCase
         foreach ($dateDirs as $dateDir) {
             $entryDirs = glob($dateDir . '/*', GLOB_ONLYDIR);
             foreach ($entryDirs as $entryDir) {
-                if (!file_exists($entryDir . '/summary.json.gz') && !file_exists($entryDir . '/summary.json')) {
+                if (!file_exists($entryDir . '/summary.json') && !file_exists($entryDir . '/summary.json.gz')) {
                     continue;
                 }
 
@@ -267,7 +271,11 @@ final class ConsoleProcessIntegrationTest extends TestCase
             return gzdecode(file_get_contents($basePath . '.json.gz'));
         }
 
-        return file_get_contents($basePath . '.json');
+        if (file_exists($basePath . '.json')) {
+            return file_get_contents($basePath . '.json');
+        }
+
+        throw new \RuntimeException(sprintf('Storage file not found: %s(.json|.json.gz)', $basePath));
     }
 
     private function clearDebugStorage(): void

@@ -4,129 +4,113 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Api\Inspector\Test;
 
-use PHPUnit\Framework\AssertionFailedError;
-use PHPUnit\Framework\Test;
-use PHPUnit\Framework\TestCase;
-use PHPUnit\Framework\TestResult;
-use PHPUnit\Framework\TestSuite;
-use PHPUnit\Framework\Warning;
-use PHPUnit\Runner\BaseTestRunner;
-use PHPUnit\TextUI\ResultPrinter;
-use PHPUnit\Util\TestDox\NamePrettifier;
-use ReflectionClass;
-use Throwable;
+use PHPUnit\Event\Code\TestMethod;
+use PHPUnit\Event\Code\Throwable;
+use PHPUnit\Event\Test\Errored;
+use PHPUnit\Event\Test\ErroredSubscriber;
+use PHPUnit\Event\Test\Failed;
+use PHPUnit\Event\Test\FailedSubscriber;
+use PHPUnit\Event\Test\MarkedIncomplete;
+use PHPUnit\Event\Test\MarkedIncompleteSubscriber;
+use PHPUnit\Event\Test\Passed;
+use PHPUnit\Event\Test\PassedSubscriber;
+use PHPUnit\Event\Test\Skipped;
+use PHPUnit\Event\Test\SkippedSubscriber;
+use PHPUnit\Event\TestRunner\ExecutionFinished;
+use PHPUnit\Event\TestRunner\ExecutionFinishedSubscriber;
+use PHPUnit\Runner\Extension\Extension;
+use PHPUnit\Runner\Extension\Facade;
+use PHPUnit\Runner\Extension\ParameterCollection;
+use PHPUnit\TextUI\Configuration\Configuration;
 
 /**
- * @psalm-suppress InternalClass, InternalMethod
+ * PHPUnit 10+ extension that collects test outcomes into a JSON file.
+ *
+ * The output path is taken from either the {@see PHPUnitJSONReporter::ENVIRONMENT_VARIABLE_DIRECTORY_NAME}
+ * environment variable or the `output-path` extension parameter (phpunit.xml).
+ * The resulting file has the fixed name {@see PHPUnitJSONReporter::FILENAME} and contains a JSON array of
+ * {file, test, status, message, stacktrace} objects — matching the legacy ADP contract.
  */
-class PHPUnitJSONReporter implements ResultPrinter
+final class PHPUnitJSONReporter implements Extension
 {
     public const FILENAME = 'phpunit-report.json';
     public const ENVIRONMENT_VARIABLE_DIRECTORY_NAME = 'REPORTER_OUTPUT_PATH';
 
-    private array $data = [];
-    private NamePrettifier $prettifier;
-
-    public function __construct()
+    public function bootstrap(Configuration $configuration, Facade $facade, ParameterCollection $parameters): void
     {
-        $this->prettifier = new NamePrettifier();
+        $outputPath = $this->resolveOutputPath($parameters);
+        $collector = new PHPUnitReportCollector($outputPath);
+
+        $facade->registerSubscribers(
+            new class($collector) implements PassedSubscriber {
+                public function __construct(
+                    private readonly PHPUnitReportCollector $collector,
+                ) {}
+
+                public function notify(Passed $event): void
+                {
+                    $this->collector->recordPassed($event->test());
+                }
+            },
+            new class($collector) implements FailedSubscriber {
+                public function __construct(
+                    private readonly PHPUnitReportCollector $collector,
+                ) {}
+
+                public function notify(Failed $event): void
+                {
+                    $this->collector->recordFailure($event->test(), 'fail', $event->throwable());
+                }
+            },
+            new class($collector) implements ErroredSubscriber {
+                public function __construct(
+                    private readonly PHPUnitReportCollector $collector,
+                ) {}
+
+                public function notify(Errored $event): void
+                {
+                    $this->collector->recordFailure($event->test(), 'error', $event->throwable());
+                }
+            },
+            new class($collector) implements SkippedSubscriber {
+                public function __construct(
+                    private readonly PHPUnitReportCollector $collector,
+                ) {}
+
+                public function notify(Skipped $event): void
+                {
+                    $this->collector->recordSkipped($event->test(), $event->message());
+                }
+            },
+            new class($collector) implements MarkedIncompleteSubscriber {
+                public function __construct(
+                    private readonly PHPUnitReportCollector $collector,
+                ) {}
+
+                public function notify(MarkedIncomplete $event): void
+                {
+                    $this->collector->recordFailure($event->test(), 'incomplete', $event->throwable());
+                }
+            },
+            new class($collector) implements ExecutionFinishedSubscriber {
+                public function __construct(
+                    private readonly PHPUnitReportCollector $collector,
+                ) {}
+
+                public function notify(ExecutionFinished $event): void
+                {
+                    $this->collector->writeReport();
+                }
+            },
+        );
     }
 
-    public function printResult(TestResult $result): void
+    private function resolveOutputPath(ParameterCollection $parameters): string
     {
-        $path = getenv(self::ENVIRONMENT_VARIABLE_DIRECTORY_NAME) ?: getcwd();
-        ksort($this->data);
-
-        file_put_contents($path . DIRECTORY_SEPARATOR . self::FILENAME, json_encode(
-            array_values($this->data),
-            JSON_THROW_ON_ERROR,
-        ));
-    }
-
-    public function write(string $buffer): void
-    {
-        $this->data = [];
-    }
-
-    public function addError(Test $test, Throwable $t, float $time): void
-    {
-        $this->logErroredTest($test, $t);
-    }
-
-    public function addWarning(Test $test, Warning $e, float $time): void
-    {
-        $this->logErroredTest($test, $e);
-    }
-
-    public function addFailure(Test $test, AssertionFailedError $e, float $time): void
-    {
-        $this->logErroredTest($test, $e);
-    }
-
-    public function addIncompleteTest(Test $test, Throwable $t, float $time): void
-    {
-        $this->logErroredTest($test, $t);
-    }
-
-    public function addRiskyTest(Test $test, Throwable $t, float $time): void
-    {
-        $this->logErroredTest($test, $t);
-    }
-
-    public function addSkippedTest(Test $test, Throwable $t, float $time): void
-    {
-        $this->logErroredTest($test, $t);
-    }
-
-    public function startTestSuite(TestSuite $suite): void {}
-
-    public function endTestSuite(TestSuite $suite): void {}
-
-    public function startTest(Test $test): void {}
-
-    public function endTest(Test $test, float $time): void
-    {
-        if (!$test instanceof TestCase) {
-            return;
+        if ($parameters->has('output-path')) {
+            return $parameters->get('output-path');
         }
-        if ($test->getStatus() !== BaseTestRunner::STATUS_PASSED) {
-            return;
-        }
-
-        $parsedName = $this->parseName($test);
-
-        $this->data[$parsedName] = [
-            'file' => $this->parseFilename($test),
-            'test' => $parsedName,
-            'status' => 'ok',
-            'stacktrace' => [],
-        ];
-    }
-
-    private function parseName(Test $test): string
-    {
-        if ($test instanceof TestCase) {
-            return $test::class . '::' . $test->getName(true);
-        }
-        return $this->prettifier->prettifyTestClass($test::class);
-    }
-
-    private function parseFilename(Test $test): string
-    {
-        $reflection = new ReflectionClass($test);
-
-        return $reflection->getFileName();
-    }
-
-    private function logErroredTest(Test $test, Throwable $t): void
-    {
-        $parsedName = $this->parseName($test);
-
-        $this->data[$parsedName] = [
-            'file' => $this->parseFilename($test),
-            'test' => $parsedName,
-            'status' => $t->getMessage(),
-            'stacktrace' => $t->getTrace(),
-        ];
+        $fromEnv = getenv(self::ENVIRONMENT_VARIABLE_DIRECTORY_NAME);
+        return $fromEnv !== false && $fromEnv !== '' ? $fromEnv : (getcwd() ?: '.');
     }
 }

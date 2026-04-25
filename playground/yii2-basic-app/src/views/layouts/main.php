@@ -440,10 +440,14 @@
             'contact' => 'Contact',
             'api-playground' => 'API Playground',
             'error' => 'Error Demo',
+            'log-demo' => 'Log Demo',
+            'var-dumper' => 'Var Dumper',
+            'api/openapi.json' => 'OpenAPI',
         ];
         foreach ($links as $url => $label): ?>
             <a href="/<?= $url ?>" class="<?= $path === $url ? 'active' : '' ?>"><?= $label ?></a>
         <?php endforeach; ?>
+        <a href="/debug" target="_blank" rel="noopener">Debug Panel</a>
     </nav>
 </div>
 <div class="main">

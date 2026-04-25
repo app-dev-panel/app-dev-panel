@@ -7,17 +7,19 @@ data collectors, storage, PSR proxy system, and object serialization.
 
 Kernel depends on PSR interfaces and these core infrastructure helpers:
 
-- `yiisoft/strings` — String manipulation utilities (core infra, framework-agnostic)
-- `yiisoft/json` — JSON encode/decode with error handling (core infra, framework-agnostic)
-- `yiisoft/var-dumper` — Variable dumping/serialization (core infra, framework-agnostic)
+- `yiisoft/strings` — `CombinedRegexp` (hot path in stream proxies), `WildcardPattern` for ignore globs
+- `yiisoft/files` — `FileHelper::ensureDirectory` / `removeDirectory` / `isEmptyDirectory` for `FileStorage` + GC
+- `yiisoft/var-dumper` — `ClosureExporter` + `VarDumper::create()` at the core of the object dumper
 - `symfony/console` — Console event types for `CommandCollector`
 - `symfony/var-dumper` — Variable dumper integration
 - `guzzlehttp/psr7` — PSR-7 HTTP message implementation
 
-**Core infra policy**: `yiisoft/var-dumper`, `yiisoft/strings`, and `yiisoft/json` are pure
-utility libraries with no framework coupling. They are considered core infrastructure and
-may be used freely in Kernel and any module. Despite the `yiisoft/` vendor prefix, these
-are not Yii framework dependencies.
+**Core infra policy**: the remaining `yiisoft/*` packages are pure utility libraries with no
+framework coupling. Despite the `yiisoft/` vendor prefix, they are not Yii framework
+dependencies. Each kept dep carries real logic (regex compilation, recursive directory
+cleanup, closure export, pretty dumping) that would cost more to re-implement than it
+saves. `yiisoft/json` was dropped in favour of an internal `AppDevPanel\Kernel\Helper\Json`
+wrapping native `json_encode/decode` with `JSON_THROW_ON_ERROR`.
 
 Note: `yiisoft/proxy` was removed from Kernel. Container proxying (`ContainerInterfaceProxy`,
 `ServiceProxy`, `ServiceMethodProxy`, `ContainerProxyConfig`, `ProxyLogTrait`) and
@@ -40,11 +42,17 @@ only depend on `yiisoft/var-dumper` (core infra).
 | `Dumper` | Serializes PHP objects with depth control and circular ref detection |
 | `StorageInterface` | Abstraction for persisting debug data |
 | `FileStorage` | JSON file-based storage with garbage collection |
+| `SqliteStorage` | SQLite-backed storage with WAL journaling and prepared statements |
+| `BroadcastingStorage` | Decorator that broadcasts entry-created UDP notifications via `Broadcaster` |
+| `StorageFactory` | Resolves a driver name (`file`, `sqlite`) or class name into a `StorageInterface` instance |
 | `MemoryStorage` | In-memory storage for testing |
 | `CollectorInterface` | Interface all collectors must implement |
 | `ServiceRegistryInterface` | Registry for external app service descriptors |
 | `FileServiceRegistry` | JSON file-based service registry |
 | `ServiceDescriptor` | Value object: service identity, URL, capabilities, heartbeat |
+| `Inspector\Primitives` | `Primitives::dump($value, $depth)` — canonical serializer for inspector HTTP responses. Walks arrays, replaces every `Closure` with a `ClosureDescriptor` marker, then delegates to `VarDumper::asPrimitives()` |
+| `Inspector\ClosureDescriptor` | `ClosureDescriptor::describe($closure)` — emits `{__closure: true, source, file, startLine, endLine}` for frontend code rendering |
+| `Inspector\ClosureDescriptorTrait` | Sugar for adapter `ConfigProvider`s — exposes `self::describeClosure()` delegating to `ClosureDescriptor::describe()` |
 
 ## Directory Structure
 
@@ -119,13 +127,20 @@ src/
 │   └── FileServiceRegistry.php
 ├── Storage/
 │   ├── StorageInterface.php
-│   ├── FileStorage.php
+│   ├── StorageFactory.php               # Resolves driver name ('file' | 'sqlite') or class name
+│   ├── FileStorage.php                  # JSON file-based (default)
+│   ├── SqliteStorage.php                # SQLite (WAL + prepared statements)
+│   ├── BroadcastingStorage.php          # Decorator: broadcasts ENTRY_CREATED via UDP
 │   ├── FileStorageGarbageCollector.php  # Automatic cleanup of old entries
 │   ├── GarbageCollector.php             # GC interface
 │   └── MemoryStorage.php
 ├── Event/                        # Debugger lifecycle events
 │   ├── ProxyMethodCallEvent.php
 │   └── MethodCallRecord.php
+├── Inspector/                    # Shared serialization helpers for the inspector layer
+│   ├── ClosureDescriptor.php             # Converts Closure → {__closure: true, source, file, startLine, endLine}
+│   ├── ClosureDescriptorTrait.php        # Thin trait wrapper for adapter ConfigProviders
+│   └── Primitives.php                    # `Primitives::dump()` — VarDumper::asPrimitives + deep closure walk
 ├── Helper/                       # Utilities
 │   ├── BacktraceIgnoreMatcher.php
 │   └── StreamWrapper/
@@ -153,6 +168,22 @@ startup() → [proxies feed collectors during request] → shutdown() → flush 
 1. Create a class implementing `CollectorInterface`
 2. Implement `startup()`, `shutdown()`, `getCollected()` methods
 3. Register the collector in the adapter's configuration
+
+## Closure Serialization
+
+Anywhere the Kernel or API serialises data that may contain PHP `Closure` values — storage
+dumps (`Dumper` / `DumpContext`), live inspector responses (`Inspector\Primitives`), adapter
+ConfigProviders normalising event listeners — the closure is replaced with a structured
+descriptor:
+
+```
+{"__closure": true, "source": "static fn(...) => ...", "file": "/path", "startLine": 10, "endLine": 12}
+```
+
+Generated by `Inspector\ClosureDescriptor::describe()` (wraps `Yiisoft\VarDumper\ClosureExporter`).
+The frontend's `JsonRenderer` detects the marker at any nesting level and renders `source` as a
+syntax-highlighted PHP code block. Do **not** stringify closures manually — always route through
+`ClosureDescriptor::describe()` or `Primitives::dump()`.
 
 ## Proxy System
 
@@ -201,6 +232,16 @@ Tracks external application instances that register with ADP for multi-app inspe
 | `TYPE_SUMMARY` | Summary metadata | Timestamp, URL, status, collector names |
 | `TYPE_DATA` | Full data | Complete collector payloads |
 | `TYPE_OBJECTS` | Object dumps | Serialized objects for deep inspection |
+
+### Drivers and Decorators
+
+| Implementation | Use case |
+|----------------|----------|
+| `FileStorage` | Default. One JSON file per entry under the storage path; per-entry GC. |
+| `SqliteStorage` | Single `.db` file with `entries` table (WAL journaling, `PRAGMA synchronous=NORMAL`, indexed `created_at`). Prepared statements only; unknown storage types throw `InvalidArgumentException` instead of falling through into SQL. |
+| `BroadcastingStorage` | Decorator around any concrete storage. Emits `MESSAGE_TYPE_ENTRY_CREATED` over UDP via `Broadcaster` so SSE listeners and CLI tail react in real time. |
+| `MemoryStorage` | Unit-test helper. |
+| `StorageFactory` | `create(string $driver, array $config, DebuggerIdGenerator $idGenerator)` — `file` / `sqlite` / any FQCN implementing `StorageInterface`. |
 
 ### Write Sources
 

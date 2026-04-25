@@ -46,7 +46,7 @@ export const EnvironmentPage = () => {
                 </Tabs>
             </Box>
             {activeTab === 'phpinfo' && <PhpInfoPage />}
-            {activeTab === 'composer' && <ComposerPage />}
+            {activeTab === 'composer' && <ComposerPage showHeader={false} />}
             {activeTab === 'opcache' && <OpcachePage />}
             {activeTab === 'git' && <GitPage showHeader={false} />}
             {activeTab === 'git-log' && <GitLogPage showHeader={false} />}

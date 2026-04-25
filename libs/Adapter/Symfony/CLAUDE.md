@@ -29,13 +29,14 @@ src/
 │   ├── SymfonyEventDispatcherProxy.php             # Wraps event_dispatcher, implements Component interface
 │   └── SymfonyTranslatorProxy.php                  # Wraps TranslatorInterface, feeds TranslatorCollector
 ├── Collector/
-│   ├── TwigCollector.php                           # Template renders, timing (requires twig/twig)
+│   ├── TwigCollector.php                           # Twig template renders, timing (feeds Kernel TemplateCollector)
 │   ├── CacheCollector.php                          # Cache hits/misses, operations
 │   ├── QueueCollector.php                           # Queue/message bus operations (Symfony Messenger)
 │   ├── SymfonyRequestCollector.php                 # Legacy: Symfony HttpFoundation collector (unused)
 │   └── SymfonyExceptionCollector.php               # Legacy: Symfony exception collector (unused)
 ├── Inspector/
 │   ├── SymfonyConfigProvider.php                   # 'config' alias: params, events, services, bundles
+│   ├── SymfonyAuthorizationConfigProvider.php      # Live auth config: firewalls, role hierarchy, voters (when security-bundle available)
 │   ├── DoctrineSchemaProvider.php                  # Database schema via DBAL (when doctrine available)
 │   ├── NullSchemaProvider.php                      # Fallback when no database configured
 │   ├── SymfonyRouteCollectionAdapter.php           # Route inspection adapter
@@ -146,6 +147,15 @@ Conditionally registered only when `symfony/security-http` is installed and the 
 `InspectController` receives container parameters as 3rd constructor argument for the `/inspect/api/params` endpoint.
 
 `DoctrineSchemaProvider` implements `SchemaProviderInterface` for `/inspect/api/table` endpoints when `doctrine.dbal.default_connection` is available. Falls back to `NullSchemaProvider`.
+
+`SymfonyAuthorizationConfigProvider` implements `AuthorizationConfigProviderInterface` for `/inspect/api/authorization`. Registered by `CollectorProxyCompilerPass::upgradeAuthorizationProvider()` when `security.firewalls` is present (SecurityBundle installed); otherwise `NullAuthorizationConfigProvider` remains in effect.
+
+| Section | Source |
+|---------|--------|
+| `guards` | Container parameter `security.firewalls` (list of firewall names) + all `security.firewall.map.config.{name}.*` params merged into each firewall's config |
+| `roleHierarchy` | Container parameter `security.role_hierarchy.roles` |
+| `voters` | Services tagged `security.voter` (injected via `TaggedIteratorArgument`) |
+| `config` | `security.access_control`, `security.access.decision_manager.strategy`, `security.user.provider.concrete.*`, firewall names list |
 
 ## Collectors
 

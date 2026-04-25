@@ -11,7 +11,6 @@ import {matchSeverityByFileState} from '@app-dev-panel/panel/Module/GenCode/Comp
 import {Context} from '@app-dev-panel/panel/Module/GenCode/Context/Context';
 import {FileOperationEnum, FileStateEnum, GenCodeFile} from '@app-dev-panel/panel/Module/GenCode/Types/FIle.types';
 import {GenCodeResult} from '@app-dev-panel/panel/Module/GenCode/Types/Result.types';
-import {yup} from '@app-dev-panel/sdk/Adapter/yup';
 import {
     Box,
     Button,
@@ -43,15 +42,6 @@ function getStateLabel(state: FileStateEnum) {
             break;
     }
     return result;
-}
-
-function createValidationSchema(files: GenCodeFile[]) {
-    const rulesSet: Record<string, ReturnType<typeof yup.number>> = {};
-    files.forEach(({id}) => {
-        rulesSet[id] = yup.number().required().oneOf([5, 6, 7]);
-    });
-
-    return yup.object(rulesSet);
 }
 
 function FileAction({file, generator}: {file: GenCodeFile; generator: GenCodeGenerator}) {

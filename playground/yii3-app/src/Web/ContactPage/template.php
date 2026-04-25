@@ -22,7 +22,9 @@ $this->setTitle('Contact');
 
 <?php if ($submitted): ?>
     <div class="alert alert-success">
-        Thank you, <?= htmlspecialchars($formData['name']) ?>! Your message has been received. (This is a demo &mdash; no email was actually sent.)
+        Thank you, <?= htmlspecialchars(
+            $formData['name'],
+        ) ?>! Your message has been received. (This is a demo &mdash; no email was actually sent.)
     </div>
 <?php endif; ?>
 

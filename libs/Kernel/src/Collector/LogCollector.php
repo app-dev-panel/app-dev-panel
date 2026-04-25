@@ -48,9 +48,17 @@ class LogCollector implements SummaryCollectorInterface
         if (!$this->isActive()) {
             return [];
         }
+
+        $byLevel = [];
+        foreach ($this->messages as $message) {
+            $level = $message['level'];
+            $byLevel[$level] = ($byLevel[$level] ?? 0) + 1;
+        }
+
         return [
             'logger' => [
                 'total' => count($this->messages),
+                'byLevel' => $byLevel,
             ],
         ];
     }

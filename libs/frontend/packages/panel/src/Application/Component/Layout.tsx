@@ -1,41 +1,57 @@
+import {LiveFeedPanel} from '@app-dev-panel/panel/Application/Component/LiveFeedPanel';
 import {NotificationCenter} from '@app-dev-panel/panel/Application/Component/NotificationCenter';
+import {AiChatPopup} from '@app-dev-panel/toolbar/Module/Toolbar/Component/Toolbar/AiChatPopup';
 
+import {DuckIcon} from '@app-dev-panel/panel/Application/Component/DuckIcon';
+import {useFramesEntries} from '@app-dev-panel/panel/Module/Frames/Context/Context';
 import {
     useGetMcpSettingsQuery,
     useUpdateMcpSettingsMutation,
 } from '@app-dev-panel/panel/Module/Inspector/API/Inspector';
+import {useOpenApiEntries} from '@app-dev-panel/panel/Module/OpenApi/Context/Context';
 import {useSelector} from '@app-dev-panel/panel/store';
 import {
     changeAutoLatest,
-    changeEditorCustomTemplate,
-    changeEditorPreset,
     changeShowInactiveCollectors,
     changeThemeMode,
+    setEditorConfig,
+    toggleLiveFeed,
 } from '@app-dev-panel/sdk/API/Application/ApplicationContext';
 import {changeEntryAction, useDebugEntry} from '@app-dev-panel/sdk/API/Debug/Context';
 import {DebugEntry, debugApi, useLazyGetDebugQuery} from '@app-dev-panel/sdk/API/Debug/Debug';
+import {addLiveDump, addLiveLog, useLiveCount} from '@app-dev-panel/sdk/API/Debug/LiveContext';
+import {setFloatingOpen} from '@app-dev-panel/sdk/API/Llm/AiChatSlice';
 import {ErrorFallback} from '@app-dev-panel/sdk/Component/ErrorFallback';
 import {CommandPalette} from '@app-dev-panel/sdk/Component/Layout/CommandPalette';
 import {EntrySelector} from '@app-dev-panel/sdk/Component/Layout/EntrySelector';
 import {TopBar} from '@app-dev-panel/sdk/Component/Layout/TopBar';
 import {UnifiedSidebar} from '@app-dev-panel/sdk/Component/Layout/UnifiedSidebar';
-import {selectUnreadCount} from '@app-dev-panel/sdk/Component/Notifications';
+import {addNotification, selectUnreadCount} from '@app-dev-panel/sdk/Component/Notifications';
 import {ScrollTopButton} from '@app-dev-panel/sdk/Component/ScrollTop';
 import {componentTokens} from '@app-dev-panel/sdk/Component/Theme/tokens';
+import {useCopyAsImage} from '@app-dev-panel/sdk/Component/useCopyAsImage';
 import {EventTypesEnum, useServerSentEvents} from '@app-dev-panel/sdk/Component/useServerSentEvents';
-import {compareCollectorWeight, getCollectorIcon, getCollectorLabel} from '@app-dev-panel/sdk/Helper/collectorMeta';
+import {
+    compareCollectorWeight,
+    getCollectorIcon,
+    getCollectorLabel,
+    hiddenSidebarCollectors,
+} from '@app-dev-panel/sdk/Helper/collectorMeta';
 import {CollectorsMap} from '@app-dev-panel/sdk/Helper/collectors';
 import {getCollectedCountByCollector} from '@app-dev-panel/sdk/Helper/collectorsTotal';
 import {isDebugEntryAboutConsole, isDebugEntryAboutWeb} from '@app-dev-panel/sdk/Helper/debugEntry';
-import {type EditorPreset, defaultEditorConfig} from '@app-dev-panel/sdk/Helper/editorUrl';
+import {type EditorConfig, defaultEditorConfig} from '@app-dev-panel/sdk/Helper/editorUrl';
 import {formatMillisecondsAsDuration} from '@app-dev-panel/sdk/Helper/formatDate';
+import {LOG_LEVEL_GROUPS, sumLevels} from '@app-dev-panel/sdk/Types/LogLevel';
 import Box from '@mui/material/Box';
 import CssBaseline from '@mui/material/CssBaseline';
 import Drawer from '@mui/material/Drawer';
+import Fab from '@mui/material/Fab';
+import Tooltip from '@mui/material/Tooltip';
 import {styled, useTheme as useMuiTheme} from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import * as React from 'react';
-import {useCallback, useEffect, useMemo, useReducer} from 'react';
+import {useCallback, useEffect, useMemo, useReducer, useRef} from 'react';
 import {ErrorBoundary} from 'react-error-boundary';
 import {useDispatch} from 'react-redux';
 import {Outlet, useLocation, useNavigate, useSearchParams} from 'react-router';
@@ -92,19 +108,44 @@ function uiReducer(state: UIState, action: UIAction): UIState {
     }
 }
 
+/**
+ * Build colored segments for the Log sidebar badge: log info / warnings / errors / deprecations / dumps.
+ * Each source keeps its own position; only non-zero segments are rendered by NavBadge.
+ */
+const buildLogBadgeSegments = (
+    entry: DebugEntry,
+): {count: number; variant: 'default' | 'error' | 'warning' | 'info'}[] | undefined => {
+    const byLevel = entry.logger?.byLevel;
+    const loggerTotal = Number(entry.logger?.total || 0);
+    const deprecations = Number(entry.deprecation?.total || 0);
+    const dumps = Number(entry['var-dumper']?.total || 0);
+
+    const errors = byLevel ? sumLevels(byLevel, LOG_LEVEL_GROUPS.errors) : 0;
+    const warnings = byLevel ? sumLevels(byLevel, LOG_LEVEL_GROUPS.warnings) : 0;
+    const info = byLevel ? sumLevels(byLevel, LOG_LEVEL_GROUPS.info) : loggerTotal;
+
+    if (errors + warnings + info + deprecations + dumps === 0) return undefined;
+    return [
+        {count: info, variant: 'default'},
+        {count: warnings, variant: 'warning'},
+        {count: errors, variant: 'error'},
+        {count: deprecations, variant: 'warning'},
+        {count: dumps, variant: 'info'},
+    ];
+};
+
 // ---------------------------------------------------------------------------
-// Collectors hidden from sidebar (shown in overview instead)
+// Derive a short label for an Open API / Frames entry URL
 // ---------------------------------------------------------------------------
-const hiddenCollectors = new Set<string>([
-    CollectorsMap.WebAppInfoCollector,
-    CollectorsMap.ConsoleAppInfoCollector,
-    CollectorsMap.HttpStreamCollector,
-    CollectorsMap.DeprecationCollector,
-    CollectorsMap.VarDumperCollector,
-    CollectorsMap.HttpClientCollector,
-    CollectorsMap.RequestCollector,
-    CollectorsMap.CommandCollector,
-]);
+const labelFromUrl = (url: string): string => {
+    try {
+        const parsed = new URL(url);
+        const segments = parsed.pathname.split('/').filter(Boolean);
+        return segments[segments.length - 1] || parsed.host;
+    } catch {
+        return url;
+    }
+};
 
 // ---------------------------------------------------------------------------
 // Static inspector sub-items
@@ -120,6 +161,7 @@ const inspectorChildren = [
     {key: '/inspector/storage', icon: 'storage', label: 'Storage'},
     {key: '/inspector/authorization', icon: 'shield', label: 'Authorization'},
     {key: '/inspector/environment', icon: 'settings_suggest', label: 'Environment'},
+    {key: '/inspector/http-mock', icon: 'cloud_queue', label: 'HTTP Mock'},
 ];
 
 // ---------------------------------------------------------------------------
@@ -136,23 +178,27 @@ const MainArea = styled(Box)(({theme}) => ({
     [theme.breakpoints.up('sm')]: {padding: componentTokens.mainGap, gap: componentTokens.mainGap},
 }));
 
-const MainInner = styled(Box)({
+const MainInner = styled(Box, {shouldForwardProp: (p) => p !== 'expanded'})<{expanded?: boolean}>(({expanded}) => ({
     display: 'flex',
     width: '100%',
-    maxWidth: componentTokens.mainMaxWidth,
+    maxWidth: expanded ? 'none' : componentTokens.mainMaxWidth,
     gap: componentTokens.mainGap,
-});
-
-const ContentArea = styled(Box)(({theme}) => ({
-    flex: 1,
-    minWidth: 0,
-    borderRadius: componentTokens.contentPanel.borderRadius,
-    backgroundColor: theme.palette.background.paper,
-    border: `1px solid ${theme.palette.divider}`,
-    padding: theme.spacing(2, 1.5),
-    overflowY: 'auto',
-    [theme.breakpoints.up('sm')]: {padding: theme.spacing(3.5, 4.5)},
 }));
+
+const ContentArea = styled(Box, {shouldForwardProp: (prop) => prop !== 'fullBleed'})<{fullBleed?: boolean}>(
+    ({theme, fullBleed}) => ({
+        flex: 1,
+        minWidth: 0,
+        borderRadius: componentTokens.contentPanel.borderRadius,
+        backgroundColor: theme.palette.background.paper,
+        border: `1px solid ${theme.palette.divider}`,
+        padding: fullBleed ? 0 : theme.spacing(2, 1.5),
+        overflowY: 'auto',
+        [theme.breakpoints.up('sm')]: {padding: fullBleed ? 0 : theme.spacing(3.5, 4.5)},
+    }),
+);
+
+const FULL_BLEED_PATTERNS: RegExp[] = [/^\/open-api(\/.*)?$/, /^\/frames(\/.*)?$/];
 
 // ---------------------------------------------------------------------------
 // Layout component
@@ -162,7 +208,7 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
     const location = useLocation();
     const navigate = useNavigate();
     const dispatch = useDispatch();
-    const [searchParams] = useSearchParams();
+    const [searchParams, setSearchParams] = useSearchParams();
     const muiTheme = useMuiTheme();
     const isMobile = useMediaQuery(muiTheme.breakpoints.down('md'));
     const [ui, dispatchUI] = useReducer(uiReducer, initialUIState);
@@ -179,6 +225,14 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
     const showInactiveCollectors = useSelector((state) => state.application.showInactiveCollectors);
     const editorConfig = useSelector((state) => state.application.editorConfig) ?? defaultEditorConfig;
     const notificationCount = useSelector(selectUnreadCount);
+    const liveFeedCount = useLiveCount();
+    const liveFeedOpen = useSelector((state) => state.application.liveFeedOpen ?? false);
+    const aiChatOpen = useSelector((state) => state.aiChat?.floatingOpen ?? false);
+    const handleAiChatToggle = useCallback(() => dispatch(setFloatingOpen(!aiChatOpen)), [dispatch, aiChatOpen]);
+    const handleAiChatClose = useCallback(() => dispatch(setFloatingOpen(false)), [dispatch]);
+
+    // Copy as image
+    const {copyToClipboard: copyAsImage, downloadAsPng, isCapturing, targetRef: contentRef} = useCopyAsImage();
 
     // MCP settings
     const {data: mcpSettings} = useGetMcpSettingsQuery();
@@ -197,14 +251,66 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
         getDebugQuery();
     }, [getDebugQuery, backendUrl, dispatch]);
 
-    // Auto-select first entry when data loads
+    // Entry selection rules:
+    // - Honor `?debugEntry=<id>` from the URL on first load and when the URL
+    //   genuinely changes (the embedded toolbar's iframe navigates via
+    //   postMessage which rewrites the query string — we want to follow it).
+    // - Don't re-apply the URL when only the entries list refreshes (SSE),
+    //   otherwise the user's manual prev/next-arrow navigation (which updates
+    //   Redux but not the URL) would be overwritten every second.
+    // - If the URL pins an entry that is absent from a non-empty loaded list,
+    //   treat it as evicted from the FIFO storage: strip the pin, notify once,
+    //   and fall back to the latest entry. The empty-list case is left alone
+    //   so the initial "no entries yet" state is not misreported as eviction.
+    // - If the URL has no `debugEntry` and nothing is selected yet, fall back
+    //   to the latest entry.
+    const lastSyncedUrlEntryIdRef = useRef<string | null>(null);
+    const evictedNotifiedIdsRef = useRef<Set<string>>(new Set());
     useEffect(() => {
-        if (getDebugQueryInfo.isSuccess && getDebugQueryInfo.data && getDebugQueryInfo.data.length) {
-            if (!debugEntry) {
+        if (!getDebugQueryInfo.isSuccess || !getDebugQueryInfo.data) return;
+
+        const requestedId = searchParams.get('debugEntry');
+        if (requestedId) {
+            if (requestedId === lastSyncedUrlEntryIdRef.current) return;
+            const requested = getDebugQueryInfo.data.find((e) => e.id === requestedId);
+            if (requested) {
+                lastSyncedUrlEntryIdRef.current = requestedId;
+                if (debugEntry?.id !== requestedId) {
+                    dispatch(changeEntryAction(requested));
+                }
+                return;
+            }
+            if (getDebugQueryInfo.data.length === 0) return; // list empty — nothing to compare against
+            // Pinned id is absent from a non-empty list → entry has been evicted.
+            if (!evictedNotifiedIdsRef.current.has(requestedId)) {
+                evictedNotifiedIdsRef.current.add(requestedId);
+                dispatch(
+                    addNotification({
+                        title: 'Debug entry unavailable',
+                        text: `Entry ${requestedId.slice(0, 12)}… is no longer in storage. Opened the latest entry instead.`,
+                        color: 'info',
+                    }),
+                );
+            }
+            lastSyncedUrlEntryIdRef.current = null;
+            setSearchParams(
+                (prev) => {
+                    const next = new URLSearchParams(prev);
+                    next.delete('debugEntry');
+                    return next;
+                },
+                {replace: true},
+            );
+            if (debugEntry?.id === requestedId || !debugEntry) {
                 dispatch(changeEntryAction(getDebugQueryInfo.data[0]));
             }
+            return;
         }
-    }, [getDebugQueryInfo.isSuccess, getDebugQueryInfo.data, dispatch, debugEntry]);
+
+        if (!debugEntry && getDebugQueryInfo.data.length > 0) {
+            dispatch(changeEntryAction(getDebugQueryInfo.data[0]));
+        }
+    }, [getDebugQueryInfo.isSuccess, getDebugQueryInfo.data, dispatch, debugEntry, searchParams, setSearchParams]);
 
     // SSE for auto-refresh
     const changeEntry = useCallback(
@@ -222,16 +328,44 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
             } catch {
                 return;
             }
-            if (data.type && data.type === EventTypesEnum.DebugUpdated) {
+            if (!data.type) return;
+
+            if (data.type === EventTypesEnum.DebugUpdated || data.type === EventTypesEnum.EntryCreated) {
                 const result = await getDebugQuery();
                 if ('data' in result && result.data.length > 0) {
                     changeEntry(result.data[0]);
                 }
+            } else if (data.type === EventTypesEnum.LiveLog) {
+                try {
+                    const payload = typeof data.payload === 'string' ? JSON.parse(data.payload) : data.payload;
+                    if (payload && typeof payload === 'object') {
+                        dispatch(
+                            addLiveLog({
+                                level: String(payload.level ?? 'debug'),
+                                message: String(payload.message ?? ''),
+                                context: payload.context,
+                            }),
+                        );
+                    }
+                } catch {
+                    /* ignore malformed payloads */
+                }
+            } else if (data.type === EventTypesEnum.LiveDump) {
+                try {
+                    const payload = typeof data.payload === 'string' ? JSON.parse(data.payload) : data.payload;
+                    if (payload && typeof payload === 'object') {
+                        dispatch(addLiveDump({variable: payload, line: payload.$__line__$ ?? undefined}));
+                    }
+                } catch {
+                    /* ignore malformed payloads */
+                }
             }
         },
-        [getDebugQuery, changeEntry],
+        [getDebugQuery, changeEntry, dispatch],
     );
-    useServerSentEvents(backendUrl, onUpdatesHandler, autoLatest);
+    // Always subscribe so the Live Feed receives logs/dumps independently of autoLatest.
+    // autoLatest only controls whether the entry list jumps to newest entry on entry-created.
+    useServerSentEvents(backendUrl, onUpdatesHandler);
 
     // Entry navigation
     const entries = getDebugQueryInfo.data ?? [];
@@ -262,6 +396,7 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
     }, [dispatch, currentMode]);
 
     // Command palette
+    const handleLiveFeedClick = useCallback(() => dispatch(toggleLiveFeed()), [dispatch]);
     const handleSearchClick = useCallback(() => dispatchUI({type: 'OPEN_PALETTE'}), []);
     const handleLogoClick = useCallback(() => navigate('/'), [navigate]);
     const handlePaletteClose = useCallback(() => dispatchUI({type: 'CLOSE_PALETTE'}), []);
@@ -290,16 +425,9 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
         [dispatch],
     );
 
-    const handleEditorPresetChange = useCallback(
-        (preset: EditorPreset) => {
-            dispatch(changeEditorPreset(preset));
-        },
-        [dispatch],
-    );
-
-    const handleEditorCustomTemplateChange = useCallback(
-        (template: string) => {
-            dispatch(changeEditorCustomTemplate(template));
+    const handleEditorConfigChange = useCallback(
+        (config: EditorConfig) => {
+            dispatch(setEditorConfig(config));
         },
         [dispatch],
     );
@@ -310,6 +438,13 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
         },
         [updateMcpSettings],
     );
+
+    const handleOpenWebsite = useCallback(() => {
+        if (!backendUrl) {
+            return;
+        }
+        window.open(backendUrl, '_blank', 'noopener,noreferrer');
+    }, [backendUrl]);
 
     // TopBar debug info — support both web requests and console commands
     const isWeb = debugEntry ? isDebugEntryAboutWeb(debugEntry) : false;
@@ -338,6 +473,18 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
 
     // Build sidebar sections
     const selectedCollector = searchParams.get('collector') || '';
+    const openApiEntries = useOpenApiEntries();
+    const framesEntries = useFramesEntries();
+
+    const openApiChildren = useMemo(
+        () => Object.keys(openApiEntries).map((name) => ({key: name, icon: 'description', label: labelFromUrl(name)})),
+        [openApiEntries],
+    );
+
+    const framesChildren = useMemo(
+        () => Object.keys(framesEntries).map((name) => ({key: name, icon: 'web_asset', label: labelFromUrl(name)})),
+        [framesEntries],
+    );
 
     const debugChildren = useMemo(() => {
         const entriesList = [{key: '__entries__', icon: 'list', label: 'All Entries'}];
@@ -352,17 +499,20 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
             : [];
         const collectors = [...debugEntry.collectors]
             .map((c) => (typeof c === 'string' ? c : c.id))
-            .filter((c) => !hiddenCollectors.has(c))
+            .filter((c) => !hiddenSidebarCollectors.has(c))
             .sort(compareCollectorWeight)
             .map((collector) => {
                 const count = getCollectedCountByCollector(collector as CollectorsMap, debugEntry);
                 const isException = collector === CollectorsMap.ExceptionCollector && !!count && count > 0;
+                const badgeSegments =
+                    collector === CollectorsMap.LogCollector ? buildLogBadgeSegments(debugEntry) : undefined;
                 return {
                     key: collector,
                     icon: getCollectorIcon(collector),
                     label: getCollectorLabel(collector),
                     badge: count,
                     badgeVariant: (isException ? 'error' : 'default') as 'error' | 'default',
+                    badgeSegments,
                 };
             })
             .filter((c) => showInactiveCollectors || c.badge == null || c.badge > 0);
@@ -394,10 +544,10 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
                 href: '/llm',
                 children: [{key: '/llm/mcp', icon: 'hub', label: 'MCP'}],
             },
-            {key: 'open-api', icon: 'data_object', label: 'Open API', href: '/open-api'},
-            {key: 'frames', icon: 'web', label: 'Frames', href: '/frames'},
+            {key: 'open-api', icon: 'data_object', label: 'Open API', href: '/open-api', children: openApiChildren},
+            {key: 'frames', icon: 'web', label: 'Frames', href: '/frames', children: framesChildren},
         ],
-        [debugChildren],
+        [debugChildren, openApiChildren, framesChildren],
     );
 
     // Determine active child key
@@ -423,8 +573,11 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
         if (location.pathname.startsWith('/llm/mcp')) {
             return '/llm/mcp';
         }
+        if (location.pathname.startsWith('/open-api') || location.pathname.startsWith('/frames')) {
+            return searchParams.get('tab') || undefined;
+        }
         return undefined;
-    }, [location.pathname, selectedCollector]);
+    }, [location.pathname, selectedCollector, searchParams]);
 
     const handleNavigate = useCallback(
         (href: string) => {
@@ -446,6 +599,10 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
                 }
             } else if (sectionKey === 'inspector' || sectionKey === 'llm') {
                 navigate(childKey);
+            } else if (sectionKey === 'open-api') {
+                navigate(`/open-api?tab=${encodeURIComponent(childKey)}`);
+            } else if (sectionKey === 'frames') {
+                navigate(`/frames?tab=${encodeURIComponent(childKey)}`);
             }
         },
         [navigate, debugEntry],
@@ -490,13 +647,19 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
                     onShowInactiveCollectorsChange={handleShowInactiveCollectorsChange}
                     mcpEnabled={mcpSettings?.enabled}
                     onMcpEnabledChange={handleMcpEnabledChange}
-                    editorPreset={editorConfig.editor}
-                    editorCustomTemplate={editorConfig.customUrlTemplate}
-                    onEditorPresetChange={handleEditorPresetChange}
-                    onEditorCustomTemplateChange={handleEditorCustomTemplateChange}
+                    editorConfig={editorConfig}
+                    onEditorConfigChange={handleEditorConfigChange}
                     notificationCount={notificationCount}
+                    liveFeedCount={liveFeedCount}
+                    liveFeedActive={liveFeedOpen}
                     onNotificationsClick={handleNotificationsClick}
+                    onLiveFeedClick={handleLiveFeedClick}
                     onLogoClick={handleLogoClick}
+                    onCopyAsImage={copyAsImage}
+                    onDownloadAsImage={downloadAsPng}
+                    isCopyingAsImage={isCapturing}
+                    websiteUrl={backendUrl}
+                    onOpenWebsite={handleOpenWebsite}
                 />
                 <EntrySelector
                     anchorEl={ui.entrySelectorAnchor}
@@ -530,7 +693,7 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
                     </Drawer>
                 )}
                 <MainArea>
-                    <MainInner>
+                    <MainInner expanded={liveFeedOpen && !isMobile}>
                         {!isMobile && (
                             <UnifiedSidebar
                                 sections={sidebarSections}
@@ -540,15 +703,56 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
                                 onChildClick={handleChildClick}
                             />
                         )}
-                        <ContentArea>
+                        <ContentArea
+                            ref={contentRef}
+                            fullBleed={FULL_BLEED_PATTERNS.some((pattern) => pattern.test(location.pathname))}
+                        >
                             <ErrorBoundary FallbackComponent={ErrorFallback} resetKeys={[location.pathname]}>
                                 <Outlet />
                             </ErrorBoundary>
                         </ContentArea>
+                        {liveFeedOpen && !isMobile && <LiveFeedPanel onClose={handleLiveFeedClick} />}
                     </MainInner>
                 </MainArea>
+                {isMobile && (
+                    <Drawer
+                        anchor="bottom"
+                        open={liveFeedOpen}
+                        onClose={handleLiveFeedClick}
+                        ModalProps={{keepMounted: true}}
+                        PaperProps={{
+                            sx: {height: '85vh', borderTopLeftRadius: 16, borderTopRightRadius: 16, overflow: 'hidden'},
+                        }}
+                    >
+                        <LiveFeedPanel onClose={handleLiveFeedClick} />
+                    </Drawer>
+                )}
             </Box>
             {children}
+            {!aiChatOpen && !(isMobile && liveFeedOpen) && (
+                <Tooltip title="Duck AI" placement="left">
+                    <Fab
+                        aria-label="Duck AI"
+                        onClick={handleAiChatToggle}
+                        sx={{
+                            position: 'fixed',
+                            bottom: children ? 72 : 24,
+                            right: 24,
+                            zIndex: 1100,
+                            width: 56,
+                            height: 56,
+                            bgcolor: 'common.white',
+                            border: '2.5px solid',
+                            borderColor: 'primary.main',
+                            boxShadow: '0 4px 12px rgba(37,99,235,0.2)',
+                            '&:hover': {bgcolor: 'primary.light'},
+                        }}
+                    >
+                        <DuckIcon sx={{fontSize: 36}} />
+                    </Fab>
+                </Tooltip>
+            )}
+            <AiChatPopup open={aiChatOpen} onClose={handleAiChatClose} entry={debugEntry} />
             <ScrollTopButton bottomOffset={!!children} />
             <CommandPalette open={ui.paletteOpen} onClose={handlePaletteClose} extraItems={paletteCollectorItems} />
         </>

@@ -49,7 +49,7 @@ final class ModuleRouteRegistrationTest extends TestCase
     /**
      * Verifies that registerRoutes() registers URL rules for debug and inspect API endpoints.
      *
-     * This is the "after fix" scenario — when debug-panel IS in the bootstrap array,
+     * This is the "after fix" scenario — when adp IS in the bootstrap array,
      * Module::bootstrap() is called, which invokes registerRoutes(), adding URL rules.
      */
     public function testRegisterRoutesAddsApiUrlRules(): void
@@ -75,21 +75,20 @@ final class ModuleRouteRegistrationTest extends TestCase
         $app = $this->createMock(Application::class);
         $app->method('getUrlManager')->willReturn($urlManager);
 
-        $module = new Module('debug-panel', null, [
+        $module = new Module('app-dev-panel', null, [
             'storagePath' => $this->storagePath . '/debug',
         ]);
 
         // Call registerRoutes directly via reflection (bootstrap() also calls
         // registerEventListeners which requires real Yii DB classes)
         $method = new \ReflectionMethod($module, 'registerRoutes');
-        $method->setAccessible(true);
         $method->invoke($module, $app);
     }
 
     /**
      * Verifies that without calling bootstrap(), no URL rules are registered.
      *
-     * This is the regression scenario — when debug-panel is NOT in the bootstrap array,
+     * This is the regression scenario — when adp is NOT in the bootstrap array,
      * bootstrap() is never called, so addRules() is never invoked, causing 404 errors
      * for /debug/api/* and /inspect/api/* endpoints.
      */
@@ -102,7 +101,7 @@ final class ModuleRouteRegistrationTest extends TestCase
         $app->method('getUrlManager')->willReturn($urlManager);
 
         // Module is configured but bootstrap() is NOT called (simulating missing bootstrap config)
-        new Module('debug-panel', null, [
+        new Module('app-dev-panel', null, [
             'storagePath' => $this->storagePath . '/debug',
         ]);
 
@@ -122,7 +121,7 @@ final class ModuleRouteRegistrationTest extends TestCase
         $app = $this->createMock(Application::class);
         $app->method('getUrlManager')->willReturn($urlManager);
 
-        $module = new Module('debug-panel', null, [
+        $module = new Module('app-dev-panel', null, [
             'storagePath' => $this->storagePath . '/debug',
             'enabled' => false,
         ]);

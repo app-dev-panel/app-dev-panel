@@ -69,6 +69,8 @@ Download `panel-dist.tar.gz` from a [GitHub Release](https://github.com/app-dev-
 curl -L https://github.com/app-dev-panel/app-dev-panel/releases/latest/download/panel-dist.tar.gz | tar xz -C public/adp-panel
 ```
 
+Alternatively the same archive is published as `frontend-dist.zip` for the built-in updater (see [Updating the frontend](#updating-the-frontend) below).
+
 Then configure the adapter to use the local path:
 
 :::tabs key:framework
@@ -99,7 +101,7 @@ app_dev_panel:
 ```php
 // config/web.php
 'modules' => [
-    'debug-panel' => [
+    'app-dev-panel' => [
         'class' => \AppDevPanel\Adapter\Yii2\Module::class,
         'panelStaticUrl' => '/adp-panel',
     ],
@@ -107,7 +109,42 @@ app_dev_panel:
 ```
 :::
 
-### Option 3: Vite Dev Server
+### Option 3: Build from Source
+
+If you're developing ADP itself or want to use a custom build, you can build the frontend from source and copy the assets into the adapter packages:
+
+```bash
+make build-panel
+```
+
+This command:
+1. Builds the panel and toolbar packages via Vite
+2. Copies `bundle.js`, `bundle.css`, and assets into each adapter's asset directory:
+   - `libs/Adapter/Symfony/Resources/public/`
+   - `libs/Adapter/Laravel/resources/dist/`
+   - `libs/Adapter/Yii3/resources/dist/`
+   - `libs/Adapter/Yii2/resources/dist/`
+
+To also publish the assets into playground applications:
+
+```bash
+make build-install-panel    # Build + publish in one step
+```
+
+::: tip Auto-Detection
+When `static_url` is left empty (the default), each adapter automatically checks whether built assets exist in its package directory. If `bundle.js` is found locally, the adapter serves assets from the local path instead of GitHub Pages — **no configuration needed**.
+
+| Adapter | Local assets path | Served as |
+|---------|-------------------|-----------|
+| Symfony | `Resources/public/bundle.js` | `/bundles/appdevpanel` |
+| Laravel | `resources/dist/bundle.js` → published to `public/vendor/app-dev-panel/` | `/vendor/app-dev-panel` |
+| Yii 3 | `resources/dist/bundle.js` → symlinked to `@public/app-dev-panel/` | `/app-dev-panel` |
+| Yii 2 | `resources/dist/bundle.js` → symlinked to `@webroot/app-dev-panel/` | `/app-dev-panel` |
+
+To revert to GitHub Pages, remove the built assets from the adapter directory.
+:::
+
+### Option 4: Vite Dev Server
 
 During frontend development, you can point the panel to the local Vite dev server:
 
@@ -142,7 +179,7 @@ app_dev_panel:
 == Yii 2
 ```php
 'modules' => [
-    'debug-panel' => [
+    'app-dev-panel' => [
         'class' => \AppDevPanel\Adapter\Yii2\Module::class,
         'panelStaticUrl' => 'http://localhost:3000',
     ],
@@ -158,7 +195,7 @@ The panel SPA includes the following modules:
 |--------|------|-------------|
 | Debug | `/debug` | View collected debug entries — logs, database queries, events, exceptions, timeline, HTTP requests, cache, mail, etc. |
 | Inspector | `/debug/inspector/*` | Live application state — routes, config, database schema, git, cache, files, translations, Composer packages |
-| LLM | `/debug/llm` | AI-powered chat and analysis of debug data |
+| LLM | `/debug/llm` | AI-powered chat and analysis of debug data. Supports OpenRouter, Anthropic, OpenAI, and ACP (local agents like Claude Code) |
 | MCP | `/debug/mcp` | MCP (Model Context Protocol) server configuration |
 | OpenAPI | `/debug/openapi` | Swagger UI for the ADP REST API |
 
@@ -186,3 +223,56 @@ GET /debug/logs/detail
 ```
 
 Panel routes skip the JSON response wrapper and token auth middleware — they only pass through CORS and IP filter.
+
+## Frontend as a Composer Package
+
+Every framework adapter requires `app-dev-panel/frontend-assets`, a Composer package that ships the prebuilt panel SPA. When you install an adapter, Composer pulls `vendor/app-dev-panel/frontend-assets/dist/` automatically — no extra download step.
+
+| What the package provides | Location after install |
+|---------------------------|------------------------|
+| Prebuilt `dist/` (`index.html`, JS, CSS, assets) | `vendor/app-dev-panel/frontend-assets/dist/` |
+| `FrontendAssets::path()` helper | `AppDevPanel\FrontendAssets\FrontendAssets` |
+
+### Standalone server — `adp serve`
+
+The `adp serve` command starts PHP's built-in server with the ADP API on `/debug/api/*` and `/inspect/api/*`, and serves the panel SPA on every other path. When `--frontend-path` is omitted, the command calls `FrontendAssets::path()` and uses the Composer-installed bundle — so the full panel is available at `http://127.0.0.1:8888/` out of the box:
+
+```bash
+php vendor/bin/adp serve --host=127.0.0.1 --port=8888 --storage-path=./var/adp
+```
+
+To serve a different bundle (e.g. a custom build or a local dev copy):
+
+```bash
+php vendor/bin/adp serve --frontend-path=/path/to/my/dist
+```
+
+### Updating the frontend
+
+Two supported update channels:
+
+1. **Composer (recommended)** — bump the tagged version from the [`frontend-assets`](https://github.com/app-dev-panel/frontend-assets) split repository:
+
+   ```bash
+   composer update app-dev-panel/frontend-assets
+   ```
+
+2. **Direct download (for PHAR installs)** — the `frontend:update` CLI command fetches `frontend-dist.zip` from the [latest GitHub Release](https://github.com/app-dev-panel/app-dev-panel/releases) and extracts it in place:
+
+   ```bash
+   php vendor/bin/adp frontend:update check
+   php vendor/bin/adp frontend:update download --path=/path/to/dist
+   ```
+
+   The command writes a `.adp-version` file alongside `index.html` so future `check` calls can tell whether an update is available.
+
+### How the package is built
+
+The monorepo does **not** track `libs/FrontendAssets/dist/` — it is generated on every push by `.github/workflows/split.yml`:
+
+1. `npm ci && npm run build -w packages/sdk && npm run build -w packages/panel` (inside `libs/frontend/`).
+2. The Vite output is copied into `libs/FrontendAssets/dist/`.
+3. A throwaway local commit adds the `dist/` files, then `splitsh-lite` extracts `libs/FrontendAssets/` (source + dist) as a subtree.
+4. The subtree is force-pushed to [`app-dev-panel/frontend-assets`](https://github.com/app-dev-panel/frontend-assets) and tagged with the release version when the trigger is a `v*` tag.
+
+Consumers see the split repository — their `composer require` never reaches into the monorepo.

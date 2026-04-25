@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
+         bootstrap="vendor/autoload.php"
+         colors="true"
+         failOnRisky="true"
+         failOnWarning="true"
+         failOnNotice="true"
+         failOnDeprecation="true"
+         failOnPhpunitDeprecation="true"
+         failOnPhpunitWarning="true"
+         failOnIncomplete="true"
+         failOnSkipped="true"
+         failOnEmptyTestSuite="true"
+         beStrictAboutTestsThatDoNotTestAnything="true"
+         cacheDirectory=".phpunit.cache"
+         enforceTimeLimit="true"
+         defaultTimeLimit="10"
+         timeoutForSmallTests="2"
+         timeoutForMediumTests="5"
+         timeoutForLargeTests="10">
+
+    <php>
+        <ini name="default_socket_timeout" value="10"/>
+        <ini name="max_execution_time" value="15"/>
+    </php>
+
+    <testsuites>
+        <testsuite name="default">
+            <directory>tests</directory>
+        </testsuite>
+    </testsuites>
+</phpunit>

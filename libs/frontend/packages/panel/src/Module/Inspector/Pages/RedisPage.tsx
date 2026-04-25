@@ -146,7 +146,6 @@ export const RedisPage = ({showHeader = true}: {showHeader?: boolean}) => {
         dbSizeQuery.refetch();
     }, [flushDbMutation, keysQuery, dbSizeQuery]);
 
-    const isConnected = pingQuery.isSuccess && !(pingQuery.data as any)?.error;
     const isLoading = pingQuery.isLoading || dbSizeQuery.isLoading;
 
     return (
@@ -161,21 +160,14 @@ export const RedisPage = ({showHeader = true}: {showHeader?: boolean}) => {
                 </Alert>
             )}
 
-            {/* Summary cards */}
-            <SummaryGrid>
-                <SummaryCard>
-                    <SummaryLabel>Status</SummaryLabel>
-                    <SummaryValue sx={{color: isConnected ? 'success.main' : 'error.main', fontSize: '18px'}}>
-                        {isConnected ? 'Connected' : 'Disconnected'}
-                    </SummaryValue>
-                </SummaryCard>
-                {dbSizeQuery.data && (
+            {dbSizeQuery.data && (
+                <SummaryGrid>
                     <SummaryCard>
                         <SummaryLabel>DB Size</SummaryLabel>
                         <SummaryValue sx={{color: 'primary.main'}}>{dbSizeQuery.data.size}</SummaryValue>
                     </SummaryCard>
-                )}
-            </SummaryGrid>
+                </SummaryGrid>
+            )}
 
             {/* Tabs */}
             <Box sx={{borderBottom: 1, borderColor: 'divider', mb: 2}}>

@@ -19,17 +19,20 @@ src/
 ├── Module.php                                 # Core module: DI, collectors, event wiring, routes
 ├── EventListener/
 │   ├── WebListener.php                        # beforeRequest/afterRequest → Debugger lifecycle
-│   ├── AuthorizationListener.php                   # User::EVENT_AFTER_LOGIN/LOGOUT → AuthorizationCollector
+│   ├── AuthorizationListener.php              # User::EVENT_AFTER_LOGIN/LOGOUT → AuthorizationCollector
+│   ├── QueueListener.php                      # yii\queue\Queue push/exec/error events → QueueCollector
 │   └── ConsoleListener.php                    # Console beforeRequest/afterRequest → Debugger lifecycle
 ├── Collector/
 │   ├── DbProfilingTarget.php                  # Yii 2 log target feeding Kernel DatabaseCollector
 │   └── DebugLogTarget.php                     # Real-time log target feeding LogCollector
 ├── Proxy/
+│   ├── CacheProxy.php                         # Extends yii\caching\Cache, feeds CacheCollector
 │   ├── I18NProxy.php                          # Extends yii\i18n\I18N, feeds TranslatorCollector
 │   ├── RouterMatchRecorder.php                # Records route matching data
 │   └── UrlRuleProxy.php                       # Wraps UrlRule for route profiling
 ├── Inspector/
 │   ├── Yii2ConfigProvider.php                 # Components, params, modules, events for inspector
+│   ├── Yii2AuthorizationConfigProvider.php    # Live auth config: user component + (optional) authManager RBAC
 │   ├── Yii2DbSchemaProvider.php               # Database schema via yii\db\Schema
 │   ├── Yii2RouteCollection.php                # Wraps UrlManager rules for route inspector
 │   ├── Yii2RouteAdapter.php                   # Wraps single UrlRule with __debugInfo()
@@ -45,13 +48,13 @@ src/
 ### 1. Bootstrap Registration (`composer.json`)
 
 Via `extra.bootstrap` in composer.json, Yii 2 auto-loads `Bootstrap` class.
-It registers the `debug-panel` module if enabled (auto-enables in YII_DEBUG mode).
+It registers the `app-dev-panel` module if enabled (auto-enables in YII_DEBUG mode).
 
 ### 2. Configuration (application config)
 
 ```php
 'modules' => [
-    'debug-panel' => [
+    'app-dev-panel' => [
         'class' => \AppDevPanel\Adapter\Yii2\Module::class,
         'storagePath' => '@runtime/debug',
         'historySize' => 50,
@@ -146,7 +149,32 @@ times internally and calls `DatabaseCollector::logQuery()` (from Kernel) on prof
 - Captures timing, rendered output, and parameters in a single call
 - Uses a per-file timer stack to handle nested rendering correctly (layout → partial → widget)
 
-### 6e. Redis, Elasticsearch, Code Coverage
+### 6e. Cache Proxy
+
+`Module::registerCacheProfiling()` swaps the application's `cache` component with a
+`CacheProxy` (`yii\caching\Cache` subclass) wrapping the user's configured cache:
+
+- `get/set/delete/exists/flush/multiGet/multiSet/add/multiAdd/getOrSet` → delegate to the inner cache and feed `CacheCollector::logCacheOperation()` with a `CacheOperationRecord`.
+- Duration measured per call via `microtime(true)`; multi-key operations produce one record per key.
+- No-op if the `cache` component is not configured.
+
+### 6f. Queue Events
+
+`Module::registerQueueProfiling()` delegates to `QueueListener` which hooks into the
+abstract `yii\queue\Queue` class (covers sync/db/amqp/... drivers):
+
+| Event | `MessageRecord` fields |
+|---|---|
+| `EVENT_BEFORE_PUSH` | — (records push start time) |
+| `EVENT_AFTER_PUSH`  | `dispatched=true`, `handled=false`, `failed=false`, `duration=push time` |
+| `EVENT_BEFORE_EXEC` | — (records exec start time) |
+| `EVENT_AFTER_EXEC`  | `dispatched=true`, `handled=true`, `failed=false`, `duration=exec time` |
+| `EVENT_AFTER_ERROR` | `dispatched=true`, `handled=true`, `failed=true`, `duration=exec time` |
+
+Each record has `bus='yii2.queue'` and `transport` set to the concrete driver FQCN.
+Listener is a no-op when `yiisoft/yii2-queue` is not installed.
+
+### 6g. Redis, Elasticsearch, Code Coverage
 
 `RedisCollector`, `ElasticsearchCollector`, and `CodeCoverageCollector` are registered in `buildCollectorMap()` and require no event wiring — they are fed data directly by application code or by the Kernel lifecycle (`startup()`/`shutdown()` for coverage).
 
@@ -175,6 +203,17 @@ This follows the same pattern as Yii3 and Symfony adapters (no auto-wiring for c
 Each `UrlRule` is wrapped in `Yii2RouteAdapter` exposing `__debugInfo()` with: name, pattern, methods, defaults, route.
 
 **`Yii2DbSchemaProvider`** uses `yii\db\Schema` for database inspection.
+
+**`Yii2AuthorizationConfigProvider`** implements `AuthorizationConfigProviderInterface` for `/inspect/api/authorization`. Registered in `Module::registerCoreServices()`. Safe to register unconditionally — missing components yield empty sections.
+
+| Section | Source |
+|---------|--------|
+| `guards` | Single `user` guard: `provider = identityClass`, `config = {loginUrl, enableSession, authTimeout, absoluteAuthTimeout, enableAutoLogin}` |
+| `roleHierarchy` | `Yii::$app->authManager->getRoles()` + `getChildren($role)` — empty when `authManager` is not configured |
+| `voters` | `authManager` roles (`type: role`) + permissions (`type: permission`) + rules (`type: rule`, `name` is rule class FQCN) |
+| `config` | `user` snapshot (`identityClass`, `isGuest`, `id`) + `authManager` class + `defaultRoles` |
+
+All `authManager` calls are wrapped in `try/catch` so `DbManager` failures (e.g., missing RBAC tables) degrade to empty sections instead of throwing.
 
 ## Collectors
 
@@ -213,6 +252,8 @@ Each `UrlRule` is wrapped in `Yii2RouteAdapter` exposing `__debugInfo()` with: n
 | `TranslatorCollector` | `I18NProxy` replacing `Yii::$app->i18n` | Translation lookups, missing translations |
 | `AuthorizationCollector` | `AuthorizationListener` on `User::EVENT_AFTER_LOGIN/LOGOUT` | Auth events: login, logout, user identity |
 | `TemplateCollector` | `View::EVENT_BEFORE_RENDER` + `EVENT_AFTER_RENDER` | Render timing, output, parameters (nested-safe) |
+| `CacheCollector` | `CacheProxy` replacing `Yii::$app->cache` | Cache get/set/delete/exists/clear with hit rate |
+| `QueueCollector` | `QueueListener` on `yii\queue\Queue::EVENT_*` | Queue push/exec/error with duration |
 | `RedisCollector` | Direct collector calls | Redis commands, timing, errors |
 | `ElasticsearchCollector` | Direct collector calls | ES requests, timing, hits |
 | `CodeCoverageCollector` | `pcov` / `xdebug` lifecycle | Per-file line coverage (opt-in) |

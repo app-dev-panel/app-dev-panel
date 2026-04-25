@@ -34,6 +34,7 @@
         "app-dev-panel/api": "*",
         "app-dev-panel/kernel": "*",
         "app-dev-panel/cli": "*",
+        "app-dev-panel/frontend-assets": "*",
         "guzzlehttp/guzzle": "^7.5",
         "guzzlehttp/psr7": "^2.4",
         "jetbrains/phpstorm-attributes": "^1.0",
@@ -50,7 +51,7 @@
         "yiisoft/files": "^2.0",
         "yiisoft/json": "^1.0",
         "yiisoft/profiler": "^3.0",
-        "yiisoft/proxy": "^1.0.1",
+        "yiisoft/proxy": "^1.2",
         "yiisoft/strings": "^2.2",
         "yiisoft/var-dumper": "^1.7"
     },
@@ -70,6 +71,12 @@
         "yiisoft/yii-console": "^2.0",
         "yiisoft/yii-http": "^1.0"
     },
+    "suggest": {
+        "yiisoft/rbac": "Required for role/permission hierarchy in the Authorization inspector",
+        "yiisoft/user": "Required to show current identity and guest state in the Authorization inspector",
+        "yiisoft/auth": "Required to list configured authentication methods (guards) in the Authorization inspector",
+        "yiisoft/access": "Required to list the active access checker in the Authorization inspector"
+    },
     "repositories": [
         {
             "type": "path",
@@ -82,6 +89,10 @@
         {
             "type": "path",
             "url": "../../Cli"
+        },
+        {
+            "type": "path",
+            "url": "../../FrontendAssets"
         }
     ],
     "autoload": {

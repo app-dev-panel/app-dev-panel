@@ -1,5 +1,7 @@
 import {DebugEntry} from '@app-dev-panel/sdk/API/Debug/Debug';
 import {CollectorsMap} from '@app-dev-panel/sdk/Helper/collectors';
+import {openInNewTabOnModifier} from '@app-dev-panel/sdk/Helper/openInNewTabOnModifier';
+import {panelPagePath} from '@app-dev-panel/sdk/Helper/panelMountPath';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import {Chip, Tooltip} from '@mui/material';
 
@@ -11,19 +13,23 @@ export const RequestTimeItem = ({data, iframeUrlHandler}: RequestTimeItemProps) 
     return (
         <Tooltip title={`${ms.toFixed(1)} ms`} arrow>
             <Chip
-                icon={<AccessTimeIcon sx={{fontSize: '14px !important'}} />}
+                icon={<AccessTimeIcon sx={{fontSize: '16px !important'}} />}
                 label={`${time.toFixed(3)} s`}
                 size="small"
                 variant="outlined"
                 onClick={(e) => {
-                    iframeUrlHandler(`/debug?collector=${CollectorsMap.TimelineCollector}&debugEntry=${data.id}`);
+                    const url = panelPagePath(
+                        `/debug?collector=${encodeURIComponent(CollectorsMap.TimelineCollector)}&debugEntry=${data.id}`,
+                    );
+                    if (openInNewTabOnModifier(e, url)) return;
+                    iframeUrlHandler(url);
                     e.stopPropagation();
                     e.preventDefault();
                 }}
                 sx={{
-                    height: 24,
+                    height: 32,
                     borderRadius: 1,
-                    fontSize: 11,
+                    fontSize: 12,
                     fontFamily: "'JetBrains Mono', monospace",
                     cursor: 'pointer',
                 }}

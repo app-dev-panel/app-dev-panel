@@ -4,42 +4,30 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\TestFixtures;
 
-use AppDevPanel\Kernel\Collector\AuthorizationCollector;
+use App\Models\User;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 
-final readonly class SecurityAction
+final class SecurityAction
 {
-    public function __construct(
-        private AuthorizationCollector $authorizationCollector,
-    ) {}
-
     public function __invoke(): JsonResponse
     {
-        $this->authorizationCollector->collectUser('admin@example.com', ['ROLE_ADMIN', 'ROLE_USER'], true);
-        $this->authorizationCollector->collectFirewall('main');
-        $this->authorizationCollector->collectToken('jwt', ['sub' => '123', 'iss' => 'app'], '2026-12-31T23:59:59Z');
-        $this->authorizationCollector->collectGuard('web', 'users', ['driver' => 'session']);
-        $this->authorizationCollector->collectRoleHierarchy(['ROLE_ADMIN' => ['ROLE_USER', 'ROLE_EDITOR']]);
-        $this->authorizationCollector->collectEffectiveRoles(['ROLE_ADMIN', 'ROLE_USER', 'ROLE_EDITOR']);
-        $this->authorizationCollector->collectAuthenticationEvent('login', 'form_login', 'success', [
-            'ip' => '127.0.0.1',
-        ]);
+        $user = User::fixture('admin@example.com');
 
-        $this->authorizationCollector->logAccessDecision(
-            'ROLE_ADMIN',
-            'App\\Entity\\User',
-            'ACCESS_GRANTED',
-            [['voter' => 'RoleVoter', 'result' => 'ACCESS_GRANTED']],
-            0.002,
-            ['route' => '/admin'],
-        );
-        $this->authorizationCollector->logAccessDecision(
-            'EDIT',
-            'App\\Entity\\Post',
-            'ACCESS_DENIED',
-            [['voter' => 'PostVoter', 'result' => 'ACCESS_DENIED']],
-            0.001,
-        );
+        // Define gates for access decision testing
+        Gate::define('admin-access', static fn($user) => true);
+        Gate::define('super-admin-access', static fn($user) => false);
+
+        // Triggers Login event → AuthorizationListener collects user, firewall, auth event
+        Auth::login($user, remember: true);
+
+        // Triggers GateEvaluated events → GateListener collects access decisions
+        Gate::check('admin-access'); // granted (gate returns true)
+        Gate::check('super-admin-access'); // denied (gate returns false)
+
+        // Triggers Logout event → AuthorizationListener collects logout auth event
+        Auth::logout();
 
         return new JsonResponse(['fixture' => 'security:basic', 'status' => 'ok']);
     }

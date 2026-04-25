@@ -1,28 +1,26 @@
 import {addApiEntry, deleteApiEntry, useOpenApiEntries} from '@app-dev-panel/panel/Module/OpenApi/Context/Context';
 import {useSelector} from '@app-dev-panel/panel/store';
-import {Remove} from '@mui/icons-material';
+import {Close, Remove} from '@mui/icons-material';
 import CheckIcon from '@mui/icons-material/Check';
 import {
     FormHelperText,
     IconButton,
-    InputBase,
     List,
     ListItem,
     ListItemButton,
     ListItemSecondaryAction,
     ListItemText,
+    OutlinedInput,
 } from '@mui/material';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
-import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import * as React from 'react';
 import {useDispatch} from 'react-redux';
 
-// TODO: split saving and cancelling
 type SettingsDialogProps = {onClose: () => void};
 export const SettingsDialog = (props: SettingsDialogProps) => {
     const baseUrl = useSelector((state) => state.application.baseUrl) as string;
@@ -44,14 +42,17 @@ export const SettingsDialog = (props: SettingsDialogProps) => {
     };
 
     return (
-        <Dialog fullWidth={true} open={true} onClose={handleClose}>
-            <DialogTitle>Open API entries</DialogTitle>
-            <DialogContent>
-                <DialogContentText>Create, edit or delete Open API entries.</DialogContentText>
-
-                <List>
+        <Dialog fullWidth open={true} onClose={handleClose}>
+            <DialogTitle sx={{display: 'flex', alignItems: 'center', justifyContent: 'space-between', pb: 1}}>
+                Open API entries
+                <IconButton size="small" onClick={handleClose} aria-label="close" sx={{color: 'text.secondary'}}>
+                    <Close fontSize="small" />
+                </IconButton>
+            </DialogTitle>
+            <DialogContent dividers>
+                <List disablePadding>
                     {Object.entries(apiEntries).map(([name, url]) => (
-                        <ListItem key={name}>
+                        <ListItem key={name} disablePadding>
                             <ListItemButton
                                 onClick={() => {
                                     setSelectedEntry(url);
@@ -59,7 +60,7 @@ export const SettingsDialog = (props: SettingsDialogProps) => {
                             >
                                 <ListItemText primary={url} secondary={name} />
                                 <ListItemSecondaryAction>
-                                    <IconButton onClick={onDeleteHandler(name)} sx={{p: 2}} aria-label="Delete entry">
+                                    <IconButton onClick={onDeleteHandler(name)} sx={{p: 1}} aria-label="Delete entry">
                                         <Remove />
                                     </IconButton>
                                 </ListItemSecondaryAction>
@@ -70,29 +71,29 @@ export const SettingsDialog = (props: SettingsDialogProps) => {
                 <Box
                     noValidate
                     component="form"
-                    sx={{display: 'flex', flexDirection: 'row', p: [0.5, 1], alignItems: 'center'}}
+                    sx={{display: 'flex', flexDirection: 'row', mt: 2, alignItems: 'center', gap: 1}}
                     onSubmit={(e) => {
                         e.preventDefault();
                         onAddHandler();
                     }}
                 >
-                    <InputBase
-                        sx={{ml: 1, flex: 1}}
-                        placeholder={'http://localhost/docs/openapi.json'}
+                    <OutlinedInput
+                        size="small"
+                        fullWidth
+                        placeholder="http://localhost/docs/openapi.json"
                         value={selectedEntry}
                         onChange={(event) => setSelectedEntry(event.target.value)}
                     />
-                    <IconButton onClick={onAddHandler} sx={{p: 2}} aria-label="Add entry">
+                    <IconButton onClick={onAddHandler} color="primary" aria-label="Add entry">
                         <CheckIcon />
                     </IconButton>
                 </Box>
-                <FormHelperText variant="outlined">
-                    Please make sure you entered the full path to the Open API json schema. For example:
-                    http://localhost/docs/openapi.json
+                <FormHelperText>
+                    Enter the full path to the Open API JSON schema (e.g. http://localhost/docs/openapi.json)
                 </FormHelperText>
             </DialogContent>
-            <DialogActions>
-                <Button onClick={handleClose} color="primary">
+            <DialogActions sx={{px: 3, py: 1.5}}>
+                <Button variant="text" color="inherit" onClick={handleClose} sx={{color: 'text.secondary'}}>
                     Close
                 </Button>
             </DialogActions>

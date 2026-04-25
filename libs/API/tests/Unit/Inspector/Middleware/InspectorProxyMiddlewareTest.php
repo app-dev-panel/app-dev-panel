@@ -302,6 +302,61 @@ final class InspectorProxyMiddlewareTest extends TestCase
         $this->assertSame(200, $response->getStatusCode());
     }
 
+    public function testReturns502OnCouldNotResolveHost(): void
+    {
+        $middleware = $this->createMiddleware(
+            $this->registryWith($this->onlineService()),
+            $this->failingHttpClient('Could not resolve host: python-app'),
+        );
+
+        $request = new ServerRequest('GET', '/inspect/api/config?service=test-svc')->withQueryParams([
+            'service' => 'test-svc',
+        ]);
+
+        $response = $middleware->process($request, $this->neverCalledHandler());
+
+        $this->assertSame(502, $response->getStatusCode());
+        $body = json_decode((string) $response->getBody(), true);
+        $this->assertStringContainsString('Cannot connect', $body['error']);
+    }
+
+    public function testReturns504OnTimeoutAlternateMessage(): void
+    {
+        $middleware = $this->createMiddleware(
+            $this->registryWith($this->onlineService()),
+            $this->failingHttpClient('Timeout was reached'),
+        );
+
+        $request = new ServerRequest('GET', '/inspect/api/config?service=test-svc')->withQueryParams([
+            'service' => 'test-svc',
+        ]);
+
+        $response = $middleware->process($request, $this->neverCalledHandler());
+
+        $this->assertSame(504, $response->getStatusCode());
+    }
+
+    public function testProxiesRequestWithoutExtraQueryParams(): void
+    {
+        /** @var RequestInterface|null $captured */
+        $captured = null;
+        $httpClient = $this->capturingHttpClient(new Response(200), $captured);
+
+        $middleware = $this->createMiddleware($this->registryWith($this->onlineService()), $httpClient);
+
+        $request = new ServerRequest('GET', '/inspect/api/routes?service=test-svc')->withQueryParams([
+            'service' => 'test-svc',
+        ]);
+
+        $response = $middleware->process($request, $this->neverCalledHandler());
+
+        $this->assertSame(200, $response->getStatusCode());
+        $this->assertNotNull($captured);
+        $uri = (string) $captured->getUri();
+        // No extra query params, so no ? should be present after removing service
+        $this->assertStringNotContainsString('?', $uri);
+    }
+
     public function testServiceWithNullInspectorUrl(): void
     {
         $now = microtime(true);

@@ -36,6 +36,7 @@
         "app-dev-panel/api": "*",
         "app-dev-panel/kernel": "*",
         "app-dev-panel/cli": "*",
+        "app-dev-panel/frontend-assets": "*",
         "guzzlehttp/guzzle": "^7.5",
         "guzzlehttp/psr7": "^2.4",
         "nyholm/psr7": "^1.8",
@@ -57,6 +58,10 @@
         "phpunit/phpunit": "^11.0",
         "symfony/framework-bundle": "^6.4|^7.0|^8.0",
         "symfony/http-client": "^6.4|^7.0|^8.0",
+        "symfony/mailer": "^6.4|^7.0|^8.0",
+        "symfony/messenger": "^6.4|^7.0|^8.0",
+        "symfony/security-bundle": "^6.4|^7.0|^8.0",
+        "symfony/validator": "^6.4|^7.0|^8.0",
         "doctrine/dbal": "^3.0|^4.0",
         "doctrine/orm": "^2.0|^3.0",
         "twig/twig": "^3.0|^4.0"
@@ -73,6 +78,10 @@
         {
             "type": "path",
             "url": "../../Cli"
+        },
+        {
+            "type": "path",
+            "url": "../../FrontendAssets"
         }
     ],
     "autoload": {

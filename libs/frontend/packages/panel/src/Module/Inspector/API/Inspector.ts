@@ -176,6 +176,23 @@ type CoverageResponse = {
     summary: {totalFiles: number; coveredLines: number; executableLines: number; percentage: number};
 };
 
+export type HttpMockStatus = {running: boolean; host: string; port: number};
+export type HttpMockExpectation = {
+    request: {
+        method?: string;
+        url?: {isEqualTo?: string; matches?: string; contains?: string};
+        body?: {isEqualTo?: string; matches?: string; contains?: string};
+        headers?: Record<string, {isEqualTo?: string; matches?: string; contains?: string}>;
+    };
+    response: {statusCode: number; body?: string; headers?: Record<string, string>; delayMillis?: number};
+    proxyTo?: string | null;
+    priority?: number;
+    scenarioName?: string | null;
+    scenarioStateIs?: string | null;
+    newScenarioState?: string | null;
+};
+export type HttpMockHistoryEntry = {method: string; url: string; headers: Record<string, string>; body: string | null};
+
 type CurlBuilderResponse = {command: string};
 
 type CheckRouteResponse = {result: boolean; action: string[]};
@@ -211,6 +228,7 @@ export const inspectorApi = createApi({
         'inspector/mcp',
         'inspector/elasticsearch',
         'inspector/redis',
+        'inspector/http-mock',
     ],
     baseQuery: createBaseQuery('/inspect/api/'),
     endpoints: (builder) => ({
@@ -231,7 +249,7 @@ export const inspectorApi = createApi({
             transformResponse: (result: Response<ObjectType>) => result.data,
         }),
         getCommands: builder.query<CommandType[], void>({
-            query: (command) => 'command',
+            query: (_command) => 'command',
             transformResponse: (result: Response<CommandType[]>) => result.data || [],
         }),
         runCommand: builder.mutation<CommandResponseType, string>({
@@ -426,6 +444,40 @@ export const inspectorApi = createApi({
             transformResponse: (result: Response<{enabled: boolean}>) => result.data,
             invalidatesTags: ['inspector/mcp'],
         }),
+        getHttpMockStatus: builder.query<HttpMockStatus, void>({
+            query: () => `http-mock/status`,
+            transformResponse: (result: Response<HttpMockStatus>) => result.data,
+            providesTags: ['inspector/http-mock'],
+        }),
+        getHttpMockExpectations: builder.query<HttpMockExpectation[], void>({
+            query: () => `http-mock/expectations`,
+            transformResponse: (result: Response<HttpMockExpectation[]>) => result.data ?? [],
+            providesTags: ['inspector/http-mock'],
+        }),
+        createHttpMockExpectation: builder.mutation<{success: boolean}, HttpMockExpectation>({
+            query: (body) => ({url: `http-mock/expectations`, method: 'POST', body}),
+            transformResponse: (result: Response<{success: boolean}>) => result.data,
+            invalidatesTags: ['inspector/http-mock'],
+        }),
+        clearHttpMockExpectations: builder.mutation<{success: boolean}, void>({
+            query: () => ({url: `http-mock/expectations`, method: 'DELETE'}),
+            transformResponse: (result: Response<{success: boolean}>) => result.data,
+            invalidatesTags: ['inspector/http-mock'],
+        }),
+        verifyHttpMockRequest: builder.mutation<{count: number}, Record<string, unknown>>({
+            query: (body) => ({url: `http-mock/verify`, method: 'POST', body}),
+            transformResponse: (result: Response<{count: number}>) => result.data,
+        }),
+        getHttpMockHistory: builder.query<HttpMockHistoryEntry[], void>({
+            query: () => `http-mock/history`,
+            transformResponse: (result: Response<HttpMockHistoryEntry[]>) => result.data ?? [],
+            providesTags: ['inspector/http-mock'],
+        }),
+        resetHttpMock: builder.mutation<{success: boolean}, void>({
+            query: () => ({url: `http-mock/reset`, method: 'POST'}),
+            transformResponse: (result: Response<{success: boolean}>) => result.data,
+            invalidatesTags: ['inspector/http-mock'],
+        }),
     }),
 });
 
@@ -437,7 +489,9 @@ export const {
     useGetClassesQuery,
     useLazyGetObjectQuery,
     useLazyGetFilesQuery,
+    useGetClassQuery,
     useLazyGetClassQuery,
+    useGetCommandsQuery,
     useLazyGetCommandsQuery,
     useRunCommandMutation,
     useGetTranslationsQuery,
@@ -476,4 +530,11 @@ export const {
     useDeleteRedisKeyMutation,
     useFlushRedisDbMutation,
     useGetCoverageQuery,
+    useGetHttpMockStatusQuery,
+    useGetHttpMockExpectationsQuery,
+    useCreateHttpMockExpectationMutation,
+    useClearHttpMockExpectationsMutation,
+    useVerifyHttpMockRequestMutation,
+    useGetHttpMockHistoryQuery,
+    useResetHttpMockMutation,
 } = inspectorApi;

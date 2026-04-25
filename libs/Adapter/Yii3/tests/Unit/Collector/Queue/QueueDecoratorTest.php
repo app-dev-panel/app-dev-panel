@@ -20,7 +20,7 @@ final class QueueDecoratorTest extends TestCase
 
     public function testStatusDelegatesToDecoratedAndCollects(): void
     {
-        $status = \Yiisoft\Queue\JobStatus::waiting();
+        $status = \Yiisoft\Queue\JobStatus::WAITING;
 
         $queue = $this->createMock(\Yiisoft\Queue\QueueInterface::class);
         $queue->expects($this->once())->method('status')->with('job-123')->willReturn($status);

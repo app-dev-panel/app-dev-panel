@@ -9,6 +9,12 @@ use AppDevPanel\Kernel\Collector\ElasticsearchRequestRecord;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Attribute\Route;
 
+/**
+ * Elasticsearch fixture — calls the collector directly because there is no standard
+ * Symfony Elasticsearch integration to proxy. The ElasticsearchCollector is designed
+ * to be fed by Elasticsearch client library plugins (e.g. elastic/elasticsearch-php
+ * middleware). This fixture simulates that data path.
+ */
 #[Route('/test/fixtures/elasticsearch', name: 'test_elasticsearch', methods: ['GET'])]
 final readonly class ElasticsearchAction
 {

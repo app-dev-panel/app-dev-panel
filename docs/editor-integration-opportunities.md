@@ -1,6 +1,6 @@
 # Editor Integration — Status & Remaining Work
 
-Status: 2026-03-30.
+Status: 2026-04-04.
 
 ## Implemented
 
@@ -18,5 +18,8 @@ Supported editors: PhpStorm, VS Code, VS Code Insiders, Cursor, Sublime Text, Ze
 | Feature | Effort | Priority |
 |---------|--------|----------|
 | HTTP callback for Docker/WSL/remote (POST to local editor plugin) | Medium | P2 |
-| Path mapping for remote-to-local paths (`{"/app": "/Users/me/project"}`) | Medium | P2 |
 | Source map support for frontend errors | High | P3 |
+
+## Recently Implemented
+
+- **Path mapping for remote-to-local paths** (2026-04-15) — Settings UI in TopBar lets users define `{remote → local}` rules. `applyPathMapping` in `editorUrl.ts` rewrites paths before URL encoding. State persists to `localStorage` via `editorConfig.pathMapping`. Component: `libs/frontend/packages/sdk/src/Component/Layout/EditorPathMappingEditor.tsx`. First matching prefix wins; empty remote keys are ignored; duplicate remotes are flagged in the UI.

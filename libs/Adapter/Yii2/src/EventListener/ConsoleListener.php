@@ -76,10 +76,12 @@ final class ConsoleListener
             ...($exception !== null ? ['error' => $exception->getMessage()] : []),
         ]);
 
-        $this->consoleAppInfoCollector?->markApplicationFinished();
-
         // Force-flush Yii's Logger so buffered messages reach DebugLogTarget before storage flush.
+        // Must happen BEFORE markApplicationFinished so that DB and log timeline events
+        // appear before the finish marker in the timeline.
         \Yii::getLogger()->flush(true);
+
+        $this->consoleAppInfoCollector?->markApplicationFinished();
 
         $this->debugger->shutdown();
     }

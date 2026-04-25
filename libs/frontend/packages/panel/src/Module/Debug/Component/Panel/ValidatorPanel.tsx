@@ -165,7 +165,7 @@ export const ValidatorPanel = ({data}: ValidatorPanelProps) => {
                 }
             >{`${filtered.length} validations`}</SectionTitle>
 
-            {filtered.map((validation, index) => {
+            {filtered.map((validation, _index) => {
                 const originalIndex = data.indexOf(validation);
                 const expanded = expandedIndex === originalIndex;
                 const errorRows = flattenErrors(validation.errors);

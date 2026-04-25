@@ -3,6 +3,8 @@
 declare(strict_types=1);
 
 use AppDevPanel\Adapter\Yii3\Collector\Asset\AssetLoaderInterfaceProxy;
+use AppDevPanel\Adapter\Yii3\Collector\Db\ConnectionInterfaceProxy;
+use AppDevPanel\Adapter\Yii3\Collector\Mailer\MailerInterfaceProxy;
 use AppDevPanel\Adapter\Yii3\Collector\Router\UrlMatcherInterfaceProxy;
 use AppDevPanel\Adapter\Yii3\Collector\Translator\TranslatorInterfaceProxy;
 use AppDevPanel\Adapter\Yii3\Collector\Validator\ValidatorInterfaceProxy;
@@ -19,10 +21,14 @@ use AppDevPanel\Cli\Command\InspectConfigCommand;
 use AppDevPanel\Cli\Command\InspectDatabaseCommand;
 use AppDevPanel\Cli\Command\InspectRoutesCommand;
 use AppDevPanel\Kernel\Collector\AssetBundleCollector;
+use AppDevPanel\Kernel\Collector\AuthorizationCollector;
+use AppDevPanel\Kernel\Collector\CacheCollector;
 use AppDevPanel\Kernel\Collector\CodeCoverageCollector;
 use AppDevPanel\Kernel\Collector\Console\CommandCollector;
 use AppDevPanel\Kernel\Collector\Console\ConsoleAppInfoCollector;
+use AppDevPanel\Kernel\Collector\DatabaseCollector;
 use AppDevPanel\Kernel\Collector\DeprecationCollector;
+use AppDevPanel\Kernel\Collector\ElasticsearchCollector;
 use AppDevPanel\Kernel\Collector\EnvironmentCollector;
 use AppDevPanel\Kernel\Collector\EventCollector;
 use AppDevPanel\Kernel\Collector\EventDispatcherInterfaceProxy;
@@ -31,24 +37,31 @@ use AppDevPanel\Kernel\Collector\HttpClientCollector;
 use AppDevPanel\Kernel\Collector\HttpClientInterfaceProxy;
 use AppDevPanel\Kernel\Collector\LogCollector;
 use AppDevPanel\Kernel\Collector\LoggerInterfaceProxy;
+use AppDevPanel\Kernel\Collector\MailerCollector;
 use AppDevPanel\Kernel\Collector\OpenTelemetryCollector;
+use AppDevPanel\Kernel\Collector\QueueCollector;
+use AppDevPanel\Kernel\Collector\RedisCollector;
 use AppDevPanel\Kernel\Collector\RouterCollector;
 use AppDevPanel\Kernel\Collector\ServiceCollector;
 use AppDevPanel\Kernel\Collector\Stream\FilesystemStreamCollector;
 use AppDevPanel\Kernel\Collector\Stream\HttpStreamCollector;
+use AppDevPanel\Kernel\Collector\TemplateCollector;
 use AppDevPanel\Kernel\Collector\TimelineCollector;
-use AppDevPanel\Kernel\Collector\AuthorizationCollector;
 use AppDevPanel\Kernel\Collector\TranslatorCollector;
 use AppDevPanel\Kernel\Collector\ValidatorCollector;
 use AppDevPanel\Kernel\Collector\VarDumperCollector;
 use AppDevPanel\Kernel\Collector\Web\RequestCollector;
 use AppDevPanel\Kernel\Collector\Web\WebAppInfoCollector;
+use AppDevPanel\Kernel\Proxy\Psr16CacheProxy;
 use Psr\Container\ContainerInterface;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Http\Client\ClientInterface;
 use Psr\Log\LoggerInterface;
+use Psr\SimpleCache\CacheInterface as Psr16CacheInterface;
 use Yiisoft\Assets\AssetLoaderInterface;
+use Yiisoft\Db\Connection\ConnectionInterface;
 use Yiisoft\Injector\Injector;
+use Yiisoft\Mailer\MailerInterface as YiisoftMailerInterface;
 use Yiisoft\Router\UrlMatcherInterface;
 use Yiisoft\Translator\TranslatorInterface as YiisoftTranslatorInterface;
 use Yiisoft\Validator\ValidatorInterface;
@@ -82,6 +95,13 @@ return [
             AuthorizationCollector::class,
             OpenTelemetryCollector::class,
             CodeCoverageCollector::class,
+            DatabaseCollector::class,
+            MailerCollector::class,
+            TemplateCollector::class,
+            CacheCollector::class,
+            QueueCollector::class,
+            RedisCollector::class,
+            ElasticsearchCollector::class,
         ],
         'collectors.web' => [
             WebAppInfoCollector::class,
@@ -102,6 +122,12 @@ return [
             ValidatorInterface::class => [ValidatorInterfaceProxy::class, ValidatorCollector::class],
             YiisoftTranslatorInterface::class => [TranslatorInterfaceProxy::class, TranslatorCollector::class],
             AssetLoaderInterface::class => [AssetLoaderInterfaceProxy::class, AssetBundleCollector::class],
+            ConnectionInterface::class => [ConnectionInterfaceProxy::class, DatabaseCollector::class],
+            YiisoftMailerInterface::class => [MailerInterfaceProxy::class, MailerCollector::class],
+            // PSR-16 SimpleCache decorator — framework-neutral. Intercepts any
+            // Psr\SimpleCache\CacheInterface binding (e.g. yiisoft/cache ArrayCache)
+            // and feeds CacheCollector. No pool argument: the default 'default' applies.
+            Psr16CacheInterface::class => [Psr16CacheProxy::class, CacheCollector::class],
         ],
         'dumper.excludedClasses' => [
             'PhpParser\\Parser\\Php7',
@@ -120,6 +146,7 @@ return [
             ContainerInterfaceProxy::LOG_ARGUMENTS
                 | ContainerInterfaceProxy::LOG_RESULT
                 | ContainerInterfaceProxy::LOG_ERROR,
+        'storage.driver' => 'file',
         'path' => '@runtime/debug',
         'ignoredRequests' => [
             '/debug/**',

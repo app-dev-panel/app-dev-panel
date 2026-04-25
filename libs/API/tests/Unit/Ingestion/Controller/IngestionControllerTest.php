@@ -7,7 +7,8 @@ namespace AppDevPanel\Api\Tests\Unit\Ingestion\Controller;
 use AppDevPanel\Api\Http\JsonResponseFactoryInterface;
 use AppDevPanel\Api\Ingestion\Controller\IngestionController;
 use AppDevPanel\Kernel\DebuggerIdGenerator;
-use AppDevPanel\Kernel\Storage\FileStorage;
+use AppDevPanel\Kernel\Storage\SqliteStorage;
+use AppDevPanel\Kernel\Storage\StorageInterface;
 use GuzzleHttp\Psr7\Response;
 use InvalidArgumentException;
 use Nyholm\Psr7\ServerRequest;
@@ -17,11 +18,13 @@ use PHPUnit\Framework\TestCase;
 final class IngestionControllerTest extends TestCase
 {
     private string $storagePath;
+    private SqliteStorage $storage;
 
     protected function setUp(): void
     {
         $this->storagePath = sys_get_temp_dir() . '/adp-ingestion-test-' . uniqid();
         mkdir($this->storagePath, 0o755, true);
+        $this->storage = new SqliteStorage($this->storagePath . '/debug.db', new DebuggerIdGenerator());
     }
 
     protected function tearDown(): void
@@ -32,9 +35,8 @@ final class IngestionControllerTest extends TestCase
     private function createController(): IngestionController
     {
         $responseFactory = $this->createJsonResponseFactory();
-        $storage = new FileStorage($this->storagePath, new DebuggerIdGenerator());
 
-        return new IngestionController($responseFactory, $storage);
+        return new IngestionController($responseFactory, $this->storage);
     }
 
     private function createJsonResponseFactory(): JsonResponseFactoryInterface
@@ -72,9 +74,9 @@ final class IngestionControllerTest extends TestCase
         $this->assertTrue($data['success']);
         $this->assertNotEmpty($data['id']);
 
-        // Verify files were written
-        $files = glob($this->storagePath . '/**/**/summary.json.gz');
-        $this->assertCount(1, $files);
+        // Verify entry was written
+        $summaries = $this->storage->read(StorageInterface::TYPE_SUMMARY);
+        $this->assertCount(1, $summaries);
     }
 
     public function testIngestWithContext(): void
@@ -112,9 +114,9 @@ final class IngestionControllerTest extends TestCase
         $this->assertSame('external-123', $data['id']);
 
         // Verify summary has context
-        $summaryFiles = glob($this->storagePath . '/**/external-123/summary.json.gz');
-        $this->assertCount(1, $summaryFiles);
-        $summary = json_decode(gzdecode(file_get_contents($summaryFiles[0])), true, 512, JSON_THROW_ON_ERROR);
+        $summaries = $this->storage->read(StorageInterface::TYPE_SUMMARY, 'external-123');
+        $this->assertCount(1, $summaries);
+        $summary = $summaries['external-123'];
         $this->assertSame('web', $summary['context']['type']);
         $this->assertSame('python', $summary['context']['language']);
     }
@@ -145,8 +147,8 @@ final class IngestionControllerTest extends TestCase
         $this->assertCount(3, $data['ids']);
 
         // Verify 3 entries in storage
-        $files = glob($this->storagePath . '/**/**/summary.json.gz');
-        $this->assertCount(3, $files);
+        $summaries = $this->storage->read(StorageInterface::TYPE_SUMMARY);
+        $this->assertCount(3, $summaries);
     }
 
     public function testIngestBatchMissingEntries(): void
@@ -187,9 +189,9 @@ final class IngestionControllerTest extends TestCase
         $this->assertTrue($data['success']);
 
         // Verify data was stored
-        $dataFiles = glob($this->storagePath . '/**/**/data.json.gz');
-        $this->assertCount(1, $dataFiles);
-        $stored = json_decode(gzdecode(file_get_contents($dataFiles[0])), true, 512, JSON_THROW_ON_ERROR);
+        $entries = $this->storage->read(StorageInterface::TYPE_DATA);
+        $this->assertCount(1, $entries);
+        $stored = array_values($entries)[0];
         $this->assertArrayHasKey('logs', $stored);
         $this->assertSame('error', $stored['logs'][0]['level']);
         $this->assertSame('Connection refused', $stored['logs'][0]['message']);
@@ -220,11 +222,10 @@ final class IngestionControllerTest extends TestCase
         $id = $data['id'];
 
         // Now read it back via storage
-        $storage = new FileStorage($this->storagePath, new DebuggerIdGenerator());
-        $summaryAll = $storage->read('summary', null);
+        $summaryAll = $this->storage->read(StorageInterface::TYPE_SUMMARY, null);
         $this->assertArrayHasKey($id, $summaryAll);
 
-        $detail = $storage->read('data', $id);
+        $detail = $this->storage->read(StorageInterface::TYPE_DATA, $id);
         $this->assertArrayHasKey($id, $detail);
         $entryData = $detail[$id];
         $this->assertArrayHasKey('custom_collector', $entryData);
@@ -260,8 +261,8 @@ final class IngestionControllerTest extends TestCase
         $data = json_decode($response->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR);
 
         // Verify summary contains all collector names
-        $summaryFiles = glob($this->storagePath . '/**/' . $data['id'] . '/summary.json.gz');
-        $summary = json_decode(gzdecode(file_get_contents($summaryFiles[0])), true, 512, JSON_THROW_ON_ERROR);
+        $summaries = $this->storage->read(StorageInterface::TYPE_SUMMARY, $data['id']);
+        $summary = $summaries[$data['id']];
         /** @var list<array{id: string, name: string}> $collectors */
         $collectors = $summary['collectors'];
         $collectorIds = array_column($collectors, 'id');
@@ -269,6 +270,112 @@ final class IngestionControllerTest extends TestCase
         $this->assertContains('http_client', $collectorIds);
         $this->assertContains('exceptions', $collectorIds);
         $this->assertContains('custom_metrics', $collectorIds);
+    }
+
+    public function testIngestBatchExceedsLimit(): void
+    {
+        $controller = $this->createController();
+
+        $entries = [];
+        for ($i = 0; $i < 101; $i++) {
+            $entries[] = ['collectors' => ['logs' => []]];
+        }
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Maximum 100');
+        $controller->ingestBatch($this->post(['entries' => $entries]));
+    }
+
+    public function testIngestLogWithMinimalFields(): void
+    {
+        $controller = $this->createController();
+        $response = $controller->ingestLog($this->post([
+            'level' => 'debug',
+            'message' => 'Simple message',
+        ]));
+
+        $this->assertSame(201, $response->getStatusCode());
+        $data = json_decode($response->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR);
+        $this->assertTrue($data['success']);
+    }
+
+    public function testIngestLogMissingMessage(): void
+    {
+        $controller = $this->createController();
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('level');
+        $controller->ingestLog($this->post(['level' => 'info']));
+    }
+
+    public function testIngestCollectorsNotArrayThrowsException(): void
+    {
+        $controller = $this->createController();
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('collectors');
+        $controller->ingest($this->post(['collectors' => 'not-an-array']));
+    }
+
+    public function testIngestBatchEntryWithoutCollectorsThrows(): void
+    {
+        $controller = $this->createController();
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('collectors');
+        $controller->ingestBatch($this->post([
+            'entries' => [
+                ['context' => ['type' => 'web']],
+            ],
+        ]));
+    }
+
+    public function testIngestLogMissingLevel(): void
+    {
+        $controller = $this->createController();
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('level');
+        $controller->ingestLog($this->post(['message' => 'no level here']));
+    }
+
+    public function testIngestBatchEntriesNotArrayThrows(): void
+    {
+        $controller = $this->createController();
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('entries');
+        $controller->ingestBatch($this->post(['entries' => 'not-array']));
+    }
+
+    public function testIngestWithCustomDebugId(): void
+    {
+        $controller = $this->createController();
+        $response = $controller->ingest($this->post([
+            'debugId' => 'custom-id-abc',
+            'collectors' => ['logs' => [['level' => 'info', 'message' => 'test']]],
+        ]));
+
+        $data = json_decode($response->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR);
+        $this->assertSame('custom-id-abc', $data['id']);
+    }
+
+    public function testIngestLogContextDefaults(): void
+    {
+        $controller = $this->createController();
+        $response = $controller->ingestLog($this->post([
+            'level' => 'info',
+            'message' => 'test',
+        ]));
+
+        $data = json_decode($response->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR);
+
+        // Verify stored data has default context
+        $summaries = $this->storage->read(StorageInterface::TYPE_SUMMARY);
+        $this->assertCount(1, $summaries);
+        $summary = array_values($summaries)[0];
+        $this->assertSame('generic', $summary['context']['type']);
+        $this->assertSame('external', $summary['context']['service']);
     }
 
     private function removeDir(string $dir): void

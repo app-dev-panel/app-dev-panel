@@ -27,7 +27,17 @@
             <p>Trigger a runtime exception to see how ADP captures and displays error details.</p>
         </a>
 
-        <a href="/debug/api/" class="feature-card" style="text-decoration: none; color: inherit;">
+        <a href="/log-demo" class="feature-card" style="text-decoration: none; color: inherit;">
+            <h3>Log Demo</h3>
+            <p>Send log messages with different severity levels and context data.</p>
+        </a>
+
+        <a href="/var-dumper" class="feature-card" style="text-decoration: none; color: inherit;">
+            <h3>Var Dumper</h3>
+            <p>Dump variables to inspect their structure in ADP.</p>
+        </a>
+
+        <a href="/debug/" class="feature-card" style="text-decoration: none; color: inherit;">
             <h3>Debug Panel</h3>
             <p>Open the ADP debug panel to inspect collected logs, events, requests, and exceptions.</p>
         </a>

@@ -43,7 +43,7 @@ final class AuthorizationSubscriber implements EventSubscriberInterface
             LoginFailureEvent::class => ['onLoginFailure', 0],
             LogoutEvent::class => ['onLogout', 0],
             SwitchUserEvent::class => ['onSwitchUser', 0],
-            VoteEvent::class => ['onVote', 0],
+            'debug.security.authorization.vote' => ['onVote', 0],
         ];
     }
 

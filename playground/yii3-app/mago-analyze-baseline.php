@@ -2,15 +2,165 @@ variant = "loose"
 
 [[issues]]
 file = "config/common/bootstrap.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(Psr\Container\ContainerInterface)`).'
+count = 1
+
+[[issues]]
+file = "config/common/bootstrap.php"
+code = "mixed-method-access"
+message = "Attempting to access a method on a non-object type (`mixed`)."
+count = 1
+
+[[issues]]
+file = "config/common/bootstrap.php"
 code = "non-existent-class-like"
 message = 'Cannot find class, interface, enum, or type alias `Psr\Container\ContainerInterface`.'
-count = 1
+count = 2
 
 [[issues]]
 file = "config/common/di/application.php"
 code = "mixed-array-access"
 message = "Unsafe array access on type `mixed`."
 count = 3
+
+[[issues]]
+file = "config/common/di/auth.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(Psr\Container\ContainerInterface)`).'
+count = 3
+
+[[issues]]
+file = "config/common/di/auth.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(Yiisoft\Aliases\Aliases)`).'
+count = 2
+
+[[issues]]
+file = "config/common/di/auth.php"
+code = "invalid-return-statement"
+message = 'Invalid return type for function `1162807080584846015:1873`: expected `unknown-ref(Yiisoft\Access\AccessCheckerInterface)`, but found `unknown-ref(Yiisoft\Rbac\ManagerInterface)`.'
+count = 1
+
+[[issues]]
+file = "config/common/di/auth.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `is_dir`: expected `string`, but found `mixed`."
+count = 2
+
+[[issues]]
+file = "config/common/di/auth.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `mkdir`: expected `string`, but found `mixed`."
+count = 2
+
+[[issues]]
+file = "config/common/di/auth.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 2
+
+[[issues]]
+file = "config/common/di/auth.php"
+code = "mixed-operand"
+message = "Invalid left operand: type `mixed` cannot be reliably used in string concatenation."
+count = 2
+
+[[issues]]
+file = "config/common/di/auth.php"
+code = "mixed-return-statement"
+message = "Could not infer a precise return type for function `1162807080584846015:2277`. Saw type `mixed`."
+count = 1
+
+[[issues]]
+file = "config/common/di/auth.php"
+code = "never-return"
+message = "Cannot return value with type 'never' from this function."
+count = 2
+
+[[issues]]
+file = "config/common/di/auth.php"
+code = "non-existent-class"
+message = 'Class `Yiisoft\Auth\Method\Composite` not found.'
+count = 1
+
+[[issues]]
+file = "config/common/di/auth.php"
+code = "non-existent-class"
+message = 'Class `Yiisoft\Rbac\Php\AssignmentsStorage` not found.'
+count = 1
+
+[[issues]]
+file = "config/common/di/auth.php"
+code = "non-existent-class"
+message = 'Class `Yiisoft\Rbac\Php\ItemsStorage` not found.'
+count = 1
+
+[[issues]]
+file = "config/common/di/auth.php"
+code = "non-existent-class"
+message = 'Class `Yiisoft\User\CurrentUser` not found.'
+count = 1
+
+[[issues]]
+file = "config/common/di/auth.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Psr\Container\ContainerInterface`.'
+count = 1
+
+[[issues]]
+file = "config/common/di/auth.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Psr\EventDispatcher\EventDispatcherInterface`.'
+count = 1
+
+[[issues]]
+file = "config/common/di/auth.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Yiisoft\Access\AccessCheckerInterface`.'
+count = 2
+
+[[issues]]
+file = "config/common/di/auth.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Yiisoft\Aliases\Aliases`.'
+count = 2
+
+[[issues]]
+file = "config/common/di/auth.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Yiisoft\Auth\AuthenticationMethodInterface`.'
+count = 1
+
+[[issues]]
+file = "config/common/di/auth.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Yiisoft\Auth\IdentityRepositoryInterface`.'
+count = 1
+
+[[issues]]
+file = "config/common/di/auth.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Yiisoft\Rbac\AssignmentsStorageInterface`.'
+count = 1
+
+[[issues]]
+file = "config/common/di/auth.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Yiisoft\Rbac\ItemsStorageInterface`.'
+count = 1
+
+[[issues]]
+file = "config/common/di/auth.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Yiisoft\Rbac\ManagerInterface`.'
+count = 1
+
+[[issues]]
+file = "config/common/di/auth.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Yiisoft\User\CurrentUser`.'
+count = 1
 
 [[issues]]
 file = "config/common/di/db.php"
@@ -34,6 +184,30 @@ count = 1
 file = "config/common/di/logger.php"
 code = "non-existent-method"
 message = 'Method `from` does not exist on type `Yiisoft\Definitions\ReferencesArray`.'
+count = 1
+
+[[issues]]
+file = "config/common/di/mailer.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(Yiisoft\Aliases\Aliases)`).'
+count = 1
+
+[[issues]]
+file = "config/common/di/mailer.php"
+code = "non-existent-class"
+message = 'Class `Yiisoft\Mailer\FileMailer` not found.'
+count = 1
+
+[[issues]]
+file = "config/common/di/mailer.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Yiisoft\Aliases\Aliases`.'
+count = 1
+
+[[issues]]
+file = "config/common/di/mailer.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Yiisoft\Mailer\MailerInterface`.'
 count = 1
 
 [[issues]]
@@ -61,6 +235,48 @@ message = 'Method `to` does not exist on type `Yiisoft\Definitions\DynamicRefere
 count = 1
 
 [[issues]]
+file = "config/common/di/translator.php"
+code = "impossible-assignment"
+message = "Invalid assignment: the right-hand side has type `never` and cannot produce a value."
+count = 2
+
+[[issues]]
+file = "config/common/di/translator.php"
+code = "never-return"
+message = "Cannot return value with type 'never' from this function."
+count = 1
+
+[[issues]]
+file = "config/common/di/translator.php"
+code = "non-existent-class"
+message = 'Class `Yiisoft\Translator\CategorySource` not found.'
+count = 1
+
+[[issues]]
+file = "config/common/di/translator.php"
+code = "non-existent-class"
+message = 'Class `Yiisoft\Translator\InMemoryMessageSource` not found.'
+count = 1
+
+[[issues]]
+file = "config/common/di/translator.php"
+code = "non-existent-class"
+message = 'Class `Yiisoft\Translator\IntlMessageFormatter` not found.'
+count = 1
+
+[[issues]]
+file = "config/common/di/translator.php"
+code = "non-existent-class"
+message = 'Class `Yiisoft\Translator\Translator` not found.'
+count = 1
+
+[[issues]]
+file = "config/common/di/translator.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Yiisoft\Translator\TranslatorInterface`.'
+count = 1
+
+[[issues]]
 file = "config/common/params.php"
 code = "non-existent-method"
 message = 'Method `to` does not exist on type `Yiisoft\Definitions\Reference`.'
@@ -70,7 +286,7 @@ count = 6
 file = "config/common/routes.php"
 code = "mixed-method-access"
 message = "Attempting to access a method on a non-object type (`mixed`)."
-count = 81
+count = 91
 
 [[issues]]
 file = "config/common/routes.php"
@@ -82,13 +298,13 @@ count = 3
 file = "config/common/routes.php"
 code = "non-existent-method"
 message = 'Method `get` does not exist on type `Yiisoft\Router\Route`.'
-count = 35
+count = 38
 
 [[issues]]
 file = "config/common/routes.php"
 code = "non-existent-method"
 message = 'Method `methods` does not exist on type `Yiisoft\Router\Route`.'
-count = 3
+count = 5
 
 [[issues]]
 file = "config/web/di/application.php"
@@ -143,6 +359,102 @@ file = "public/index.php"
 code = "non-existent-class-like"
 message = 'Class, interface, enum, or trait `Psr\Log\LogLevel` not found.'
 count = 3
+
+[[issues]]
+file = "src/Auth/DemoIdentity.php"
+code = "non-existent-class-like"
+message = 'Class `App\Auth\DemoIdentity` cannot implement unknown type `IdentityInterface`'
+count = 1
+
+[[issues]]
+file = "src/Auth/DemoIdentity.php"
+code = "unused-property"
+message = "Property `$attributes` is never used."
+count = 1
+
+[[issues]]
+file = "src/Auth/DemoIdentity.php"
+code = "unused-property"
+message = "Property `$id` is never used."
+count = 1
+
+[[issues]]
+file = "src/Auth/DemoIdentity.php"
+code = "unused-property"
+message = "Property `$token` is never used."
+count = 1
+
+[[issues]]
+file = "src/Auth/DemoIdentityRepository.php"
+code = "non-existent-class-like"
+message = 'Class `App\Auth\DemoIdentityRepository` cannot implement unknown type `IdentityRepositoryInterface`'
+count = 1
+
+[[issues]]
+file = "src/Auth/DemoIdentityRepository.php"
+code = "non-existent-class-like"
+message = 'Class `App\Auth\DemoIdentityRepository` cannot implement unknown type `IdentityWithTokenRepositoryInterface`'
+count = 1
+
+[[issues]]
+file = "src/Auth/DemoIdentityRepository.php"
+code = "unused-property"
+message = "Property `$identities` is never used."
+count = 1
+
+[[issues]]
+file = "src/Auth/RbacSeeder.php"
+code = "impossible-assignment"
+message = "Invalid assignment: the right-hand side has type `never` and cannot produce a value."
+count = 6
+
+[[issues]]
+file = "src/Auth/RbacSeeder.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(Yiisoft\Rbac\AssignmentsStorageInterface)`).'
+count = 3
+
+[[issues]]
+file = "src/Auth/RbacSeeder.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(Yiisoft\Rbac\ItemsStorageInterface)`).'
+count = 1
+
+[[issues]]
+file = "src/Auth/RbacSeeder.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(Yiisoft\Rbac\ManagerInterface)`).'
+count = 14
+
+[[issues]]
+file = "src/Auth/RbacSeeder.php"
+code = "non-existent-class"
+message = 'Class `Yiisoft\Rbac\Permission` not found.'
+count = 3
+
+[[issues]]
+file = "src/Auth/RbacSeeder.php"
+code = "non-existent-class"
+message = 'Class `Yiisoft\Rbac\Role` not found.'
+count = 3
+
+[[issues]]
+file = "src/Auth/RbacSeeder.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Yiisoft\Rbac\AssignmentsStorageInterface`.'
+count = 1
+
+[[issues]]
+file = "src/Auth/RbacSeeder.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Yiisoft\Rbac\ItemsStorageInterface`.'
+count = 1
+
+[[issues]]
+file = "src/Auth/RbacSeeder.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Yiisoft\Rbac\ManagerInterface`.'
+count = 1
 
 [[issues]]
 file = "src/Console/HelloCommand.php"
@@ -200,6 +512,12 @@ count = 1
 
 [[issues]]
 file = "src/Web/Api/ErrorAction.php"
+code = "non-existent-attribute-class"
+message = 'Attribute class `OpenApi\Attributes\Get` not found or could not be autoloaded.'
+count = 1
+
+[[issues]]
+file = "src/Web/Api/ErrorAction.php"
 code = "non-existent-class-like"
 message = 'Cannot find class, interface, enum, or type alias `Psr\Log\LoggerInterface`.'
 count = 1
@@ -226,6 +544,18 @@ count = 1
 file = "src/Web/Api/IndexAction.php"
 code = "mixed-return-statement"
 message = 'Could not infer a precise return type for function `app\web\api\indexaction::__invoke`. Saw type `mixed`.'
+count = 1
+
+[[issues]]
+file = "src/Web/Api/IndexAction.php"
+code = "non-existent-attribute-class"
+message = 'Attribute class `OpenApi\Attributes\Get` not found or could not be autoloaded.'
+count = 1
+
+[[issues]]
+file = "src/Web/Api/IndexAction.php"
+code = "non-existent-attribute-class"
+message = 'Attribute class `OpenApi\Attributes\Info` not found or could not be autoloaded.'
 count = 1
 
 [[issues]]
@@ -259,6 +589,54 @@ message = 'Cannot find class, interface, enum, or type alias `Yiisoft\DataRespon
 count = 1
 
 [[issues]]
+file = "src/Web/Api/OpenApiAction.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(Yiisoft\DataResponse\DataResponseFactoryInterface)`).'
+count = 1
+
+[[issues]]
+file = "src/Web/Api/OpenApiAction.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `json_decode`: expected `string`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "src/Web/Api/OpenApiAction.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 1
+
+[[issues]]
+file = "src/Web/Api/OpenApiAction.php"
+code = "mixed-method-access"
+message = "Attempting to access a method on a non-object type (`mixed`)."
+count = 4
+
+[[issues]]
+file = "src/Web/Api/OpenApiAction.php"
+code = "mixed-return-statement"
+message = 'Could not infer a precise return type for function `app\web\api\openapiaction::__invoke`. Saw type `mixed`.'
+count = 1
+
+[[issues]]
+file = "src/Web/Api/OpenApiAction.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Psr\Http\Message\ResponseInterface`.'
+count = 1
+
+[[issues]]
+file = "src/Web/Api/OpenApiAction.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Yiisoft\DataResponse\DataResponseFactoryInterface`.'
+count = 1
+
+[[issues]]
+file = "src/Web/Api/OpenApiAction.php"
+code = "non-existent-method"
+message = 'Method `scan` does not exist on type `OpenApi\Generator`.'
+count = 1
+
+[[issues]]
 file = "src/Web/Api/UsersAction.php"
 code = "invalid-method-access"
 message = 'Attempting to access a method on a non-object type (`unknown-ref(Psr\Log\LoggerInterface)`).'
@@ -274,6 +652,12 @@ count = 1
 file = "src/Web/Api/UsersAction.php"
 code = "mixed-return-statement"
 message = 'Could not infer a precise return type for function `app\web\api\usersaction::__invoke`. Saw type `mixed`.'
+count = 1
+
+[[issues]]
+file = "src/Web/Api/UsersAction.php"
+code = "non-existent-attribute-class"
+message = 'Attribute class `OpenApi\Attributes\Get` not found or could not be autoloaded.'
 count = 1
 
 [[issues]]
@@ -331,6 +715,126 @@ message = 'Cannot find class, interface, enum, or type alias `Yiisoft\View\WebVi
 count = 1
 
 [[issues]]
+file = "src/Web/AuthorizationPage/Action.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(Psr\Http\Message\ServerRequestInterface)`).'
+count = 1
+
+[[issues]]
+file = "src/Web/AuthorizationPage/Action.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(Yiisoft\Rbac\ManagerInterface)`).'
+count = 2
+
+[[issues]]
+file = "src/Web/AuthorizationPage/Action.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(Yiisoft\User\CurrentUser)`).'
+count = 3
+
+[[issues]]
+file = "src/Web/AuthorizationPage/Action.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(Yiisoft\Yii\View\Renderer\ViewRenderer)`).'
+count = 1
+
+[[issues]]
+file = "src/Web/AuthorizationPage/Action.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `array_keys`: expected `array<('K.array_keys() extends array-key), ('V.array_keys() extends mixed)>`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "src/Web/AuthorizationPage/Action.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 4
+
+[[issues]]
+file = "src/Web/AuthorizationPage/Action.php"
+code = "mixed-return-statement"
+message = 'Could not infer a precise return type for function `app\web\authorizationpage\action::__invoke`. Saw type `mixed`.'
+count = 1
+
+[[issues]]
+file = "src/Web/AuthorizationPage/Action.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Psr\Http\Message\ResponseInterface`.'
+count = 1
+
+[[issues]]
+file = "src/Web/AuthorizationPage/Action.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Psr\Http\Message\ServerRequestInterface`.'
+count = 2
+
+[[issues]]
+file = "src/Web/AuthorizationPage/Action.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Yiisoft\Auth\IdentityRepositoryInterface`.'
+count = 1
+
+[[issues]]
+file = "src/Web/AuthorizationPage/Action.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Yiisoft\Rbac\ManagerInterface`.'
+count = 1
+
+[[issues]]
+file = "src/Web/AuthorizationPage/Action.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Yiisoft\User\CurrentUser`.'
+count = 1
+
+[[issues]]
+file = "src/Web/AuthorizationPage/Action.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Yiisoft\Yii\View\Renderer\ViewRenderer`.'
+count = 1
+
+[[issues]]
+file = "src/Web/AuthorizationPage/Action.php"
+code = "non-existent-class-like"
+message = 'Class, Interface, or Trait `Yiisoft\Auth\IdentityWithTokenRepositoryInterface` does not exist.'
+count = 1
+
+[[issues]]
+file = "src/Web/AuthorizationPage/template.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(Yiisoft\Router\UrlGeneratorInterface)`).'
+count = 1
+
+[[issues]]
+file = "src/Web/AuthorizationPage/template.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(Yiisoft\View\WebView)`).'
+count = 1
+
+[[issues]]
+file = "src/Web/AuthorizationPage/template.php"
+code = "mixed-argument"
+message = "The first value for `echo` is too general."
+count = 9
+
+[[issues]]
+file = "src/Web/AuthorizationPage/template.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Yiisoft\Router\UrlGeneratorInterface`.'
+count = 1
+
+[[issues]]
+file = "src/Web/AuthorizationPage/template.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Yiisoft\View\WebView`.'
+count = 1
+
+[[issues]]
+file = "src/Web/AuthorizationPage/template.php"
+code = "non-existent-method"
+message = 'Method `encode` does not exist on type `Yiisoft\Html\Html`.'
+count = 8
+
+[[issues]]
 file = "src/Web/ContactPage/Action.php"
 code = "invalid-method-access"
 message = 'Attempting to access a method on a non-object type (`unknown-ref(Psr\Http\Message\ServerRequestInterface)`).'
@@ -385,6 +889,12 @@ message = 'Cannot find class, interface, enum, or type alias `Yiisoft\View\WebVi
 count = 1
 
 [[issues]]
+file = "src/Web/ContactPage/template.php"
+code = "redundant-cast"
+message = "Redundant cast to `(string)`: the expression already has this type."
+count = 1
+
+[[issues]]
 file = "src/Web/HomePage/Action.php"
 code = "invalid-method-access"
 message = 'Attempting to access a method on a non-object type (`unknown-ref(Yiisoft\Yii\View\Renderer\ViewRenderer)`).'
@@ -412,7 +922,7 @@ count = 1
 file = "src/Web/HomePage/template.php"
 code = "invalid-method-access"
 message = 'Attempting to access a method on a non-object type (`unknown-ref(Yiisoft\Router\UrlGeneratorInterface)`).'
-count = 4
+count = 7
 
 [[issues]]
 file = "src/Web/HomePage/template.php"
@@ -424,7 +934,7 @@ count = 1
 file = "src/Web/HomePage/template.php"
 code = "mixed-argument"
 message = "The first value for `echo` is too general."
-count = 4
+count = 7
 
 [[issues]]
 file = "src/Web/HomePage/template.php"
@@ -437,6 +947,84 @@ file = "src/Web/HomePage/template.php"
 code = "non-existent-class-like"
 message = 'Cannot find class, interface, enum, or type alias `Yiisoft\View\WebView`.'
 count = 1
+
+[[issues]]
+file = "src/Web/LogDemoPage/Action.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(Psr\Http\Message\ServerRequestInterface)`).'
+count = 2
+
+[[issues]]
+file = "src/Web/LogDemoPage/Action.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(Psr\Log\LoggerInterface)`).'
+count = 1
+
+[[issues]]
+file = "src/Web/LogDemoPage/Action.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(Yiisoft\Yii\View\Renderer\ViewRenderer)`).'
+count = 1
+
+[[issues]]
+file = "src/Web/LogDemoPage/Action.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 2
+
+[[issues]]
+file = "src/Web/LogDemoPage/Action.php"
+code = "mixed-return-statement"
+message = 'Could not infer a precise return type for function `app\web\logdemopage\action::__invoke`. Saw type `mixed`.'
+count = 1
+
+[[issues]]
+file = "src/Web/LogDemoPage/Action.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Psr\Http\Message\ResponseInterface`.'
+count = 1
+
+[[issues]]
+file = "src/Web/LogDemoPage/Action.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Psr\Http\Message\ServerRequestInterface`.'
+count = 1
+
+[[issues]]
+file = "src/Web/LogDemoPage/Action.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Psr\Log\LoggerInterface`.'
+count = 1
+
+[[issues]]
+file = "src/Web/LogDemoPage/Action.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Yiisoft\Yii\View\Renderer\ViewRenderer`.'
+count = 1
+
+[[issues]]
+file = "src/Web/LogDemoPage/template.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(Yiisoft\View\WebView)`).'
+count = 1
+
+[[issues]]
+file = "src/Web/LogDemoPage/template.php"
+code = "mixed-argument"
+message = "The first value for `echo` is too general."
+count = 3
+
+[[issues]]
+file = "src/Web/LogDemoPage/template.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Yiisoft\View\WebView`.'
+count = 1
+
+[[issues]]
+file = "src/Web/LogDemoPage/template.php"
+code = "non-existent-method"
+message = 'Method `encode` does not exist on type `Yiisoft\Html\Html`.'
+count = 3
 
 [[issues]]
 file = "src/Web/NotFound/NotFoundHandler.php"
@@ -589,6 +1177,30 @@ message = 'Method `encode` does not exist on type `Yiisoft\Html\Html`.'
 count = 4
 
 [[issues]]
+file = "src/Web/TestFixtures/AssetAction.php"
+code = "non-existent-class-like"
+message = 'Class `App\Web\TestFixtures\AssetAction` cannot implement unknown type `RequestHandlerInterface`'
+count = 1
+
+[[issues]]
+file = "src/Web/TestFixtures/AssetAction.php"
+code = "unused-property"
+message = "Property `$assetLoader` is never used."
+count = 1
+
+[[issues]]
+file = "src/Web/TestFixtures/AssetAction.php"
+code = "unused-property"
+message = "Property `$responseFactory` is never used."
+count = 1
+
+[[issues]]
+file = "src/Web/TestFixtures/BootstrapAsset.php"
+code = "non-existent-class-like"
+message = 'Class `App\Web\TestFixtures\BootstrapAsset` cannot extend unknown type `AssetBundle`'
+count = 1
+
+[[issues]]
 file = "src/Web/TestFixtures/CacheAction.php"
 code = "non-existent-class-like"
 message = 'Class `App\Web\TestFixtures\CacheAction` cannot implement unknown type `RequestHandlerInterface`'
@@ -597,7 +1209,7 @@ count = 1
 [[issues]]
 file = "src/Web/TestFixtures/CacheAction.php"
 code = "unused-property"
-message = "Property `$cacheCollector` is never used."
+message = "Property `$cache` is never used."
 count = 1
 
 [[issues]]
@@ -615,7 +1227,7 @@ count = 1
 [[issues]]
 file = "src/Web/TestFixtures/CacheHeavyAction.php"
 code = "unused-property"
-message = "Property `$cacheCollector` is never used."
+message = "Property `$cache` is never used."
 count = 1
 
 [[issues]]
@@ -645,7 +1257,7 @@ count = 1
 [[issues]]
 file = "src/Web/TestFixtures/DatabaseAction.php"
 code = "unused-property"
-message = "Property `$databaseCollector` is never used."
+message = "Property `$connection` is never used."
 count = 1
 
 [[issues]]
@@ -715,18 +1327,6 @@ message = 'Class `App\Web\TestFixtures\ExceptionChainedAction` cannot implement 
 count = 1
 
 [[issues]]
-file = "src/Web/TestFixtures/FileStreamAction.php"
-code = "non-existent-class-like"
-message = 'Class `App\Web\TestFixtures\FileStreamAction` cannot implement unknown type `RequestHandlerInterface`'
-count = 1
-
-[[issues]]
-file = "src/Web/TestFixtures/FileStreamAction.php"
-code = "unused-property"
-message = "Property `$responseFactory` is never used."
-count = 1
-
-[[issues]]
 file = "src/Web/TestFixtures/FilesystemAction.php"
 code = "non-existent-class-like"
 message = 'Class `App\Web\TestFixtures\FilesystemAction` cannot implement unknown type `RequestHandlerInterface`'
@@ -754,6 +1354,12 @@ count = 1
 file = "src/Web/TestFixtures/HttpClientAction.php"
 code = "unused-property"
 message = "Property `$responseFactory` is never used."
+count = 1
+
+[[issues]]
+file = "src/Web/TestFixtures/JqueryAsset.php"
+code = "non-existent-class-like"
+message = 'Class `App\Web\TestFixtures\JqueryAsset` cannot extend unknown type `AssetBundle`'
 count = 1
 
 [[issues]]
@@ -819,7 +1425,7 @@ count = 1
 [[issues]]
 file = "src/Web/TestFixtures/MailerAction.php"
 code = "unused-property"
-message = "Property `$mailerCollector` is never used."
+message = "Property `$mailer` is never used."
 count = 1
 
 [[issues]]
@@ -957,13 +1563,19 @@ count = 1
 [[issues]]
 file = "src/Web/TestFixtures/RouterAction.php"
 code = "unused-property"
+message = "Property `$currentRoute` is never used."
+count = 1
+
+[[issues]]
+file = "src/Web/TestFixtures/RouterAction.php"
+code = "unused-property"
 message = "Property `$responseFactory` is never used."
 count = 1
 
 [[issues]]
 file = "src/Web/TestFixtures/RouterAction.php"
 code = "unused-property"
-message = "Property `$routerCollector` is never used."
+message = "Property `$routeCollection` is never used."
 count = 1
 
 [[issues]]
@@ -999,7 +1611,7 @@ count = 1
 [[issues]]
 file = "src/Web/TestFixtures/TemplateAction.php"
 code = "unused-property"
-message = "Property `$templateCollector` is never used."
+message = "Property `$webView` is never used."
 count = 1
 
 [[issues]]
@@ -1035,7 +1647,7 @@ count = 1
 [[issues]]
 file = "src/Web/TestFixtures/TranslatorAction.php"
 code = "unused-property"
-message = "Property `$translatorCollector` is never used."
+message = "Property `$translator` is never used."
 count = 1
 
 [[issues]]
@@ -1053,7 +1665,7 @@ count = 1
 [[issues]]
 file = "src/Web/TestFixtures/ValidatorAction.php"
 code = "unused-property"
-message = "Property `$validatorCollector` is never used."
+message = "Property `$validator` is never used."
 count = 1
 
 [[issues]]
@@ -1071,7 +1683,25 @@ count = 1
 [[issues]]
 file = "src/Web/TestFixtures/ViewAction.php"
 code = "unused-property"
-message = "Property `$templateCollector` is never used."
+message = "Property `$webView` is never used."
+count = 1
+
+[[issues]]
+file = "src/Web/TestFixtures/views/footer.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Yiisoft\View\WebView`.'
+count = 1
+
+[[issues]]
+file = "src/Web/TestFixtures/views/header.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Yiisoft\View\WebView`.'
+count = 1
+
+[[issues]]
+file = "src/Web/TestFixtures/views/home.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Yiisoft\View\WebView`.'
 count = 1
 
 [[issues]]
@@ -1108,4 +1738,70 @@ count = 1
 file = "src/Web/UsersPage/template.php"
 code = "non-existent-class-like"
 message = 'Cannot find class, interface, enum, or type alias `Yiisoft\View\WebView`.'
+count = 1
+
+[[issues]]
+file = "src/Web/VarDumperPage/Action.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(Psr\Http\Message\ServerRequestInterface)`).'
+count = 1
+
+[[issues]]
+file = "src/Web/VarDumperPage/Action.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(Yiisoft\Yii\View\Renderer\ViewRenderer)`).'
+count = 1
+
+[[issues]]
+file = "src/Web/VarDumperPage/Action.php"
+code = "mixed-return-statement"
+message = 'Could not infer a precise return type for function `app\web\vardumperpage\action::__invoke`. Saw type `mixed`.'
+count = 1
+
+[[issues]]
+file = "src/Web/VarDumperPage/Action.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Psr\Http\Message\ResponseInterface`.'
+count = 1
+
+[[issues]]
+file = "src/Web/VarDumperPage/Action.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Psr\Http\Message\ServerRequestInterface`.'
+count = 1
+
+[[issues]]
+file = "src/Web/VarDumperPage/Action.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Yiisoft\Yii\View\Renderer\ViewRenderer`.'
+count = 1
+
+[[issues]]
+file = "src/Web/VarDumperPage/Action.php"
+code = "non-existent-method"
+message = 'Method `dump` does not exist on type `Yiisoft\VarDumper\VarDumper`.'
+count = 1
+
+[[issues]]
+file = "src/Web/VarDumperPage/template.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(Yiisoft\View\WebView)`).'
+count = 1
+
+[[issues]]
+file = "src/Web/VarDumperPage/template.php"
+code = "mixed-argument"
+message = "The first value for `echo` is too general."
+count = 1
+
+[[issues]]
+file = "src/Web/VarDumperPage/template.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Yiisoft\View\WebView`.'
+count = 1
+
+[[issues]]
+file = "src/Web/VarDumperPage/template.php"
+code = "non-existent-method"
+message = 'Method `encode` does not exist on type `Yiisoft\Html\Html`.'
 count = 1

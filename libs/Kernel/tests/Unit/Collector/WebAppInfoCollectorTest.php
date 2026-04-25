@@ -68,4 +68,37 @@ final class WebAppInfoCollectorTest extends AbstractCollectorTestCase
         $this->assertIsArray($summary['web']);
         $this->assertSame('', $summary['web']['adapter']);
     }
+
+    public function testMarkApplicationStartedAndFinished(): void
+    {
+        $timeline = new TimelineCollector();
+        $timeline->startup();
+        $collector = new WebAppInfoCollector($timeline);
+        $collector->startup();
+
+        $collector->markApplicationStarted();
+        $collector->markRequestStarted();
+
+        usleep(10_000);
+
+        $collector->markRequestFinished();
+        $collector->markApplicationFinished();
+
+        $collected = $collector->getCollected();
+
+        $this->assertGreaterThan(0, $collected['applicationProcessingTime']);
+        $this->assertGreaterThan(0, $collected['requestProcessingTime']);
+        $this->assertGreaterThanOrEqual(0, $collected['applicationEmit']);
+        $this->assertGreaterThanOrEqual(0, $collected['preloadTime']);
+    }
+
+    public function testMarkApplicationStartedWhenInactive(): void
+    {
+        $collector = new WebAppInfoCollector(new TimelineCollector());
+        // Not started — should be no-op
+        $collector->markApplicationStarted();
+        $collector->markApplicationFinished();
+
+        $this->assertSame([], $collector->getCollected());
+    }
 }

@@ -7,7 +7,7 @@ Bridges ADP Kernel and API into Laravel. Uses Laravel's event system, middleware
 - Composer: `app-dev-panel/adapter-laravel`
 - Namespace: `AppDevPanel\Adapter\Laravel\`
 - PHP: 8.4+
-- Laravel: 11.x / 12.x
+- Laravel: 11.x / 12.x / 13.x
 - Dependencies: `app-dev-panel/kernel`, `app-dev-panel/api`, `app-dev-panel/cli`, `nyholm/psr7`, `guzzlehttp/guzzle`, `guzzlehttp/psr7`, `symfony/var-dumper`, PSR packages (`container`, `event-dispatcher`, `http-client`, `http-message`, `log`), Illuminate components (`contracts`, `http`, `routing`, `support`)
 
 ## Directory Structure
@@ -16,7 +16,9 @@ Bridges ADP Kernel and API into Laravel. Uses Laravel's event system, middleware
 src/
 ├── AppDevPanelServiceProvider.php              # Service provider: registers all services, collectors, API
 ├── Middleware/
-│   └── DebugMiddleware.php                     # HTTP lifecycle: startup/shutdown, request/response capture
+│   ├── DebugMiddleware.php                     # HTTP lifecycle: startup/shutdown, request/response capture
+│   ├── DebugCollectors.php                     # Groups optional collector dependencies injected into DebugMiddleware
+│   └── Psr7Converter.php                       # Laravel/HttpFoundation Request+Response → PSR-7
 ├── EventListener/
 │   ├── DatabaseListener.php                    # QueryExecuted → DatabaseCollector
 │   ├── CacheListener.php                       # CacheHit/CacheMissed/KeyWritten/KeyForgotten → CacheCollector
@@ -24,6 +26,9 @@ src/
 │   ├── QueueListener.php                       # JobProcessing/JobProcessed/JobFailed → QueueCollector
 │   ├── HttpClientListener.php                  # RequestSending/ResponseReceived/ConnectionFailed → HttpClientCollector
 │   ├── AuthorizationListener.php               # Authenticated/Login/Logout/Failed → AuthorizationCollector
+│   ├── GateListener.php                        # Gate evaluation events → AuthorizationCollector (granted/denied access decisions)
+│   ├── RedisListener.php                       # Illuminate\Redis\Events\CommandExecuted → RedisCollector
+│   ├── ValidatorListener.php                   # Validator factory resolver() → ValidatorCollector (pass/fail, errors)
 │   ├── ViteAssetListener.php                   # Vite preloadedAssets() → AssetBundleCollector
 │   └── ConsoleListener.php                     # CommandStarting/CommandFinished → Debugger lifecycle
 ├── Proxy/
@@ -34,6 +39,7 @@ src/
 │   └── TemplateCollectorCompilerEngine.php     # Wraps Blade CompilerEngine → TemplateCollector
 ├── Inspector/
 │   ├── LaravelConfigProvider.php               # Config, services, event listeners, providers
+│   ├── LaravelAuthorizationConfigProvider.php  # Live auth config: guards, abilities, policies, (optional) Spatie roles
 │   ├── LaravelSchemaProvider.php               # Database schema via Illuminate\Database\Connection
 │   ├── NullSchemaProvider.php                  # Fallback when no database configured
 │   ├── LaravelRouteCollectionAdapter.php       # Route inspection adapter
@@ -126,6 +132,7 @@ Wires in `boot()`:
 | Service | Class | Data |
 |---------|-------|------|
 | Config provider | `LaravelConfigProvider` | Services (bindings), config params, event listeners, service providers |
+| Authorization provider | `LaravelAuthorizationConfigProvider` | Guards from `config('auth.guards')`, abilities + policies from `Gate` (reflection on private `$abilities`/`$policies`), role hierarchy from Spatie Permission when installed |
 | Database schema | `LaravelSchemaProvider` | Tables, columns, records via `Illuminate\Database\Connection` |
 | Route collection | `LaravelRouteCollectionAdapter` | All registered routes |
 | URL matcher | `LaravelUrlMatcherAdapter` | Route matching test |

@@ -16,12 +16,20 @@ return [
             ->name('contact'),
         Route::get('/api-playground')->action(Web\ApiPlaygroundPage\Action::class)->name('api-playground'),
         Route::get('/error')->action(Web\ErrorPage\Action::class)->name('error-demo'),
+        Route::methods(['GET', 'POST'], '/log-demo')
+            ->action(Web\LogDemoPage\Action::class)
+            ->name('log-demo'),
+        Route::methods(['GET', 'POST'], '/var-dumper')
+            ->action(Web\VarDumperPage\Action::class)
+            ->name('var-dumper'),
+        Route::get('/authorization')->action(Web\AuthorizationPage\Action::class)->name('authorization'),
     ),
     Group::create('/api')
         ->routes(
             Route::get('/')->action(Web\Api\IndexAction::class)->name('api-index'),
             Route::get('/users')->action(Web\Api\UsersAction::class)->name('api-users'),
             Route::get('/error')->action(Web\Api\ErrorAction::class)->name('api-error'),
+            Route::get('/openapi.json')->action(Web\Api\OpenApiAction::class)->name('api-openapi'),
         )
         ->prependMiddleware(FormatDataResponseAsJson::class),
     Group::create('/test/fixtures')
@@ -31,7 +39,9 @@ return [
             Route::get('/events')->action(Web\TestFixtures\EventsAction::class)->name('test-events'),
             Route::get('/dump')->action(Web\TestFixtures\DumpAction::class)->name('test-dump'),
             Route::get('/timeline')->action(Web\TestFixtures\TimelineAction::class)->name('test-timeline'),
-            Route::get('/request-info')->action(Web\TestFixtures\RequestInfoAction::class)->name('test-request-info'),
+            Route::methods(['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'], '/request-info')
+                ->action(Web\TestFixtures\RequestInfoAction::class)
+                ->name('test-request-info'),
             Route::get('/exception')->action(Web\TestFixtures\ExceptionAction::class)->name('test-exception'),
             Route::get('/exception-chained')->action(Web\TestFixtures\ExceptionChainedAction::class)->name(
                 'test-exception-chained',
@@ -40,14 +50,11 @@ return [
             Route::get('/logs-heavy')->action(Web\TestFixtures\LogsHeavyAction::class)->name('test-logs-heavy'),
             Route::get('/http-client')->action(Web\TestFixtures\HttpClientAction::class)->name('test-http-client'),
             Route::get('/filesystem')->action(Web\TestFixtures\FilesystemAction::class)->name('test-filesystem'),
-            Route::get('/filesystem-streams')->action(Web\TestFixtures\FileStreamAction::class)->name(
-                'test-filesystem-streams',
-            ),
             Route::get('/database')->action(Web\TestFixtures\DatabaseAction::class)->name('test-database'),
             Route::get('/mailer')->action(Web\TestFixtures\MailerAction::class)->name('test-mailer'),
             Route::get('/queue')->action(Web\TestFixtures\QueueAction::class)->name('test-queue'),
             Route::get('/validator')->action(Web\TestFixtures\ValidatorAction::class)->name('test-validator'),
-            Route::get('/router')->action(Web\TestFixtures\RouterAction::class)->name('test-router'),
+            Route::get('/router')->action(Web\TestFixtures\RouterAction::class)->name('test_router'),
             Route::get('/cache')->action(Web\TestFixtures\CacheAction::class)->name('test-cache'),
             Route::get('/cache-heavy')->action(Web\TestFixtures\CacheHeavyAction::class)->name('test-cache-heavy'),
             Route::get('/opentelemetry')->action(Web\TestFixtures\OpenTelemetryAction::class)->name(

@@ -1,3 +1,4 @@
+import {ClassName} from '@app-dev-panel/panel/Application/Component/ClassName';
 import {JsonRenderer} from '@app-dev-panel/panel/Module/Debug/Component/JsonRenderer';
 import {useGetObjectQuery} from '@app-dev-panel/sdk/API/Debug/Debug';
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
@@ -39,7 +40,11 @@ export const ObjectPage = () => {
     return (
         <Box>
             <Typography variant="h6" my={1}>
-                {data.class}#{objectId}
+                <ClassName value={data.class}>
+                    <span>
+                        {data.class}#{objectId}
+                    </span>
+                </ClassName>
             </Typography>
             <JsonRenderer value={data.value} />
         </Box>

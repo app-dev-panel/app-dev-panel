@@ -1,16 +1,21 @@
-import {type EditorConfig, type EditorPreset, defaultEditorConfig} from '@app-dev-panel/sdk/Helper/editorUrl';
+import {type EditorConfig, defaultEditorConfig} from '@app-dev-panel/sdk/Helper/editorUrl';
 import {createSlice, PayloadAction} from '@reduxjs/toolkit';
+
+export type ToolbarPosition = 'float' | 'bottom' | 'right' | 'left';
 
 type ApplicationContext = {
     baseUrl: string;
     preferredPageSize: number;
     toolbarOpen: boolean;
+    toolbarPosition: ToolbarPosition;
+    toolbarFloatRect: {x: number; y: number; width: number; height: number} | null;
     favoriteUrls: string[];
     autoLatest: boolean;
     iframeHeight: number;
     selectedService: string;
     themeMode: 'light' | 'dark' | 'system';
     showInactiveCollectors: boolean;
+    liveFeedOpen: boolean;
     editorConfig: EditorConfig;
 };
 export const ApplicationSlice = createSlice({
@@ -19,12 +24,15 @@ export const ApplicationSlice = createSlice({
         baseUrl: '',
         preferredPageSize: 20,
         toolbarOpen: true,
+        toolbarPosition: 'bottom' as ToolbarPosition,
+        toolbarFloatRect: null as {x: number; y: number; width: number; height: number} | null,
         favoriteUrls: [] as string[],
         autoLatest: false,
         iframeHeight: 400,
         selectedService: 'local',
         themeMode: 'system',
         showInactiveCollectors: false,
+        liveFeedOpen: false,
         editorConfig: defaultEditorConfig,
     } as ApplicationContext,
     reducers: {
@@ -52,6 +60,15 @@ export const ApplicationSlice = createSlice({
         setIFrameHeight: (state, action) => {
             state.iframeHeight = action.payload;
         },
+        setToolbarPosition: (state, action: PayloadAction<ToolbarPosition>) => {
+            state.toolbarPosition = action.payload;
+        },
+        setToolbarFloatRect: (
+            state,
+            action: PayloadAction<{x: number; y: number; width: number; height: number} | null>,
+        ) => {
+            state.toolbarFloatRect = action.payload;
+        },
         changeSelectedService(state, action: PayloadAction<string>) {
             state.selectedService = action.payload;
         },
@@ -61,14 +78,11 @@ export const ApplicationSlice = createSlice({
         changeShowInactiveCollectors: (state, action: PayloadAction<boolean>) => {
             state.showInactiveCollectors = action.payload;
         },
-        changeEditorPreset: (state, action: PayloadAction<EditorPreset>) => {
-            state.editorConfig = {...(state.editorConfig ?? defaultEditorConfig), editor: action.payload};
+        setEditorConfig: (state, action: PayloadAction<EditorConfig>) => {
+            state.editorConfig = action.payload;
         },
-        changeEditorCustomTemplate: (state, action: PayloadAction<string>) => {
-            state.editorConfig = {...(state.editorConfig ?? defaultEditorConfig), customUrlTemplate: action.payload};
-        },
-        changeEditorPathMapping: (state, action: PayloadAction<Record<string, string>>) => {
-            state.editorConfig = {...(state.editorConfig ?? defaultEditorConfig), pathMapping: action.payload};
+        toggleLiveFeed: (state) => {
+            state.liveFeedOpen = !state.liveFeedOpen;
         },
     },
 });
@@ -81,10 +95,11 @@ export const {
     addFavoriteUrl,
     removeFavoriteUrl,
     setIFrameHeight,
+    setToolbarPosition,
+    setToolbarFloatRect,
     changeSelectedService,
     changeThemeMode,
     changeShowInactiveCollectors,
-    changeEditorPreset,
-    changeEditorCustomTemplate,
-    changeEditorPathMapping,
+    setEditorConfig,
+    toggleLiveFeed,
 } = ApplicationSlice.actions;

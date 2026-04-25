@@ -2,9 +2,11 @@ import {useGetTableQuery} from '@app-dev-panel/panel/Module/Inspector/API/Inspec
 import {FullScreenCircularProgress} from '@app-dev-panel/sdk/Component/FullScreenCircularProgress';
 import {DataTable} from '@app-dev-panel/sdk/Component/Grid';
 import {PageHeader} from '@app-dev-panel/sdk/Component/PageHeader';
+import {QueryErrorState} from '@app-dev-panel/sdk/Component/QueryErrorState';
 import {Button, Typography} from '@mui/material';
 import {GridColDef, GridRenderCellParams, GridValidRowModel} from '@mui/x-data-grid';
 import {useEffect, useState} from 'react';
+import {Link as RouterLink} from 'react-router';
 
 const columns: GridColDef[] = [
     {
@@ -40,7 +42,11 @@ const columns: GridColDef[] = [
         renderCell: (params: GridRenderCellParams) => {
             return (
                 <Typography my={1}>
-                    <Button variant="contained" href={`/inspector/storage/database/${params.row.name}`}>
+                    <Button
+                        variant="contained"
+                        component={RouterLink}
+                        to={`/inspector/storage/database/${params.row.name}`}
+                    >
                         View
                     </Button>
                 </Typography>
@@ -50,7 +56,7 @@ const columns: GridColDef[] = [
 ];
 
 export const DatabasePage = ({showHeader = true}: {showHeader?: boolean}) => {
-    const {data, isLoading} = useGetTableQuery();
+    const {data, isLoading, isError, error, refetch} = useGetTableQuery();
     const [tables, setTables] = useState<GridValidRowModel[]>([]);
 
     useEffect(() => {
@@ -66,6 +72,23 @@ export const DatabasePage = ({showHeader = true}: {showHeader?: boolean}) => {
     if (isLoading) {
         return <FullScreenCircularProgress />;
     }
+
+    if (isError) {
+        return (
+            <>
+                {showHeader && (
+                    <PageHeader title="Database" icon="storage" description="Browse database tables and records" />
+                )}
+                <QueryErrorState
+                    error={error}
+                    title="Failed to load database tables"
+                    fallback="Failed to load database tables."
+                    onRetry={refetch}
+                />
+            </>
+        );
+    }
+
     return (
         <>
             {showHeader && (

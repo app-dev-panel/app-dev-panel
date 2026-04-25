@@ -7,7 +7,8 @@ namespace AppDevPanel\Api\Tests\Unit\Ingestion\Controller;
 use AppDevPanel\Api\Http\JsonResponseFactoryInterface;
 use AppDevPanel\Api\Ingestion\Controller\OtlpController;
 use AppDevPanel\Kernel\DebuggerIdGenerator;
-use AppDevPanel\Kernel\Storage\FileStorage;
+use AppDevPanel\Kernel\Storage\SqliteStorage;
+use AppDevPanel\Kernel\Storage\StorageInterface;
 use GuzzleHttp\Psr7\Response;
 use Nyholm\Psr7\ServerRequest;
 use Nyholm\Psr7\Stream;
@@ -16,11 +17,13 @@ use PHPUnit\Framework\TestCase;
 final class OtlpControllerTest extends TestCase
 {
     private string $storagePath;
+    private SqliteStorage $storage;
 
     protected function setUp(): void
     {
         $this->storagePath = sys_get_temp_dir() . '/adp-otlp-test-' . uniqid();
         mkdir($this->storagePath, 0o755, true);
+        $this->storage = new SqliteStorage($this->storagePath . '/debug.db', new DebuggerIdGenerator());
     }
 
     protected function tearDown(): void
@@ -31,9 +34,8 @@ final class OtlpControllerTest extends TestCase
     private function createController(): OtlpController
     {
         $responseFactory = $this->createJsonResponseFactory();
-        $storage = new FileStorage($this->storagePath, new DebuggerIdGenerator());
 
-        return new OtlpController($responseFactory, $storage);
+        return new OtlpController($responseFactory, $this->storage);
     }
 
     private function createJsonResponseFactory(): JsonResponseFactoryInterface
@@ -92,8 +94,8 @@ final class OtlpControllerTest extends TestCase
         $this->assertArrayHasKey('partialSuccess', $data);
 
         // Verify storage has entry
-        $files = glob($this->storagePath . '/**/**/summary.json.gz');
-        $this->assertCount(1, $files);
+        $summaries = $this->storage->read(StorageInterface::TYPE_SUMMARY);
+        $this->assertCount(1, $summaries);
     }
 
     public function testTracesMultipleSpansSameTrace(): void
@@ -138,8 +140,8 @@ final class OtlpControllerTest extends TestCase
         $this->assertSame(200, $response->getStatusCode());
 
         // Should create one entry per trace
-        $files = glob($this->storagePath . '/**/**/summary.json.gz');
-        $this->assertCount(1, $files);
+        $summaries = $this->storage->read(StorageInterface::TYPE_SUMMARY);
+        $this->assertCount(1, $summaries);
     }
 
     public function testTracesEmptyPayload(): void
@@ -153,8 +155,8 @@ final class OtlpControllerTest extends TestCase
         $this->assertSame(200, $response->getStatusCode());
 
         // No entries should be created
-        $files = glob($this->storagePath . '/**/**/summary.json.gz');
-        $this->assertCount(0, $files);
+        $summaries = $this->storage->read(StorageInterface::TYPE_SUMMARY);
+        $this->assertCount(0, $summaries);
     }
 
     public function testTracesMultipleTraces(): void
@@ -192,8 +194,161 @@ final class OtlpControllerTest extends TestCase
         $this->assertSame(200, $response->getStatusCode());
 
         // Two traces = two entries
-        $files = glob($this->storagePath . '/**/**/summary.json.gz');
-        $this->assertCount(2, $files);
+        $summaries = $this->storage->read(StorageInterface::TYPE_SUMMARY);
+        $this->assertCount(2, $summaries);
+    }
+
+    public function testTracesWithErrorSpanCountsErrors(): void
+    {
+        $controller = $this->createController();
+
+        $response = $controller->traces($this->post([
+            'resourceSpans' => [
+                [
+                    'resource' => [
+                        'attributes' => [
+                            ['key' => 'service.name', 'value' => ['stringValue' => 'error-service']],
+                        ],
+                    ],
+                    'scopeSpans' => [
+                        [
+                            'spans' => [
+                                [
+                                    'traceId' => 'trace-err-1',
+                                    'spanId' => 'span-root',
+                                    'name' => 'GET /fail',
+                                    'startTimeUnixNano' => '1700000000000000000',
+                                    'endTimeUnixNano' => '1700000000500000000',
+                                    'kind' => 2,
+                                    'status' => ['code' => 2, 'message' => 'Internal error'],
+                                ],
+                                [
+                                    'traceId' => 'trace-err-1',
+                                    'spanId' => 'span-child',
+                                    'parentSpanId' => 'span-root',
+                                    'name' => 'DB query',
+                                    'startTimeUnixNano' => '1700000000100000000',
+                                    'endTimeUnixNano' => '1700000000400000000',
+                                    'kind' => 3,
+                                    'status' => ['code' => 1],
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ]));
+
+        $this->assertSame(200, $response->getStatusCode());
+
+        // Should have created one entry
+        $summaries = $this->storage->read(StorageInterface::TYPE_SUMMARY);
+        $this->assertCount(1, $summaries);
+
+        // Read summary and verify error count is recorded
+        $summary = array_values($summaries)[0];
+        $this->assertSame(1, $summary['opentelemetry']['errors']);
+        $this->assertSame(2, $summary['opentelemetry']['spans']);
+    }
+
+    public function testTracesWithNoRootSpanUsesFirstSpan(): void
+    {
+        $controller = $this->createController();
+
+        // All spans have parentSpanId — no root span
+        $response = $controller->traces($this->post([
+            'resourceSpans' => [
+                [
+                    'resource' => [
+                        'attributes' => [
+                            ['key' => 'service.name', 'value' => ['stringValue' => 'orphan-service']],
+                        ],
+                    ],
+                    'scopeSpans' => [
+                        [
+                            'spans' => [
+                                [
+                                    'traceId' => 'trace-orphan',
+                                    'spanId' => 'span-a',
+                                    'parentSpanId' => 'span-external',
+                                    'name' => 'child-op-1',
+                                    'startTimeUnixNano' => '1700000000000000000',
+                                    'endTimeUnixNano' => '1700000000100000000',
+                                    'kind' => 3,
+                                ],
+                                [
+                                    'traceId' => 'trace-orphan',
+                                    'spanId' => 'span-b',
+                                    'parentSpanId' => 'span-external',
+                                    'name' => 'child-op-2',
+                                    'startTimeUnixNano' => '1700000000100000000',
+                                    'endTimeUnixNano' => '1700000000200000000',
+                                    'kind' => 3,
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ]));
+
+        $this->assertSame(200, $response->getStatusCode());
+
+        $summaries = $this->storage->read(StorageInterface::TYPE_SUMMARY);
+        $this->assertCount(1, $summaries);
+
+        // Verify the first span's operation was used as the context operation
+        $summary = array_values($summaries)[0];
+        $this->assertSame('child-op-1', $summary['context']['operation']);
+    }
+
+    public function testTracesWithAttributesAndEvents(): void
+    {
+        $controller = $this->createController();
+
+        $response = $controller->traces($this->post([
+            'resourceSpans' => [
+                [
+                    'resource' => [
+                        'attributes' => [
+                            ['key' => 'service.name', 'value' => ['stringValue' => 'rich-service']],
+                            ['key' => 'service.version', 'value' => ['stringValue' => '1.0.0']],
+                        ],
+                    ],
+                    'scopeSpans' => [
+                        [
+                            'spans' => [
+                                [
+                                    'traceId' => 'trace-rich',
+                                    'spanId' => 'span-rich',
+                                    'name' => 'POST /api/submit',
+                                    'startTimeUnixNano' => '1700000000000000000',
+                                    'endTimeUnixNano' => '1700000000300000000',
+                                    'kind' => 2,
+                                    'attributes' => [
+                                        ['key' => 'http.method', 'value' => ['stringValue' => 'POST']],
+                                        ['key' => 'http.status_code', 'value' => ['intValue' => '201']],
+                                    ],
+                                    'events' => [
+                                        [
+                                            'timeUnixNano' => '1700000000100000000',
+                                            'name' => 'request.received',
+                                            'attributes' => [],
+                                        ],
+                                    ],
+                                    'status' => ['code' => 1],
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ]));
+
+        $this->assertSame(200, $response->getStatusCode());
+
+        $summaries = $this->storage->read(StorageInterface::TYPE_SUMMARY);
+        $this->assertCount(1, $summaries);
     }
 
     private function removeDir(string $dir): void

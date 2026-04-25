@@ -1,3 +1,4 @@
+import {ClassName} from '@app-dev-panel/panel/Application/Component/ClassName';
 import {
     AuthorizationGuard,
     AuthorizationVoter,
@@ -6,6 +7,7 @@ import {
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {JsonRenderer} from '@app-dev-panel/sdk/Component/JsonRenderer';
 import {PageHeader} from '@app-dev-panel/sdk/Component/PageHeader';
+import {QueryErrorState} from '@app-dev-panel/sdk/Component/QueryErrorState';
 import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
 import {Box, Chip, LinearProgress, Typography} from '@mui/material';
 import {styled} from '@mui/material/styles';
@@ -37,6 +39,22 @@ const TableHeader = styled(TableRow)(({theme}) => ({
 
 const MonoText = styled(Typography)(({theme}) => ({fontFamily: theme.adp.fontFamilyMono, fontSize: '12px'}));
 
+const ClassNameText = ({value, bold = false, muted = false}: {value: string; bold?: boolean; muted?: boolean}) => (
+    <ClassName value={value}>
+        <Typography
+            component="span"
+            sx={(theme) => ({
+                fontFamily: theme.adp.fontFamilyMono,
+                fontSize: '12px',
+                fontWeight: bold ? 600 : 400,
+                color: muted ? 'text.secondary' : 'text.primary',
+            })}
+        >
+            {value}
+        </Typography>
+    </ClassName>
+);
+
 const HierarchyRow = styled(Box)(({theme}) => ({
     display: 'flex',
     alignItems: 'center',
@@ -55,8 +73,12 @@ const GuardsTable = ({guards}: {guards: AuthorizationGuard[]}) => (
         </TableHeader>
         {guards.map((guard) => (
             <TableRow key={guard.name}>
-                <MonoText sx={{flex: 1, fontWeight: 600}}>{guard.name}</MonoText>
-                <MonoText sx={{flex: 1, color: 'text.secondary'}}>{guard.provider}</MonoText>
+                <Box sx={{flex: 1}}>
+                    <ClassNameText value={guard.name} bold />
+                </Box>
+                <Box sx={{flex: 1}}>
+                    <ClassNameText value={guard.provider} muted />
+                </Box>
                 <Box sx={{flex: 2}}>
                     {Object.entries(guard.config).map(([key, value]) => (
                         <Chip
@@ -127,7 +149,9 @@ const VotersTable = ({voters}: {voters: AuthorizationVoter[]}) => (
         </TableHeader>
         {voters.map((voter, index) => (
             <TableRow key={index}>
-                <MonoText sx={{flex: 2, fontWeight: 500}}>{voter.name}</MonoText>
+                <Box sx={{flex: 2}}>
+                    <ClassNameText value={voter.name} bold />
+                </Box>
                 <Box sx={{flex: 1}}>
                     <Chip
                         label={voter.type}
@@ -145,18 +169,41 @@ const VotersTable = ({voters}: {voters: AuthorizationVoter[]}) => (
 );
 
 export const AuthorizationPage = () => {
-    const {data, isLoading, error} = useGetAuthorizationQuery();
+    const {data, isLoading, isError, error, refetch} = useGetAuthorizationQuery();
 
     if (isLoading) {
         return <LinearProgress />;
     }
 
-    if (error) {
-        return <EmptyState icon="error" title="Failed to load authorization data" />;
+    if (isError) {
+        return (
+            <Box>
+                <PageHeader
+                    title="Authorization"
+                    icon="shield"
+                    description="Security guards, roles, voters, and configuration"
+                />
+                <QueryErrorState
+                    error={error}
+                    title="Failed to load authorization data"
+                    fallback="Failed to load authorization data."
+                    onRetry={refetch}
+                />
+            </Box>
+        );
     }
 
     if (!data) {
-        return <EmptyState icon="shield" title="No authorization data available" />;
+        return (
+            <Box>
+                <PageHeader
+                    title="Authorization"
+                    icon="shield"
+                    description="Security guards, roles, voters, and configuration"
+                />
+                <EmptyState icon="shield" title="No authorization data available" />
+            </Box>
+        );
     }
 
     const hasGuards = data.guards.length > 0;

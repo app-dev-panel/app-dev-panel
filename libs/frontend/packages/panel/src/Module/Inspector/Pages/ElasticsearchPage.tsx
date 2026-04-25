@@ -2,6 +2,7 @@ import {useGetElasticsearchHealthQuery} from '@app-dev-panel/panel/Module/Inspec
 import {FullScreenCircularProgress} from '@app-dev-panel/sdk/Component/FullScreenCircularProgress';
 import {DataTable} from '@app-dev-panel/sdk/Component/Grid';
 import {PageHeader} from '@app-dev-panel/sdk/Component/PageHeader';
+import {QueryErrorState} from '@app-dev-panel/sdk/Component/QueryErrorState';
 import {Box, Chip, Typography} from '@mui/material';
 import {GridColDef, GridRenderCellParams, GridValidRowModel} from '@mui/x-data-grid';
 import {useMemo} from 'react';
@@ -86,7 +87,7 @@ type HealthData = {
 };
 
 export const ElasticsearchPage = ({showHeader = true}: {showHeader?: boolean}) => {
-    const {data, isLoading} = useGetElasticsearchHealthQuery();
+    const {data, isLoading, isError, error, refetch} = useGetElasticsearchHealthQuery();
 
     const typedData = data as unknown as HealthData | undefined;
     const health = typedData?.health;
@@ -94,6 +95,26 @@ export const ElasticsearchPage = ({showHeader = true}: {showHeader?: boolean}) =
 
     if (isLoading) {
         return <FullScreenCircularProgress />;
+    }
+
+    if (isError) {
+        return (
+            <>
+                {showHeader && (
+                    <PageHeader
+                        title="Elasticsearch"
+                        icon="search"
+                        description="Inspect Elasticsearch cluster and indices"
+                    />
+                )}
+                <QueryErrorState
+                    error={error}
+                    title="Failed to load Elasticsearch data"
+                    fallback="Failed to load Elasticsearch cluster data."
+                    onRetry={refetch}
+                />
+            </>
+        );
     }
 
     return (

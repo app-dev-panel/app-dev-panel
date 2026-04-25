@@ -107,7 +107,7 @@ class DbSchemaProvider implements SchemaProviderInterface
                 'dbType' => $columnSchema->getDbType(),
                 'defaultValue' => $columnSchema->getDefaultValue(),
                 'comment' => $columnSchema->getComment(),
-                'allowNull' => !($columnSchema->isNotNull() ?? false),
+                'allowNull' => !$columnSchema->isNotNull(),
             ];
         }
         return $result;

@@ -92,6 +92,117 @@ const App = () => (
 );
 ```
 
+## React 19 Pitfalls & Review Checklist
+
+**Apply this checklist whenever you write or review React code. A self-review that skips these points is not a review.** For every hook, every ref, every effect, every postMessage, walk through the relevant items below. Call out the issue with `file:line` and a concrete fix — don't write "looks good" on hot paths without explicit justification.
+
+### Render purity — never do these during render
+
+The function body of a component runs on every render, can be interrupted (concurrent features, Suspense retries), and runs twice in development (StrictMode). Nothing in the render phase may have observable side effects.
+
+- **No ref mutation during render.** `ref.current = ...` at the top level of a component body is a bug: unpredictable under StrictMode double-invocation and concurrent rendering. If you need "compute once, never recompute," use `useState(() => init)` — that's exactly what lazy state is for. If you need "latest value captured in a closure for later," move the assignment into `useEffect` / `useLayoutEffect`.
+- **No state setters during render without a guard.** `setX(...)` in the body without an `if (condition) setX(...)` + idempotency guard causes infinite loops. Prefer deriving the value during render instead of storing it.
+- **No timers, subscriptions, network I/O in render.** `setTimeout`, `fetch`, `addEventListener`, `new Observer()` all belong in effects.
+- **No `Date.now()` / `Math.random()` / `new Date()` during render without lazy state.** Non-deterministic output breaks hydration and StrictMode double-render assertions. Seed them with `useState(() => ...)`.
+- **No reading DOM geometry during render.** Use `useLayoutEffect` or a ref callback.
+
+Anti-pattern to flag on sight:
+
+```tsx
+// BAD — ref mutation during render
+const srcRef = useRef<string | undefined>(undefined);
+if (srcRef.current === undefined) {
+    srcRef.current = buildUrl(props);
+}
+
+// GOOD — lazy state initializer
+const [src] = useState(() => buildUrl(props));
+```
+
+### useRef usage
+
+- **`useRef<T>(null)` for DOM refs.** React assigns `null` on unmount, never `undefined`. `useRef<T | undefined>(undefined)` and `useRef<T>(null!)` are both wrong by default.
+- **Refs hold values you don't render.** If the JSX reads `ref.current`, it should probably be state instead.
+- **"Latest prop/callback" refs must sync in an effect, not in render.** Reading the latest value in handlers is fine; keeping the ref up to date must happen in `useEffect(() => { ref.current = value; })` or `useLayoutEffect` — not at the top of the function body.
+- **No `ref!.current`.** Fix the type or narrow it. Non-null assertions hide real bugs (ref can genuinely be null during the first render or after unmount).
+
+### useEffect discipline
+
+- **Every effect has a reason this can't be expressed as derived state, an event handler, or a ref callback.** If an effect only syncs state A to state B, delete it and compute B during render.
+- **Every subscription / listener / timer / `AbortController` has matching cleanup.** `return () => observer.unsubscribe()` / `clearTimeout(id)` / `controller.abort()`.
+- **Dependency arrays are complete.** Trust `eslint-plugin-react-hooks/exhaustive-deps`. Suppressing the rule is a smell — either lift the dependency or genuinely accept the stale closure with a comment explaining why.
+- **Effects that fetch data handle races.** Either use an `AbortController` or a local `cancelled` flag set to true in cleanup. Latest-response-wins is a classic bug.
+- **Effects that read props inside async code capture stale values.** Use a ref (updated in another effect) or include the prop in deps.
+- **Never write to props.** They're inputs.
+
+### Hook rules
+
+- **No conditional hooks, no hooks in loops, no hooks inside handlers.** Same call order on every render.
+- **Custom hooks start with `use`** so the rules-of-hooks linter enforces #1.
+- **No hooks past an early return.** All hooks must run before any conditional `return`.
+
+### useCallback / useMemo
+
+- **Don't add them reflexively.** They have a cost (the deps array, the allocation, the reader confusion). Add only when the value is passed to a memoized child or a dep of another hook, or the computation is genuinely expensive.
+- **Empty dep arrays are usually wrong.** A callback with `[]` that references state or props captures a stale closure forever. Either list the deps or store the value in a ref.
+- **Memoization is broken by inline objects/arrays at the call site.** `<Child config={{...}} />` defeats `memo(Child)` regardless of what Child does.
+
+### Keys
+
+- **Stable, unique, content-derived keys.** `key={item.id}`, not `key={index}` in dynamic lists. Index is acceptable only for fixed-length lists that never reorder.
+- **No random / `Math.random()` / `Date.now()` keys.** They remount children on every render, nuking state and focus.
+
+### Cross-window / postMessage
+
+- **Validate `event.source`.** Only accept messages from the window you expect (your own iframe's `contentWindow`, or `window.opener`). Any frame on the page can `postMessage` into yours.
+- **Validate `event.origin`** when the message carries security or integrity meaning.
+- **Validate `event.data` shape.** `typeof data === 'object' && data !== null && 'event' in data && (data.event === '...')` — not `data.event === '...'` on an unknown.
+- **Document `targetOrigin: '*'` usages.** Default should be a specific origin; `*` needs a comment explaining why the wider audience is safe.
+
+### Accessibility — auto-flag in review
+
+- **`<div onClick>` without `role`, `tabIndex`, and keyboard handler** is a non-operable button. Use `<button>` or add all three.
+- **`<Link href="#" onClick={preventDefault}>`** is not a link — it's a button styled as a link. Use `<button>` or the library's button-as-link form (`<Link component="button" type="button">` in MUI).
+- **Icon-only interactive elements need `aria-label`.**
+- **Dynamic regions** (toasts, live validation, async results) need `aria-live`, `role="status"`, or `role="alert"`.
+- **Form controls must have associated `<label>`** — not placeholders, not `title`.
+- **Focus management on modals / route changes / async content swaps.**
+- **`outline: none`** without an equivalent `:focus-visible` style is an accessibility regression.
+
+### TypeScript hygiene
+
+- **No `as unknown as X` double-casts.** Declare the global augmentation, fix the generic, or narrow properly.
+- **No `!` non-null assertions** on values that can actually be null at runtime (refs during first render, optional chaining targets, array finds).
+- **Global augmentations go in `.d.ts` and use `interface` for merging.** `type` aliases shadow; interfaces merge.
+- **`as const` + derived unions** instead of `enum`.
+
+### Performance red flags
+
+- **`React.memo(Child)` while Child receives inline `{...}` / `() => ...`** — memo is a no-op.
+- **Large lists without virtualization** (>100 rows).
+- **Context value computed inline every render** makes every consumer rerender.
+- **Images without `width`/`height`** cause cumulative layout shift.
+
+### State colocation
+
+- **Don't duplicate derived state.** If it can be computed from props/state, compute it during render.
+- **Don't lift state higher than it needs to be.** Siblings that both read a value → lift. Otherwise keep it local.
+- **Server data belongs in an async cache** (RTK Query / TanStack Query), not `useState` + `useEffect(fetch)`.
+
+### Self-review protocol
+
+Before claiming work is done — and **before writing any review summary** — walk through these in order:
+
+1. Grep your own diff for `\.current\s*=` — is every mutation inside an effect or handler?
+2. Grep for `useRef<[^>]*\|\s*undefined>` and `useRef<[^>]*>\(null!\)` — fix the types.
+3. For each `useEffect`, ask: cleanup? complete deps? race? Could this be derived instead?
+4. For each `postMessage` listener, verify `event.source` and data shape.
+5. For each interactive non-`<button>` / non-`<a>`, verify `role`, `tabIndex`, keyboard handler, and `aria-*`.
+6. For each `as`, `!`, `any`, `@ts-*` — justify or remove.
+7. Re-read your "what's good" section and delete anything you didn't audit against items 1–6.
+
+If you wrote the code, you owe the user items 1–6 before saying "done". If you're reviewing, items 1–6 determine whether the review is honest.
+
 ## TypeScript Rules
 
 1. **`type` over `interface`** — use `type` for all type definitions.

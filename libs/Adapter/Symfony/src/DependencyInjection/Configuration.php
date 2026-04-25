@@ -23,6 +23,10 @@ final class Configuration implements ConfigurationInterface
             ->arrayNode('storage')
             ->addDefaultsIfNotSet()
             ->children()
+            ->scalarNode('driver')
+            ->defaultValue('file')
+            ->info('Storage driver: "sqlite", "file", or a fully qualified class name implementing StorageInterface')
+            ->end()
             ->scalarNode('path')
             ->defaultValue('%kernel.project_dir%/var/debug')
             ->info('Directory for debug data storage')
@@ -196,6 +200,12 @@ final class Configuration implements ConfigurationInterface
             ->scalarNode('auth_token')
             ->defaultValue('')
             ->info('Authentication token for API access (empty = no auth)')
+            ->end()
+            ->scalarNode('inspector_url')
+            ->defaultNull()
+            ->info(
+                'Base URL of the application for MCP inspector tools (e.g. http://localhost:8080). If null, inspector tools are disabled in the HTTP MCP endpoint.',
+            )
             ->end()
             ->end()
             ->end()

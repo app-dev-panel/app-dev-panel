@@ -1,3 +1,4 @@
+import {ClassName} from '@app-dev-panel/panel/Application/Component/ClassName';
 import {JsonRenderer} from '@app-dev-panel/panel/Module/Debug/Component/JsonRenderer';
 import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
 import {Box, Chip, Collapse, Icon, Tab, Tabs, Typography, type Theme} from '@mui/material';
@@ -280,7 +281,13 @@ const EventCard = ({eventClass, eventData}: {eventClass: string; eventData: Comm
                 }}
             >
                 <Icon sx={{fontSize: 16, color: 'text.disabled'}}>{expanded ? 'expand_less' : 'expand_more'}</Icon>
-                <Typography sx={{fontWeight: 600, fontSize: '13px', flex: 1}}>{shortName}</Typography>
+                <Box sx={{fontWeight: 600, fontSize: '13px', flex: 1, display: 'flex', alignItems: 'center'}}>
+                    <ClassName value={eventClass}>
+                        <Typography component="span" sx={{fontWeight: 600, fontSize: '13px'}}>
+                            {shortName}
+                        </Typography>
+                    </ClassName>
+                </Box>
                 {exitCode != null && (
                     <Chip
                         label={exitCode === 0 ? 'OK' : `exit ${exitCode}`}

@@ -4,11 +4,11 @@ React/TypeScript frontend for ADP. Provides a web UI to inspect debug data and a
 
 ## Tech Stack
 
-- React 19+, TypeScript 5.5+
-- Vite 5.4+ (build tool)
-- Material-UI (MUI) 5+ with DataGrid and TreeView
-- Redux Toolkit 1.9+ with RTK Query (state management and API calls)
-- React Router 6 (navigation)
+- React 19+, TypeScript 6+
+- Vite 8+ (build tool)
+- Material-UI (MUI) 7+ with DataGrid and TreeView
+- Redux Toolkit 2+ with RTK Query (state management and API calls)
+- React Router 7 (navigation)
 - React Hook Form + Yup (forms and validation)
 - Workbox 7 (PWA / Service Worker)
 - Lerna 8 (monorepo management)
@@ -29,7 +29,7 @@ packages/
 │   │   ├── Application/    # App shell (Layout, NotFoundPage, Settings)
 │   │   └── Module/         # Feature modules
 │   │       ├── Debug/      # Debug data viewer (collector panels, timeline, exceptions)
-│   │       ├── Inspector/  # Application inspector (20+ pages: routes, DB, git, cache, etc.)
+│   │       ├── Inspector/  # Application inspector (28 pages: routes, DB, git, cache, etc.)
 │   │       ├── Llm/        # LLM chat and AI-powered analysis (connect, chat, analyze, history)
 │   │       ├── Mcp/        # MCP server setup and configuration page
 │   │       ├── GenCode/    # Code generation wizard (stepper: generate, preview, result)
@@ -50,7 +50,10 @@ packages/
     │   │   ├── createBaseQuery.ts       # Dynamic base URL factory
     │   │   ├── errorNotificationMiddleware.ts
     │   │   ├── Debug/      # Debug API (debugApi, debugSlice)
-    │   │   └── Application/# Application state (ApplicationSlice)
+    │   │   ├── Application/# Application state (ApplicationSlice)
+    │   │   └── Llm/
+    │   │       ├── Llm.ts              # LLM API (llmApi) + llmBaseQuery with X-Acp-Session header
+    │   │       └── acpSession.ts       # ACP session ID management (sessionStorage, per-tab UUID)
     │   ├── Component/      # Reusable components
     │   │   ├── Theme/
     │   │   │   ├── tokens.ts              # Design tokens (primitives, semantic, dark)
@@ -70,10 +73,11 @@ packages/
     │   │   ├── EmptyState.tsx              # Generic empty state (icon + title + desc)
     │   │   ├── SectionTitle.tsx            # Section heading component
     │   │   ├── SqlHighlight.tsx            # SQL syntax highlighting (Prism, inline/formatted modes)
+    │   │   ├── FilterChip.tsx              # Unified colored filter/tag badge (fixes gray-on-hover bug)
     │   │   ├── FilterInput.tsx             # Reusable filter text input with debounce
     │   │   ├── BodyPreview.tsx             # HTTP body preview (JSON, HTML, text)
     │   │   ├── ExplainPlanVisualizer.tsx   # SQL EXPLAIN plan tree visualizer
-    │   │   ├── FileLink.tsx               # Clickable file path link (IDE integration)
+    │   │   ├── FileLink.tsx               # Clickable file *path* link (File Explorer + Open in Editor). For class names use `panel/Application/Component/ClassName` instead.
     │   │   ├── StackTrace.tsx             # Exception stack trace renderer
     │   │   ├── KeyValueTable.tsx          # Key-value pair table display
     │   │   ├── StatusCard.tsx             # Status indicator card
@@ -83,7 +87,7 @@ packages/
     │   │   ├── ServiceSelector.tsx        # Multi-app service selector
     │   │   ├── ServerSentEventsObserver.ts  # SSE connection manager
     │   │   ├── useServerSentEvents.ts       # SSE React hook
-    │   │   ├── JsonRenderer.tsx             # JSON display component
+    │   │   ├── JsonRenderer.tsx             # JSON display; renders `ClosureDescriptor` markers and `fn(...)=>…` strings as PHP code
     │   │   ├── CodeHighlight.tsx            # Syntax highlighting
     │   │   ├── Form/
     │   │   │   └── FilterInput.tsx          # Form-integrated filter input
@@ -92,7 +96,7 @@ packages/
     │   │   ├── mui/        # MUI type extensions
     │   │   ├── yii/        # Yii-specific input matchers
     │   │   └── yup/        # Yup validation adapters
-    │   ├── Helper/         # Utility functions (30+ helpers)
+    │   ├── Helper/         # Utility functions (25 helpers)
     │   │   ├── fuzzyMatch.ts              # Fuzzy matching algorithm (score + indices)
     │   │   ├── layoutTranslit.ts          # QWERTY ↔ ЙЦУКЕН transliteration
     │   └── Types/          # TypeScript type definitions
@@ -261,6 +265,37 @@ Key features:
 - Hook: `useServerSentEvents(baseUrl, onMessage, subscribe)`
 - Used for real-time debug entry notifications
 
+## Rendering Rules
+
+### Class names (PHP FQCN) — always use `ClassName`
+
+Any place that renders a PHP class name (fully-qualified or short) **must** use
+`packages/panel/src/Application/Component/ClassName.tsx`. It provides the two
+required affordances: a link to the internal File Explorer
+(`/inspector/files?class=…`) **and** an "Open in Editor" button that resolves
+the source path via the inspector API and opens the user's configured IDE.
+
+```tsx
+import {ClassName} from '@app-dev-panel/panel/Application/Component/ClassName';
+
+// Full FQCN, default rendering
+<ClassName value={message.messageClass} />
+
+// Short label in a list row, full FQCN drives the links
+<ClassName value={fqcn}>{shortClassName(fqcn)}</ClassName>
+
+// Callable — method name is included in both explorer and editor URLs
+<ClassName value={action.className} methodName={action.methodName} />
+```
+
+Do **not** render class names as plain `Typography`, `styled(Typography)`, or
+`<FileLink className=…>`. `FileLink` is for file *paths* only — it has no
+`className` prop anymore.
+
+Non-FQCN values (short names without a `\`) render as plain inline text
+without buttons, so the component is safe to use for both short and
+fully-qualified identifiers.
+
 ## Code Quality
 
 ```bash
@@ -274,6 +309,53 @@ npm run check          # Run all checks
 **Prettier** (v3.8+): Single quotes, trailing commas, 120 char width, 4-space indent, `objectWrap: "collapse"`, `prettier-plugin-organize-imports`.
 
 **ESLint**: @typescript-eslint with `consistent-type-definitions: "type"`, integrated with Prettier via `eslint-config-prettier`.
+
+## Building URLs to ADP Pages
+
+Any code that opens a panel page in a new tab (badge Ctrl/Cmd-click, "Open in panel" menu items, external-anchor links) **must** go through `panelPagePath` from `@app-dev-panel/sdk/Helper/panelMountPath`.
+
+A valid panel URL has three parts:
+
+```
+{mount}{panelPath}{?query}
+ ─┬──── ─┬──────── ─┬─────
+  │      │          │
+  │      │          └── page-specific params (collector, debugEntry, level, class, path, …)
+  │      │
+  │      └── panel-internal React Router path
+  │          (`/debug`, `/debug/list`, `/debug/object`, `/inspector/files`, `/llm`, `/mcp`, …)
+  │
+  └── ADP mount inside the host app.
+      Read from `window.__adp_panel_url` (set by PHP `ToolbarInjector` from
+      `PanelConfig::viewerBasePath`). Defaults to `/debug`.
+```
+
+**Two `/debug` segments is correct when the panel is at its default mount:** the first is the mount, the second is the internal collector viewer route. `panelPagePath('/debug?collector=X&debugEntry=Y')` resolves to `/debug/debug?collector=X&debugEntry=Y` by default, and to `/adp/debug?collector=X&debugEntry=Y` when the host configured `__adp_panel_url = '/adp'`.
+
+### Rules
+
+- Always URL-encode dynamic path/query values with `encodeURIComponent` — especially backslashes in PHP collector FQCNs (`AppDevPanel\Kernel\Collector\LogCollector` → `AppDevPanel%5C...`). `Application/Component/Layout.tsx` is the reference (see line ~476).
+- Never hardcode `/debug` as the mount. Always call `panelPagePath` so a custom `__adp_panel_url` is respected.
+- The panel-internal path must include `/debug` for collector viewer URLs. A bare-query call — `panelPagePath('?collector=X')` → `/debug?...` — goes to the panel **home** page, not the collector viewer. Use `panelPagePath('/debug?collector=X&debugEntry=Y')`.
+- For inspector pages use the corresponding internal route: `panelPagePath('/inspector/files?class=Foo')`.
+
+### Badge → panel URL mapping
+
+| Badge | Panel URL |
+|-------|-----------|
+| Logs | `{mount}/debug?collector=<LogCollector>&debugEntry=<id>[&level=…]` |
+| Events | `{mount}/debug?collector=<EventCollector>&debugEntry=<id>` |
+| RequestTime | `{mount}/debug?collector=<TimelineCollector>&debugEntry=<id>` |
+| Memory | `{mount}/debug?collector=<Web/Console AppInfoCollector>&debugEntry=<id>` |
+| Database | `{mount}/debug?collector=<DatabaseCollector>&debugEntry=<id>` |
+| HttpClient | `{mount}/debug?collector=<HttpClientCollector>&debugEntry=<id>` |
+| Validator | `{mount}/debug?collector=<ValidatorCollector>&debugEntry=<id>` |
+| Deprecation | `{mount}/debug?collector=<DeprecationCollector>&debugEntry=<id>` |
+| Request (web) | `{mount}/debug?debugEntry=<id>` (entry overview) |
+| Command (console) | `{mount}/debug?debugEntry=<id>` (entry overview) |
+| Exception | `{mount}/inspector/files?class=<ExceptionClass>` (class explorer) |
+
+Toolbar badges fall through `openInNewTabOnModifier` (`@app-dev-panel/sdk/Helper/openInNewTabOnModifier`) for the modifier branch — it handles `ctrlKey || metaKey`, calls `window.open(url, '_blank', 'noopener,noreferrer')`, and stops the event. Tests live next to each badge (`LogsItem.test.tsx`, `EventsItem.test.tsx`, `Web/RequestItem.test.tsx`) and assert the full URL shape including both `/debug` segments.
 
 ## Build & Development
 

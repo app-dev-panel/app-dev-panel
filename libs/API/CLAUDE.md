@@ -1,6 +1,6 @@
 # API Module
 
-HTTP layer for ADP. Five domains: **Debug** (stored debug entries), **Inspector** (live app state), **Ingestion** (external data intake), **MCP** (AI assistant integration), **LLM** (AI chat and analysis).
+HTTP layer for ADP. Five domains: **Debug** (stored debug entries), **Inspector** (live app state), **Ingestion** (external data intake), **MCP** (AI assistant integration), **LLM** (AI chat and analysis). LLM supports four providers: OpenRouter, Anthropic, OpenAI (HTTP APIs), and ACP (Agent Client Protocol — spawns local AI agents like Claude Code via stdio subprocess).
 
 ## Package
 
@@ -23,7 +23,7 @@ src/
 │   │   ├── DebugController.php          # Debug data endpoints (list, summary, view, dump, object, SSE)
 │   │   └── SettingsController.php       # Debug settings (path mapping)
 │   ├── Middleware/
-│   │   ├── ResponseDataWrapper.php      # Wraps responses in {id, data, error, success, status}
+│   │   ├── ResponseDataWrapper.php      # Wraps responses in {id, data, error, success}
 │   │   ├── DebugHeaders.php             # Adds X-Debug-Id, X-Debug-Link headers
 │   │   └── TokenAuthMiddleware.php      # Token-based authentication
 │   ├── Repository/
@@ -56,6 +56,7 @@ src/
 │   │   ├── ElasticsearchController.php  # Elasticsearch cluster health, indices, search, raw query
 │   │   ├── RedisController.php          # Redis inspection (ping, info, keys, get, delete, flush)
 │   │   ├── CodeCoverageController.php   # Code coverage (pcov/xdebug)
+│   │   ├── HttpMockController.php       # HTTP mock expectations, verify, history, reset (Phiremock)
 │   │   └── ServiceController.php        # Service registration (register, heartbeat, list, deregister)
 │   ├── Middleware/
 │   │   └── InspectorProxyMiddleware.php # Proxies inspector requests to external services
@@ -68,16 +69,23 @@ src/
 │   ├── Elasticsearch/
 │   │   ├── ElasticsearchProviderInterface.php  # Interface for ES cluster inspection
 │   │   └── NullElasticsearchProvider.php       # Default no-op fallback
+│   ├── HttpMock/
+│   │   ├── HttpMockProviderInterface.php       # HTTP mock backend (expectations, history, verify)
+│   │   ├── NullHttpMockProvider.php            # Default no-op fallback
+│   │   └── PhiremockProvider.php               # Backend implementation via Phiremock HTTP API
 │   ├── Command/
 │   │   ├── CommandInterface.php
 │   │   ├── CommandResponse.php
 │   │   ├── BashCommand.php
-│   │   ├── PHPUnitCommand.php
-│   │   ├── CodeceptionCommand.php
+│   │   ├── PHPUnitCommand.php           # JSON-report variant (uses PHPUnitJSONReporter)
+│   │   ├── PHPUnitRawCommand.php        # raw stdout/stderr variant
+│   │   ├── CodeceptionCommand.php       # JSON-report variant (uses CodeceptionJSONReporter)
+│   │   ├── CodeceptionRawCommand.php    # raw stdout/stderr variant
 │   │   └── PsalmCommand.php
 │   ├── Test/
-│   │   ├── CodeceptionJSONReporter.php
-│   │   └── PHPUnitJSONReporter.php
+│   │   ├── PHPUnitJSONReporter.php        # PHPUnit 10+ Extension, writes phpunit-report.json
+│   │   ├── PHPUnitReportCollector.php     # In-memory collector used by PHPUnitJSONReporter
+│   │   └── CodeceptionJSONReporter.php    # Codeception 5+ Extension, writes codeception-report.json
 │   └── ApplicationState.php
 ├── Ingestion/
 │   └── Controller/
@@ -91,9 +99,17 @@ src/
 ├── Llm/
 │   ├── Controller/
 │   │   └── LlmController.php           # LLM integration (connect, chat, analyze, history, OAuth)
+│   ├── Acp/
+│   │   ├── AcpDaemonManager.php          # Daemon lifecycle: start/stop, session management, Unix socket IPC
+│   │   ├── AcpDaemonManagerInterface.php # Interface for daemon manager (start, startSession, sendPrompt, etc.)
+│   │   ├── acp-daemon-runner.php         # Standalone daemon process (multi-session, Unix socket server)
+│   │   ├── AcpCommandVerifier.php       # Checks if agent command exists on PATH
+│   │   ├── AcpCommandVerifierInterface.php # Interface for command verification
+│   │   └── AcpResponse.php              # Value object for ACP agent response
 │   ├── FileLlmHistoryStorage.php        # File-based chat history
 │   ├── FileLlmSettings.php              # File-based LLM settings
 │   ├── LlmHistoryStorageInterface.php
+│   ├── LlmProviderService.php          # Provider dispatch (OpenRouter, Anthropic, OpenAI, ACP)
 │   └── LlmSettingsInterface.php
 ├── Http/
 │   ├── JsonResponseFactory.php          # JSON response creation
@@ -234,6 +250,20 @@ Requires `\Redis` (phpredis extension) in the DI container.
 | GET | `/` | Collect and return PHP code coverage data (requires pcov or xdebug) |
 | GET | `/file` | Read a source file (`?path=`) |
 
+### HTTP Mock API (`/inspect/api/http-mock`)
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/status` | Backend availability (enabled, provider name, reachable URL) |
+| GET | `/expectations` | List registered expectations |
+| POST | `/expectations` | Register a new expectation (mock rule) |
+| DELETE | `/expectations` | Clear all expectations |
+| GET | `/verify` | Verify executed requests against expectations |
+| GET | `/history` | Request history captured by the mock backend |
+| POST | `/reset` | Reset expectations + history |
+
+Backed by `HttpMockProviderInterface`. Default `NullHttpMockProvider` returns "disabled". `PhiremockProvider` proxies to a running Phiremock server.
+
 ### MCP API (`/inspect/api/mcp`)
 
 JSON-RPC 2.0 endpoint for AI assistant integration via Model Context Protocol.
@@ -317,8 +347,8 @@ All API requests pass through:
 
 1. **IpFilterMiddleware** — Validates request IP against `allowedIPs` (default: `127.0.0.1`, `::1`)
 2. **CorsMiddleware** — Adds permissive CORS headers (`Access-Control-Allow-Origin: *`)
-3. **ResponseDataWrapper** — Wraps all responses in `{id, data, error, success, status}`
-4. **DebugHeaders** — Adds `X-Debug-Id` and `X-Debug-Link` response headers
+3. **ResponseDataWrapper** — Wraps all responses in `{id, data, error, success}`
+4. **TokenAuthMiddleware** — Optional token-based authentication
 
 Inspector route group (`/inspect/api`) additionally includes:
 
@@ -333,10 +363,20 @@ All API responses are wrapped:
     "id": "debug-entry-id",
     "data": { ... },
     "error": null,
-    "success": true,
-    "status": 200
+    "success": true
 }
 ```
+
+## Serialization
+
+Inspector controllers (`InspectController`, `AuthorizationController`, `CacheController`,
+`GitController`, `RoutingController`, `RequestController`, `TranslationController`) serialise
+their responses through `AppDevPanel\Kernel\Inspector\Primitives::dump($value, $depth)` — **not**
+`VarDumper::create(...)->asPrimitives(...)` directly. `Primitives::dump()` recursively walks
+arrays and replaces every `Closure` with a `ClosureDescriptor` marker so the frontend can render
+it as a syntax-highlighted PHP block. Use this helper for any new inspector endpoint that might
+surface framework-level data with closures (DI definitions, event listeners, route handlers,
+translator fallbacks, etc.).
 
 ## SSE (Server-Sent Events)
 

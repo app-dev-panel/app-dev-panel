@@ -178,16 +178,17 @@ final class ConnectionInterfaceProxyTest extends TestCase
         $this->assertSame('mysql', $proxy->getDriverName());
     }
 
-    public function testGetServerVersionDelegatesToDecorated(): void
+    public function testGetServerInfoDelegatesToDecorated(): void
     {
+        $serverInfo = $this->createMock(\Yiisoft\Db\Connection\ServerInfoInterface::class);
         $connection = $this->createMock(ConnectionInterface::class);
-        $connection->method('getServerVersion')->willReturn('8.0.32');
+        $connection->method('getServerInfo')->willReturn($serverInfo);
 
         $timeline = new TimelineCollector();
         $collector = new DatabaseCollector($timeline);
 
         $proxy = new ConnectionInterfaceProxy($connection, $collector);
-        $this->assertSame('8.0.32', $proxy->getServerVersion());
+        $this->assertSame($serverInfo, $proxy->getServerInfo());
     }
 
     public function testGetTablePrefixDelegatesToDecorated(): void
@@ -319,7 +320,7 @@ final class ConnectionInterfaceProxyTest extends TestCase
         $query = $this->createMock(QueryInterface::class);
         $batchResult = $this->createMock(BatchQueryResultInterface::class);
         $connection = $this->createMock(ConnectionInterface::class);
-        $connection->method('createBatchQueryResult')->with($query, false)->willReturn($batchResult);
+        $connection->method('createBatchQueryResult')->with($query)->willReturn($batchResult);
 
         $timeline = new TimelineCollector();
         $collector = new DatabaseCollector($timeline);

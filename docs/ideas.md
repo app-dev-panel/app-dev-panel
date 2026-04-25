@@ -1,6 +1,6 @@
 # Ideas & Future Improvements
 
-Status: 2026-03-30. Brainstorming — not committed to roadmap.
+Status: 2026-04-04. Brainstorming — not committed to roadmap.
 
 ## 1. Collector Manifest
 

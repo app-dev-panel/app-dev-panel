@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use AppDevPanel\Adapter\Yii3\Collector\Router\RouterDataExtractor;
+use AppDevPanel\Adapter\Yii3\Collector\View\ViewEventListener;
 use AppDevPanel\Kernel\Collector\EnvironmentCollector;
 use AppDevPanel\Kernel\Collector\ExceptionCollector;
 use AppDevPanel\Kernel\Collector\Web\RequestCollector;
@@ -11,6 +12,8 @@ use AppDevPanel\Kernel\Debugger;
 use AppDevPanel\Kernel\StartupContext;
 use Yiisoft\ErrorHandler\Event\ApplicationError;
 use Yiisoft\Profiler\ProfilerInterface;
+use Yiisoft\View\Event\WebView\AfterRender;
+use Yiisoft\View\Event\WebView\BeforeRender;
 use Yiisoft\Yii\Http\Event\AfterEmit;
 use Yiisoft\Yii\Http\Event\AfterRequest;
 use Yiisoft\Yii\Http\Event\ApplicationShutdown;
@@ -43,11 +46,11 @@ return [
         ),
     ],
     AfterRequest::class => [
-        static fn(AfterRequest $event, WebAppInfoCollector $collector) => $collector->markRequestFinished(),
         static fn(AfterRequest $event, RequestCollector $collector) => $event->getResponse() !== null
             ? $collector->collectResponse($event->getResponse())
             : null,
         static fn(AfterRequest $event, RouterDataExtractor $extractor) => $extractor->extract(),
+        static fn(AfterRequest $event, WebAppInfoCollector $collector) => $collector->markRequestFinished(),
     ],
     AfterEmit::class => [
         [ProfilerInterface::class, 'flush'],
@@ -58,5 +61,11 @@ return [
         static fn(ApplicationError $event, ExceptionCollector $collector) => $collector->collect(
             $event->getThrowable(),
         ),
+    ],
+    BeforeRender::class => [
+        [ViewEventListener::class, 'beforeRender'],
+    ],
+    AfterRender::class => [
+        [ViewEventListener::class, 'afterRender'],
     ],
 ];

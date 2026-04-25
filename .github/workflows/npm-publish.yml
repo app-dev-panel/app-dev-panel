@@ -65,6 +65,9 @@ jobs:
       - name: Package toolbar build
         run: cd packages/toolbar && tar -czf ../../toolbar-dist.tar.gz dist/
 
+      - name: Package panel build as frontend-dist.zip
+        run: cd packages/panel/dist && zip -r ../../../frontend-dist.zip .
+
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -75,6 +78,7 @@ jobs:
             libs/frontend/packages/toolbar/dist/
             libs/frontend/panel-dist.tar.gz
             libs/frontend/toolbar-dist.tar.gz
+            libs/frontend/frontend-dist.zip
           retention-days: 1
 
   publish:
@@ -107,7 +111,7 @@ jobs:
         run: npx lerna version "$GITHUB_REF_NAME" --no-git-tag-version --no-push --yes
 
       - name: Clean up build artifacts from working tree
-        run: rm -f panel-dist.tar.gz toolbar-dist.tar.gz
+        run: rm -f panel-dist.tar.gz toolbar-dist.tar.gz frontend-dist.zip
 
       - name: Commit and push version bump
         run: |
@@ -140,3 +144,4 @@ jobs:
           files: |
             artifacts/panel-dist.tar.gz
             artifacts/toolbar-dist.tar.gz
+            artifacts/frontend-dist.zip

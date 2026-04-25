@@ -62,4 +62,57 @@ final class LaravelUrlMatcherAdapterTest extends TestCase
         $this->assertTrue($result->isSuccess());
         $this->assertSame([], $result->middlewares);
     }
+
+    public function testMatchPostRoute(): void
+    {
+        $route = new Route(['POST'], '/users', ['uses' => 'App\\Http\\Controllers\\UserController@store']);
+
+        $routeCollection = new RouteCollection();
+        $routeCollection->add($route);
+
+        $router = $this->createMock(Router::class);
+        $router->method('getRoutes')->willReturn($routeCollection);
+
+        $adapter = new LaravelUrlMatcherAdapter($router);
+        $request = new ServerRequest('POST', 'http://localhost/users');
+        $result = $adapter->match($request);
+
+        $this->assertTrue($result->isSuccess());
+    }
+
+    public function testMatchWithRouteParameters(): void
+    {
+        $route = new Route(['GET'], '/users/{id}', ['uses' => 'App\\Http\\Controllers\\UserController@show']);
+
+        $routeCollection = new RouteCollection();
+        $routeCollection->add($route);
+
+        $router = $this->createMock(Router::class);
+        $router->method('getRoutes')->willReturn($routeCollection);
+
+        $adapter = new LaravelUrlMatcherAdapter($router);
+        $request = new ServerRequest('GET', 'http://localhost/users/42');
+        $result = $adapter->match($request);
+
+        $this->assertTrue($result->isSuccess());
+    }
+
+    public function testMatchWrongMethodReturnsFailure(): void
+    {
+        $route = new Route(['GET'], '/users', ['uses' => 'App\\Http\\Controllers\\UserController@index']);
+
+        $routeCollection = new RouteCollection();
+        $routeCollection->add($route);
+
+        $router = $this->createMock(Router::class);
+        $router->method('getRoutes')->willReturn($routeCollection);
+
+        $adapter = new LaravelUrlMatcherAdapter($router);
+        // DELETE is not registered for /users
+        $request = new ServerRequest('DELETE', 'http://localhost/users');
+        $result = $adapter->match($request);
+
+        // Should fail since DELETE method is not registered
+        $this->assertFalse($result->isSuccess());
+    }
 }

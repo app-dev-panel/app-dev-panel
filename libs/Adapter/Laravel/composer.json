@@ -37,6 +37,7 @@
         "app-dev-panel/api": "*",
         "app-dev-panel/kernel": "*",
         "app-dev-panel/cli": "*",
+        "app-dev-panel/frontend-assets": "*",
         "guzzlehttp/guzzle": "^7.5",
         "guzzlehttp/psr7": "^2.4",
         "nyholm/psr7": "^1.8",
@@ -45,15 +46,15 @@
         "psr/http-client": "^1.0",
         "psr/http-message": "^1.0|^2.0",
         "psr/log": "^3.0",
-        "illuminate/contracts": "^11.0|^12.0",
-        "illuminate/http": "^11.0|^12.0",
-        "illuminate/routing": "^11.0|^12.0",
-        "illuminate/support": "^11.0|^12.0",
+        "illuminate/contracts": "^11.0|^12.0|^13.0",
+        "illuminate/http": "^11.0|^12.0|^13.0",
+        "illuminate/routing": "^11.0|^12.0|^13.0",
+        "illuminate/support": "^11.0|^12.0|^13.0",
         "symfony/var-dumper": "^6.4|^7.0|^8.0"
     },
     "require-dev": {
         "phpunit/phpunit": "^11.0",
-        "orchestra/testbench": "^9.0|^10.0"
+        "orchestra/testbench": "^9.0|^10.0|^11.0"
     },
     "repositories": [
         {
@@ -67,6 +68,10 @@
         {
             "type": "path",
             "url": "../../Cli"
+        },
+        {
+            "type": "path",
+            "url": "../../FrontendAssets"
         }
     ],
     "autoload": {

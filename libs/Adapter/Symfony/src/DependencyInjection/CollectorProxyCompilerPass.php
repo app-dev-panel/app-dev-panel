@@ -5,10 +5,16 @@ declare(strict_types=1);
 namespace AppDevPanel\Adapter\Symfony\DependencyInjection;
 
 use AppDevPanel\Adapter\Symfony\Inspector\DoctrineSchemaProvider;
+use AppDevPanel\Adapter\Symfony\Inspector\SymfonyAuthorizationConfigProvider;
+use AppDevPanel\Adapter\Symfony\Proxy\SymfonyCacheProxy;
 use AppDevPanel\Adapter\Symfony\Proxy\SymfonyEventDispatcherProxy;
 use AppDevPanel\Adapter\Symfony\Proxy\SymfonyTranslatorProxy;
+use AppDevPanel\Adapter\Symfony\Proxy\SymfonyValidatorProxy;
+use AppDevPanel\Adapter\Symfony\Proxy\TwigEnvironmentProxy;
+use AppDevPanel\Api\Inspector\Authorization\AuthorizationConfigProviderInterface;
 use AppDevPanel\Api\Inspector\Controller\InspectController;
 use AppDevPanel\Api\Inspector\Database\SchemaProviderInterface;
+use AppDevPanel\Kernel\Collector\CacheCollector;
 use AppDevPanel\Kernel\Collector\EventCollector;
 use AppDevPanel\Kernel\Collector\HttpClientCollector;
 use AppDevPanel\Kernel\Collector\HttpClientInterfaceProxy;
@@ -16,13 +22,17 @@ use AppDevPanel\Kernel\Collector\LogCollector;
 use AppDevPanel\Kernel\Collector\LoggerInterfaceProxy;
 use AppDevPanel\Kernel\Collector\OpenTelemetryCollector;
 use AppDevPanel\Kernel\Collector\SpanProcessorInterfaceProxy;
+use AppDevPanel\Kernel\Collector\TemplateCollector;
 use AppDevPanel\Kernel\Collector\TranslatorCollector;
+use AppDevPanel\Kernel\Collector\ValidatorCollector;
 use AppDevPanel\Kernel\Debugger;
 use AppDevPanel\Kernel\DebuggerIdGenerator;
 use AppDevPanel\Kernel\DebuggerIgnoreConfig;
+use AppDevPanel\Kernel\DebugServer\LoggerDecorator;
 use AppDevPanel\Kernel\Storage\StorageInterface;
 use Psr\Http\Client\ClientInterface;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\DependencyInjection\Argument\TaggedIteratorArgument;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
@@ -48,8 +58,12 @@ final class CollectorProxyCompilerPass implements CompilerPassInterface
         $this->decorateHttpClient($container);
         $this->decorateTranslator($container);
         $this->decorateSpanProcessor($container);
+        $this->decorateTwig($container);
+        $this->decorateValidator($container);
+        $this->decorateCache($container);
         $this->upgradeSchemaProvider($container);
         $this->collectContainerParameters($container);
+        $this->upgradeAuthorizationProvider($container);
     }
 
     private function registerDebugger(ContainerBuilder $container): void
@@ -95,11 +109,18 @@ final class CollectorProxyCompilerPass implements CompilerPassInterface
             return;
         }
 
+        // Wrap inner logger with LoggerDecorator for Live Feed broadcasting,
+        // then wrap that with LoggerInterfaceProxy for collector capture.
+        $container
+            ->register(LoggerDecorator::class, LoggerDecorator::class)
+            ->setArguments([new Reference(LoggerInterfaceProxy::class . '.inner')])
+            ->setPublic(false);
+
         $container
             ->register(LoggerInterfaceProxy::class, LoggerInterfaceProxy::class)
             ->setDecoratedService($serviceId)
             ->setArguments([
-                new Reference(LoggerInterfaceProxy::class . '.inner'),
+                new Reference(LoggerDecorator::class),
                 new Reference(LogCollector::class),
             ]);
     }
@@ -193,6 +214,74 @@ final class CollectorProxyCompilerPass implements CompilerPassInterface
             ]);
     }
 
+    private function decorateTwig(ContainerBuilder $container): void
+    {
+        if (!$container->has(TemplateCollector::class)) {
+            return;
+        }
+
+        if (!$container->has('twig')) {
+            return;
+        }
+
+        $container
+            ->register(TwigEnvironmentProxy::class, TwigEnvironmentProxy::class)
+            ->setDecoratedService('twig')
+            ->setArguments([
+                new Reference(TwigEnvironmentProxy::class . '.inner'),
+                new Reference(TemplateCollector::class),
+            ]);
+    }
+
+    private function decorateValidator(ContainerBuilder $container): void
+    {
+        if (!$container->has(ValidatorCollector::class)) {
+            return;
+        }
+
+        if (!interface_exists(\Symfony\Component\Validator\Validator\ValidatorInterface::class)) {
+            return;
+        }
+
+        $serviceId = match (true) {
+            $container->has('validator') => 'validator',
+            $container->has(\Symfony\Component\Validator\Validator\ValidatorInterface::class)
+                => \Symfony\Component\Validator\Validator\ValidatorInterface::class,
+            default => null,
+        };
+
+        if ($serviceId === null) {
+            return;
+        }
+
+        $container
+            ->register(SymfonyValidatorProxy::class, SymfonyValidatorProxy::class)
+            ->setDecoratedService($serviceId)
+            ->setArguments([
+                new Reference(SymfonyValidatorProxy::class . '.inner'),
+                new Reference(ValidatorCollector::class),
+            ]);
+    }
+
+    private function decorateCache(ContainerBuilder $container): void
+    {
+        if (!$container->has(CacheCollector::class)) {
+            return;
+        }
+
+        // Decorate the default cache pool ('cache.app' is Symfony's default app cache)
+        if ($container->has('cache.app')) {
+            $container
+                ->register('app_dev_panel.cache.app.proxy', SymfonyCacheProxy::class)
+                ->setDecoratedService('cache.app')
+                ->setArguments([
+                    new Reference('app_dev_panel.cache.app.proxy.inner'),
+                    new Reference(CacheCollector::class),
+                    'app',
+                ]);
+        }
+    }
+
     /**
      * Upgrades NullSchemaProvider to DoctrineSchemaProvider when Doctrine DBAL is available.
      *
@@ -212,6 +301,30 @@ final class CollectorProxyCompilerPass implements CompilerPassInterface
         $container
             ->register(SchemaProviderInterface::class, DoctrineSchemaProvider::class)
             ->setArguments([new Reference('doctrine.dbal.default_connection')])
+            ->setPublic(false);
+    }
+
+    /**
+     * Upgrades NullAuthorizationConfigProvider to SymfonyAuthorizationConfigProvider
+     * when symfony/security-bundle is installed (detected via the `security.firewalls`
+     * parameter that SecurityBundle's extension writes into the container).
+     */
+    private function upgradeAuthorizationProvider(ContainerBuilder $container): void
+    {
+        if (!$container->hasParameter('security.firewalls')) {
+            return;
+        }
+
+        $params = $container->hasParameter('app_dev_panel.container_parameters')
+            ? $container->getParameter('app_dev_panel.container_parameters')
+            : [];
+
+        $container
+            ->register(AuthorizationConfigProviderInterface::class, SymfonyAuthorizationConfigProvider::class)
+            ->setArguments([
+                is_array($params) ? $params : [],
+                new TaggedIteratorArgument('security.voter'),
+            ])
             ->setPublic(false);
     }
 

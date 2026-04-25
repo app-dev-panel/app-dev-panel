@@ -434,6 +434,10 @@ textarea.form-control {
             <a href="{{ path('contact') }}" class="{{ app.request.pathInfo == '/contact' ? 'active' : '' }}">Contact</a>
             <a href="{{ path('api_playground') }}" class="{{ app.request.pathInfo == '/api-playground' ? 'active' : '' }}">API Playground</a>
             <a href="{{ path('error_demo') }}" class="{{ app.request.pathInfo == '/error' ? 'active' : '' }}">Error Demo</a>
+            <a href="{{ path('log_demo') }}" class="{{ app.request.pathInfo == '/log-demo' ? 'active' : '' }}">Log Demo</a>
+            <a href="{{ path('var_dumper') }}" class="{{ app.request.pathInfo == '/var-dumper' ? 'active' : '' }}">Var Dumper</a>
+            <a href="{{ path('api_openapi') }}" class="{{ app.request.pathInfo == '/api/openapi.json' ? 'active' : '' }}">OpenAPI</a>
+            <a href="/debug" target="_blank" rel="noopener">Debug Panel</a>
         </nav>
     </header>
 

@@ -72,6 +72,14 @@ const Tree = React.memo(({row}: {row: InspectorFile}) => {
 export type TreeViewProps = {onSelect: (nodeId: string) => void; tree: InspectorFile[]};
 export const TreeView = (props: TreeViewProps) => {
     const {onSelect, tree} = props;
+    const uniqueTree = useMemo(() => {
+        const seen = new Set<string>();
+        return tree.filter((row) => {
+            if (seen.has(row.path)) return false;
+            seen.add(row.path);
+            return true;
+        });
+    }, [tree]);
     return (
         <SimpleTreeView
             // defaultCollapseIcon={false}
@@ -82,8 +90,8 @@ export const TreeView = (props: TreeViewProps) => {
             sx={{py: 2}}
             onItemSelectionToggle={(event, nodeId) => onSelect(nodeId)}
         >
-            {tree.map((row, index) => (
-                <Tree key={index} row={row} />
+            {uniqueTree.map((row) => (
+                <Tree key={row.path} row={row} />
             ))}
         </SimpleTreeView>
     );

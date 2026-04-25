@@ -10,16 +10,24 @@
         "doctrine/doctrine-bundle": "^3.2",
         "nyholm/psr7": "^1.8",
         "nyholm/psr7-server": "^1.1",
+        "open-telemetry/api": "^1.9",
+        "open-telemetry/sdk": "^1.14",
         "symfony/console": "^7.0",
         "symfony/dotenv": "^7.0",
         "symfony/framework-bundle": "^7.0",
+        "symfony/mailer": "^8.0",
+        "symfony/messenger": "^8.0",
         "symfony/runtime": "^7.0",
+        "symfony/security-bundle": "^8.0",
         "symfony/translation": "^8.0",
         "symfony/twig-bundle": "^8.0",
+        "symfony/validator": "^8.0",
         "symfony/yaml": "^7.0",
-        "twig/twig": "^3.24"
+        "twig/twig": "^3.24",
+        "zircote/swagger-php": "^4.0"
     },
     "require-dev": {
+        "phpunit/phpunit": "^11.5",
         "symfony/maker-bundle": "^1.0"
     },
     "repositories": [
@@ -49,9 +57,20 @@
             "App\\": "src/"
         }
     },
+    "autoload-dev": {
+        "psr-4": {
+            "App\\Tests\\": "tests/"
+        }
+    },
     "scripts": {
-        "post-install-cmd": ["php bin/console cache:clear --no-warmup || true"],
-        "post-update-cmd": ["php bin/console cache:clear --no-warmup || true"],
+        "post-install-cmd": [
+            "php bin/console cache:clear --no-warmup || true",
+            "php bin/console assets:install public --symlink --relative || true"
+        ],
+        "post-update-cmd": [
+            "php bin/console cache:clear --no-warmup || true",
+            "php bin/console assets:install public --symlink --relative || true"
+        ],
         "serve": [
             "Composer\\Config::disableProcessTimeout",
             "bash ../../bin/serve.sh 8102"

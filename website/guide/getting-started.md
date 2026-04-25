@@ -68,9 +68,9 @@ return [
 ```php
 // config/web.php
 return [
-    'bootstrap' => ['debug-panel'],
+    'bootstrap' => ['app-dev-panel'],
     'modules' => [
-        'debug-panel' => [
+        'app-dev-panel' => [
             'class' => \AppDevPanel\Adapter\Yii2\Module::class,
         ],
     ],

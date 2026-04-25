@@ -4,8 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controller\TestFixtures;
 
-use AppDevPanel\Kernel\Collector\CacheCollector;
-use AppDevPanel\Kernel\Collector\CacheOperationRecord;
+use Psr\Cache\CacheItemPoolInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Attribute\Route;
 
@@ -13,43 +12,33 @@ use Symfony\Component\Routing\Attribute\Route;
 final readonly class CacheAction
 {
     public function __construct(
-        private CacheCollector $cacheCollector,
+        private CacheItemPoolInterface $cache,
     ) {}
 
     public function __invoke(): JsonResponse
     {
-        // Simulate cache operations by calling the collector directly.
-        $this->cacheCollector->logCacheOperation(new CacheOperationRecord(
-            pool: 'default',
-            operation: 'set',
-            key: 'user:42',
-            duration: 0.001,
-            value: ['id' => 42, 'name' => 'John Doe', 'email' => 'john@example.com'],
-        ));
+        // Use Symfony's cache pool — the SymfonyCacheProxy intercepts these
+        // calls and feeds cache operations to CacheCollector.
 
-        $this->cacheCollector->logCacheOperation(new CacheOperationRecord(
-            pool: 'default',
-            operation: 'get',
-            key: 'user:42',
-            hit: true,
-            duration: 0.0005,
-            value: ['id' => 42, 'name' => 'John Doe', 'email' => 'john@example.com'],
-        ));
+        // Set a value
+        $item = $this->cache->getItem('user_42');
+        $item->set(['id' => 42, 'name' => 'John Doe', 'email' => 'john@example.com']);
+        $this->cache->save($item);
 
-        $this->cacheCollector->logCacheOperation(new CacheOperationRecord(
-            pool: 'default',
-            operation: 'get',
-            key: 'user:99',
-            duration: 0.0003,
-        ));
+        // Get a hit
+        $hitItem = $this->cache->getItem('user_42');
 
-        $this->cacheCollector->logCacheOperation(new CacheOperationRecord(
-            pool: 'default',
-            operation: 'delete',
-            key: 'user:42',
-            duration: 0.0002,
-        ));
+        // Get a miss
+        $missItem = $this->cache->getItem('user_99');
 
-        return new JsonResponse(['fixture' => 'cache:basic', 'status' => 'ok']);
+        // Delete
+        $this->cache->deleteItem('user_42');
+
+        return new JsonResponse([
+            'fixture' => 'cache:basic',
+            'status' => 'ok',
+            'hit' => $hitItem->isHit(),
+            'miss' => !$missItem->isHit(),
+        ]);
     }
 }

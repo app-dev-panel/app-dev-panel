@@ -1,3 +1,4 @@
+import {ClassName} from '@app-dev-panel/panel/Application/Component/ClassName';
 import {JsonRenderer} from '@app-dev-panel/panel/Module/Debug/Component/JsonRenderer';
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
@@ -16,41 +17,12 @@ type Bundle = {
     depends: string[];
     options: Record<string, any>;
 };
-type AssetBundlePanelProps = {data: {bundles: Record<string, Bundle>; bundleCount: number}};
+type AssetBundlePanelProps = {data: {bundles: Record<string, Bundle>}};
 
 function shortClassName(fqcn: string): string {
     const parts = fqcn.split('\\');
     return parts[parts.length - 1] ?? fqcn;
 }
-
-const SummaryGrid = styled(Box)(({theme}) => ({
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))',
-    gap: theme.spacing(2),
-    marginBottom: theme.spacing(3),
-}));
-
-const SummaryCard = styled(Box)(({theme}) => ({
-    padding: theme.spacing(2),
-    borderRadius: Number(theme.shape.borderRadius) * 1.5,
-    border: `1px solid ${theme.palette.divider}`,
-    backgroundColor: theme.palette.background.paper,
-}));
-
-const SummaryLabel = styled(Typography)(({theme}) => ({
-    fontSize: '11px',
-    fontWeight: 600,
-    textTransform: 'uppercase' as const,
-    letterSpacing: '0.5px',
-    color: theme.palette.text.disabled,
-    marginBottom: theme.spacing(0.5),
-}));
-
-const SummaryValue = styled(Typography)(({theme}) => ({
-    fontFamily: theme.adp.fontFamilyMono,
-    fontWeight: 700,
-    fontSize: '22px',
-}));
 
 const BundleRow = styled(Box, {shouldForwardProp: (p) => p !== 'expanded'})<{expanded?: boolean}>(
     ({theme, expanded}) => ({
@@ -115,13 +87,6 @@ export const AssetBundlePanel = ({data}: AssetBundlePanelProps) => {
 
     return (
         <Box>
-            <SummaryGrid>
-                <SummaryCard>
-                    <SummaryLabel>Total Bundles</SummaryLabel>
-                    <SummaryValue sx={{color: 'primary.main'}}>{data.bundleCount}</SummaryValue>
-                </SummaryCard>
-            </SummaryGrid>
-
             <SectionTitle
                 action={<FilterInput value={filter} onChange={setFilter} placeholder="Filter bundles..." />}
             >{`${filtered.length} bundles`}</SectionTitle>
@@ -131,7 +96,9 @@ export const AssetBundlePanel = ({data}: AssetBundlePanelProps) => {
                 return (
                     <Box key={key}>
                         <BundleRow expanded={expanded} onClick={() => setExpandedKey(expanded ? null : key)}>
-                            <ClassCell>{shortClassName(bundle.class)}</ClassCell>
+                            <ClassCell>
+                                <ClassName value={bundle.class}>{shortClassName(bundle.class)}</ClassName>
+                            </ClassCell>
                             {bundle.css.length > 0 && (
                                 <Chip
                                     label={`${bundle.css.length} CSS`}
@@ -178,7 +145,7 @@ export const AssetBundlePanel = ({data}: AssetBundlePanelProps) => {
                             <DetailBox>
                                 <Box sx={{mb: 1.5}}>
                                     <FieldLabel>Full Class Name</FieldLabel>
-                                    <Typography
+                                    <Box
                                         sx={(theme) => ({
                                             fontFamily: theme.adp.fontFamilyMono,
                                             fontSize: '12px',
@@ -186,8 +153,8 @@ export const AssetBundlePanel = ({data}: AssetBundlePanelProps) => {
                                             wordBreak: 'break-all',
                                         })}
                                     >
-                                        {bundle.class}
-                                    </Typography>
+                                        <ClassName value={bundle.class} />
+                                    </Box>
                                 </Box>
                                 {bundle.sourcePath && (
                                     <Box sx={{mb: 1.5}}>

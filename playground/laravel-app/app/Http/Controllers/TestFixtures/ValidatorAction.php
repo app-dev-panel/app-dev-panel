@@ -4,34 +4,25 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\TestFixtures;
 
-use AppDevPanel\Kernel\Collector\ValidatorCollector;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Validator;
 
-final readonly class ValidatorAction
+final class ValidatorAction
 {
-    public function __construct(
-        private ValidatorCollector $validatorCollector,
-    ) {}
-
     public function __invoke(): JsonResponse
     {
-        // Simulate a passing validation
-        $this->validatorCollector->collect(
-            value: ['email' => 'user@example.com', 'name' => 'John'],
-            isValid: true,
-            rules: ['email' => 'required|email', 'name' => 'required|string|min:2'],
-        );
+        // Passing validation — ValidatorListener captures via after() hook
+        Validator::make(['email' => 'user@example.com', 'name' => 'John'], [
+            'email' => 'required|email',
+            'name' => 'required|string|min:2',
+        ])->validate();
 
-        // Simulate a failing validation
-        $this->validatorCollector->collect(
-            value: ['email' => 'not-an-email', 'name' => ''],
-            isValid: false,
-            errors: [
-                'email' => ['The email must be a valid email address.'],
-                'name' => ['The name field is required.'],
-            ],
-            rules: ['email' => 'required|email', 'name' => 'required|string|min:2'],
-        );
+        // Failing validation — ValidatorListener captures via after() hook
+        $validator = Validator::make(['email' => 'not-an-email', 'name' => ''], [
+            'email' => 'required|email',
+            'name' => 'required|string|min:2',
+        ]);
+        $validator->fails();
 
         return new JsonResponse(['fixture' => 'validator:basic', 'status' => 'ok']);
     }

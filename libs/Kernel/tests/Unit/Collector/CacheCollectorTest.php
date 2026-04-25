@@ -74,4 +74,35 @@ final class CacheCollectorTest extends AbstractCollectorTestCase
         $this->assertSame(1, $data['cache']['misses']);
         $this->assertSame(3, $data['cache']['totalOperations']);
     }
+
+    public function testShutdownResetsState(): void
+    {
+        $collector = new CacheCollector(new TimelineCollector());
+        $collector->startup();
+        $collector->logCacheOperation(new CacheOperationRecord('pool', 'get', 'key1', hit: true, duration: 0.001));
+        $collector->shutdown();
+
+        // After shutdown, collector is inactive — returns empty
+        $this->assertSame([], $collector->getCollected());
+        $this->assertSame([], $collector->getSummary());
+
+        // Re-startup should be clean
+        $collector->startup();
+        $this->assertSame(0, $collector->getCollected()['totalOperations']);
+        $this->assertSame(0, $collector->getCollected()['hits']);
+        $this->assertSame(0, $collector->getCollected()['misses']);
+    }
+
+    public function testDeleteOperationDoesNotCountAsHitOrMiss(): void
+    {
+        $collector = new CacheCollector(new TimelineCollector());
+        $collector->startup();
+
+        $collector->logCacheOperation(new CacheOperationRecord('pool', 'delete', 'key1', duration: 0.001));
+
+        $data = $collector->getCollected();
+        $this->assertSame(1, $data['totalOperations']);
+        $this->assertSame(0, $data['hits']);
+        $this->assertSame(0, $data['misses']);
+    }
 }

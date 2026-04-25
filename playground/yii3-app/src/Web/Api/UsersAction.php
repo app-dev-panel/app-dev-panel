@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Web\Api;
 
+use OpenApi\Attributes as OA;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Log\LoggerInterface;
 use Yiisoft\DataResponse\DataResponseFactoryInterface;
@@ -15,6 +16,20 @@ final readonly class UsersAction
         private LoggerInterface $logger,
     ) {}
 
+    #[OA\Get(
+        path: '/api/users',
+        summary: 'List users',
+        tags: ['Users'],
+        responses: [
+            new OA\Response(response: 200, description: 'List of users', content: new OA\JsonContent(properties: [
+                new OA\Property(property: 'users', type: 'array', items: new OA\Items(properties: [
+                    new OA\Property(property: 'id', type: 'integer'),
+                    new OA\Property(property: 'name', type: 'string'),
+                    new OA\Property(property: 'email', type: 'string'),
+                ])),
+            ])),
+        ],
+    )]
     public function __invoke(): ResponseInterface
     {
         $this->logger->info('Users API called');

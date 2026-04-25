@@ -30,6 +30,7 @@ jobs:
           - { name: "adapter-yii2",     local_path: "libs/Adapter/Yii2",    split_repository: "adapter-yii2" }
           - { name: "adapter-cycle",    local_path: "libs/Adapter/Cycle",   split_repository: "adapter-cycle" }
           - { name: "adapter-yii3",     local_path: "libs/Adapter/Yii3",    split_repository: "adapter-yii3" }
+          - { name: "frontend-assets",  local_path: "libs/FrontendAssets",  split_repository: "frontend-assets", needs_frontend_build: true }
 
     steps:
       - name: Checkout
@@ -37,6 +38,32 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
+
+      - name: Setup Node.js
+        if: matrix.package.needs_frontend_build
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: libs/frontend/package-lock.json
+
+      - name: Build panel SPA into FrontendAssets/dist
+        if: matrix.package.needs_frontend_build
+        run: |
+          cd libs/frontend
+          npm ci
+          npm run build -w packages/sdk
+          npm run build -w packages/panel
+          cd ../..
+          rm -rf libs/FrontendAssets/dist
+          mkdir -p libs/FrontendAssets/dist
+          cp -R libs/frontend/packages/panel/dist/. libs/FrontendAssets/dist/
+          # Force-add the dist to a local commit so splitsh-lite sees it.
+          # This commit stays local — it is never pushed back to the monorepo.
+          git config --local user.name "github-actions[bot]"
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git add -f libs/FrontendAssets/dist
+          git commit -m "ci: bundle panel SPA into FrontendAssets/dist"
 
       - name: Install splitsh-lite
         env:

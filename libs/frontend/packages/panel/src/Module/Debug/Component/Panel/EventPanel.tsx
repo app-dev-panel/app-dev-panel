@@ -1,11 +1,10 @@
+import {ClassName} from '@app-dev-panel/panel/Application/Component/ClassName';
 import {JsonRenderer} from '@app-dev-panel/panel/Module/Debug/Component/JsonRenderer';
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
-import {FileLink} from '@app-dev-panel/sdk/Component/FileLink';
 import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
 import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
 import {parseFilename} from '@app-dev-panel/sdk/Helper/filePathParser';
 import {formatMicrotime} from '@app-dev-panel/sdk/Helper/formatDate';
-import {Description} from '@mui/icons-material';
 import {Box, Chip, Collapse, Icon, IconButton, Tooltip, Typography} from '@mui/material';
 import {styled, useTheme} from '@mui/material/styles';
 import {useCallback, useDeferredValue, useMemo, useState} from 'react';
@@ -238,28 +237,16 @@ export const EventPanel = ({events}: EventTimelineProps) => {
                         <Collapse in={expanded}>
                             <DetailBox>
                                 <Box sx={{display: 'flex', alignItems: 'center', gap: 0.5, mb: 1}}>
-                                    <Typography
-                                        variant="caption"
+                                    <Box
                                         sx={(theme) => ({
                                             fontFamily: theme.adp.fontFamilyMono,
+                                            fontSize: theme.typography.caption.fontSize,
                                             color: 'text.secondary',
                                             flex: 1,
                                         })}
                                     >
-                                        {event.name}
-                                    </Typography>
-                                    <FileLink className={event.name}>
-                                        <Tooltip title="Open File">
-                                            <IconButton
-                                                size="small"
-                                                component="span"
-                                                aria-label="Open File"
-                                                sx={{p: 0.5}}
-                                            >
-                                                <Description sx={{fontSize: 16}} />
-                                            </IconButton>
-                                        </Tooltip>
-                                    </FileLink>
+                                        <ClassName value={event.name} />
+                                    </Box>
                                 </Box>
 
                                 {event.event && <JsonRenderer value={event.event} depth={3} />}

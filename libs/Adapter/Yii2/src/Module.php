@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Adapter\Yii2;
 
+use AppDevPanel\Adapter\Yii2\Collector\BroadcastingLogTarget;
 use AppDevPanel\Adapter\Yii2\Collector\DbProfilingTarget;
 use AppDevPanel\Adapter\Yii2\Collector\DebugLogTarget;
 use AppDevPanel\Adapter\Yii2\Controller\DebugDumpController;
@@ -11,16 +12,21 @@ use AppDevPanel\Adapter\Yii2\Controller\DebugQueryController;
 use AppDevPanel\Adapter\Yii2\Controller\DebugResetController;
 use AppDevPanel\Adapter\Yii2\Controller\DebugSummaryController;
 use AppDevPanel\Adapter\Yii2\Controller\DebugTailController;
+use AppDevPanel\Adapter\Yii2\Controller\DevBroadcastController;
+use AppDevPanel\Adapter\Yii2\Controller\DevServerController;
 use AppDevPanel\Adapter\Yii2\Controller\InspectConfigController;
 use AppDevPanel\Adapter\Yii2\Controller\InspectDatabaseController;
 use AppDevPanel\Adapter\Yii2\Controller\InspectRoutesController;
 use AppDevPanel\Adapter\Yii2\EventListener\ConsoleListener;
+use AppDevPanel\Adapter\Yii2\EventListener\QueueListener;
 use AppDevPanel\Adapter\Yii2\EventListener\WebListener;
 use AppDevPanel\Adapter\Yii2\Inspector\NullSchemaProvider;
+use AppDevPanel\Adapter\Yii2\Inspector\Yii2AuthorizationConfigProvider;
 use AppDevPanel\Adapter\Yii2\Inspector\Yii2ConfigProvider;
 use AppDevPanel\Adapter\Yii2\Inspector\Yii2DbSchemaProvider;
 use AppDevPanel\Adapter\Yii2\Inspector\Yii2RouteCollection;
 use AppDevPanel\Adapter\Yii2\Inspector\Yii2UrlMatcherAdapter;
+use AppDevPanel\Adapter\Yii2\Proxy\CacheProxy;
 use AppDevPanel\Adapter\Yii2\Proxy\I18NProxy;
 use AppDevPanel\Adapter\Yii2\Proxy\RouterMatchRecorder;
 use AppDevPanel\Adapter\Yii2\Proxy\UrlRuleProxy;
@@ -32,15 +38,16 @@ use AppDevPanel\Api\Debug\Repository\CollectorRepositoryInterface;
 use AppDevPanel\Api\Http\JsonResponseFactory;
 use AppDevPanel\Api\Http\JsonResponseFactoryInterface;
 use AppDevPanel\Api\Inspector\Authorization\AuthorizationConfigProviderInterface;
-use AppDevPanel\Api\Inspector\Authorization\NullAuthorizationConfigProvider;
 use AppDevPanel\Api\Inspector\Controller\AuthorizationController;
 use AppDevPanel\Api\Inspector\Controller\CacheController;
 use AppDevPanel\Api\Inspector\Controller\CommandController;
 use AppDevPanel\Api\Inspector\Controller\ComposerController;
 use AppDevPanel\Api\Inspector\Controller\DatabaseController;
+use AppDevPanel\Api\Inspector\Controller\ElasticsearchController;
 use AppDevPanel\Api\Inspector\Controller\FileController;
 use AppDevPanel\Api\Inspector\Controller\GitController;
 use AppDevPanel\Api\Inspector\Controller\GitRepositoryProvider;
+use AppDevPanel\Api\Inspector\Controller\HttpMockController;
 use AppDevPanel\Api\Inspector\Controller\InspectController;
 use AppDevPanel\Api\Inspector\Controller\OpcacheController;
 use AppDevPanel\Api\Inspector\Controller\RequestController;
@@ -48,7 +55,15 @@ use AppDevPanel\Api\Inspector\Controller\RoutingController;
 use AppDevPanel\Api\Inspector\Controller\ServiceController;
 use AppDevPanel\Api\Inspector\Controller\TranslationController;
 use AppDevPanel\Api\Inspector\Database\SchemaProviderInterface;
+use AppDevPanel\Api\Inspector\Elasticsearch\ElasticsearchProviderInterface;
+use AppDevPanel\Api\Inspector\Elasticsearch\NullElasticsearchProvider;
+use AppDevPanel\Api\Inspector\HttpMock\HttpMockProviderInterface;
+use AppDevPanel\Api\Inspector\HttpMock\NullHttpMockProvider;
 use AppDevPanel\Api\Inspector\Middleware\InspectorProxyMiddleware;
+use AppDevPanel\Api\Llm\Acp\AcpCommandVerifier;
+use AppDevPanel\Api\Llm\Acp\AcpCommandVerifierInterface;
+use AppDevPanel\Api\Llm\Acp\AcpDaemonManager;
+use AppDevPanel\Api\Llm\Acp\AcpDaemonManagerInterface;
 use AppDevPanel\Api\Llm\Controller\LlmController;
 use AppDevPanel\Api\Llm\FileLlmHistoryStorage;
 use AppDevPanel\Api\Llm\FileLlmSettings;
@@ -102,10 +117,14 @@ use AppDevPanel\Kernel\Collector\Web\WebAppInfoCollector;
 use AppDevPanel\Kernel\Debugger;
 use AppDevPanel\Kernel\DebuggerIdGenerator;
 use AppDevPanel\Kernel\DebuggerIgnoreConfig;
+use AppDevPanel\Kernel\DebugServer\Broadcaster;
+use AppDevPanel\Kernel\DebugServer\Connection;
 use AppDevPanel\Kernel\Service\FileServiceRegistry;
 use AppDevPanel\Kernel\Service\ServiceRegistryInterface;
-use AppDevPanel\Kernel\Storage\FileStorage;
+use AppDevPanel\Kernel\Storage\BroadcastingStorage;
+use AppDevPanel\Kernel\Storage\StorageFactory;
 use AppDevPanel\Kernel\Storage\StorageInterface;
+use AppDevPanel\McpServer\Inspector\InspectorClient;
 use AppDevPanel\McpServer\McpServer;
 use AppDevPanel\McpServer\McpToolRegistryFactory;
 use GuzzleHttp\Client;
@@ -136,6 +155,11 @@ class Module extends \yii\base\Module implements BootstrapInterface
     public bool $enabled = true;
 
     /**
+     * @var string Storage driver: 'sqlite', 'file', or FQCN of a StorageInterface implementation.
+     */
+    public string $storageDriver = 'file';
+
+    /**
      * @var string Directory for debug data storage.
      */
     public string $storagePath = '@runtime/debug';
@@ -143,7 +167,7 @@ class Module extends \yii\base\Module implements BootstrapInterface
     /**
      * @var int Maximum number of debug entries to keep.
      */
-    public int $historySize = FileStorage::DEFAULT_HISTORY_SIZE;
+    public int $historySize = 50;
 
     /**
      * @var array<string, bool> Collector toggle map.
@@ -224,6 +248,13 @@ class Module extends \yii\base\Module implements BootstrapInterface
      *             Use http://localhost:3001 for Vite dev server.
      */
     public string $toolbarStaticUrl = '';
+
+    /**
+     * @var string|null Base URL of the running application for MCP inspector tools (e.g. http://localhost:8080).
+     *                  When null (default), inspector tools are disabled in the HTTP MCP endpoint.
+     *                  Set this only if you need MCP inspector tools and accept the HTTP round-trip overhead.
+     */
+    public ?string $mcpInspectorUrl = null;
 
     public $controllerNamespace = 'AppDevPanel\\Adapter\\Yii2\\Controller';
 
@@ -307,7 +338,12 @@ class Module extends \yii\base\Module implements BootstrapInterface
     private function registerCoreServices(string $storagePath): void
     {
         $idGenerator = new DebuggerIdGenerator();
-        $storage = new FileStorage($storagePath, $idGenerator, $this->excludedClasses);
+        $storage = new BroadcastingStorage(StorageFactory::create(
+            $this->storageDriver,
+            $storagePath,
+            $idGenerator,
+            $this->excludedClasses,
+        ));
 
         $httpFactory = new HttpFactory();
 
@@ -366,13 +402,33 @@ class Module extends \yii\base\Module implements BootstrapInterface
         // Authorization provider
         \Yii::$container->setSingleton(
             AuthorizationConfigProviderInterface::class,
-            NullAuthorizationConfigProvider::class,
+            static fn() => new Yii2AuthorizationConfigProvider(\Yii::$app),
         );
         \Yii::$container->setSingleton(
             AuthorizationController::class,
             static fn() => new AuthorizationController(
                 \Yii::$container->get(JsonResponseFactoryInterface::class),
                 \Yii::$container->get(AuthorizationConfigProviderInterface::class),
+            ),
+        );
+
+        // HTTP mock provider
+        \Yii::$container->setSingleton(HttpMockProviderInterface::class, NullHttpMockProvider::class);
+        \Yii::$container->setSingleton(
+            HttpMockController::class,
+            static fn() => new HttpMockController(
+                \Yii::$container->get(JsonResponseFactoryInterface::class),
+                \Yii::$container->get(HttpMockProviderInterface::class),
+            ),
+        );
+
+        // Elasticsearch provider
+        \Yii::$container->setSingleton(ElasticsearchProviderInterface::class, NullElasticsearchProvider::class);
+        \Yii::$container->setSingleton(
+            ElasticsearchController::class,
+            static fn() => new ElasticsearchController(
+                \Yii::$container->get(JsonResponseFactoryInterface::class),
+                \Yii::$container->get(ElasticsearchProviderInterface::class),
             ),
         );
 
@@ -437,16 +493,19 @@ class Module extends \yii\base\Module implements BootstrapInterface
     {
         $panelStaticUrl = $this->panelStaticUrl;
         if ($panelStaticUrl === '') {
-            // Auto-detect: if built assets exist in adapter package, publish them
-            $adapterDist = \dirname(__DIR__) . '/resources/dist/bundle.js';
-            if (file_exists($adapterDist)) {
-                $webroot = \Yii::getAlias('@webroot');
-                $targetDir = $webroot . '/app-dev-panel';
-                if (!is_dir($targetDir)) {
-                    @symlink(\dirname($adapterDist), $targetDir);
-                }
-                if (is_dir($targetDir)) {
-                    $panelStaticUrl = '/app-dev-panel';
+            // Auto-detect: if built assets exist in adapter package, publish them.
+            // Either the panel bundle or the toolbar subdir is enough to trigger publishing.
+            $distDir = \dirname(__DIR__) . '/resources/dist';
+            if (file_exists($distDir . '/bundle.js') || is_dir($distDir . '/toolbar')) {
+                $webroot = \Yii::getAlias('@webroot', false);
+                if (is_string($webroot)) {
+                    $targetDir = $webroot . '/app-dev-panel';
+                    if (!is_dir($targetDir)) {
+                        @symlink($distDir, $targetDir);
+                    }
+                    if (is_dir($targetDir)) {
+                        $panelStaticUrl = '/app-dev-panel';
+                    }
                 }
             }
         }
@@ -595,9 +654,14 @@ class Module extends \yii\base\Module implements BootstrapInterface
 
         \Yii::$container->setSingleton(McpSettings::class, static fn() => new McpSettings($storagePath));
 
+        $mcpInspectorUrl = $this->mcpInspectorUrl;
+
         \Yii::$container->setSingleton(
             McpServer::class,
-            static fn() => new McpServer(McpToolRegistryFactory::create(\Yii::$container->get(StorageInterface::class))),
+            static fn() => new McpServer(McpToolRegistryFactory::create(
+                \Yii::$container->get(StorageInterface::class),
+                InspectorClient::fromOptionalUrl($mcpInspectorUrl),
+            )),
         );
 
         \Yii::$container->setSingleton(
@@ -628,6 +692,11 @@ class Module extends \yii\base\Module implements BootstrapInterface
             static fn() => new FileLlmHistoryStorage($resolvedStoragePath),
         );
 
+        \Yii::$container->setSingleton(AcpCommandVerifierInterface::class, static fn() => new AcpCommandVerifier());
+        \Yii::$container->setSingleton(
+            AcpDaemonManagerInterface::class,
+            static fn() => new AcpDaemonManager($resolvedStoragePath),
+        );
         \Yii::$container->setSingleton(
             LlmProviderService::class,
             static fn() => new LlmProviderService(
@@ -635,6 +704,7 @@ class Module extends \yii\base\Module implements BootstrapInterface
                 \Yii::$container->get(ClientInterface::class),
                 \Yii::$container->get(RequestFactoryInterface::class),
                 \Yii::$container->get(StreamFactoryInterface::class),
+                \Yii::$container->get(AcpDaemonManagerInterface::class),
             ),
         );
         \Yii::$container->setSingleton(
@@ -647,6 +717,8 @@ class Module extends \yii\base\Module implements BootstrapInterface
                 \Yii::$container->get(RequestFactoryInterface::class),
                 \Yii::$container->get(StreamFactoryInterface::class),
                 \Yii::$container->get(ClientInterface::class),
+                \Yii::$container->get(AcpCommandVerifierInterface::class),
+                \Yii::$container->get(AcpDaemonManagerInterface::class),
             ),
         );
     }
@@ -811,6 +883,9 @@ class Module extends \yii\base\Module implements BootstrapInterface
             $this->registerDebugLogTarget($logCollector);
         }
 
+        // Register VarDumper broadcasting for Live Feed
+        $this->registerVarDumperBroadcasting();
+
         // Register translator profiling if TranslatorCollector is active
         $translatorCollector = $this->getCollector(TranslatorCollector::class);
         if ($translatorCollector instanceof TranslatorCollector) {
@@ -821,6 +896,18 @@ class Module extends \yii\base\Module implements BootstrapInterface
         $templateCollector = $this->getCollector(TemplateCollector::class);
         if ($templateCollector instanceof TemplateCollector) {
             $this->registerTemplateProfiling($templateCollector);
+        }
+
+        // Register cache proxy if CacheCollector is active
+        $cacheCollector = $this->getCollector(CacheCollector::class);
+        if ($cacheCollector instanceof CacheCollector) {
+            $this->registerCacheProfiling($app, $cacheCollector);
+        }
+
+        // Register queue profiling if QueueCollector is active
+        $queueCollector = $this->getCollector(QueueCollector::class);
+        if ($queueCollector instanceof QueueCollector) {
+            $this->registerQueueProfiling($queueCollector);
         }
     }
 
@@ -867,12 +954,50 @@ class Module extends \yii\base\Module implements BootstrapInterface
         restore_exception_handler();
 
         $debugger = $this->debugger;
+
+        // Shared state: whether onExceptionRendered already captured the response.
+        // Used to avoid double-capture between the exception-handler closure and the
+        // shutdown-function fallback (the latter runs only when Yii calls exit()
+        // and control never returns from $previousHandler).
+        $responseCaptured = new class {
+            public bool $done = false;
+        };
+
+        // Register shutdown fallback: when Yii's ErrorHandler ends via exit(), control
+        // won't return from $previousHandler($exception), so we capture response state
+        // here from the final Yii response object. Safe to run multiple times.
+        register_shutdown_function(static function () use ($app, $listener, $responseCaptured): void {
+            if ($responseCaptured->done) {
+                return;
+            }
+            // Skip when this $app is no longer the current Yii application (e.g. between
+            // integration test cases that null \Yii::$app in tearDown). Calling getResponse()
+            // after teardown lazy-creates a Response whose init() reads \Yii::$app->charset,
+            // triggering "Attempt to read property \"charset\" on null".
+            if (\Yii::$app !== $app) {
+                return;
+            }
+            // Only capture if the Response component was actually instantiated during the
+            // request — the second argument to has() checks for an initialized instance,
+            // not just a registered definition.
+            if (!$app->has('response', true)) {
+                return;
+            }
+            try {
+                $listener->onExceptionRendered($app);
+                $responseCaptured->done = true;
+            } catch (\Throwable) {
+                // Shutdown functions must never throw
+            }
+        });
+
         set_exception_handler(static function (\Throwable $exception) use (
             $exceptionCollector,
             $debugger,
             $previousHandler,
             $listener,
             $app,
+            $responseCaptured,
         ): void {
             // Feed the collector before Yii2's handler clears the exception
             $exceptionCollector->collect($exception);
@@ -886,10 +1011,17 @@ class Module extends \yii\base\Module implements BootstrapInterface
                 header('X-Debug-Id: ' . $debugger->getId());
             }
 
-            // Delegate to Yii2's error handler
+            // Delegate to Yii2's error handler. When silentExitOnException=true Yii returns
+            // after rendering; when false (or on fatal paths) it calls exit() and control
+            // never returns here — the shutdown function handles that case.
             if ($previousHandler !== null) {
                 $previousHandler($exception);
             }
+
+            // Capture the rendered response (status code set by Yii's ErrorHandler) so
+            // RequestCollector doesn't keep its default 200.
+            $listener->onExceptionRendered($app);
+            $responseCaptured->done = true;
         });
     }
 
@@ -924,6 +1056,9 @@ class Module extends \yii\base\Module implements BootstrapInterface
             $container,
             \Yii::$app->params,
         );
+
+        $app->controllerMap['dev'] = new DevServerController('dev', $app);
+        $app->controllerMap['dev-broadcast'] = new DevBroadcastController('dev-broadcast', $app);
     }
 
     private function decorateHttpClient(HttpClientCollector $collector): void
@@ -1090,6 +1225,45 @@ class Module extends \yii\base\Module implements BootstrapInterface
     {
         $target = new DebugLogTarget($logCollector);
         \Yii::$app->log->targets['adp-debug'] = $target;
+
+        // Also register broadcasting target for Live Feed
+        $broadcastTarget = new BroadcastingLogTarget();
+        \Yii::$app->log->targets['adp-broadcast'] = $broadcastTarget;
+    }
+
+    private function registerVarDumperBroadcasting(): void
+    {
+        $broadcaster = new Broadcaster();
+        $varDumperCollector = $this->getCollector(VarDumperCollector::class);
+
+        // Hook into Symfony's VarDumper (used by dump() in most PHP projects)
+        if (class_exists(\Symfony\Component\VarDumper\VarDumper::class)) {
+            \Symfony\Component\VarDumper\VarDumper::setHandler(static function (mixed $var, ?string $label = null) use (
+                $broadcaster,
+                $varDumperCollector,
+            ): void {
+                $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 5);
+                $line = '';
+                foreach ($trace as $frame) {
+                    if (array_key_exists('file', $frame) && !str_contains($frame['file'], 'vendor/')) {
+                        $line = $frame['file'] . ':' . ($frame['line'] ?? 0);
+                        break;
+                    }
+                }
+
+                // Broadcast for Live Feed
+                try {
+                    $broadcaster->broadcast(
+                        Connection::MESSAGE_TYPE_VAR_DUMPER,
+                        \Yiisoft\VarDumper\VarDumper::create($var)->asJson(false),
+                    );
+                } catch (\Throwable) {
+                }
+
+                // Also collect for VarDumperCollector
+                $varDumperCollector?->collect($var, $label ?? $line);
+            });
+        }
     }
 
     private function registerTemplateProfiling(TemplateCollector $collector): void
@@ -1164,42 +1338,83 @@ class Module extends \yii\base\Module implements BootstrapInterface
                 [
                     'class' => \yii\web\UrlRule::class,
                     'pattern' => 'debug/api/<path:.*>',
-                    'route' => 'debug-panel/adp-api/handle',
+                    'route' => 'app-dev-panel/adp-api/handle',
                     'defaults' => ['path' => ''],
                 ],
                 [
                     'class' => \yii\web\UrlRule::class,
                     'pattern' => 'debug/api',
-                    'route' => 'debug-panel/adp-api/handle',
+                    'route' => 'app-dev-panel/adp-api/handle',
                 ],
                 [
                     'class' => \yii\web\UrlRule::class,
                     'pattern' => 'inspect/api/<path:.*>',
-                    'route' => 'debug-panel/adp-api/handle',
+                    'route' => 'app-dev-panel/adp-api/handle',
                     'defaults' => ['path' => ''],
                 ],
                 [
                     'class' => \yii\web\UrlRule::class,
                     'pattern' => 'inspect/api',
-                    'route' => 'debug-panel/adp-api/handle',
+                    'route' => 'app-dev-panel/adp-api/handle',
                 ],
                 // Panel SPA routes (catch-all for client-side routing)
                 [
                     'class' => \yii\web\UrlRule::class,
                     'pattern' => 'debug/<path:(?!api(/|$)).+>',
-                    'route' => 'debug-panel/adp-api/handle',
+                    'route' => 'app-dev-panel/adp-api/handle',
                     'defaults' => ['path' => ''],
                     'verb' => ['GET'],
                 ],
                 [
                     'class' => \yii\web\UrlRule::class,
                     'pattern' => 'debug',
-                    'route' => 'debug-panel/adp-api/handle',
+                    'route' => 'app-dev-panel/adp-api/handle',
                     'verb' => ['GET'],
                 ],
             ],
             false,
         );
+    }
+
+    /**
+     * Replace the `cache` component with a {@see CacheProxy} wrapping the configured inner cache.
+     *
+     * Yii 2 lets us swap any component at bootstrap — existing injections that keep a
+     * reference to `Yii::$app->cache` will pick up the proxy transparently.
+     */
+    private function registerCacheProfiling(Application $app, CacheCollector $cacheCollector): void
+    {
+        if (!$app->has('cache')) {
+            return;
+        }
+
+        try {
+            $inner = $app->get('cache');
+        } catch (\Throwable) {
+            return;
+        }
+
+        if (!$inner instanceof \yii\caching\CacheInterface) {
+            return;
+        }
+
+        if ($inner instanceof CacheProxy) {
+            return;
+        }
+
+        $app->set('cache', new CacheProxy($inner, $cacheCollector));
+    }
+
+    /**
+     * Hook into `yii2-queue` events to feed {@see QueueCollector}.
+     *
+     * Delegates to {@see QueueListener} which listens on the abstract
+     * `yii\queue\Queue` class and handles all five push/exec/error events. When
+     * the `yiisoft/yii2-queue` package is not installed the listener becomes a no-op.
+     */
+    private function registerQueueProfiling(QueueCollector $queueCollector): void
+    {
+        new QueueListener($queueCollector)->register();
     }
 
     private function createToolbarInjector(): ?ToolbarInjector

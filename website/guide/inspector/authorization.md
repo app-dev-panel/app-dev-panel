@@ -26,11 +26,65 @@ Inspect the security and authorization configuration of your application.
 
 ## Adapter Support
 
-| Adapter | Provider |
-|---------|----------|
-| Symfony | <class>AppDevPanel\Adapter\Symfony\Inspector\SymfonyConfigProvider</class> (reads `security.yaml` config) |
-| Others | <class>AppDevPanel\Api\Inspector\Authorization\NullAuthorizationConfigProvider</class> (returns empty) |
+| Adapter | Provider | Notes |
+|---------|----------|-------|
+| Yii 3 | <class>AppDevPanel\Adapter\Yii3\Inspector\Yii3AuthorizationConfigProvider</class> | Reads RBAC / User / Auth / Access services (all optional) |
+| Symfony | <class>AppDevPanel\Adapter\Symfony\Inspector\SymfonyAuthorizationConfigProvider</class> | Reads `security.firewalls`, `security.role_hierarchy`, `security.voter`-tagged services; registered automatically when `symfony/security-bundle` is installed |
+| Laravel | <class>AppDevPanel\Adapter\Laravel\Inspector\LaravelAuthorizationConfigProvider</class> | Reads `config/auth.php` guards and providers; lists `Gate` abilities and policies via reflection |
+| Yii 2 | <class>AppDevPanel\Adapter\Yii2\Inspector\Yii2AuthorizationConfigProvider</class> | Reads the `user` component (identity class, login/session settings) and, when configured, `authManager` roles/permissions/rules |
+| Cycle | <class>AppDevPanel\Api\Inspector\Authorization\NullAuthorizationConfigProvider</class> | ORM-only adapter — returns an empty configuration |
 
-::: info
-Authorization inspection requires framework-specific integration. Currently, only the Symfony adapter provides full security config introspection.
-:::
+## Live Demo
+
+The Yii 3 playground (`playground/yii3-app`) ships a full authorization showcase:
+
+- three users (`alice` / `bob` / `carol`) backed by an in-memory identity repository
+- RBAC hierarchy seeded on first boot: `admin → editor → reader → view-dashboard`, plus the `edit-post` and `delete-post` permissions
+- Bearer / Basic / query-parameter guards registered as a `Composite`
+- a `/authorization` page that switches users via `?token=alice-demo-token` and probes permissions live
+
+Start the playground and visit **`http://127.0.0.1:8101/authorization`** to try it; the ADP **Authorization Inspector** (`/inspect/#/authorization`) shows the same data pulled from the running container.
+
+### Yii 3 — per-section requirements
+
+Each section of the Yii 3 response is populated only when the relevant package is in the container (listed under `suggest` in the adapter's `composer.json`):
+
+| Section | Required package |
+|---------|------------------|
+| Guards | `yiisoft/auth` |
+| Role hierarchy | `yiisoft/rbac` |
+| Voters | `yiisoft/access` and/or `yiisoft/rbac` |
+| Security config / current user | `yiisoft/user` |
+
+### Symfony — per-section requirements
+
+Requires `symfony/security-bundle`. Sections map to Symfony security primitives:
+
+| Section | Source |
+|---------|--------|
+| Guards | Parameter `security.firewalls` + all collected `security.firewall.map.config.{name}.*` sub-parameters |
+| Role hierarchy | Parameter `security.role_hierarchy.roles` |
+| Voters | Services tagged `security.voter` |
+| Security config | `security.access_control`, `security.access.decision_manager.strategy`, providers from `security.user.provider.concrete.*` |
+
+### Laravel — per-section requirements
+
+Built-in Laravel authorization is always available; optional packages extend it:
+
+| Section | Source |
+|---------|--------|
+| Guards | `config('auth.guards')` with provider class resolved from `config('auth.providers.*.model')` or `driver` |
+| Role hierarchy | Empty by default; populated from `Spatie\Permission\Models\Role::with('permissions')` when `spatie/laravel-permission` is installed |
+| Voters | `Illuminate\Contracts\Auth\Access\Gate`: abilities defined via `Gate::define()` and policies registered via `Gate::policy()` (read through reflection) |
+| Security config | `config('auth.defaults')`, `config('auth.providers')`, `config('auth.passwords')`, `config('auth.password_timeout')` |
+
+### Yii 2 — per-section requirements
+
+Session-based auth is always available; RBAC is optional:
+
+| Section | Source |
+|---------|--------|
+| Guards | Single `user` guard with `provider = identityClass` and login/session config (`loginUrl`, `enableSession`, `authTimeout`, `absoluteAuthTimeout`, `enableAutoLogin`) |
+| Role hierarchy | `Yii::$app->authManager->getRoles()` + `getChildren($role)` — empty when the `authManager` component is not configured |
+| Voters | `authManager` roles + permissions + rules (each typed accordingly) |
+| Security config | `user` snapshot (`identityClass`, `isGuest`, `id`) + `authManager` class and `defaultRoles` |

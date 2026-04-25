@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Adapter\Yii2\EventListener;
 
+use AppDevPanel\Adapter\Yii2\Inspector\Yii2RouteCollection;
 use AppDevPanel\Adapter\Yii2\Proxy\RouterMatchRecorder;
 use AppDevPanel\Api\Toolbar\ToolbarInjector;
 use AppDevPanel\Kernel\Collector\ExceptionCollector;
@@ -76,7 +77,13 @@ final class WebListener
             return;
         }
 
-        $this->webAppInfoCollector?->markRequestFinished();
+        // Force-flush Yii's Logger so buffered messages reach DebugLogTarget before storage flush.
+        // Yii's Logger has flushInterval=1000 by default, so with ~14 messages per request
+        // the buffer never auto-flushes. Without this, LogCollector gets 0 messages.
+        // Must happen BEFORE markRequestFinished/markApplicationFinished so that DB and log
+        // timeline events appear before the finish markers in the timeline.
+        \Yii::getLogger()->flush(true);
+
         $this->extractRouteData($app);
 
         if ($this->requestCollector !== null) {
@@ -89,12 +96,8 @@ final class WebListener
 
         $this->injectToolbar($app);
 
+        $this->webAppInfoCollector?->markRequestFinished();
         $this->webAppInfoCollector?->markApplicationFinished();
-
-        // Force-flush Yii's Logger so buffered messages reach DebugLogTarget before storage flush.
-        // Yii's Logger has flushInterval=1000 by default, so with ~14 messages per request
-        // the buffer never auto-flushes. Without this, LogCollector gets 0 messages.
-        \Yii::getLogger()->flush(true);
 
         $this->debugger->shutdown();
         $this->matchRecorder?->reset();
@@ -108,12 +111,38 @@ final class WebListener
      */
     public function onExceptionHandler(\yii\web\Application $app): void
     {
-        $this->webAppInfoCollector?->markRequestFinished();
-        $this->extractRouteData($app);
-        $this->webAppInfoCollector?->markApplicationFinished();
-
         \Yii::getLogger()->flush(true);
+        $this->extractRouteData($app);
+        $this->webAppInfoCollector?->markRequestFinished();
+        $this->webAppInfoCollector?->markApplicationFinished();
         $this->matchRecorder?->reset();
+    }
+
+    /**
+     * Called after Yii 2's error handler has prepared the error response.
+     *
+     * On the exception path EVENT_AFTER_REQUEST never fires, so RequestCollector
+     * retains its default status code (200). This hook captures the actually
+     * rendered response (e.g. 404, 500) via PSR-7 conversion and feeds it to
+     * RequestCollector so the stored debug entry reflects the real status.
+     *
+     * Safe to call multiple times — RequestCollector overwrites.
+     */
+    public function onExceptionRendered(\yii\web\Application $app): void
+    {
+        if ($this->requestCollector === null) {
+            return;
+        }
+
+        try {
+            $psrResponse = $this->convertYiiResponseToPsr7($app->getResponse());
+        } catch (\Throwable) {
+            // If response conversion fails (e.g., response component unavailable),
+            // don't block further error handling.
+            return;
+        }
+
+        $this->requestCollector->collectResponse($psrResponse);
     }
 
     /**
@@ -133,6 +162,12 @@ final class WebListener
             return;
         }
 
+        $request = $app->getRequest();
+        $path = parse_url($request->getUrl(), PHP_URL_PATH);
+        if (is_string($path) && $this->toolbarInjector->isPanelRequest($path)) {
+            return;
+        }
+
         $response = $app->getResponse();
 
         // Only inject into HTML format responses
@@ -140,15 +175,17 @@ final class WebListener
             return;
         }
 
-        $content = $response->content;
-        if ($content === null || $content === '') {
+        // Yii 2 stores the action return value in $response->data; $response->content
+        // is only populated later during Response::prepare() inside send().
+        // At EVENT_AFTER_REQUEST time, we must read from data.
+        $content = $response->data;
+        if (!is_string($content) || $content === '') {
             return;
         }
 
-        $request = $app->getRequest();
         $backendUrl = $request->getHostInfo();
 
-        $response->content = $this->toolbarInjector->inject($content, $backendUrl, $this->debugger->getId());
+        $response->data = $this->toolbarInjector->inject($content, $backendUrl, $this->debugger->getId());
     }
 
     private function getPsr17Factory(): Psr17Factory
@@ -221,11 +258,61 @@ final class WebListener
         // Primary: use proxy-recorded match data (accurate pattern, name, timing)
         if ($this->matchRecorder !== null && $this->matchRecorder->getMatchedRule() !== null) {
             $this->extractFromRecorder($app, $uri);
+        } else {
+            // Fallback: extract from resolved controller/action (no match timing, no pattern)
+            $this->extractFromController($app, $uri);
+        }
+
+        // Collect all registered routes for the route list
+        $this->collectAllRoutes($app);
+    }
+
+    /**
+     * Collect route list for the Router panel.
+     *
+     * When proxy-recorded attempts are available, routes are listed in checking order
+     * with a `matched` flag showing which rules matched and which didn't.
+     * Falls back to the static route collection from UrlManager.
+     */
+    private function collectAllRoutes(\yii\web\Application $app): void
+    {
+        $attempts = $this->matchRecorder?->getAttempts() ?? [];
+
+        if ($attempts !== []) {
+            $routes = [];
+            foreach ($attempts as $attempt) {
+                $rule = $attempt['rule'];
+                $routes[] = [
+                    'name' => $rule instanceof UrlRule ? $rule->name : $rule::class,
+                    'pattern' => $rule instanceof UrlRule ? $rule->name : $rule::class,
+                    'methods' => $rule instanceof UrlRule ? ($rule->verb ?? [] ?: ['ANY']) : ['ANY'],
+                    'host' => $rule instanceof UrlRule ? $rule->host : null,
+                    'matched' => $attempt['matched'],
+                ];
+            }
+            $this->routerCollector->collectRoutes($routes);
             return;
         }
 
-        // Fallback: extract from resolved controller/action (no match timing, no pattern)
-        $this->extractFromController($app, $uri);
+        if (!$app->has('urlManager')) {
+            return;
+        }
+
+        $urlManager = $app->getUrlManager();
+        $collection = new Yii2RouteCollection($urlManager);
+
+        $routes = [];
+        foreach ($collection->getRoutes() as $adapter) {
+            $info = $adapter->__debugInfo();
+            $routes[] = [
+                'name' => $info['name'],
+                'pattern' => $info['pattern'],
+                'methods' => $info['methods'] ?: ['ANY'],
+                'host' => $info['hosts'][0] ?? null,
+            ];
+        }
+
+        $this->routerCollector->collectRoutes($routes);
     }
 
     /**

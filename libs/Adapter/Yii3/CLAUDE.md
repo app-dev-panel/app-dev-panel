@@ -51,7 +51,9 @@ src/
 │   └── View/
 │       └── ViewEventListener.php
 ├── Inspector/
-│   └── DbSchemaProvider.php             # Database schema via Yiisoft DB
+│   ├── DbSchemaProvider.php             # Database schema via Yiisoft DB
+│   ├── Yii3AuthorizationConfigProvider.php  # Live auth config via RBAC/User/Auth (all optional)
+│   └── Yii3ConfigProvider.php           # Wraps ConfigInterface; normalises events-web listeners for the inspector
 ├── Proxy/
 │   ├── ContainerInterfaceProxy.php      # PSR-11 container proxy
 │   ├── ContainerProxyConfig.php
@@ -115,19 +117,35 @@ Maps framework lifecycle events to debugger lifecycle:
 
 ## Middleware
 
-The adapter provides two middleware classes that must be added to the application's middleware stack:
+The adapter provides three middleware classes that must be added to the application's middleware stack:
 
 | Middleware | Purpose |
 |-----------|---------|
 | `DebugHeaders` (from `AppDevPanel\Api`) | Adds `X-Debug-Id` response header linking each response to its debug entry |
+| `ToolbarMiddleware` | Injects the ADP debug toolbar into HTML responses (before `</body>`) |
 | `YiiApiMiddleware` | Routes requests matching `/debug/api/*` to the ADP API application, bypassing normal app routing |
 
 **Required middleware stack order** (in `config/web/di/application.php`):
 ```
-DebugHeaders → ErrorCatcher → YiiApiMiddleware → SessionMiddleware → CsrfTokenMiddleware → FormatDataResponse → RequestCatcherMiddleware → Router
+DebugHeaders → ToolbarMiddleware → ErrorCatcher → YiiApiMiddleware → SessionMiddleware → CsrfTokenMiddleware → FormatDataResponse → RequestCatcherMiddleware → Router
 ```
 
-`DebugHeaders` must be outermost (before `ErrorCatcher`) to attach the debug ID even on error responses. `YiiApiMiddleware` must be before `Router` to intercept API requests early.
+`DebugHeaders` must be outermost (before `ErrorCatcher`) to attach the debug ID even on error responses. `ToolbarMiddleware` must be after `DebugHeaders` (needs the debug ID) and before `ErrorCatcher` so the toolbar appears even on error pages. `YiiApiMiddleware` must be before `Router` to intercept API requests early.
+
+## Inspector
+
+`GET /inspect/api/events` is served by `Yii3ConfigProvider`, registered as the `config` alias in `config/di-api.php`. It wraps `Yiisoft\Config\ConfigInterface` and normalises each listener returned by `$config->get('events')` / `$config->get('events-web')` into the shape expected by the frontend Events page: `{name, class, listeners}` where each listener is a `Class::method` string, a `[class, method]` tuple, or a `ClosureDescriptor` array (`{__closure: true, source, file, startLine, endLine}`) so that closures/arrow functions render as syntax-highlighted code blocks. Non-event groups (`params`, `di`, etc.) are delegated to the underlying `ConfigInterface`.
+
+`GET /inspect/api/authorization` is served by `Yii3AuthorizationConfigProvider`, wired in `config/di-api.php`. It introspects the DI container for optional Yii packages — if a package is absent, its section is empty rather than producing an error.
+
+| Section | Source |
+|---------|--------|
+| `guards` | `Yiisoft\Auth\AuthenticationMethodInterface` + concrete `HttpBasic`/`HttpBearer`/`HttpHeader`/`QueryParam`/`Composite` (yiisoft/auth). Deduplicated across the interface id and concrete class. |
+| `roleHierarchy` | `Yiisoft\Rbac\ItemsStorageInterface::getAll()` + `getDirectChildren()` (yiisoft/rbac v2) or `getChildren()` (v1) — map `role name → list of child role names`. |
+| `voters` | `Yiisoft\Access\AccessCheckerInterface` (yiisoft/access) entry plus every rule returned by `Yiisoft\Rbac\RulesStorageInterface::getAll()`. |
+| `config` | `user`, `rbac`, `auth` subtrees of `app-dev-panel/yii3` params; plus live `CurrentUser` snapshot (`isGuest`, `id`) when `Yiisoft\User\CurrentUser` is in the container. |
+
+All four packages (`yiisoft/rbac`, `yiisoft/user`, `yiisoft/auth`, `yiisoft/access`) are declared in `composer.json` `suggest` — the adapter works without them, the inspector just renders an empty section.
 
 ## Configuration (`params.php`)
 

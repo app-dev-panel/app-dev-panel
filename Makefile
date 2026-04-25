@@ -7,6 +7,7 @@
         mago mago-format mago-lint mago-analyze mago-fix \
         mago-playgrounds mago-playground-yii3 mago-playground-symfony mago-playground-yii2 mago-playground-laravel \
         mago-playgrounds-fix mago-playground-yii3-fix mago-playground-symfony-fix mago-playground-yii2-fix mago-playground-laravel-fix \
+        modulite \
         check check-ci fix \
         install install-php install-frontend install-playgrounds \
         serve-yii3 serve-symfony serve-yii2 serve-laravel serve \
@@ -29,6 +30,20 @@ LARAVEL_PORT  ?= 8104
 # --- Binaries ---
 # Use vendor/bin/mago locally (absolute path); CI installs mago globally via setup-mago action
 MAGO          ?= $(shell [ -x $(CURDIR)/vendor/bin/mago ] && echo $(CURDIR)/vendor/bin/mago || echo mago)
+
+# --- Hard timeouts (prevent hangs in CI / Claude hooks) ---
+# HARD RULE: Never raise these values. If a run breaches them, fix the slow code or skip the test.
+# `timeout` (GNU coreutils) kills the target after N seconds; --kill-after sends SIGKILL shortly after.
+TIMEOUT       ?= $(shell command -v timeout 2>/dev/null || command -v gtimeout 2>/dev/null)
+# Ceiling for the whole test suite (PHPUnit / Vitest). The full suite takes ~90s today — this is the
+# absolute upper bound; going near it means something is wrong.
+TEST_TIMEOUT  ?= 180
+# Ceiling for a single fixture / scenario run against a single playground.
+FIXTURE_TIMEOUT ?= 120
+# Ceiling for lightweight helper commands (curl-style polls, daemon pings).
+HELPER_TIMEOUT ?= 15
+# Wrap a command: $(call with_timeout,<seconds>,<command>)
+with_timeout = $(if $(TIMEOUT),$(TIMEOUT) --kill-after=5s $(1) $(2),$(2))
 
 # --- Paths ---
 ROOT_DIR      := $(shell pwd)
@@ -77,8 +92,11 @@ help: ## Show this help
 	@echo "  make mago-playground-yii2      Mago checks for Yii2 playground"
 	@echo "  make mago-playground-laravel   Mago checks for Laravel playground"
 	@echo ""
+	@echo "$(YELLOW)Modulite (Module Boundaries):$(RESET)"
+	@echo "  make modulite              Check module boundary violations"
+	@echo ""
 	@echo "$(YELLOW)Combined:$(RESET)"
-	@echo "  make check                 Run ALL code quality checks (core + playgrounds)"
+	@echo "  make check                 Run ALL code quality checks (core + playgrounds + modulite)"
 	@echo "  make check-ci              Run all checks for CI (core + playgrounds + frontend)"
 	@echo "  make fix                   Fix all code (core + playgrounds)"
 	@echo ""
@@ -176,7 +194,8 @@ build-panel: ## Build panel + toolbar and copy to all adapter asset directories
 
 install-panel: ## Publish built panel assets into playground applications
 	@echo "$(CYAN)Publishing panel assets to playgrounds...$(RESET)"
-	cd $(PLAYGROUND_DIR)/symfony-app && rm -rf public/bundles/appdevpanel && php bin/console assets:install public --symlink
+	cd $(PLAYGROUND_DIR)/symfony-app && rm -rf public/bundles/appdevpanel && php bin/console assets:install public --symlink --relative
+	cd $(PLAYGROUND_DIR)/laravel-app && rm -rf public/vendor/app-dev-panel && php artisan vendor:publish --tag=app-dev-panel-assets --force --ansi
 	@echo "$(GREEN)Done. Panel available at /debug on each playground.$(RESET)"
 
 build-install-panel: build-panel install-panel ## Build panel + publish to all playgrounds
@@ -186,16 +205,16 @@ build-install-panel: build-panel install-panel ## Build panel + publish to all p
 # ============================================================================
 
 test-php: ## Run PHP unit tests (PHPUnit)
-	@echo "$(CYAN)Running PHP unit tests...$(RESET)"
-	composer test:unit
+	@echo "$(CYAN)Running PHP unit tests (timeout: $(TEST_TIMEOUT)s)...$(RESET)"
+	$(call with_timeout,$(TEST_TIMEOUT),composer test:unit)
 
 test-frontend: ## Run frontend unit tests (Vitest)
-	@echo "$(CYAN)Running frontend unit tests...$(RESET)"
-	cd $(FRONTEND_DIR) && npm test
+	@echo "$(CYAN)Running frontend unit tests (timeout: $(TEST_TIMEOUT)s)...$(RESET)"
+	cd $(FRONTEND_DIR) && $(call with_timeout,$(TEST_TIMEOUT),npm test)
 
 test-frontend-e2e: ## Run frontend browser tests (Vitest + Playwright)
-	@echo "$(CYAN)Running frontend browser tests...$(RESET)"
-	cd $(FRONTEND_DIR) && npm run test:e2e
+	@echo "$(CYAN)Running frontend browser tests (timeout: $(TEST_TIMEOUT)s)...$(RESET)"
+	cd $(FRONTEND_DIR) && $(call with_timeout,$(TEST_TIMEOUT),npm run test:e2e)
 
 test: ## Run ALL tests in parallel (PHP unit + frontend unit)
 	@echo "$(CYAN)Running all tests in parallel...$(RESET)"
@@ -296,6 +315,18 @@ mago-playgrounds-fix: ## Fix formatting in all playgrounds (parallel)
 	@echo "$(GREEN)All playground formatting fixed!$(RESET)"
 
 # ============================================================================
+# Modulite — Module Boundary Validation
+# ============================================================================
+
+modulite: ## Check module boundary violations (inspired by VK Modulite)
+	@echo "$(CYAN)Checking module boundaries (Modulite)...$(RESET)"
+	php tools/modulite-check.php
+
+modulite-ci: ## Check module boundaries with GitHub Actions annotations
+	@echo "$(CYAN)Checking module boundaries (Modulite, GitHub format)...$(RESET)"
+	php tools/modulite-check.php --format=github
+
+# ============================================================================
 # Code Quality — Frontend
 # ============================================================================
 
@@ -311,15 +342,15 @@ frontend-fix: ## Fix frontend code quality issues
 # Combined
 # ============================================================================
 
-check: ## Run ALL code quality checks (core + playgrounds + frontend)
+check: ## Run ALL code quality checks (core + playgrounds + frontend + modulite)
 	@echo "$(CYAN)Running all code quality checks...$(RESET)"
-	@$(MAKE) -j3 --output-sync=target mago mago-playgrounds frontend-check
+	@$(MAKE) -j4 --output-sync=target mago mago-playgrounds frontend-check modulite
 	@echo ""
 	@echo "$(GREEN)All code quality checks passed!$(RESET)"
 
-check-ci: ## Run all checks for CI (core + playgrounds + frontend)
+check-ci: ## Run all checks for CI (core + playgrounds + frontend + modulite)
 	@echo "$(CYAN)Running all CI checks...$(RESET)"
-	@$(MAKE) -j3 --output-sync=target mago mago-playgrounds frontend-check
+	@$(MAKE) -j4 --output-sync=target mago mago-playgrounds frontend-check modulite-ci
 	@echo ""
 	@echo "$(GREEN)All CI checks passed!$(RESET)"
 
@@ -373,20 +404,20 @@ serve: ## Start all playground servers in background
 # ============================================================================
 
 fixtures-yii3: ## Run test fixtures against Yii 3 playground
-	@echo "$(CYAN)[Scenarios: Yii3] Running test fixtures on port $(YII3_PORT)...$(RESET)"
-	php vendor/bin/adp debug:fixtures http://127.0.0.1:$(YII3_PORT)
+	@echo "$(CYAN)[Scenarios: Yii3] Running test fixtures on port $(YII3_PORT) (timeout: $(FIXTURE_TIMEOUT)s)...$(RESET)"
+	$(call with_timeout,$(FIXTURE_TIMEOUT),php libs/Cli/bin/adp debug:fixtures http://127.0.0.1:$(YII3_PORT))
 
 fixtures-symfony: ## Run test fixtures against Symfony playground
-	@echo "$(CYAN)[Scenarios: Symfony] Running test fixtures on port $(SYMFONY_PORT)...$(RESET)"
-	php vendor/bin/adp debug:fixtures http://127.0.0.1:$(SYMFONY_PORT)
+	@echo "$(CYAN)[Scenarios: Symfony] Running test fixtures on port $(SYMFONY_PORT) (timeout: $(FIXTURE_TIMEOUT)s)...$(RESET)"
+	$(call with_timeout,$(FIXTURE_TIMEOUT),php libs/Cli/bin/adp debug:fixtures http://127.0.0.1:$(SYMFONY_PORT))
 
 fixtures-yii2: ## Run test fixtures against Yii2 playground
-	@echo "$(CYAN)[Scenarios: Yii2] Running test fixtures on port $(YII2_PORT)...$(RESET)"
-	php vendor/bin/adp debug:fixtures http://127.0.0.1:$(YII2_PORT)
+	@echo "$(CYAN)[Scenarios: Yii2] Running test fixtures on port $(YII2_PORT) (timeout: $(FIXTURE_TIMEOUT)s)...$(RESET)"
+	$(call with_timeout,$(FIXTURE_TIMEOUT),php libs/Cli/bin/adp debug:fixtures http://127.0.0.1:$(YII2_PORT))
 
 fixtures-laravel: ## Run test fixtures against Laravel playground
-	@echo "$(CYAN)[Scenarios: Laravel] Running test fixtures on port $(LARAVEL_PORT)...$(RESET)"
-	php vendor/bin/adp debug:fixtures http://127.0.0.1:$(LARAVEL_PORT)
+	@echo "$(CYAN)[Scenarios: Laravel] Running test fixtures on port $(LARAVEL_PORT) (timeout: $(FIXTURE_TIMEOUT)s)...$(RESET)"
+	$(call with_timeout,$(FIXTURE_TIMEOUT),php libs/Cli/bin/adp debug:fixtures http://127.0.0.1:$(LARAVEL_PORT))
 
 fixtures: ## Run test fixtures against all playgrounds (requires running servers)
 	@echo "$(CYAN)Running test fixtures against all playgrounds...$(RESET)"
@@ -395,19 +426,19 @@ fixtures: ## Run test fixtures against all playgrounds (requires running servers
 
 test-fixtures-yii3: ## Run PHPUnit E2E fixtures against Yii 3 playground
 	@echo "$(CYAN)[E2E Fixtures: Yii3] Running PHPUnit E2E tests on port $(YII3_PORT)...$(RESET)"
-	PLAYGROUND_URL=http://127.0.0.1:$(YII3_PORT) php vendor/bin/phpunit --testsuite Fixtures --testdox
+	PLAYGROUND_URL=http://127.0.0.1:$(YII3_PORT) $(call with_timeout,$(FIXTURE_TIMEOUT),php vendor/bin/phpunit --testsuite Fixtures --testdox)
 
 test-fixtures-symfony: ## Run PHPUnit E2E fixtures against Symfony playground
 	@echo "$(CYAN)[E2E Fixtures: Symfony] Running PHPUnit E2E tests on port $(SYMFONY_PORT)...$(RESET)"
-	PLAYGROUND_URL=http://127.0.0.1:$(SYMFONY_PORT) php vendor/bin/phpunit --testsuite Fixtures --testdox
+	PLAYGROUND_URL=http://127.0.0.1:$(SYMFONY_PORT) $(call with_timeout,$(FIXTURE_TIMEOUT),php vendor/bin/phpunit --testsuite Fixtures --testdox)
 
 test-fixtures-yii2: ## Run PHPUnit E2E fixtures against Yii2 playground
 	@echo "$(CYAN)[E2E Fixtures: Yii2] Running PHPUnit E2E tests on port $(YII2_PORT)...$(RESET)"
-	PLAYGROUND_URL=http://127.0.0.1:$(YII2_PORT) php vendor/bin/phpunit --testsuite Fixtures --testdox
+	PLAYGROUND_URL=http://127.0.0.1:$(YII2_PORT) $(call with_timeout,$(FIXTURE_TIMEOUT),php vendor/bin/phpunit --testsuite Fixtures --testdox)
 
 test-fixtures-laravel: ## Run PHPUnit E2E fixtures against Laravel playground
 	@echo "$(CYAN)[E2E Fixtures: Laravel] Running PHPUnit E2E tests on port $(LARAVEL_PORT)...$(RESET)"
-	PLAYGROUND_URL=http://127.0.0.1:$(LARAVEL_PORT) php vendor/bin/phpunit --testsuite Fixtures --testdox
+	PLAYGROUND_URL=http://127.0.0.1:$(LARAVEL_PORT) $(call with_timeout,$(FIXTURE_TIMEOUT),php vendor/bin/phpunit --testsuite Fixtures --testdox)
 
 test-fixtures: ## Run PHPUnit E2E fixtures against all playgrounds (requires running servers)
 	@echo "$(CYAN)Running PHPUnit E2E fixtures against all playgrounds...$(RESET)"
@@ -416,19 +447,19 @@ test-fixtures: ## Run PHPUnit E2E fixtures against all playgrounds (requires run
 
 test-scenario-yii3: ## Run full scenario test against Yii 3 playground
 	@echo "$(CYAN)[Scenario: Yii3] Running full scenario on port $(YII3_PORT)...$(RESET)"
-	PLAYGROUND_URL=http://127.0.0.1:$(YII3_PORT) php vendor/bin/phpunit --testsuite Fixtures --group scenario --testdox
+	PLAYGROUND_URL=http://127.0.0.1:$(YII3_PORT) $(call with_timeout,$(FIXTURE_TIMEOUT),php vendor/bin/phpunit --testsuite Fixtures --group scenario --testdox)
 
 test-scenario-symfony: ## Run full scenario test against Symfony playground
 	@echo "$(CYAN)[Scenario: Symfony] Running full scenario on port $(SYMFONY_PORT)...$(RESET)"
-	PLAYGROUND_URL=http://127.0.0.1:$(SYMFONY_PORT) php vendor/bin/phpunit --testsuite Fixtures --group scenario --testdox
+	PLAYGROUND_URL=http://127.0.0.1:$(SYMFONY_PORT) $(call with_timeout,$(FIXTURE_TIMEOUT),php vendor/bin/phpunit --testsuite Fixtures --group scenario --testdox)
 
 test-scenario-yii2: ## Run full scenario test against Yii2 playground
 	@echo "$(CYAN)[Scenario: Yii2] Running full scenario on port $(YII2_PORT)...$(RESET)"
-	PLAYGROUND_URL=http://127.0.0.1:$(YII2_PORT) php vendor/bin/phpunit --testsuite Fixtures --group scenario --testdox
+	PLAYGROUND_URL=http://127.0.0.1:$(YII2_PORT) $(call with_timeout,$(FIXTURE_TIMEOUT),php vendor/bin/phpunit --testsuite Fixtures --group scenario --testdox)
 
 test-scenario-laravel: ## Run full scenario test against Laravel playground
 	@echo "$(CYAN)[Scenario: Laravel] Running full scenario on port $(LARAVEL_PORT)...$(RESET)"
-	PLAYGROUND_URL=http://127.0.0.1:$(LARAVEL_PORT) php vendor/bin/phpunit --testsuite Fixtures --group scenario --testdox
+	PLAYGROUND_URL=http://127.0.0.1:$(LARAVEL_PORT) $(call with_timeout,$(FIXTURE_TIMEOUT),php vendor/bin/phpunit --testsuite Fixtures --group scenario --testdox)
 
 test-scenario: ## Run full scenario test against all playgrounds (requires running servers)
 	@echo "$(CYAN)Running full scenario tests against all playgrounds...$(RESET)"
@@ -437,19 +468,19 @@ test-scenario: ## Run full scenario test against all playgrounds (requires runni
 
 test-mcp-yii3: ## Run MCP API E2E tests against Yii 3 playground
 	@echo "$(CYAN)[MCP E2E: Yii3] Running MCP API tests on port $(YII3_PORT)...$(RESET)"
-	PLAYGROUND_URL=http://127.0.0.1:$(YII3_PORT) php vendor/bin/phpunit --testsuite Fixtures --group mcp --testdox
+	PLAYGROUND_URL=http://127.0.0.1:$(YII3_PORT) $(call with_timeout,$(FIXTURE_TIMEOUT),php vendor/bin/phpunit --testsuite Fixtures --group mcp --testdox)
 
 test-mcp-symfony: ## Run MCP API E2E tests against Symfony playground
 	@echo "$(CYAN)[MCP E2E: Symfony] Running MCP API tests on port $(SYMFONY_PORT)...$(RESET)"
-	PLAYGROUND_URL=http://127.0.0.1:$(SYMFONY_PORT) php vendor/bin/phpunit --testsuite Fixtures --group mcp --testdox
+	PLAYGROUND_URL=http://127.0.0.1:$(SYMFONY_PORT) $(call with_timeout,$(FIXTURE_TIMEOUT),php vendor/bin/phpunit --testsuite Fixtures --group mcp --testdox)
 
 test-mcp-yii2: ## Run MCP API E2E tests against Yii2 playground
 	@echo "$(CYAN)[MCP E2E: Yii2] Running MCP API tests on port $(YII2_PORT)...$(RESET)"
-	PLAYGROUND_URL=http://127.0.0.1:$(YII2_PORT) php vendor/bin/phpunit --testsuite Fixtures --group mcp --testdox
+	PLAYGROUND_URL=http://127.0.0.1:$(YII2_PORT) $(call with_timeout,$(FIXTURE_TIMEOUT),php vendor/bin/phpunit --testsuite Fixtures --group mcp --testdox)
 
 test-mcp-laravel: ## Run MCP API E2E tests against Laravel playground
 	@echo "$(CYAN)[MCP E2E: Laravel] Running MCP API tests on port $(LARAVEL_PORT)...$(RESET)"
-	PLAYGROUND_URL=http://127.0.0.1:$(LARAVEL_PORT) php vendor/bin/phpunit --testsuite Fixtures --group mcp --testdox
+	PLAYGROUND_URL=http://127.0.0.1:$(LARAVEL_PORT) $(call with_timeout,$(FIXTURE_TIMEOUT),php vendor/bin/phpunit --testsuite Fixtures --group mcp --testdox)
 
 test-mcp: ## Run MCP API E2E tests against all playgrounds (requires running servers)
 	@echo "$(CYAN)Running MCP API E2E tests against all playgrounds...$(RESET)"
@@ -458,19 +489,19 @@ test-mcp: ## Run MCP API E2E tests against all playgrounds (requires running ser
 
 test-pages-yii3: ## Run playground pages E2E tests against Yii 3 playground
 	@echo "$(CYAN)[Pages E2E: Yii3] Running pages tests on port $(YII3_PORT)...$(RESET)"
-	PLAYGROUND_URL=http://127.0.0.1:$(YII3_PORT) php vendor/bin/phpunit --testsuite Fixtures --group pages --testdox
+	PLAYGROUND_URL=http://127.0.0.1:$(YII3_PORT) $(call with_timeout,$(FIXTURE_TIMEOUT),php vendor/bin/phpunit --testsuite Fixtures --group pages --testdox)
 
 test-pages-symfony: ## Run playground pages E2E tests against Symfony playground
 	@echo "$(CYAN)[Pages E2E: Symfony] Running pages tests on port $(SYMFONY_PORT)...$(RESET)"
-	PLAYGROUND_URL=http://127.0.0.1:$(SYMFONY_PORT) php vendor/bin/phpunit --testsuite Fixtures --group pages --testdox
+	PLAYGROUND_URL=http://127.0.0.1:$(SYMFONY_PORT) $(call with_timeout,$(FIXTURE_TIMEOUT),php vendor/bin/phpunit --testsuite Fixtures --group pages --testdox)
 
 test-pages-yii2: ## Run playground pages E2E tests against Yii2 playground
 	@echo "$(CYAN)[Pages E2E: Yii2] Running pages tests on port $(YII2_PORT)...$(RESET)"
-	PLAYGROUND_URL=http://127.0.0.1:$(YII2_PORT) php vendor/bin/phpunit --testsuite Fixtures --group pages --testdox
+	PLAYGROUND_URL=http://127.0.0.1:$(YII2_PORT) $(call with_timeout,$(FIXTURE_TIMEOUT),php vendor/bin/phpunit --testsuite Fixtures --group pages --testdox)
 
 test-pages-laravel: ## Run playground pages E2E tests against Laravel playground
 	@echo "$(CYAN)[Pages E2E: Laravel] Running pages tests on port $(LARAVEL_PORT)...$(RESET)"
-	PLAYGROUND_URL=http://127.0.0.1:$(LARAVEL_PORT) php vendor/bin/phpunit --testsuite Fixtures --group pages --testdox
+	PLAYGROUND_URL=http://127.0.0.1:$(LARAVEL_PORT) $(call with_timeout,$(FIXTURE_TIMEOUT),php vendor/bin/phpunit --testsuite Fixtures --group pages --testdox)
 
 test-pages: ## Run playground pages E2E tests against all playgrounds (requires running servers)
 	@echo "$(CYAN)Running playground pages E2E tests against all playgrounds...$(RESET)"
@@ -485,8 +516,8 @@ test-playground-yii3: ## Start Yii 3 server, run E2E fixtures + scenario, stop s
 	@echo "$(CYAN)[Playground: Yii3] Starting server on port $(YII3_PORT)...$(RESET)"
 	@cd $(PLAYGROUND_DIR)/yii3-app && composer serve &>/dev/null & echo $$! > /tmp/adp-yii3.pid
 	@sleep 3
-	@echo "$(CYAN)[Playground: Yii3] Running E2E fixture tests...$(RESET)"
-	@PLAYGROUND_URL=http://127.0.0.1:$(YII3_PORT) php vendor/bin/phpunit --testsuite Fixtures --testdox; \
+	@echo "$(CYAN)[Playground: Yii3] Running E2E fixture tests (timeout: $(FIXTURE_TIMEOUT)s)...$(RESET)"
+	@PLAYGROUND_URL=http://127.0.0.1:$(YII3_PORT) $(call with_timeout,$(FIXTURE_TIMEOUT),php vendor/bin/phpunit --testsuite Fixtures --testdox); \
 		EXIT_CODE=$$?; \
 		kill $$(cat /tmp/adp-yii3.pid) 2>/dev/null || true; rm -f /tmp/adp-yii3.pid; \
 		pkill -f "127.0.0.1:$(YII3_PORT)" 2>/dev/null || true; \
@@ -496,8 +527,8 @@ test-playground-symfony: ## Start Symfony server, run E2E fixtures + scenario, s
 	@echo "$(CYAN)[Playground: Symfony] Starting server on port $(SYMFONY_PORT)...$(RESET)"
 	@cd $(PLAYGROUND_DIR)/symfony-app && composer serve &>/dev/null & echo $$! > /tmp/adp-symfony.pid
 	@sleep 3
-	@echo "$(CYAN)[Playground: Symfony] Running E2E fixture tests...$(RESET)"
-	@PLAYGROUND_URL=http://127.0.0.1:$(SYMFONY_PORT) php vendor/bin/phpunit --testsuite Fixtures --testdox; \
+	@echo "$(CYAN)[Playground: Symfony] Running E2E fixture tests (timeout: $(FIXTURE_TIMEOUT)s)...$(RESET)"
+	@PLAYGROUND_URL=http://127.0.0.1:$(SYMFONY_PORT) $(call with_timeout,$(FIXTURE_TIMEOUT),php vendor/bin/phpunit --testsuite Fixtures --testdox); \
 		EXIT_CODE=$$?; \
 		kill $$(cat /tmp/adp-symfony.pid) 2>/dev/null || true; rm -f /tmp/adp-symfony.pid; \
 		pkill -f "127.0.0.1:$(SYMFONY_PORT)" 2>/dev/null || true; \
@@ -507,8 +538,8 @@ test-playground-laravel: ## Start Laravel server, run E2E fixtures + scenario, s
 	@echo "$(CYAN)[Playground: Laravel] Starting server on port $(LARAVEL_PORT)...$(RESET)"
 	@cd $(PLAYGROUND_DIR)/laravel-app && composer serve &>/dev/null & echo $$! > /tmp/adp-laravel.pid
 	@sleep 3
-	@echo "$(CYAN)[Playground: Laravel] Running E2E fixture tests...$(RESET)"
-	@PLAYGROUND_URL=http://127.0.0.1:$(LARAVEL_PORT) php vendor/bin/phpunit --testsuite Fixtures --testdox; \
+	@echo "$(CYAN)[Playground: Laravel] Running E2E fixture tests (timeout: $(FIXTURE_TIMEOUT)s)...$(RESET)"
+	@PLAYGROUND_URL=http://127.0.0.1:$(LARAVEL_PORT) $(call with_timeout,$(FIXTURE_TIMEOUT),php vendor/bin/phpunit --testsuite Fixtures --testdox); \
 		EXIT_CODE=$$?; \
 		kill $$(cat /tmp/adp-laravel.pid) 2>/dev/null || true; rm -f /tmp/adp-laravel.pid; \
 		pkill -f "127.0.0.1:$(LARAVEL_PORT)" 2>/dev/null || true; \

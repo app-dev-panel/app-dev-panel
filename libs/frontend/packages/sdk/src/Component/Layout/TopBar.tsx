@@ -1,8 +1,15 @@
+import {EditorPathMappingEditor} from '@app-dev-panel/sdk/Component/Layout/EditorPathMappingEditor';
 import {RequestPill} from '@app-dev-panel/sdk/Component/Layout/RequestPill';
 import {SearchTrigger} from '@app-dev-panel/sdk/Component/Layout/SearchTrigger';
 import {DuckIcon} from '@app-dev-panel/sdk/Component/SvgIcon/DuckIcon';
 import {componentTokens} from '@app-dev-panel/sdk/Component/Theme/tokens';
-import {editorPresetLabels, type EditorPreset} from '@app-dev-panel/sdk/Helper/editorUrl';
+import {
+    defaultEditorConfig,
+    editorPresetLabels,
+    type EditorConfig,
+    type EditorPreset,
+} from '@app-dev-panel/sdk/Helper/editorUrl';
+import GitHubIcon from '@mui/icons-material/GitHub';
 import {
     Autocomplete,
     Badge,
@@ -19,6 +26,7 @@ import {
     MenuItem,
     Switch,
     TextField,
+    Tooltip,
     Typography,
     type PaletteMode,
 } from '@mui/material';
@@ -54,8 +62,9 @@ type TopBarProps = {
     showInactiveCollectors?: boolean;
     mcpEnabled?: boolean;
     notificationCount?: number;
-    editorPreset?: EditorPreset;
-    editorCustomTemplate?: string;
+    liveFeedCount?: number;
+    liveFeedActive?: boolean;
+    editorConfig?: EditorConfig;
     onMenuClick?: () => void;
     onPrevEntry?: () => void;
     onNextEntry?: () => void;
@@ -66,10 +75,15 @@ type TopBarProps = {
     onRefresh?: () => void;
     onShowInactiveCollectorsChange?: (value: boolean) => void;
     onMcpEnabledChange?: (value: boolean) => void;
-    onEditorPresetChange?: (preset: EditorPreset) => void;
-    onEditorCustomTemplateChange?: (template: string) => void;
+    onEditorConfigChange?: (config: EditorConfig) => void;
     onNotificationsClick?: (e: React.MouseEvent<HTMLElement>) => void;
+    onLiveFeedClick?: () => void;
     onLogoClick?: () => void;
+    onCopyAsImage?: () => void;
+    onDownloadAsImage?: () => void;
+    isCopyingAsImage?: boolean;
+    websiteUrl?: string;
+    onOpenWebsite?: () => void;
 };
 
 const BarRoot = styled('header')(({theme}) => ({
@@ -135,13 +149,19 @@ export const TopBar = React.memo(
         onRefresh,
         onShowInactiveCollectorsChange,
         onMcpEnabledChange,
-        editorPreset,
-        editorCustomTemplate,
-        onEditorPresetChange,
-        onEditorCustomTemplateChange,
+        editorConfig,
+        onEditorConfigChange,
         notificationCount,
+        liveFeedCount,
+        liveFeedActive,
         onNotificationsClick,
+        onLiveFeedClick,
         onLogoClick,
+        onCopyAsImage,
+        onDownloadAsImage,
+        isCopyingAsImage,
+        websiteUrl,
+        onOpenWebsite,
     }: TopBarProps) => {
         const theme = useTheme();
         const compact = useMediaQuery(theme.breakpoints.down('md'));
@@ -161,6 +181,12 @@ export const TopBar = React.memo(
         }, []);
         const handleSettingsClose = useCallback(() => setSettingsOpen(false), []);
 
+        const resolvedEditorConfig = editorConfig ?? defaultEditorConfig;
+        const updateEditorConfig = useCallback(
+            (patch: Partial<EditorConfig>) => onEditorConfigChange?.({...resolvedEditorConfig, ...patch}),
+            [onEditorConfigChange, resolvedEditorConfig],
+        );
+
         // Bell animation on count change
         const [bellAnimating, setBellAnimating] = useState(false);
         const prevCountRef = useRef(notificationCount ?? 0);
@@ -175,41 +201,90 @@ export const TopBar = React.memo(
             }
         }, [notificationCount]);
 
+        const tooltipEnterDelay = 400;
+        const autoLatestLabel = autoRefresh
+            ? 'Auto-latest: on (switch to newest entry automatically)'
+            : 'Auto-latest: off';
+        const themeLabel = resolvedMode === 'dark' ? 'Switch to light theme' : 'Switch to dark theme';
+        const liveFeedLabel = liveFeedActive ? 'Hide live feed' : 'Show live feed';
+        const openWebsiteLabel = websiteUrl ? `Open ${websiteUrl} in a new tab` : 'Open backend website in a new tab';
+
         return (
             <BarRoot>
                 {onMenuClick && (
-                    <IconButton
-                        size="small"
-                        onClick={onMenuClick}
-                        aria-label="Open menu"
-                        sx={{display: {xs: 'inline-flex', md: 'none'}}}
-                    >
-                        <Icon sx={{fontSize: 20}}>menu</Icon>
-                    </IconButton>
+                    <Tooltip title="Open menu" arrow enterDelay={tooltipEnterDelay}>
+                        <IconButton
+                            size="small"
+                            onClick={onMenuClick}
+                            aria-label="Open menu"
+                            sx={{display: {xs: 'inline-flex', md: 'none'}}}
+                        >
+                            <Icon sx={{fontSize: 20}}>menu</Icon>
+                        </IconButton>
+                    </Tooltip>
                 )}
                 <Logo onClick={onLogoClick}>
                     <DuckIcon sx={{fontSize: 22}} />
                     <span className="logo-text">App Dev Panel</span>
                 </Logo>
                 <CenterGroup>
-                    <IconButton
-                        size="small"
-                        onClick={onPrevEntry}
-                        disabled={!onPrevEntry}
-                        aria-label="Previous entry"
-                        sx={{display: {xs: 'none', sm: 'inline-flex'}}}
+                    {onOpenWebsite && (
+                        <Tooltip title={openWebsiteLabel} arrow enterDelay={tooltipEnterDelay}>
+                            <span style={{display: 'inline-flex'}}>
+                                <IconButton
+                                    size="small"
+                                    onClick={onOpenWebsite}
+                                    disabled={!websiteUrl}
+                                    aria-label={openWebsiteLabel}
+                                    sx={{display: {xs: 'none', md: 'inline-flex'}}}
+                                >
+                                    <Icon sx={{fontSize: 18}}>open_in_new</Icon>
+                                </IconButton>
+                            </span>
+                        </Tooltip>
+                    )}
+                    <Tooltip title="Previous entry" arrow enterDelay={tooltipEnterDelay}>
+                        <span style={{display: 'inline-flex'}}>
+                            <IconButton
+                                size="small"
+                                onClick={onPrevEntry}
+                                disabled={!onPrevEntry}
+                                aria-label="Previous entry"
+                                sx={{display: {xs: 'none', sm: 'inline-flex'}}}
+                            >
+                                <Icon sx={{fontSize: 18}}>chevron_left</Icon>
+                            </IconButton>
+                        </span>
+                    </Tooltip>
+                    <Tooltip title="Next entry" arrow enterDelay={tooltipEnterDelay}>
+                        <span style={{display: 'inline-flex'}}>
+                            <IconButton
+                                size="small"
+                                onClick={onNextEntry}
+                                disabled={!onNextEntry}
+                                aria-label="Next entry"
+                                sx={{display: {xs: 'none', sm: 'inline-flex'}}}
+                            >
+                                <Icon sx={{fontSize: 18}}>chevron_right</Icon>
+                            </IconButton>
+                        </span>
+                    </Tooltip>
+                    <Tooltip
+                        title={isRefreshing ? 'Refreshing…' : 'Refresh entries'}
+                        arrow
+                        enterDelay={tooltipEnterDelay}
                     >
-                        <Icon sx={{fontSize: 18}}>chevron_left</Icon>
-                    </IconButton>
-                    <IconButton
-                        size="small"
-                        onClick={onNextEntry}
-                        disabled={!onNextEntry}
-                        aria-label="Next entry"
-                        sx={{display: {xs: 'none', sm: 'inline-flex'}}}
-                    >
-                        <Icon sx={{fontSize: 18}}>chevron_right</Icon>
-                    </IconButton>
+                        <span style={{display: 'inline-flex'}}>
+                            <IconButton
+                                size="small"
+                                onClick={onRefresh}
+                                disabled={isRefreshing}
+                                aria-label="Refresh entries"
+                            >
+                                <Icon sx={{fontSize: 18}}>{isRefreshing ? 'hourglass_empty' : 'refresh'}</Icon>
+                            </IconButton>
+                        </span>
+                    </Tooltip>
                     <PillContainer>
                         {method && path != null && status != null ? (
                             <RequestPill
@@ -223,37 +298,85 @@ export const TopBar = React.memo(
                             <Box sx={{height: 32}} />
                         )}
                     </PillContainer>
-                    <IconButton
-                        size="small"
-                        onClick={onRefresh}
-                        disabled={isRefreshing}
-                        aria-label="Refresh entries"
-                        title="Refresh entries"
-                    >
-                        <Icon sx={{fontSize: 18}}>{isRefreshing ? 'hourglass_empty' : 'refresh'}</Icon>
-                    </IconButton>
-                    <IconButton
-                        size="small"
-                        onClick={onAutoRefreshToggle}
-                        aria-label={
-                            autoRefresh ? 'Auto-latest: on (switch to newest entry automatically)' : 'Auto-latest: off'
-                        }
-                        title={
-                            autoRefresh ? 'Auto-latest: on (switch to newest entry automatically)' : 'Auto-latest: off'
-                        }
-                    >
-                        <Icon sx={{fontSize: 18, color: autoRefresh ? 'success.main' : undefined}}>
-                            {autoRefresh ? 'sync' : 'sync_disabled'}
-                        </Icon>
-                    </IconButton>
+                    <Tooltip title={autoLatestLabel} arrow enterDelay={tooltipEnterDelay}>
+                        <IconButton size="small" onClick={onAutoRefreshToggle} aria-label={autoLatestLabel}>
+                            <Icon sx={{fontSize: 18, color: autoRefresh ? 'success.main' : undefined}}>
+                                {autoRefresh ? 'sync' : 'sync_disabled'}
+                            </Icon>
+                        </IconButton>
+                    </Tooltip>
                 </CenterGroup>
                 <SearchTrigger onClick={onSearchClick} />
                 {!compact && (
                     <>
-                        <IconButton size="small" onClick={onThemeToggle} aria-label="Toggle theme">
-                            <Icon sx={{fontSize: 18}}>{resolvedMode === 'dark' ? 'dark_mode' : 'light_mode'}</Icon>
-                        </IconButton>
-                        <IconButton size="small" onClick={onNotificationsClick} aria-label="Notifications">
+                        <Tooltip title={themeLabel} arrow enterDelay={tooltipEnterDelay}>
+                            <IconButton size="small" onClick={onThemeToggle} aria-label={themeLabel}>
+                                <Icon sx={{fontSize: 18}}>{resolvedMode === 'dark' ? 'dark_mode' : 'light_mode'}</Icon>
+                            </IconButton>
+                        </Tooltip>
+                        <Tooltip
+                            title={notificationCount ? `Notifications (${notificationCount})` : 'Notifications'}
+                            arrow
+                            enterDelay={tooltipEnterDelay}
+                        >
+                            <IconButton size="small" onClick={onNotificationsClick} aria-label="Notifications">
+                                <Badge
+                                    badgeContent={notificationCount}
+                                    color="error"
+                                    max={99}
+                                    sx={{
+                                        '& .MuiBadge-badge': {
+                                            fontSize: 10,
+                                            height: 16,
+                                            minWidth: 16,
+                                            animation: bellAnimating ? `${badgePulse} 0.4s ease-out` : 'none',
+                                        },
+                                    }}
+                                >
+                                    <Icon
+                                        sx={{
+                                            fontSize: 18,
+                                            animation: bellAnimating ? `${bellShake} 0.5s ease-in-out` : 'none',
+                                            transformOrigin: 'top center',
+                                        }}
+                                    >
+                                        notifications
+                                    </Icon>
+                                </Badge>
+                            </IconButton>
+                        </Tooltip>
+                    </>
+                )}
+                <Tooltip title={liveFeedLabel} arrow enterDelay={tooltipEnterDelay}>
+                    <IconButton
+                        size="small"
+                        onClick={onLiveFeedClick}
+                        aria-label={liveFeedLabel}
+                        sx={{backgroundColor: liveFeedActive ? 'action.selected' : undefined, borderRadius: 1}}
+                    >
+                        <Badge
+                            badgeContent={liveFeedCount}
+                            color="warning"
+                            max={99}
+                            sx={{
+                                '& .MuiBadge-badge': {
+                                    fontSize: 10,
+                                    height: 16,
+                                    minWidth: 16,
+                                    animation:
+                                        liveFeedCount && liveFeedCount > 0 ? `${badgePulse} 0.4s ease-out` : 'none',
+                                },
+                            }}
+                        >
+                            <Icon sx={{fontSize: 18, color: liveFeedActive ? 'primary.main' : undefined}}>
+                                terminal
+                            </Icon>
+                        </Badge>
+                    </IconButton>
+                </Tooltip>
+                <Tooltip title="More options" arrow enterDelay={tooltipEnterDelay}>
+                    <IconButton size="small" onClick={handleMenuOpen} aria-label="More options">
+                        {compact && notificationCount ? (
                             <Badge
                                 badgeContent={notificationCount}
                                 color="error"
@@ -267,40 +390,13 @@ export const TopBar = React.memo(
                                     },
                                 }}
                             >
-                                <Icon
-                                    sx={{
-                                        fontSize: 18,
-                                        animation: bellAnimating ? `${bellShake} 0.5s ease-in-out` : 'none',
-                                        transformOrigin: 'top center',
-                                    }}
-                                >
-                                    notifications
-                                </Icon>
+                                <Icon sx={{fontSize: 18}}>more_vert</Icon>
                             </Badge>
-                        </IconButton>
-                    </>
-                )}
-                <IconButton size="small" onClick={handleMenuOpen} aria-label="More options">
-                    {compact && notificationCount ? (
-                        <Badge
-                            badgeContent={notificationCount}
-                            color="error"
-                            max={99}
-                            sx={{
-                                '& .MuiBadge-badge': {
-                                    fontSize: 10,
-                                    height: 16,
-                                    minWidth: 16,
-                                    animation: bellAnimating ? `${badgePulse} 0.4s ease-out` : 'none',
-                                },
-                            }}
-                        >
+                        ) : (
                             <Icon sx={{fontSize: 18}}>more_vert</Icon>
-                        </Badge>
-                    ) : (
-                        <Icon sx={{fontSize: 18}}>more_vert</Icon>
-                    )}
-                </IconButton>
+                        )}
+                    </IconButton>
+                </Tooltip>
 
                 <Menu
                     anchorEl={menuAnchor}
@@ -338,21 +434,108 @@ export const TopBar = React.memo(
                             <ListItemText>Notifications</ListItemText>
                         </MenuItem>
                     )}
+                    {compact && onOpenWebsite && (
+                        <MenuItem
+                            disabled={!websiteUrl}
+                            onClick={() => {
+                                handleMenuClose();
+                                onOpenWebsite();
+                            }}
+                        >
+                            <ListItemIcon>
+                                <Icon sx={{fontSize: 20}}>open_in_new</Icon>
+                            </ListItemIcon>
+                            <ListItemText>Open website</ListItemText>
+                        </MenuItem>
+                    )}
                     {compact && <Divider />}
+                    {onCopyAsImage && (
+                        <MenuItem
+                            disabled={isCopyingAsImage}
+                            onClick={() => {
+                                handleMenuClose();
+                                onCopyAsImage();
+                            }}
+                        >
+                            <ListItemIcon>
+                                <Icon sx={{fontSize: 20}}>{isCopyingAsImage ? 'hourglass_empty' : 'photo_camera'}</Icon>
+                            </ListItemIcon>
+                            <ListItemText>{isCopyingAsImage ? 'Capturing...' : 'Copy as image'}</ListItemText>
+                        </MenuItem>
+                    )}
+                    {onDownloadAsImage && (
+                        <MenuItem
+                            disabled={isCopyingAsImage}
+                            onClick={() => {
+                                handleMenuClose();
+                                onDownloadAsImage();
+                            }}
+                        >
+                            <ListItemIcon>
+                                <Icon sx={{fontSize: 20}}>download</Icon>
+                            </ListItemIcon>
+                            <ListItemText>Download as image</ListItemText>
+                        </MenuItem>
+                    )}
+                    {(onCopyAsImage || onDownloadAsImage) && <Divider />}
                     <MenuItem onClick={handleSettingsOpen}>
                         <ListItemIcon>
                             <Icon sx={{fontSize: 20}}>settings</Icon>
                         </ListItemIcon>
                         <ListItemText>Settings</ListItemText>
                     </MenuItem>
+                    <Divider />
+                    <MenuItem
+                        component="a"
+                        href="https://app-dev-panel.github.io/app-dev-panel/sponsor"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={handleMenuClose}
+                    >
+                        <ListItemIcon>
+                            <Icon sx={{fontSize: 20}}>favorite</Icon>
+                        </ListItemIcon>
+                        <ListItemText>Donate</ListItemText>
+                    </MenuItem>
+                    <MenuItem
+                        component="a"
+                        href="https://app-dev-panel.github.io/app-dev-panel/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={handleMenuClose}
+                    >
+                        <ListItemIcon>
+                            <Icon sx={{fontSize: 20}}>public</Icon>
+                        </ListItemIcon>
+                        <ListItemText>Website</ListItemText>
+                    </MenuItem>
+                    <MenuItem
+                        component="a"
+                        href="https://github.com/app-dev-panel/app-dev-panel"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={handleMenuClose}
+                    >
+                        <ListItemIcon>
+                            <GitHubIcon sx={{fontSize: 20}} />
+                        </ListItemIcon>
+                        <ListItemText>GitHub</ListItemText>
+                    </MenuItem>
                 </Menu>
 
                 <Dialog open={settingsOpen} onClose={handleSettingsClose} maxWidth="xs" fullWidth>
                     <DialogTitle sx={{display: 'flex', alignItems: 'center', justifyContent: 'space-between', pb: 1}}>
                         Settings
-                        <IconButton size="small" onClick={handleSettingsClose} edge="end">
-                            <Icon sx={{fontSize: 20}}>close</Icon>
-                        </IconButton>
+                        <Tooltip title="Close settings" arrow enterDelay={400}>
+                            <IconButton
+                                size="small"
+                                onClick={handleSettingsClose}
+                                edge="end"
+                                aria-label="Close settings"
+                            >
+                                <Icon sx={{fontSize: 20}}>close</Icon>
+                            </IconButton>
+                        </Tooltip>
                     </DialogTitle>
                     <DialogContent>
                         <Box sx={{display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', py: 1}}>
@@ -389,21 +572,28 @@ export const TopBar = React.memo(
                                 size="small"
                                 options={Object.keys(editorPresetLabels) as EditorPreset[]}
                                 getOptionLabel={(option) => editorPresetLabels[option] ?? option}
-                                value={editorPreset ?? 'none'}
-                                onChange={(_, value) => onEditorPresetChange?.(value ?? 'none')}
+                                value={resolvedEditorConfig.editor}
+                                onChange={(_, value) => updateEditorConfig({editor: value ?? 'none'})}
                                 disableClearable
                                 renderInput={(params) => <TextField {...params} label="Editor" />}
                                 sx={{mb: 1.5}}
                             />
-                            {editorPreset === 'custom' && (
+                            {resolvedEditorConfig.editor === 'custom' && (
                                 <TextField
                                     fullWidth
                                     size="small"
                                     label="Custom URL template"
                                     placeholder="myeditor://open?file={file}&line={line}"
-                                    value={editorCustomTemplate ?? ''}
-                                    onChange={(e) => onEditorCustomTemplateChange?.(e.target.value)}
+                                    value={resolvedEditorConfig.customUrlTemplate}
+                                    onChange={(e) => updateEditorConfig({customUrlTemplate: e.target.value})}
                                     helperText="Use {file} and {line} placeholders"
+                                    sx={{mb: 1.5}}
+                                />
+                            )}
+                            {resolvedEditorConfig.editor !== 'none' && (
+                                <EditorPathMappingEditor
+                                    mapping={resolvedEditorConfig.pathMapping}
+                                    onChange={(pathMapping) => updateEditorConfig({pathMapping})}
                                 />
                             )}
                         </Box>

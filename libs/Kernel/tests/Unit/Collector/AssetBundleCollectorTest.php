@@ -120,6 +120,24 @@ final class AssetBundleCollectorTest extends AbstractCollectorTestCase
         $this->assertSame(0, $collector->getCollected()['bundleCount']);
     }
 
+    public function testCollectBundleIgnoredWhenInactive(): void
+    {
+        $collector = new AssetBundleCollector(new TimelineCollector());
+        // Not started
+        $collector->collectBundle('test', [
+            'class' => 'Test\\Asset',
+            'sourcePath' => null,
+            'basePath' => null,
+            'baseUrl' => null,
+            'css' => [],
+            'js' => [],
+            'depends' => [],
+            'options' => [],
+        ]);
+
+        $this->assertSame([], $collector->getCollected());
+    }
+
     public function testMultipleBundles(): void
     {
         $collector = new AssetBundleCollector(new TimelineCollector());

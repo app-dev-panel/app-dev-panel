@@ -91,12 +91,6 @@ message = 'Class `App\actions\testFixtures\ExceptionChainedAction` cannot extend
 count = 1
 
 [[issues]]
-file = "src/actions/testFixtures/FileStreamAction.php"
-code = "non-existent-class-like"
-message = 'Class `App\actions\testFixtures\FileStreamAction` cannot extend unknown type `Action`'
-count = 1
-
-[[issues]]
 file = "src/actions/testFixtures/FilesystemAction.php"
 code = "non-existent-class-like"
 message = 'Class `App\actions\testFixtures\FilesystemAction` cannot extend unknown type `Action`'
@@ -230,8 +224,20 @@ count = 1
 
 [[issues]]
 file = "src/controllers/ApiController.php"
+code = "non-existent-attribute-class"
+message = 'Attribute class `OpenApi\Attributes\Info` not found or could not be autoloaded.'
+count = 1
+
+[[issues]]
+file = "src/controllers/ApiController.php"
 code = "non-existent-class-like"
 message = 'Class `App\controllers\ApiController` cannot extend unknown type `Controller`'
+count = 1
+
+[[issues]]
+file = "src/controllers/OpenApiController.php"
+code = "non-existent-class-like"
+message = 'Class `App\controllers\OpenApiController` cannot extend unknown type `Controller`'
 count = 1
 
 [[issues]]
@@ -337,6 +343,42 @@ message = 'Cannot find class, interface, enum, or type alias `yii\web\View`.'
 count = 1
 
 [[issues]]
+file = "src/views/site/log-demo.php"
+code = "invalid-property-access"
+message = 'Attempting to access a property on a non-object type (`unknown-ref(yii\web\View)`).'
+count = 1
+
+[[issues]]
+file = "src/views/site/log-demo.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `strtoupper`: expected `string`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "src/views/site/log-demo.php"
+code = "mixed-argument"
+message = "The first value for `echo` is too general."
+count = 1
+
+[[issues]]
+file = "src/views/site/log-demo.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `yii\web\View`.'
+count = 1
+
+[[issues]]
+file = "src/views/site/log-demo.php"
+code = "non-existent-method"
+message = 'Method `encode` does not exist on type `yii\helpers\Html`.'
+count = 2
+
+[[issues]]
+file = "src/views/site/log-demo.php"
+code = "null-property-access"
+message = "Attempting to access a property on an expression that is always `null`."
+count = 3
+
+[[issues]]
 file = "src/views/site/users.php"
 code = "invalid-property-access"
 message = 'Attempting to access a property on a non-object type (`unknown-ref(yii\web\View)`).'
@@ -347,6 +389,24 @@ file = "src/views/site/users.php"
 code = "non-existent-class-like"
 message = 'Cannot find class, interface, enum, or type alias `yii\web\View`.'
 count = 1
+
+[[issues]]
+file = "src/views/site/var-dumper.php"
+code = "invalid-property-access"
+message = 'Attempting to access a property on a non-object type (`unknown-ref(yii\web\View)`).'
+count = 1
+
+[[issues]]
+file = "src/views/site/var-dumper.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `yii\web\View`.'
+count = 1
+
+[[issues]]
+file = "src/views/site/var-dumper.php"
+code = "null-property-access"
+message = "Attempting to access a property on an expression that is always `null`."
+count = 3
 
 [[issues]]
 file = "src/views/test-fixtures/template-parent.php"

@@ -52,6 +52,7 @@ export const primitives = {
 export const semanticTokens = {
     palette: {
         primary: {main: primitives.blue500, light: primitives.blue50, dark: primitives.blue700},
+        info: {main: primitives.blue500, light: primitives.blue50, dark: primitives.blue700},
         success: {main: primitives.green600, light: '#DCFCE7'},
         warning: {main: primitives.amber600, light: '#FEF3C7'},
         error: {main: primitives.red600, light: primitives.red50},
@@ -123,6 +124,7 @@ export const semanticTokens = {
 export const darkSemanticTokens = {
     palette: {
         primary: {main: '#60A5FA', light: '#1E3A5F', dark: '#3B82F6'},
+        info: {main: '#60A5FA', light: '#1E3A5F', dark: '#3B82F6'},
         success: {main: '#4ADE80', light: '#14532D'},
         warning: {main: '#FBBF24', light: '#713F12'},
         error: {main: '#F87171', light: '#7F1D1D'},

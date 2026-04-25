@@ -1,3 +1,4 @@
+import {ClassName} from '@app-dev-panel/panel/Application/Component/ClassName';
 import {JsonRenderer} from '@app-dev-panel/panel/Module/Debug/Component/JsonRenderer';
 import {VarDumpValue} from '@app-dev-panel/panel/Module/Debug/Component/VarDumpValue';
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
@@ -7,9 +8,11 @@ import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
 import {formatMicrotime} from '@app-dev-panel/sdk/Helper/formatDate';
 import {searchVariants} from '@app-dev-panel/sdk/Helper/layoutTranslit';
 import {usePathMapper} from '@app-dev-panel/sdk/Helper/usePathMapper';
+import {isLogLevel} from '@app-dev-panel/sdk/Types/LogLevel';
 import {Box, Chip, Collapse, Icon, IconButton, type Theme, Typography} from '@mui/material';
 import {styled, useTheme} from '@mui/material/styles';
 import {useDeferredValue, useMemo, useState} from 'react';
+import {useSearchParams} from 'react-router';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -194,11 +197,19 @@ function buildUnifiedEntries(
 export const UnifiedLogPanel = ({logs, deprecations, dumps}: UnifiedLogPanelProps) => {
     const theme = useTheme();
     const pathMapper = usePathMapper();
+    const [searchParams] = useSearchParams();
     const [filter, setFilter] = useState('');
     const deferredFilter = useDeferredValue(filter);
     const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
-    const [activeKinds, setActiveKinds] = useState<Set<EntryKind>>(new Set());
-    const [activeLevels, setActiveLevels] = useState<Set<Level>>(new Set());
+
+    const [activeLevels, setActiveLevels] = useState<Set<Level>>(() => {
+        const raw = searchParams.get('level');
+        if (!raw) return new Set();
+        return new Set(raw.split(',').filter(isLogLevel) as Level[]);
+    });
+    const [activeKinds, setActiveKinds] = useState<Set<EntryKind>>(() =>
+        searchParams.get('level') ? new Set<EntryKind>(['log']) : new Set(),
+    );
     const [activeCategories, setActiveCategories] = useState<Set<DeprecationCategory>>(new Set());
 
     // Build unified entry list
@@ -258,17 +269,32 @@ export const UnifiedLogPanel = ({logs, deprecations, dumps}: UnifiedLogPanelProp
     const hasLogs = kindCounts.log > 0;
     const hasDeprecations = kindCounts.deprecation > 0;
 
+    // A kind is considered "on" if it's explicitly selected OR any of its sub-filters is active.
+    const isKindActive = (kind: EntryKind) =>
+        activeKinds.has(kind) ||
+        (kind === 'log' && activeLevels.size > 0) ||
+        (kind === 'deprecation' && activeCategories.size > 0);
+
     // Toggle helpers
     const toggleKind = (kind: EntryKind) => {
-        setActiveKinds((prev) => {
-            const next = new Set(prev);
-            if (next.has(kind)) {
+        if (isKindActive(kind)) {
+            // Turn the kind off entirely — remove explicit selection and clear its sub-filters
+            // so nothing leaks into subsequent filter combinations.
+            setActiveKinds((prev) => {
+                if (!prev.has(kind)) return prev;
+                const next = new Set(prev);
                 next.delete(kind);
-            } else {
+                return next;
+            });
+            if (kind === 'log') setActiveLevels(new Set());
+            if (kind === 'deprecation') setActiveCategories(new Set());
+        } else {
+            setActiveKinds((prev) => {
+                const next = new Set(prev);
                 next.add(kind);
-            }
-            return next;
-        });
+                return next;
+            });
+        }
         setExpandedIndex(null);
     };
 
@@ -308,17 +334,28 @@ export const UnifiedLogPanel = ({logs, deprecations, dumps}: UnifiedLogPanelProp
     const hasAnyActiveFilter = activeKinds.size > 0 || activeLevels.size > 0 || activeCategories.size > 0;
 
     // Determine which sub-filters to show
-    const showLogSubFilters = hasLogs && (activeKinds.size === 0 || activeKinds.has('log')) && presentLevels.length > 1;
+    // Sub-filters are visible when their kind is active (explicit or implicit) or when no kind is filtered at all.
+    const noExplicitKindFilter = activeKinds.size === 0;
+    const showLogSubFilters = hasLogs && (noExplicitKindFilter || activeKinds.has('log')) && presentLevels.length > 1;
     const showDeprecationSubFilters =
-        hasDeprecations && (activeKinds.size === 0 || activeKinds.has('deprecation')) && presentCategories.length > 0;
+        hasDeprecations && (noExplicitKindFilter || activeKinds.has('deprecation')) && presentCategories.length > 0;
+
+    // Effective kinds — a sub-filter always implies its parent kind (clicking ERROR
+    // alone means "error logs only", not "error logs + everything else").
+    const effectiveKinds = useMemo(() => {
+        const kinds = new Set(activeKinds);
+        if (activeLevels.size > 0) kinds.add('log');
+        if (activeCategories.size > 0) kinds.add('deprecation');
+        return kinds;
+    }, [activeKinds, activeLevels, activeCategories]);
 
     // Filter entries
     const filtered = useMemo(() => {
         let result = allEntries;
 
-        // Filter by kind
-        if (activeKinds.size > 0) {
-            result = result.filter((e) => activeKinds.has(e.kind));
+        // Filter by kind (explicit + implied by active sub-filters)
+        if (effectiveKinds.size > 0) {
+            result = result.filter((e) => effectiveKinds.has(e.kind));
         }
 
         // Filter by log level
@@ -358,7 +395,7 @@ export const UnifiedLogPanel = ({logs, deprecations, dumps}: UnifiedLogPanelProp
         }
 
         return result;
-    }, [allEntries, activeKinds, activeLevels, activeCategories, deferredFilter]);
+    }, [allEntries, effectiveKinds, activeLevels, activeCategories, deferredFilter]);
 
     // ---------------------------------------------------------------------------
     // Render
@@ -380,7 +417,7 @@ export const UnifiedLogPanel = ({logs, deprecations, dumps}: UnifiedLogPanelProp
                 <Box sx={{display: 'flex', flexWrap: 'wrap', gap: 0.75, mb: 1.5}}>
                     {presentKinds.map((kind) => {
                         const color = kindColor(kind, theme);
-                        const isActive = activeKinds.has(kind);
+                        const isActive = isKindActive(kind);
                         const label = kind === 'log' ? 'Logs' : kind === 'deprecation' ? 'Deprecations' : 'Dumps';
                         return (
                             <Chip
@@ -423,78 +460,68 @@ export const UnifiedLogPanel = ({logs, deprecations, dumps}: UnifiedLogPanelProp
                 </Box>
             )}
 
-            {/* Log level sub-filters */}
-            {showLogSubFilters && (
+            {/* Log level + deprecation category sub-filters (combined in one row) */}
+            {(showLogSubFilters || showDeprecationSubFilters) && (
                 <Box sx={{display: 'flex', flexWrap: 'wrap', gap: 0.5, mb: 1.5, pl: 1}}>
-                    {presentLevels.map((level) => {
-                        const color = levelColor(level, theme);
-                        const isActive = activeLevels.has(level);
-                        return (
-                            <Chip
-                                key={level}
-                                label={`${level.toUpperCase()} (${levelCounts.get(level)})`}
-                                size="small"
-                                onClick={() => toggleLevel(level)}
-                                variant={isActive ? 'filled' : 'outlined'}
-                                sx={{
-                                    fontSize: '10px',
-                                    height: 22,
-                                    borderRadius: 0.75,
-                                    fontWeight: 600,
-                                    cursor: 'pointer',
-                                    borderColor: color,
-                                    ...(isActive
-                                        ? {backgroundColor: color, color: theme.palette.common.white}
-                                        : {color}),
-                                }}
-                            />
-                        );
-                    })}
-                    {activeLevels.size > 0 && (
+                    {showLogSubFilters &&
+                        presentLevels.map((level) => {
+                            const color = levelColor(level, theme);
+                            const isActive = activeLevels.has(level);
+                            return (
+                                <Chip
+                                    key={`level-${level}`}
+                                    label={`${level.toUpperCase()} (${levelCounts.get(level)})`}
+                                    size="small"
+                                    onClick={() => toggleLevel(level)}
+                                    variant={isActive ? 'filled' : 'outlined'}
+                                    sx={{
+                                        fontSize: '10px',
+                                        height: 22,
+                                        borderRadius: 0.75,
+                                        fontWeight: 600,
+                                        cursor: 'pointer',
+                                        borderColor: color,
+                                        ...(isActive
+                                            ? {backgroundColor: color, color: theme.palette.common.white}
+                                            : {color}),
+                                    }}
+                                />
+                            );
+                        })}
+                    {showDeprecationSubFilters &&
+                        presentCategories.map((category) => {
+                            const color = categoryColor(category, theme);
+                            const isActive = activeCategories.has(category);
+                            const label = category === 'php' ? 'DEPR PHP' : 'DEPR USER';
+                            return (
+                                <Chip
+                                    key={`category-${category}`}
+                                    label={`${label} (${categoryCounts.get(category)})`}
+                                    size="small"
+                                    onClick={() => toggleCategory(category)}
+                                    variant={isActive ? 'filled' : 'outlined'}
+                                    sx={{
+                                        fontSize: '10px',
+                                        height: 22,
+                                        borderRadius: 0.75,
+                                        fontWeight: 600,
+                                        cursor: 'pointer',
+                                        borderColor: color,
+                                        ...(isActive
+                                            ? {backgroundColor: color, color: theme.palette.common.white}
+                                            : {color}),
+                                    }}
+                                />
+                            );
+                        })}
+                    {(activeLevels.size > 0 || activeCategories.size > 0) && (
                         <Chip
                             label="Clear"
                             size="small"
-                            onClick={() => setActiveLevels(new Set())}
-                            variant="outlined"
-                            sx={{fontSize: '10px', height: 22, borderRadius: 0.75}}
-                        />
-                    )}
-                </Box>
-            )}
-
-            {/* Deprecation category sub-filters */}
-            {showDeprecationSubFilters && (
-                <Box sx={{display: 'flex', flexWrap: 'wrap', gap: 0.5, mb: 1.5, pl: 1}}>
-                    {presentCategories.map((category) => {
-                        const color = categoryColor(category, theme);
-                        const isActive = activeCategories.has(category);
-                        const label = category === 'php' ? 'PHP' : 'USER';
-                        return (
-                            <Chip
-                                key={category}
-                                label={`${label} (${categoryCounts.get(category)})`}
-                                size="small"
-                                onClick={() => toggleCategory(category)}
-                                variant={isActive ? 'filled' : 'outlined'}
-                                sx={{
-                                    fontSize: '10px',
-                                    height: 22,
-                                    borderRadius: 0.75,
-                                    fontWeight: 600,
-                                    cursor: 'pointer',
-                                    borderColor: color,
-                                    ...(isActive
-                                        ? {backgroundColor: color, color: theme.palette.common.white}
-                                        : {color}),
-                                }}
-                            />
-                        );
-                    })}
-                    {activeCategories.size > 0 && (
-                        <Chip
-                            label="Clear"
-                            size="small"
-                            onClick={() => setActiveCategories(new Set())}
+                            onClick={() => {
+                                setActiveLevels(new Set());
+                                setActiveCategories(new Set());
+                            }}
                             variant="outlined"
                             sx={{fontSize: '10px', height: 22, borderRadius: 0.75}}
                         />
@@ -632,9 +659,13 @@ export const UnifiedLogPanel = ({logs, deprecations, dumps}: UnifiedLogPanelProp
                                                 {dep.trace.map((frame, i) => (
                                                     <TraceRow key={i}>
                                                         {frame.file && `${frame.file}:${frame.line} `}
-                                                        {frame.class
-                                                            ? `${frame.class}::${frame.function}()`
-                                                            : `${frame.function}()`}
+                                                        {frame.class ? (
+                                                            <ClassName value={frame.class} methodName={frame.function}>
+                                                                {`${frame.class}::${frame.function}()`}
+                                                            </ClassName>
+                                                        ) : (
+                                                            `${frame.function}()`
+                                                        )}
                                                     </TraceRow>
                                                 ))}
                                             </Box>

@@ -6,6 +6,8 @@ namespace AppDevPanel\Adapter\Laravel\Middleware;
 
 use AppDevPanel\Api\Toolbar\ToolbarInjector;
 use AppDevPanel\Kernel\Debugger;
+use AppDevPanel\Kernel\DebugServer\Broadcaster;
+use AppDevPanel\Kernel\DebugServer\Connection;
 use AppDevPanel\Kernel\StartupContext;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
@@ -91,8 +93,6 @@ final class DebugMiddleware
 
     private function collectAfterResponse(Request $request, SymfonyResponse $response): void
     {
-        $this->collectors->webAppInfo?->markRequestFinished();
-
         if ($this->collectors->request !== null) {
             $psrResponse = $this->psr7Converter->convertResponse($response);
             $this->collectors->request->collectResponse($psrResponse);
@@ -101,11 +101,17 @@ final class DebugMiddleware
         $this->collectors->routerDataExtractor?->extract($request);
 
         $this->collectViteAssets();
+
+        $this->collectors->webAppInfo?->markRequestFinished();
     }
 
     private function injectToolbar(Request $request, SymfonyResponse $response): void
     {
         if ($this->toolbarInjector === null || !$this->toolbarInjector->isEnabled()) {
+            return;
+        }
+
+        if ($this->toolbarInjector->isPanelRequest($request->getPathInfo())) {
             return;
         }
 
@@ -131,7 +137,8 @@ final class DebugMiddleware
         }
 
         $collector = $this->collectors->varDumper;
-        VarDumper::setHandler(static function (mixed $var, ?string $label = null) use ($collector): void {
+        $broadcaster = new Broadcaster();
+        VarDumper::setHandler(static function (mixed $var, ?string $label = null) use ($collector, $broadcaster): void {
             $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 5);
             $line = '';
             foreach ($trace as $frame) {
@@ -143,6 +150,15 @@ final class DebugMiddleware
                 break;
             }
             $collector->collect($var, $label ?? $line);
+
+            // Broadcast for Live Feed
+            try {
+                $broadcaster->broadcast(
+                    Connection::MESSAGE_TYPE_VAR_DUMPER,
+                    \Yiisoft\VarDumper\VarDumper::create($var)->asJson(false),
+                );
+            } catch (\Throwable) {
+            }
         });
 
         self::$varDumperHandlerRegistered = true;

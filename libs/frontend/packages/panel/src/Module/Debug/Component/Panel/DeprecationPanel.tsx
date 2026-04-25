@@ -1,3 +1,4 @@
+import {ClassName} from '@app-dev-panel/panel/Application/Component/ClassName';
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
 import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
@@ -233,9 +234,13 @@ export const DeprecationPanel = ({data}: DeprecationPanelProps) => {
                                         {entry.trace.map((frame, i) => (
                                             <TraceRow key={i}>
                                                 {frame.file && `${frame.file}:${frame.line} `}
-                                                {frame.class
-                                                    ? `${frame.class}::${frame.function}()`
-                                                    : `${frame.function}()`}
+                                                {frame.class ? (
+                                                    <ClassName value={frame.class} methodName={frame.function}>
+                                                        {`${frame.class}::${frame.function}()`}
+                                                    </ClassName>
+                                                ) : (
+                                                    `${frame.function}()`
+                                                )}
                                             </TraceRow>
                                         ))}
                                     </Box>

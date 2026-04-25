@@ -28,9 +28,10 @@ jobs:
         with:
           ref: ${{ github.sha }}
           repo-token: ${{ secrets.GITHUB_TOKEN }}
-          check-regexp: '^(PHP Tests|Frontend Tests|Mago:|Frontend: Quality)'
+          check-regexp: '^(PHP Tests|Frontend|Mago:)'
           wait-interval: 30
           allowed-conclusions: success,skipped
+        timeout-minutes: 60
 
   build:
     name: Build VitePress + Panel

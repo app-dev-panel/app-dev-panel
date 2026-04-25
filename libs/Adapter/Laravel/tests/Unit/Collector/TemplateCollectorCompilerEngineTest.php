@@ -90,4 +90,70 @@ final class TemplateCollectorCompilerEngineTest extends TestCase
         @unlink($file1);
         @unlink($file2);
     }
+
+    public function testGetWithCollectorHandlesExceptionAndEndRender(): void
+    {
+        $timeline = new TimelineCollector();
+        $timeline->startup();
+        $templateCollector = new TemplateCollector($timeline);
+        $templateCollector->startup();
+
+        $tmpFile = tempnam(sys_get_temp_dir(), 'blade_');
+        file_put_contents($tmpFile, '<?php throw new \RuntimeException("Template error"); ?>');
+
+        $compiler = $this->createMock(CompilerInterface::class);
+        $compiler->method('isExpired')->willReturn(false);
+        $compiler->method('getCompiledPath')->willReturn($tmpFile);
+
+        $engine = new TemplateCollectorCompilerEngine($compiler, new Filesystem());
+        $engine->setCollector($templateCollector);
+
+        try {
+            $engine->get($tmpFile);
+            $this->fail('Expected exception to be thrown');
+        } catch (\Throwable $e) {
+            $this->assertStringContainsString('Template error', $e->getMessage());
+        }
+
+        // endRender should have been called even though an exception occurred
+        $collected = $templateCollector->getCollected();
+        $this->assertCount(1, $collected['renders']);
+        $this->assertSame($tmpFile, $collected['renders'][0]['template']);
+
+        @unlink($tmpFile);
+    }
+
+    public function testSetCollectorCanBeCalledAfterConstruction(): void
+    {
+        $timeline = new TimelineCollector();
+        $timeline->startup();
+        $templateCollector = new TemplateCollector($timeline);
+        $templateCollector->startup();
+
+        $tmpFile = tempnam(sys_get_temp_dir(), 'blade_');
+        file_put_contents($tmpFile, '<?php echo "Late collector"; ?>');
+
+        $compiler = $this->createMock(CompilerInterface::class);
+        $compiler->method('isExpired')->willReturn(false);
+        $compiler->method('getCompiledPath')->willReturn($tmpFile);
+
+        $engine = new TemplateCollectorCompilerEngine($compiler, new Filesystem());
+
+        // First render without collector
+        $result1 = $engine->get($tmpFile);
+        $this->assertSame('Late collector', $result1);
+
+        // Set collector after first render
+        $engine->setCollector($templateCollector);
+
+        // Second render with collector
+        $result2 = $engine->get($tmpFile);
+        $this->assertSame('Late collector', $result2);
+
+        $collected = $templateCollector->getCollected();
+        // Only the second render should be collected
+        $this->assertCount(1, $collected['renders']);
+
+        @unlink($tmpFile);
+    }
 }

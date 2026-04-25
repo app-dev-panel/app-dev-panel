@@ -12,6 +12,21 @@ use Yiisoft\Yii\View\Renderer\CsrfViewInjection;
 
 return [
     'app-dev-panel/yii3' => [
+        'user' => [
+            'guestId' => null,
+            'authTimeout' => 3600,
+            'absoluteAuthTimeout' => 86_400,
+        ],
+        'rbac' => [
+            'storage' => 'php',
+            'itemsFile' => '@runtime/rbac/items.php',
+            'assignmentsFile' => '@runtime/rbac/assignments.php',
+        ],
+        'auth' => [
+            'methods' => ['bearer', 'basic', 'query_param'],
+            'bearerRealm' => 'playground',
+            'queryParam' => 'access-token',
+        ],
         'collectors' => [
             \AppDevPanel\Kernel\Collector\EnvironmentCollector::class,
             \AppDevPanel\Kernel\Collector\LogCollector::class,
@@ -26,10 +41,20 @@ return [
             \AppDevPanel\Kernel\Collector\DatabaseCollector::class,
             \AppDevPanel\Kernel\Collector\MailerCollector::class,
             \AppDevPanel\Kernel\Collector\OpenTelemetryCollector::class,
+            \AppDevPanel\Kernel\Collector\ValidatorCollector::class,
+            \AppDevPanel\Kernel\Collector\TranslatorCollector::class,
+            \AppDevPanel\Kernel\Collector\TemplateCollector::class,
         ],
     ],
 
     'application' => require __DIR__ . '/application.php',
+
+    'locale' => [
+        'locales' => [
+            'en' => 'en-US',
+            'de' => 'de-DE',
+        ],
+    ],
 
     'yiisoft/aliases' => [
         'aliases' => require __DIR__ . '/aliases.php',

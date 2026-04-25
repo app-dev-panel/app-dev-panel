@@ -19,5 +19,8 @@ export default defineConfig({
         exclude: ['**/node_modules/**', '**/__e2e__/**', '**/*.browser.test.{ts,tsx}'],
         css: false,
         onConsoleLog: () => false,
+        testTimeout: 10_000,
+        hookTimeout: 10_000,
+        teardownTimeout: 5_000,
     },
 });

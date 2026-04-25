@@ -151,6 +151,16 @@ final class CommandCollectorTest extends AbstractCollectorTestCase
         $this->assertNull($summary['command']['class']);
     }
 
+    public function testGetSummaryWithNoCommandEvents(): void
+    {
+        $collector = $this->getCollector();
+        $collector->startup();
+
+        // No events collected, so getSummary should return empty
+        $summary = $collector->getSummary();
+        $this->assertSame([], $summary);
+    }
+
     public function testCollectCommandDataInactiveDoesNothing(): void
     {
         $collector = $this->getCollector();

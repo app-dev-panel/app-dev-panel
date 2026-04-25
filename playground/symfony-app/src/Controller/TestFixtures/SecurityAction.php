@@ -4,45 +4,38 @@ declare(strict_types=1);
 
 namespace App\Controller\TestFixtures;
 
-use AppDevPanel\Kernel\Collector\AuthorizationCollector;
+use App\Security\InMemoryUser;
+use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
 #[Route('/test/fixtures/security', name: 'test_security', methods: ['GET'])]
 final readonly class SecurityAction
 {
     public function __construct(
-        private AuthorizationCollector $authorizationCollector,
+        private Security $security,
+        private AuthorizationCheckerInterface $authorizationChecker,
     ) {}
 
     public function __invoke(): JsonResponse
     {
-        $this->authorizationCollector->collectUser('admin@example.com', ['ROLE_ADMIN', 'ROLE_USER'], true);
-        $this->authorizationCollector->collectFirewall('main');
-        $this->authorizationCollector->collectToken('jwt', ['sub' => '123', 'iss' => 'app'], '2026-12-31T23:59:59Z');
-        $this->authorizationCollector->collectGuard('web', 'users', ['driver' => 'session']);
-        $this->authorizationCollector->collectRoleHierarchy(['ROLE_ADMIN' => ['ROLE_USER', 'ROLE_EDITOR']]);
-        $this->authorizationCollector->collectEffectiveRoles(['ROLE_ADMIN', 'ROLE_USER', 'ROLE_EDITOR']);
-        $this->authorizationCollector->collectAuthenticationEvent('login', 'form_login', 'success', [
-            'ip' => '127.0.0.1',
+        // Programmatically log in a user — triggers LoginSuccessEvent which the
+        // AuthorizationSubscriber captures (user identity, firewall, auth event).
+        $user = new InMemoryUser('admin@example.com', ['ROLE_USER']);
+        $this->security->login($user, firewallName: 'main');
+
+        // isGranted() calls trigger VoteEvent — captured by AuthorizationSubscriber
+        // as access decisions. ROLE_USER should be granted, ROLE_ADMIN should be denied.
+        $isUser = $this->authorizationChecker->isGranted('ROLE_USER');
+        $isAdmin = $this->authorizationChecker->isGranted('ROLE_ADMIN');
+
+        return new JsonResponse([
+            'fixture' => 'security:basic',
+            'status' => 'ok',
+            'isUser' => $isUser,
+            'isAdmin' => $isAdmin,
+            'user' => $user->getUserIdentifier(),
         ]);
-
-        $this->authorizationCollector->logAccessDecision(
-            'ROLE_ADMIN',
-            'App\\Entity\\User',
-            'ACCESS_GRANTED',
-            [['voter' => 'RoleVoter', 'result' => 'ACCESS_GRANTED']],
-            0.002,
-            ['route' => '/admin'],
-        );
-        $this->authorizationCollector->logAccessDecision(
-            'EDIT',
-            'App\\Entity\\Post',
-            'ACCESS_DENIED',
-            [['voter' => 'PostVoter', 'result' => 'ACCESS_DENIED']],
-            0.001,
-        );
-
-        return new JsonResponse(['fixture' => 'security:basic', 'status' => 'ok']);
     }
 }

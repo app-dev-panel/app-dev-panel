@@ -1,12 +1,14 @@
+import {ClassName} from '@app-dev-panel/panel/Application/Component/ClassName';
 import {JsonRenderer} from '@app-dev-panel/panel/Module/Debug/Component/JsonRenderer';
 import {useDebugEntry} from '@app-dev-panel/sdk/API/Debug/Context';
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
 import {formatMicrotime} from '@app-dev-panel/sdk/Helper/formatDate';
 import {parseObjectId} from '@app-dev-panel/sdk/Helper/objectString';
-import {Box, Chip, Collapse, Icon, IconButton, Link, Tooltip, Typography} from '@mui/material';
+import {Box, Chip, Collapse, Icon, IconButton, Tooltip, Typography} from '@mui/material';
 import {styled, useTheme} from '@mui/material/styles';
 import {useState} from 'react';
+import {Link as RouterLink} from 'react-router';
 
 type MiddlewareType = {memory: number; name: string; time: number};
 type BeforeMiddlewareType = {request: string} & MiddlewareType;
@@ -121,9 +123,11 @@ export const MiddlewarePanel = (props: MiddlewarePanelProps) => {
                                 }}
                             />
                             <NameCell>
-                                <Tooltip title={row.name}>
-                                    <span>{shortName}</span>
-                                </Tooltip>
+                                <ClassName value={row.name}>
+                                    <Tooltip title={row.name}>
+                                        <span>{shortName}</span>
+                                    </Tooltip>
+                                </ClassName>
                             </NameCell>
                             {row.memory > 0 && (
                                 <Typography sx={{fontSize: '11px', color: 'text.disabled', flexShrink: 0}}>
@@ -136,24 +140,24 @@ export const MiddlewarePanel = (props: MiddlewarePanelProps) => {
                         </MiddlewareRow>
                         <Collapse in={expanded}>
                             <DetailBox>
-                                <Typography
-                                    variant="caption"
+                                <Box
                                     sx={(theme) => ({
                                         fontFamily: theme.adp.fontFamilyMono,
+                                        fontSize: theme.typography.caption.fontSize,
                                         color: 'text.secondary',
                                         display: 'block',
                                         mb: 1,
                                     })}
                                 >
-                                    {row.name}
-                                </Typography>
+                                    <ClassName value={row.name} />
+                                </Box>
 
                                 {objectId && debugEntry && (
                                     <Box sx={{mb: 1}}>
                                         <Chip
                                             clickable
-                                            component={Link}
-                                            href={`/debug/object?debugEntry=${debugEntry.id}&id=${objectId}`}
+                                            component={RouterLink}
+                                            to={`/debug/object?debugEntry=${debugEntry.id}&id=${objectId}`}
                                             label="Examine Object"
                                             size="small"
                                             icon={<Icon sx={{fontSize: '14px !important'}}>data_object</Icon>}

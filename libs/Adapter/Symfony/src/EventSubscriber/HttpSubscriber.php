@@ -6,6 +6,8 @@ namespace AppDevPanel\Adapter\Symfony\EventSubscriber;
 
 use AppDevPanel\Api\Toolbar\ToolbarInjector;
 use AppDevPanel\Kernel\Debugger;
+use AppDevPanel\Kernel\DebugServer\Broadcaster;
+use AppDevPanel\Kernel\DebugServer\Connection;
 use AppDevPanel\Kernel\StartupContext;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
@@ -83,8 +85,6 @@ final class HttpSubscriber implements EventSubscriberInterface
             return;
         }
 
-        $this->collectors->webAppInfo?->markRequestFinished();
-
         if ($this->collectors->request !== null) {
             $psrResponse = $this->psr7Converter->convertResponse($event->getResponse());
             $this->collectors->request->collectResponse($psrResponse);
@@ -96,6 +96,8 @@ final class HttpSubscriber implements EventSubscriberInterface
         $event->getResponse()->headers->set('X-Debug-Id', $this->debugger->getId());
 
         $this->injectToolbar($event);
+
+        $this->collectors->webAppInfo?->markRequestFinished();
     }
 
     public function onKernelException(ExceptionEvent $event): void
@@ -123,6 +125,12 @@ final class HttpSubscriber implements EventSubscriberInterface
             return;
         }
 
+        $request = $event->getRequest();
+
+        if ($this->toolbarInjector->isPanelRequest($request->getPathInfo())) {
+            return;
+        }
+
         $response = $event->getResponse();
         $contentType = $response->headers->get('Content-Type', '');
 
@@ -135,7 +143,6 @@ final class HttpSubscriber implements EventSubscriberInterface
             return;
         }
 
-        $request = $event->getRequest();
         $backendUrl = $request->getSchemeAndHttpHost();
 
         $injected = $this->toolbarInjector->inject($content, $backendUrl, $this->debugger->getId());
@@ -154,8 +161,10 @@ final class HttpSubscriber implements EventSubscriberInterface
         }
 
         $collector = $this->collectors->varDumper;
+        $broadcaster = new Broadcaster();
         $previousHandler = VarDumper::setHandler(static function (mixed $var, ?string $label = null) use (
             $collector,
+            $broadcaster,
         ): void {
             $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 5);
             $line = '';
@@ -169,6 +178,15 @@ final class HttpSubscriber implements EventSubscriberInterface
             }
 
             $collector->collect($var, $label ?? $line);
+
+            // Broadcast for Live Feed
+            try {
+                $broadcaster->broadcast(
+                    Connection::MESSAGE_TYPE_VAR_DUMPER,
+                    \Yiisoft\VarDumper\VarDumper::create($var)->asJson(false),
+                );
+            } catch (\Throwable) {
+            }
         });
 
         $this->varDumperHandlerRegistered = true;

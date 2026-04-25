@@ -10,19 +10,31 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use Psr\Log\LoggerInterface;
+use Psr\Log\NullLogger;
 
 final class TokenAuthMiddleware implements MiddlewareInterface
 {
+    private bool $insecureWarningLogged = false;
+
     public function __construct(
         private readonly ResponseFactoryInterface $responseFactory,
         private readonly StreamFactoryInterface $streamFactory,
         #[\SensitiveParameter]
         private readonly string $token,
+        private readonly LoggerInterface $logger = new NullLogger(),
     ) {}
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         if ($this->token === '') {
+            if (!$this->insecureWarningLogged) {
+                $this->logger->warning(
+                    'ADP TokenAuthMiddleware is installed with an empty token — all requests to the debug API bypass authentication. Configure a non-empty token in production.',
+                );
+                $this->insecureWarningLogged = true;
+            }
+
             return $handler->handle($request);
         }
 

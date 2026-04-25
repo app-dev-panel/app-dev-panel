@@ -11,13 +11,11 @@ use AppDevPanel\Adapter\Yii3\Api\AliasPathResolver;
 use AppDevPanel\Adapter\Yii3\Api\ToolbarMiddleware;
 use AppDevPanel\Adapter\Yii3\Api\YiiApiMiddleware;
 use AppDevPanel\Adapter\Yii3\Inspector\DbSchemaProvider;
+use AppDevPanel\Adapter\Yii3\Inspector\Yii3AuthorizationConfigProvider;
+use AppDevPanel\Adapter\Yii3\Inspector\Yii3ConfigProvider;
 use AppDevPanel\Api\ApiApplication;
 use AppDevPanel\Api\Debug\Controller\DebugController;
 use AppDevPanel\Api\Debug\Controller\SettingsController;
-use AppDevPanel\Api\Panel\PanelConfig;
-use AppDevPanel\Api\Panel\PanelController;
-use AppDevPanel\Api\Toolbar\ToolbarConfig;
-use AppDevPanel\Api\Toolbar\ToolbarInjector;
 use AppDevPanel\Api\Debug\Middleware\ResponseDataWrapper;
 use AppDevPanel\Api\Debug\Middleware\TokenAuthMiddleware;
 use AppDevPanel\Api\Debug\Repository\CollectorRepository;
@@ -26,6 +24,34 @@ use AppDevPanel\Api\Http\JsonResponseFactory;
 use AppDevPanel\Api\Http\JsonResponseFactoryInterface;
 use AppDevPanel\Api\Ingestion\Controller\IngestionController;
 use AppDevPanel\Api\Ingestion\Controller\OtlpController;
+use AppDevPanel\Api\Inspector\Authorization\AuthorizationConfigProviderInterface;
+use AppDevPanel\Api\Inspector\Controller\AuthorizationController;
+use AppDevPanel\Api\Inspector\Controller\CacheController;
+use AppDevPanel\Api\Inspector\Controller\CommandController;
+use AppDevPanel\Api\Inspector\Controller\ComposerController;
+use AppDevPanel\Api\Inspector\Controller\DatabaseController;
+use AppDevPanel\Api\Inspector\Controller\ElasticsearchController;
+use AppDevPanel\Api\Inspector\Controller\FileController;
+use AppDevPanel\Api\Inspector\Controller\GitController;
+use AppDevPanel\Api\Inspector\Controller\GitRepositoryProvider;
+use AppDevPanel\Api\Inspector\Controller\HttpMockController;
+use AppDevPanel\Api\Inspector\Controller\InspectController;
+use AppDevPanel\Api\Inspector\Controller\OpcacheController;
+use AppDevPanel\Api\Inspector\Controller\RequestController;
+use AppDevPanel\Api\Inspector\Controller\RoutingController;
+use AppDevPanel\Api\Inspector\Controller\ServiceController;
+use AppDevPanel\Api\Inspector\Controller\TranslationController;
+use AppDevPanel\Api\Inspector\Database\NullSchemaProvider;
+use AppDevPanel\Api\Inspector\Database\SchemaProviderInterface;
+use AppDevPanel\Api\Inspector\Elasticsearch\ElasticsearchProviderInterface;
+use AppDevPanel\Api\Inspector\Elasticsearch\NullElasticsearchProvider;
+use AppDevPanel\Api\Inspector\HttpMock\HttpMockProviderInterface;
+use AppDevPanel\Api\Inspector\HttpMock\NullHttpMockProvider;
+use AppDevPanel\Api\Inspector\Middleware\InspectorProxyMiddleware;
+use AppDevPanel\Api\Llm\Acp\AcpCommandVerifier;
+use AppDevPanel\Api\Llm\Acp\AcpCommandVerifierInterface;
+use AppDevPanel\Api\Llm\Acp\AcpDaemonManager;
+use AppDevPanel\Api\Llm\Acp\AcpDaemonManagerInterface;
 use AppDevPanel\Api\Llm\Controller\LlmController;
 use AppDevPanel\Api\Llm\FileLlmHistoryStorage;
 use AppDevPanel\Api\Llm\FileLlmSettings;
@@ -35,36 +61,22 @@ use AppDevPanel\Api\Llm\LlmSettingsInterface;
 use AppDevPanel\Api\Mcp\Controller\McpController;
 use AppDevPanel\Api\Mcp\Controller\McpSettingsController;
 use AppDevPanel\Api\Mcp\McpSettings;
-use AppDevPanel\McpServer\McpServer;
-use AppDevPanel\McpServer\McpToolRegistryFactory;
+use AppDevPanel\Api\Middleware\IpFilterMiddleware;
 use AppDevPanel\Api\NullPathMapper;
+use AppDevPanel\Api\Panel\PanelConfig;
+use AppDevPanel\Api\Panel\PanelController;
 use AppDevPanel\Api\PathMapper;
 use AppDevPanel\Api\PathMapperInterface;
-use AppDevPanel\Api\Inspector\Controller\CacheController;
-use AppDevPanel\Api\Inspector\Controller\CommandController;
-use AppDevPanel\Api\Inspector\Controller\ComposerController;
-use AppDevPanel\Api\Inspector\Controller\DatabaseController;
-use AppDevPanel\Api\Inspector\Controller\FileController;
-use AppDevPanel\Api\Inspector\Controller\GitController;
-use AppDevPanel\Api\Inspector\Controller\GitRepositoryProvider;
-use AppDevPanel\Api\Inspector\Controller\InspectController;
-use AppDevPanel\Api\Inspector\Controller\OpcacheController;
-use AppDevPanel\Api\Inspector\Controller\RequestController;
-use AppDevPanel\Api\Inspector\Controller\RoutingController;
-use AppDevPanel\Api\Inspector\Controller\ServiceController;
-use AppDevPanel\Api\Inspector\Controller\TranslationController;
-use AppDevPanel\Api\Inspector\Authorization\AuthorizationConfigProviderInterface;
-use AppDevPanel\Api\Inspector\Authorization\NullAuthorizationConfigProvider;
-use AppDevPanel\Api\Inspector\Controller\AuthorizationController;
-use AppDevPanel\Api\Inspector\Database\NullSchemaProvider;
-use AppDevPanel\Api\Inspector\Database\SchemaProviderInterface;
-use AppDevPanel\Api\Inspector\Middleware\InspectorProxyMiddleware;
-use AppDevPanel\Api\Middleware\IpFilterMiddleware;
 use AppDevPanel\Api\PathResolverInterface;
+use AppDevPanel\Api\Toolbar\ToolbarConfig;
+use AppDevPanel\Api\Toolbar\ToolbarInjector;
 use AppDevPanel\Kernel\DebuggerIdGenerator;
 use AppDevPanel\Kernel\Service\FileServiceRegistry;
 use AppDevPanel\Kernel\Service\ServiceRegistryInterface;
 use AppDevPanel\Kernel\Storage\StorageInterface;
+use AppDevPanel\McpServer\Inspector\InspectorClient;
+use AppDevPanel\McpServer\McpServer;
+use AppDevPanel\McpServer\McpToolRegistryFactory;
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\HttpFactory;
 use Psr\Container\ContainerInterface;
@@ -73,6 +85,7 @@ use Psr\Http\Message\RequestFactoryInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Http\Message\UriFactoryInterface;
+use Psr\Log\LoggerInterface;
 use Yiisoft\Aliases\Aliases;
 
 /** @var array $params */
@@ -90,8 +103,16 @@ if (!($apiConfig['enabled'] ?? true)) {
 
 $allowedIps = $apiConfig['allowedIps'] ?? ['127.0.0.1', '::1'];
 $authToken = $apiConfig['authToken'] ?? '';
+$inspectorUrl = $apiConfig['inspectorUrl'] ?? null;
 
 return [
+    // Alias so framework-agnostic inspector controllers can fetch the merged config
+    // via $container->has('config') / get('config'). Yii 3 registers the merged
+    // configuration under ConfigInterface::class; wrap it in Yii3ConfigProvider so
+    // event listener callables (closures, [class, method] tuples) are serialised
+    // into the structured shape the inspector frontend expects.
+    'config' => static fn(\Yiisoft\Config\ConfigInterface $config) => new Yii3ConfigProvider($config),
+
     // PSR-17 factories
     RequestFactoryInterface::class => static fn() => new HttpFactory(),
     ResponseFactoryInterface::class => static fn() => new HttpFactory(),
@@ -118,8 +139,7 @@ return [
 
     // Service registry
     ServiceRegistryInterface::class => static fn(ContainerInterface $container) => new FileServiceRegistry(
-        $container->get(Aliases::class)->get($params['app-dev-panel/yii3']['path'] ?? '@runtime/debug')
-            . '/services',
+        $container->get(Aliases::class)->get($params['app-dev-panel/yii3']['path'] ?? '@runtime/debug') . '/services',
     ),
 
     // Schema provider (database inspection)
@@ -138,14 +158,40 @@ return [
         SchemaProviderInterface $schemaProvider,
     ) => new DatabaseController($jsonResponseFactory, $schemaProvider),
 
-    // Authorization provider
-    AuthorizationConfigProviderInterface::class => static fn() => new NullAuthorizationConfigProvider(),
+    // Authorization provider — wires Yii's RBAC/User/Auth services when available,
+    // falls back to the no-op provider when the whole `app-dev-panel/yii3` params subtree
+    // and none of the optional packages (yiisoft/rbac, yiisoft/user, yiisoft/auth,
+    // yiisoft/access) are present.
+    AuthorizationConfigProviderInterface::class => static function (ContainerInterface $container) use (
+        $params,
+    ): AuthorizationConfigProviderInterface {
+        $yii3Params = $params['app-dev-panel/yii3'] ?? [];
+        return new Yii3AuthorizationConfigProvider($container, is_array($yii3Params) ? $yii3Params : []);
+    },
 
     // Authorization controller
     AuthorizationController::class => static fn(
         JsonResponseFactoryInterface $jsonResponseFactory,
         AuthorizationConfigProviderInterface $authorizationConfigProvider,
     ) => new AuthorizationController($jsonResponseFactory, $authorizationConfigProvider),
+
+    // HTTP mock provider
+    HttpMockProviderInterface::class => static fn() => new NullHttpMockProvider(),
+
+    // HTTP mock controller
+    HttpMockController::class => static fn(
+        JsonResponseFactoryInterface $jsonResponseFactory,
+        HttpMockProviderInterface $httpMockProvider,
+    ) => new HttpMockController($jsonResponseFactory, $httpMockProvider),
+
+    // Elasticsearch provider
+    ElasticsearchProviderInterface::class => static fn() => new NullElasticsearchProvider(),
+
+    // Elasticsearch controller
+    ElasticsearchController::class => static fn(
+        JsonResponseFactoryInterface $jsonResponseFactory,
+        ElasticsearchProviderInterface $elasticsearchProvider,
+    ) => new ElasticsearchController($jsonResponseFactory, $elasticsearchProvider),
 
     // Collector repository
     CollectorRepositoryInterface::class => static fn(StorageInterface $storage) => new CollectorRepository($storage),
@@ -206,10 +252,10 @@ return [
             staticUrl: $toolbarParams['staticUrl'] ?? '',
         );
     },
-    ToolbarInjector::class => static fn(
-        PanelConfig $panelConfig,
-        ToolbarConfig $toolbarConfig,
-    ) => new ToolbarInjector($panelConfig, $toolbarConfig),
+    ToolbarInjector::class => static fn(PanelConfig $panelConfig, ToolbarConfig $toolbarConfig) => new ToolbarInjector(
+        $panelConfig,
+        $toolbarConfig,
+    ),
     ToolbarMiddleware::class => static fn(
         ToolbarInjector $toolbarInjector,
         DebuggerIdGenerator $idGenerator,
@@ -266,7 +312,7 @@ return [
     InspectController::class => static fn(
         JsonResponseFactoryInterface $jsonResponseFactory,
         ContainerInterface $container,
-    ) => new InspectController($jsonResponseFactory, $container),
+    ) => new InspectController($jsonResponseFactory, $container, $params),
 
     CacheController::class => static fn(
         JsonResponseFactoryInterface $jsonResponseFactory,
@@ -275,8 +321,9 @@ return [
 
     TranslationController::class => static fn(
         JsonResponseFactoryInterface $jsonResponseFactory,
+        LoggerInterface $logger,
         ContainerInterface $container,
-    ) => new TranslationController($jsonResponseFactory, null, $container),
+    ) => new TranslationController($jsonResponseFactory, $logger, $container, $params),
 
     CommandController::class => static function (
         JsonResponseFactoryInterface $jsonResponseFactory,
@@ -287,9 +334,19 @@ return [
         return new CommandController($jsonResponseFactory, $pathResolver, $container, $commandMap);
     },
 
-    RoutingController::class => static fn(JsonResponseFactoryInterface $jsonResponseFactory) => new RoutingController(
-        $jsonResponseFactory,
-    ),
+    RoutingController::class => static function (
+        JsonResponseFactoryInterface $jsonResponseFactory,
+        ContainerInterface $container,
+    ): RoutingController {
+        $routeCollection = $container->has(\Yiisoft\Router\RouteCollectionInterface::class)
+            ? $container->get(\Yiisoft\Router\RouteCollectionInterface::class)
+            : null;
+        $urlMatcher = $container->has(\Yiisoft\Router\UrlMatcherInterface::class)
+            ? $container->get(\Yiisoft\Router\UrlMatcherInterface::class)
+            : null;
+
+        return new RoutingController($jsonResponseFactory, $routeCollection, $urlMatcher);
+    },
 
     RequestController::class => static fn(
         JsonResponseFactoryInterface $jsonResponseFactory,
@@ -297,13 +354,15 @@ return [
     ) => new RequestController($jsonResponseFactory, $collectorRepository),
 
     // MCP Server
-    McpSettings::class => static fn(ContainerInterface $container) => new McpSettings(
-        $container->get(Aliases::class)->get($params['app-dev-panel/yii3']['path'] ?? '@runtime/debug'),
-    ),
+    McpSettings::class =>
+        static fn(ContainerInterface $container) => new McpSettings($container->get(Aliases::class)->get(
+            $params['app-dev-panel/yii3']['path'] ?? '@runtime/debug',
+        )),
 
-    McpServer::class => static fn(StorageInterface $storage) => new McpServer(
-        McpToolRegistryFactory::create($storage),
-    ),
+    McpServer::class => static fn(StorageInterface $storage): McpServer => new McpServer(McpToolRegistryFactory::create(
+        $storage,
+        InspectorClient::fromOptionalUrl($inspectorUrl),
+    )),
 
     McpController::class => static fn(
         JsonResponseFactoryInterface $jsonResponseFactory,
@@ -317,14 +376,23 @@ return [
     ) => new McpSettingsController($jsonResponseFactory, $mcpSettings),
 
     // LLM settings
-    LlmSettingsInterface::class => static fn(ContainerInterface $container) => new FileLlmSettings(
-        $container->get(Aliases::class)->get($params['app-dev-panel/yii3']['path'] ?? '@runtime/debug'),
-    ),
+    LlmSettingsInterface::class =>
+        static fn(ContainerInterface $container) => new FileLlmSettings($container->get(Aliases::class)->get(
+            $params['app-dev-panel/yii3']['path'] ?? '@runtime/debug',
+        )),
 
     // LLM history storage
-    LlmHistoryStorageInterface::class => static fn(ContainerInterface $container) => new FileLlmHistoryStorage(
-        $container->get(Aliases::class)->get($params['app-dev-panel/yii3']['path'] ?? '@runtime/debug'),
-    ),
+    LlmHistoryStorageInterface::class =>
+        static fn(ContainerInterface $container) => new FileLlmHistoryStorage($container->get(Aliases::class)->get(
+            $params['app-dev-panel/yii3']['path'] ?? '@runtime/debug',
+        )),
+
+    // ACP daemon manager and command verifier
+    AcpCommandVerifierInterface::class => static fn() => new AcpCommandVerifier(),
+    AcpDaemonManagerInterface::class =>
+        static fn(ContainerInterface $container) => new AcpDaemonManager($container->get(Aliases::class)->get(
+            $params['app-dev-panel/yii3']['path'] ?? '@runtime/debug',
+        )),
 
     // LLM provider service
     LlmProviderService::class => static fn(
@@ -332,7 +400,8 @@ return [
         ClientInterface $httpClient,
         RequestFactoryInterface $requestFactory,
         StreamFactoryInterface $streamFactory,
-    ) => new LlmProviderService($llmSettings, $httpClient, $requestFactory, $streamFactory),
+        AcpDaemonManagerInterface $acpDaemonManager,
+    ) => new LlmProviderService($llmSettings, $httpClient, $requestFactory, $streamFactory, $acpDaemonManager),
 
     // LLM controller
     LlmController::class => static fn(
@@ -343,7 +412,19 @@ return [
         RequestFactoryInterface $requestFactory,
         StreamFactoryInterface $streamFactory,
         ClientInterface $httpClient,
-    ) => new LlmController($jsonResponseFactory, $llmSettings, $providerService, $historyStorage, $requestFactory, $streamFactory, $httpClient),
+        AcpCommandVerifierInterface $commandVerifier,
+        AcpDaemonManagerInterface $acpDaemonManager,
+    ) => new LlmController(
+        $jsonResponseFactory,
+        $llmSettings,
+        $providerService,
+        $historyStorage,
+        $requestFactory,
+        $streamFactory,
+        $httpClient,
+        $commandVerifier,
+        $acpDaemonManager,
+    ),
 
     // ApiApplication
     ApiApplication::class => static fn(

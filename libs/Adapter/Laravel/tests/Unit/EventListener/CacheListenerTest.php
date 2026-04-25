@@ -99,6 +99,91 @@ final class CacheListenerTest extends TestCase
         return $collector;
     }
 
+    public function testCacheHitWithNullStoreName(): void
+    {
+        [$collector, $listeners] = $this->registerListener();
+
+        $event = new CacheHit(null, 'session:abc', 'data');
+        $listeners[CacheHit::class]($event);
+
+        $collected = $collector->getCollected();
+        $this->assertSame('default', $collected['operations'][0]['pool']);
+    }
+
+    public function testCacheMissedWithNullStoreName(): void
+    {
+        [$collector, $listeners] = $this->registerListener();
+
+        $event = new CacheMissed(null, 'session:xyz');
+        $listeners[CacheMissed::class]($event);
+
+        $collected = $collector->getCollected();
+        $this->assertSame('default', $collected['operations'][0]['pool']);
+    }
+
+    public function testKeyWrittenWithNullStoreName(): void
+    {
+        [$collector, $listeners] = $this->registerListener();
+
+        $event = new KeyWritten(null, 'config:key', 'value', 60);
+        $listeners[KeyWritten::class]($event);
+
+        $collected = $collector->getCollected();
+        $this->assertSame('default', $collected['operations'][0]['pool']);
+    }
+
+    public function testKeyForgottenWithNullStoreName(): void
+    {
+        [$collector, $listeners] = $this->registerListener();
+
+        $event = new KeyForgotten(null, 'temp:key');
+        $listeners[KeyForgotten::class]($event);
+
+        $collected = $collector->getCollected();
+        $this->assertSame('default', $collected['operations'][0]['pool']);
+    }
+
+    public function testCacheHitWithCustomStoreName(): void
+    {
+        [$collector, $listeners] = $this->registerListener();
+
+        $event = new CacheHit('redis', 'user:session', 'session-data');
+        $listeners[CacheHit::class]($event);
+
+        $collected = $collector->getCollected();
+        $this->assertSame('redis', $collected['operations'][0]['pool']);
+    }
+
+    public function testKeyWrittenWithValue(): void
+    {
+        [$collector, $listeners] = $this->registerListener();
+
+        $event = new KeyWritten('redis', 'user:1:profile', ['name' => 'John'], 3600);
+        $listeners[KeyWritten::class]($event);
+
+        $collected = $collector->getCollected();
+        $this->assertSame('set', $collected['operations'][0]['operation']);
+        $this->assertSame('user:1:profile', $collected['operations'][0]['key']);
+        $this->assertSame('redis', $collected['operations'][0]['pool']);
+    }
+
+    public function testMultipleEventsRecordedSequentially(): void
+    {
+        [$collector, $listeners] = $this->registerListener();
+
+        $listeners[CacheMissed::class](new CacheMissed('file', 'key1'));
+        $listeners[KeyWritten::class](new KeyWritten('file', 'key1', 'value', 300));
+        $listeners[CacheHit::class](new CacheHit('file', 'key1', 'value'));
+
+        $collected = $collector->getCollected();
+        $this->assertCount(3, $collected['operations']);
+        $this->assertSame('get', $collected['operations'][0]['operation']);
+        $this->assertFalse($collected['operations'][0]['hit']);
+        $this->assertSame('set', $collected['operations'][1]['operation']);
+        $this->assertSame('get', $collected['operations'][2]['operation']);
+        $this->assertTrue($collected['operations'][2]['hit']);
+    }
+
     /**
      * @return array{CacheCollector, array<string, \Closure>}
      */

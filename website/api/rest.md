@@ -13,6 +13,7 @@ description: "Complete ADP REST API reference: debug entries, summaries, collect
 | GET | `/debug/api/view/{id}` | Full entry data (optionally filtered by collector) |
 | GET | `/debug/api/dump/{id}` | Dump objects for entry |
 | GET | `/debug/api/object/{id}/{objectId}` | Specific object from dump |
+| GET | `/debug/api/settings` | Debug settings (path mapping) |
 
 ### Example: List entries
 
@@ -34,8 +35,7 @@ GET /debug/api/
         }
     ],
     "error": null,
-    "success": true,
-    "status": 200
+    "success": true
 }
 ```
 
@@ -46,6 +46,233 @@ GET /debug/api/view/abc123?collector=log
 ```
 
 Returns full collected data for the specified entry, optionally filtered to a single collector.
+
+## OTLP Trace Ingestion
+
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/debug/api/otlp/v1/traces` | Ingest OpenTelemetry traces in OTLP format |
+
+## LLM API
+
+All LLM endpoints share the same settings stored in `.llm-settings.json`. Both the debug panel and the toolbar use these endpoints — configure once, use everywhere.
+
+See the [AI Chat guide](/guide/ai-chat) for user-facing documentation.
+
+### LLM Providers
+
+| Provider | Auth | How it works |
+|----------|------|--------------|
+| `openrouter` | API key or OAuth | HTTP calls to OpenRouter API (default) |
+| `anthropic` | API key or OAuth token | HTTP calls to Anthropic Messages API |
+| `openai` | API key | HTTP calls to OpenAI Chat Completions API |
+| `acp` | None (local agent) | Spawns agent (e.g. Claude Code) as subprocess via Agent Client Protocol |
+
+### Connection
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/debug/api/llm/status` | Connection status, provider, model, timeout, custom prompt |
+| POST | `/debug/api/llm/connect` | Connect with API key or ACP agent |
+| POST | `/debug/api/llm/disconnect` | Clear stored credentials |
+
+#### Status
+
+```
+GET /debug/api/llm/status
+```
+
+```json
+{
+    "data": {
+        "connected": true,
+        "provider": "openrouter",
+        "model": "anthropic/claude-sonnet-4",
+        "timeout": 30,
+        "customPrompt": "Reply in English. Be concise and actionable..."
+    }
+}
+```
+
+#### Connect with API Key
+
+```
+POST /debug/api/llm/connect
+Content-Type: application/json
+
+{"provider": "anthropic", "apiKey": "sk-ant-..."}
+```
+
+Supported providers: `openrouter`, `anthropic`, `openai`.
+
+#### Connect with ACP
+
+The ACP provider uses the [Agent Client Protocol](https://agentclientprotocol.com/) to communicate with local AI agents over stdio. ADP runs a persistent daemon process that manages multiple agent subprocesses — one per browser tab (session).
+
+```
+POST /debug/api/llm/connect
+Content-Type: application/json
+X-Acp-Session: <uuid>
+
+{
+  "provider": "acp",
+  "acpCommand": "npx",
+  "acpArgs": ["@agentclientprotocol/claude-agent-acp"]
+}
+```
+
+- `acpCommand` — Executable to run (default: `npx`). Must be on system PATH.
+- `acpArgs` — Arguments passed to the command (default: `["@agentclientprotocol/claude-agent-acp"]`).
+- `acpEnv` — Environment variables merged into the agent's environment.
+
+**Required header:** `X-Acp-Session` — a UUID identifying the browser tab. Generated via `crypto.randomUUID()` and stored in `sessionStorage`. The frontend SDK injects this header automatically on all LLM API requests.
+
+**Connect flow:**
+
+1. Start daemon (if not running, or restart if protocol version mismatch)
+2. Start agent session for the given `X-Acp-Session` UUID
+3. Save settings only after both steps succeed
+
+**Response:**
+
+```json
+{
+  "data": {
+    "connected": true,
+    "provider": "acp",
+    "acpCommand": "npx",
+    "sessionId": "550e8400-e29b-41d4-a716-446655440000",
+    "agentName": "Claude",
+    "agentVersion": "1.0.0"
+  }
+}
+```
+
+ACP adapters bridge the protocol to specific agents. Known adapters:
+- `@agentclientprotocol/claude-agent-acp` — Claude Code (default)
+- `@anthropic-ai/gemini-agent-acp` — Gemini CLI
+- `@anthropic-ai/codex-agent-acp` — Codex CLI
+
+**Daemon architecture:**
+
+The daemon (`acp-daemon-runner.php`) is a standalone PHP process that listens on a Unix socket at `/tmp/adp-acp-{hash}.sock`. It manages agent subprocesses via an internal protocol:
+
+| Action | Description |
+|--------|-------------|
+| `ping` | Health check, returns `{ok, protocol, sessions}` |
+| `session-start` | Spawn agent subprocess, perform ACP `initialize` handshake |
+| `session-stop` | Terminate a specific agent |
+| `session-status` | Check if a session's agent is alive |
+| `prompt` | Route `session/new` + `session/prompt` to the correct agent |
+| `shutdown` | Stop all sessions and exit |
+
+Limits: max 10 concurrent sessions, 30-minute idle timeout per session.
+
+**Protocol lifecycle per chat request:** `initialize` (on session start) → `session/new` → `session/prompt` (with streaming `session/update` notifications) → response.
+
+### OAuth (OpenRouter)
+
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/debug/api/llm/oauth/initiate` | Start OAuth PKCE flow, returns `authUrl` and `codeVerifier` |
+| POST | `/debug/api/llm/oauth/exchange` | Exchange authorization `code` + `codeVerifier` for API key |
+
+#### Initiate
+
+```
+POST /debug/api/llm/oauth/initiate
+Content-Type: application/json
+
+{"callbackUrl": "https://localhost:5173/debug/llm/callback"}
+```
+
+```json
+{
+    "data": {
+        "authUrl": "https://openrouter.ai/auth?...",
+        "codeVerifier": "..."
+    }
+}
+```
+
+Open `authUrl` in a popup. After user approval, OpenRouter redirects to `callbackUrl?code=...`. Exchange the code:
+
+```
+POST /debug/api/llm/oauth/exchange
+Content-Type: application/json
+
+{"code": "...", "codeVerifier": "..."}
+```
+
+### Settings
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/debug/api/llm/models` | List available models for the connected provider |
+| POST | `/debug/api/llm/model` | Set active model: `{"model": "anthropic/claude-sonnet-4"}` |
+| POST | `/debug/api/llm/timeout` | Set timeout in seconds (5–300): `{"timeout": 60}` |
+| POST | `/debug/api/llm/custom-prompt` | Set system prompt: `{"customPrompt": "..."}` |
+
+All settings endpoints return the updated `LlmStatus` object (same shape as `GET /status`).
+
+### Chat & Analysis
+
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/debug/api/llm/chat` | Send chat completion request |
+| POST | `/debug/api/llm/analyze` | Analyze debug entry data with AI |
+
+#### Chat
+
+```
+POST /debug/api/llm/chat
+Content-Type: application/json
+
+{
+    "messages": [
+        {"role": "user", "content": "Why is my /api/users endpoint slow?"}
+    ],
+    "model": "anthropic/claude-sonnet-4",
+    "temperature": 0.7
+}
+```
+
+```json
+{
+    "data": {
+        "choices": [{"message": {"role": "assistant", "content": "Based on..."}}],
+        "model": "anthropic/claude-sonnet-4",
+        "usage": {"prompt_tokens": 50, "completion_tokens": 200}
+    }
+}
+```
+
+The custom prompt (if set) is automatically prepended as a system message. All responses are normalized to the OpenAI-compatible format regardless of provider.
+
+#### Analyze
+
+```
+POST /debug/api/llm/analyze
+Content-Type: application/json
+
+{
+    "context": {"request": {"method": "GET", "path": "/api/users"}, "db": {"queries": {"total": 47}}},
+    "prompt": "Why are there so many queries?"
+}
+```
+
+Context is truncated to 12,000 characters. Returns `{"data": {"analysis": "...", "model": "..."}}`.
+
+### History
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/debug/api/llm/history` | Get all history entries (max 100, FIFO) |
+| POST | `/debug/api/llm/history` | Add entry: `{query, response, timestamp, error?}` |
+| DELETE | `/debug/api/llm/history/{index}` | Delete entry by index |
+| DELETE | `/debug/api/llm/history` | Clear all history |
+
+History is shared between the panel and toolbar — entries added from either appear in both.
 
 ## Ingestion API
 

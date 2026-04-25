@@ -301,7 +301,7 @@ UrlManager::parseRequest($request)
 **Adding rules dynamically:**
 ```php
 $app->urlManager->addRules([
-    'debug/api/<path:.*>' => 'debug-panel/api/index',
+    'debug/api/<path:.*>' => 'app-dev-panel/api/index',
 ], false);  // false = append (true = prepend)
 ```
 
