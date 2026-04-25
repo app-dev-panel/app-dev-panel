@@ -74,3 +74,24 @@ The adapter automatically decorates Symfony's <class>Symfony\Contracts\Translati
 ## Database Inspector
 
 When `doctrine/dbal` is available, <class>AppDevPanel\Adapter\Symfony\Inspector\DoctrineSchemaProvider</class> provides database schema inspection. Falls back to <class>AppDevPanel\Adapter\Symfony\Inspector\NullSchemaProvider</class> otherwise.
+
+## Frontend Assets
+
+`composer require app-dev-panel/adapter-symfony` transitively pulls <pkg>app-dev-panel/frontend-assets</pkg>, which ships the prebuilt panel SPA and toolbar widget. `AppDevPanelExtension` auto-detects the source in three steps and resolves `panel.static_url` accordingly:
+
+1. **`assets:install` copy** in `Resources/public/bundle.js` — webserver serves it directly via `try_files`.
+2. **Composer-installed bundle** in `vendor/app-dev-panel/frontend-assets/dist/` — served on demand by <class>AppDevPanel\Adapter\Symfony\Controller\FrontendAssetsController</class> under `GET /bundles/appdevpanel/{file}`. The URL matches the existing `assets:install` convention, so a webserver fallback (`try_files $uri /index.php`) still wins when files are present.
+3. **CDN fallback**: `https://app-dev-panel.github.io/app-dev-panel`.
+
+Override via `app_dev_panel.panel.static_url` (and `app_dev_panel.toolbar.static_url`) in `app_dev_panel.yaml`. Update the bundle with `composer update app-dev-panel/frontend-assets`.
+
+## Manual API exploration (curl)
+
+The debug API root is at `/debug/api`, **not** `/debug/api/debug`:
+
+```bash
+curl http://127.0.0.1:8000/debug/api                  # list recent debug entries
+curl http://127.0.0.1:8000/debug/api/summary/{id}
+curl http://127.0.0.1:8000/debug/api/view/{id}
+curl http://127.0.0.1:8000/debug/api/event-stream     # SSE
+```

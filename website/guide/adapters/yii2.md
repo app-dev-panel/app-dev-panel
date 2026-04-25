@@ -82,3 +82,13 @@ The adapter replaces Yii 2's `i18n` application component with <class>AppDevPane
 ## Database Inspector
 
 `Yii2DbSchemaProvider` provides database schema inspection via `yii\db\Schema`. Falls back to <class>AppDevPanel\Adapter\Yii2\Inspector\NullSchemaProvider</class> when no database component is configured.
+
+## Frontend Assets
+
+`composer require app-dev-panel/adapter-yii2` transitively pulls <pkg>app-dev-panel/frontend-assets</pkg>. <class>AppDevPanel\Adapter\Yii2\Module</class> resolves `panelStaticUrl` automatically:
+
+1. If `FrontendAssets::exists()` — symlink `vendor/app-dev-panel/frontend-assets/dist/` to `@webroot/app-dev-panel`, set `panelStaticUrl = '/app-dev-panel'`.
+2. Otherwise fall back to `libs/Adapter/Yii2/resources/dist` (monorepo dev).
+3. Otherwise, CDN fallback (`https://app-dev-panel.github.io/app-dev-panel`).
+
+Override via the module's `panelStaticUrl` / `toolbarStaticUrl` config keys. Update with `composer update app-dev-panel/frontend-assets`.

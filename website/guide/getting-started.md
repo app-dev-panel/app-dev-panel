@@ -100,6 +100,10 @@ PHP_CLI_SERVER_WORKERS=3 php -S 127.0.0.1:8080 -t public
 ```
 :::
 
+### Frontend served from Composer
+
+Each adapter requires <pkg>app-dev-panel/frontend-assets</pkg>, the prebuilt panel SPA + toolbar widget. Composer installs it transitively, and the adapter resolves the bundle locally so the panel and toolbar work out of the box without CDN access. To update the bundle: `composer update app-dev-panel/frontend-assets`. See your adapter page for the URL it is mounted under and how to override the source via `panel.static_url`.
+
 ## Try the Demo
 
 You can try the panel UI right away with the [Live Demo](https://app-dev-panel.github.io/app-dev-panel/demo/) — no installation required. Enter your application's backend URL to connect.

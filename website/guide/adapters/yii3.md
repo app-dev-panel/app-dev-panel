@@ -73,3 +73,13 @@ When `yiisoft/translator` is installed, the adapter registers <class>AppDevPanel
 ## Database Inspector
 
 Database schema inspection is provided via `Yiisoft\Db` through <class>AppDevPanel\Adapter\Yii3\Inspector\DbSchemaProvider</class>.
+
+## Frontend Assets
+
+`composer require app-dev-panel/adapter-yii3` transitively pulls <pkg>app-dev-panel/frontend-assets</pkg>. The DI factory in `config/di-api.php` resolves `panel.staticUrl` automatically:
+
+1. If `FrontendAssets::exists()` — symlink `vendor/app-dev-panel/frontend-assets/dist/` to `@public/app-dev-panel`, set `panel.staticUrl = '/app-dev-panel'`.
+2. Otherwise, fall back to `libs/Adapter/Yii3/resources/dist` (monorepo dev) if it contains a build.
+3. Otherwise, CDN fallback (`https://app-dev-panel.github.io/app-dev-panel`).
+
+Override via the `app-dev-panel/yii3.panel.staticUrl` parameter. Update with `composer update app-dev-panel/frontend-assets`.

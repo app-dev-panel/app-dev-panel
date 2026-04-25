@@ -66,3 +66,13 @@ DebugHeaders → ErrorCatcher → YiiApiMiddleware → ... → Router
 ## Инспектор базы данных
 
 Инспекция схемы базы данных осуществляется через `Yiisoft\Db` с помощью <class>AppDevPanel\Adapter\Yii3\Inspector\DbSchemaProvider</class>.
+
+## Фронтенд-ассеты
+
+`composer require app-dev-panel/adapter-yii3` транзитивно подтягивает <pkg>app-dev-panel/frontend-assets</pkg>. DI-фабрика в `config/di-api.php` автодетектит источник:
+
+1. Если `FrontendAssets::exists()` — создаётся симлинк `vendor/app-dev-panel/frontend-assets/dist/` → `@public/app-dev-panel`, `panel.staticUrl = '/app-dev-panel'`.
+2. Иначе fallback на `libs/Adapter/Yii3/resources/dist` (для разработки в монорепе).
+3. Иначе — CDN (`https://app-dev-panel.github.io/app-dev-panel`).
+
+Поведение переопределяется параметром `app-dev-panel/yii3.panel.staticUrl`. Обновление сборки: `composer update app-dev-panel/frontend-assets`.
