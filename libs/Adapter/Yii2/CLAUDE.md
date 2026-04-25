@@ -272,3 +272,13 @@ All `authManager` calls are wrapped in `try/catch` so `DbManager` failures (e.g.
 | Config inspector | `SymfonyConfigProvider` | `Yii2ConfigProvider` |
 | API bridge | `AdpApiController` (Symfony controller) | `AdpApiController` (Yii 2 controller) |
 | Route registration | PHP route configurator | `UrlManager::addRules()` |
+
+## Frontend Assets
+
+Adapter requires `app-dev-panel/frontend-assets`. `Module::registerApiApplication()` resolves `panelStaticUrl` in this priority order:
+
+1. `FrontendAssets::exists()` → symlink `FrontendAssets::path()` to `@webroot/app-dev-panel`, set `panelStaticUrl = '/app-dev-panel'`
+2. Otherwise, `libs/Adapter/Yii2/resources/dist` contains a build (monorepo dev) → symlink that, same URL
+3. Otherwise → `PanelConfig::DEFAULT_STATIC_URL` (CDN)
+
+Symlink creation is best-effort (`@symlink`); when the webroot is read-only the resolver falls through to the CDN. Toolbar URL is computed by `ToolbarInjector` as `{panelStaticUrl}/toolbar/bundle.js`. Override via the module's `panelStaticUrl` / `toolbarStaticUrl` config keys.

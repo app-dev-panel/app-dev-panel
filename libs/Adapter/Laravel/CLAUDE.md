@@ -208,3 +208,15 @@ return [
 | Database | Doctrine DBAL `SchemaManager` | Illuminate `SchemaBuilder` + query builder |
 | PSR-7 bridge | `nyholm/psr7-server` (HttpFoundation → PSR-7) | `Nyholm\Psr7\Factory\Psr17Factory` (direct) |
 | Package discovery | Manual bundle registration | Auto via `extra.laravel.providers` |
+
+## Frontend Assets
+
+Adapter requires `app-dev-panel/frontend-assets`. Bundle delivery resolved by `AppDevPanelServiceProvider::registerApiControllers()` in this priority order:
+
+1. `public/vendor/app-dev-panel/bundle.js` exists → `panel.static_url = '/vendor/app-dev-panel'` (webserver static)
+2. `FrontendAssets::exists()` → `panel.static_url = '/vendor/app-dev-panel'`, served by `Controller\FrontendAssetsController` via route `/vendor/app-dev-panel/{file}` registered in `routes/adp.php` (PHP-streamed `BinaryFileResponse` with path-traversal guard, immutable cache headers)
+3. Otherwise → `PanelConfig::DEFAULT_STATIC_URL` (CDN)
+
+Both panel and toolbar are served from the same prefix; toolbar URL is computed by `ToolbarInjector` as `{panel.static_url}/toolbar/bundle.js`. Override via `config/app-dev-panel.php` keys `panel.static_url` / `toolbar.static_url`.
+
+Optional `vendor:publish --tag=app-dev-panel-assets` copies `FrontendAssets::path()` into `public/vendor/app-dev-panel/` for environments that prefer raw static delivery.

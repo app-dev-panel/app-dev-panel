@@ -70,6 +70,7 @@ use AppDevPanel\Api\PathMapperInterface;
 use AppDevPanel\Api\PathResolverInterface;
 use AppDevPanel\Api\Toolbar\ToolbarConfig;
 use AppDevPanel\Api\Toolbar\ToolbarInjector;
+use AppDevPanel\FrontendAssets\FrontendAssets;
 use AppDevPanel\Kernel\DebuggerIdGenerator;
 use AppDevPanel\Kernel\Service\FileServiceRegistry;
 use AppDevPanel\Kernel\Service\ServiceRegistryInterface;
@@ -222,16 +223,26 @@ return [
     PanelConfig::class => static function (ContainerInterface $container) use ($params): PanelConfig {
         $staticUrl = $params['app-dev-panel/yii3']['panel']['staticUrl'] ?? '';
         if ($staticUrl === '') {
-            // Auto-detect: if built assets exist in adapter package, symlink them
-            $adapterDist = \dirname(__DIR__) . '/resources/dist/bundle.js';
-            if (file_exists($adapterDist)) {
+            // Auto-detect: prefer the frontend-assets Composer package, fall back to
+            // adapter-local resources/dist (for monorepo dev). Either way, expose
+            // the bundle to the webserver via a symlink under @public/app-dev-panel.
+            $sourceDist = null;
+            if (FrontendAssets::exists()) {
+                $sourceDist = FrontendAssets::path();
+            } else {
+                $adapterDist = \dirname(__DIR__) . '/resources/dist';
+                if (file_exists($adapterDist . '/bundle.js')) {
+                    $sourceDist = $adapterDist;
+                }
+            }
+            if ($sourceDist !== null) {
                 $aliases = $container->get(Aliases::class);
                 $webroot = $aliases->get('@public');
                 $targetDir = $webroot . '/app-dev-panel';
-                if (!is_dir($targetDir)) {
-                    @symlink(\dirname($adapterDist), $targetDir);
+                if (!is_dir($targetDir) && !is_link($targetDir)) {
+                    @symlink($sourceDist, $targetDir);
                 }
-                if (is_dir($targetDir)) {
+                if (is_dir($targetDir) || is_link($targetDir)) {
                     $staticUrl = '/app-dev-panel';
                 }
             }

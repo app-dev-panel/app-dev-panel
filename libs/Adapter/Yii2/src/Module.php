@@ -83,6 +83,7 @@ use AppDevPanel\Api\PathResolver;
 use AppDevPanel\Api\PathResolverInterface;
 use AppDevPanel\Api\Toolbar\ToolbarConfig;
 use AppDevPanel\Api\Toolbar\ToolbarInjector;
+use AppDevPanel\FrontendAssets\FrontendAssets;
 use AppDevPanel\Kernel\Collector\AssetBundleCollector;
 use AppDevPanel\Kernel\Collector\AuthorizationCollector;
 use AppDevPanel\Kernel\Collector\CacheCollector;
@@ -493,17 +494,27 @@ class Module extends \yii\base\Module implements BootstrapInterface
     {
         $panelStaticUrl = $this->panelStaticUrl;
         if ($panelStaticUrl === '') {
-            // Auto-detect: if built assets exist in adapter package, publish them.
-            // Either the panel bundle or the toolbar subdir is enough to trigger publishing.
-            $distDir = \dirname(__DIR__) . '/resources/dist';
-            if (file_exists($distDir . '/bundle.js') || is_dir($distDir . '/toolbar')) {
+            // Auto-detect: prefer the frontend-assets Composer package, fall back to
+            // adapter-local resources/dist (for monorepo dev). Either way, publish via
+            // a symlink under @webroot/app-dev-panel so the webserver serves the bundle
+            // directly.
+            $distDir = null;
+            if (FrontendAssets::exists()) {
+                $distDir = FrontendAssets::path();
+            } else {
+                $adapterDist = \dirname(__DIR__) . '/resources/dist';
+                if (file_exists($adapterDist . '/bundle.js') || is_dir($adapterDist . '/toolbar')) {
+                    $distDir = $adapterDist;
+                }
+            }
+            if ($distDir !== null) {
                 $webroot = \Yii::getAlias('@webroot', false);
                 if (is_string($webroot)) {
                     $targetDir = $webroot . '/app-dev-panel';
-                    if (!is_dir($targetDir)) {
+                    if (!is_dir($targetDir) && !is_link($targetDir)) {
                         @symlink($distDir, $targetDir);
                     }
-                    if (is_dir($targetDir)) {
+                    if (is_dir($targetDir) || is_link($targetDir)) {
                         $panelStaticUrl = '/app-dev-panel';
                     }
                 }
