@@ -31,10 +31,6 @@ final class RequestCollector implements SummaryCollectorInterface
 
     public function getCollected(): array
     {
-        if (!$this->isActive()) {
-            return [];
-        }
-
         $requestRaw = null;
         if ($this->request instanceof ServerRequestInterface) {
             $requestRaw = Message::toString($this->request);
@@ -91,9 +87,6 @@ final class RequestCollector implements SummaryCollectorInterface
 
     public function getSummary(): array
     {
-        if (!$this->isActive()) {
-            return [];
-        }
         return [
             'request' => [
                 'url' => $this->requestUrl,

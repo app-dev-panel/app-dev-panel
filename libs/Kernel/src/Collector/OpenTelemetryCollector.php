@@ -48,10 +48,6 @@ final class OpenTelemetryCollector implements SummaryCollectorInterface
 
     public function getCollected(): array
     {
-        if (!$this->isActive()) {
-            return [];
-        }
-
         return [
             'spans' => $this->spans,
             'traceCount' => count($this->traceIds),
@@ -62,10 +58,6 @@ final class OpenTelemetryCollector implements SummaryCollectorInterface
 
     public function getSummary(): array
     {
-        if (!$this->isActive()) {
-            return [];
-        }
-
         return [
             'opentelemetry' => [
                 'spans' => count($this->spans),

@@ -33,10 +33,6 @@ final class TranslatorCollector implements SummaryCollectorInterface
 
     public function getCollected(): array
     {
-        if (!$this->isActive()) {
-            return [];
-        }
-
         return [
             'translations' => $this->translations,
             'missingCount' => $this->missingCount,
@@ -48,10 +44,6 @@ final class TranslatorCollector implements SummaryCollectorInterface
 
     public function getSummary(): array
     {
-        if (!$this->isActive()) {
-            return [];
-        }
-
         return [
             'translator' => [
                 'total' => count($this->translations),

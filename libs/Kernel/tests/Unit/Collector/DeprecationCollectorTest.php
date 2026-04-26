@@ -105,7 +105,7 @@ final class DeprecationCollectorTest extends AbstractCollectorTestCase
         restore_error_handler();
     }
 
-    public function testShutdownResetsData(): void
+    public function testStartupResetsDataAfterPreviousCycle(): void
     {
         $collector = new DeprecationCollector(new TimelineCollector());
         $collector->startup();
@@ -113,12 +113,11 @@ final class DeprecationCollectorTest extends AbstractCollectorTestCase
         @trigger_error('before shutdown', E_USER_DEPRECATED);
         $this->assertCount(1, $collector->getCollected());
 
+        // After shutdown the buffer is preserved — storage flush relies on this.
         $collector->shutdown();
+        $this->assertCount(1, $collector->getCollected());
 
-        // After shutdown, collector is inactive
-        $this->assertSame([], $collector->getCollected());
-
-        // After restart, data is fresh
+        // The next startup() wipes the previous cycle (long-running process semantics).
         $collector->startup();
         $this->assertSame([], $collector->getCollected());
         $collector->shutdown();

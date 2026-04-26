@@ -18,9 +18,6 @@ final class ServiceCollector implements SummaryCollectorInterface
 
     public function getCollected(): array
     {
-        if (!$this->isActive()) {
-            return [];
-        }
         return $this->items;
     }
 
@@ -46,9 +43,6 @@ final class ServiceCollector implements SummaryCollectorInterface
 
     public function getSummary(): array
     {
-        if (!$this->isActive()) {
-            return [];
-        }
         return [
             'service' => [
                 'total' => count($this->items),
