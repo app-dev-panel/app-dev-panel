@@ -1232,12 +1232,6 @@ count = 1
 
 [[issues]]
 file = "libs/Kernel/src/Collector/ElasticsearchCollector.php"
-code = "cyclomatic-complexity"
-message = "Class has high complexity."
-count = 1
-
-[[issues]]
-file = "libs/Kernel/src/Collector/ElasticsearchCollector.php"
 code = "no-isset"
 message = "Use of the `isset` construct."
 count = 2
