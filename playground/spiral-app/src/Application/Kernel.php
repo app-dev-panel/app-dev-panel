@@ -212,7 +212,6 @@ final class Kernel
         // the collector singleton in `defineSingletons()`.
         $this->container->bindSingleton(\App\Application\TracingPdo::class, function () {
             $pdo = new \App\Application\TracingPdo('sqlite::memory:');
-            $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
             $pdo->setCollector($this->container->get(\AppDevPanel\Kernel\Collector\DatabaseCollector::class));
             return $pdo;
         });

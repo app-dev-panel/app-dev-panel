@@ -8,14 +8,16 @@ use AppDevPanel\Kernel\Collector\DatabaseCollector;
 use AppDevPanel\Kernel\Collector\QueryRecord;
 
 /**
- * Minimal PDO decorator that times every query and feeds the ADP DatabaseCollector.
- *
- * Wraps the three statement-producing entry points (`query`, `exec`, `prepare`).
- * For prepared statements we delegate to {@see TracingPdoStatement} so the timing
- * spans `PDOStatement::execute()` — the moment the engine actually runs the SQL.
+ * Composition-based PDO wrapper that times every query and feeds the ADP
+ * `DatabaseCollector`. Composition (rather than `extends \PDO`) keeps us free
+ * of PHP 8.4's strict return-type checks on overridden `prepare()` /
+ * `query()` / `exec()` — the inner PDO is held privately, our methods return
+ * decorated statements, and consumers type-hint on `TracingPdo` directly.
  */
-final class TracingPdo extends \PDO
+final class TracingPdo
 {
+    private readonly \PDO $pdo;
+
     public function __construct(
         string $dsn,
         ?string $username = null,
@@ -23,7 +25,8 @@ final class TracingPdo extends \PDO
         ?array $options = null,
         private ?DatabaseCollector $collector = null,
     ) {
-        parent::__construct($dsn, $username, $password, $options ?? []);
+        $this->pdo = new \PDO($dsn, $username, $password, $options ?? []);
+        $this->pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
     }
 
     public function setCollector(?DatabaseCollector $collector): void
@@ -31,27 +34,36 @@ final class TracingPdo extends \PDO
         $this->collector = $collector;
     }
 
-    public function query(string $query, ?int $fetchMode = null, mixed ...$fetchModeArgs): \PDOStatement|false
+    public function setAttribute(int $attribute, mixed $value): bool
     {
-        $start = microtime(true);
-        $stmt = $fetchMode === null ? parent::query($query) : parent::query($query, $fetchMode, ...$fetchModeArgs);
-        $this->log($query, [], $start, $stmt instanceof \PDOStatement ? $stmt->rowCount() : 0);
-
-        return $stmt;
+        return $this->pdo->setAttribute($attribute, $value);
     }
 
     public function exec(string $statement): int|false
     {
         $start = microtime(true);
-        $rows = parent::exec($statement);
+        $rows = $this->pdo->exec($statement);
         $this->log($statement, [], $start, $rows === false ? 0 : $rows);
 
         return $rows;
     }
 
-    public function prepare(string $query, array $options = []): \PDOStatement|false
+    public function query(string $sql): TracingPdoStatement|false
     {
-        $stmt = parent::prepare($query, $options);
+        $start = microtime(true);
+        $stmt = $this->pdo->query($sql);
+        if ($stmt === false) {
+            return false;
+        }
+        $rows = $stmt->rowCount();
+        $this->log($sql, [], $start, $rows);
+
+        return new TracingPdoStatement($stmt, $sql, null);
+    }
+
+    public function prepare(string $query, array $options = []): TracingPdoStatement|false
+    {
+        $stmt = $this->pdo->prepare($query, $options);
         if ($stmt === false) {
             return false;
         }
@@ -59,8 +71,33 @@ final class TracingPdo extends \PDO
         return new TracingPdoStatement($stmt, $query, $this->collector);
     }
 
+    public function lastInsertId(?string $name = null): string|false
+    {
+        return $this->pdo->lastInsertId($name);
+    }
+
+    public function beginTransaction(): bool
+    {
+        return $this->pdo->beginTransaction();
+    }
+
+    public function commit(): bool
+    {
+        return $this->pdo->commit();
+    }
+
+    public function rollBack(): bool
+    {
+        return $this->pdo->rollBack();
+    }
+
+    public function inTransaction(): bool
+    {
+        return $this->pdo->inTransaction();
+    }
+
     /**
-     * @internal — used by {@see TracingPdoStatement} too.
+     * @internal
      */
     public function log(string $sql, array $params, float $start, int $rows): void
     {

@@ -284,12 +284,6 @@ count = 1
 
 [[issues]]
 file = "src/Application/TracingPdo.php"
-code = "invalid-return-statement"
-message = 'Invalid return type for function `app\application\tracingpdo::prepare`: expected `PDOStatement|false`, but found `App\Application\TracingPdoStatement`.'
-count = 1
-
-[[issues]]
-file = "src/Application/TracingPdo.php"
 code = "mixed-assignment"
 message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
 count = 1
@@ -891,6 +885,12 @@ count = 1
 [[issues]]
 file = "src/Controller/Web/UsersPage.php"
 code = "invalid-method-access"
+message = "Attempting to access a method on a non-object type (`false`)."
+count = 3
+
+[[issues]]
+file = "src/Controller/Web/UsersPage.php"
+code = "invalid-method-access"
 message = 'Attempting to access a method on a non-object type (`unknown-ref(Psr\Log\LoggerInterface)`).'
 count = 1
 
@@ -929,6 +929,12 @@ file = "src/Controller/Web/UsersPage.php"
 code = "non-existent-method"
 message = 'Method `create` does not exist on type `Nyholm\Psr7\Stream`.'
 count = 1
+
+[[issues]]
+file = "src/Controller/Web/UsersPage.php"
+code = "redundant-cast"
+message = "Redundant cast to `(string)`: the expression already has this type."
+count = 3
 
 [[issues]]
 file = "src/Controller/Web/VarDumperPage.php"

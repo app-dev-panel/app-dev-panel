@@ -43,6 +43,12 @@ message = "Parameters that may contain sensitive information should be marked wi
 count = 1
 
 [[issues]]
+file = "src/Application/TracingPdo.php"
+code = "too-many-methods"
+message = "Class has too many methods."
+count = 1
+
+[[issues]]
 file = "src/Controller/TestFixtures/LogsAction.php"
 code = "no-debug-symbols"
 message = "Do not commit debug functions."
@@ -52,4 +58,10 @@ count = 1
 file = "src/Controller/TestFixtures/MultiAction.php"
 code = "no-debug-symbols"
 message = "Do not commit debug functions."
+count = 1
+
+[[issues]]
+file = "src/Controller/Web/UsersPage.php"
+code = "inline-variable-return"
+message = "Variable assignment can be inlined into the return statement."
 count = 1
