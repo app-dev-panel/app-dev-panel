@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Controller\TestFixtures;
 
-use App\Application\TracingPdo;
+use Cycle\Database\DatabaseProviderInterface;
 
 final class DatabaseAction
 {
     public function __construct(
-        private readonly TracingPdo $pdo,
+        private readonly DatabaseProviderInterface $dbal,
     ) {}
 
     /**
@@ -17,25 +17,23 @@ final class DatabaseAction
      */
     public function __invoke(): array
     {
-        // Schema (skip if already created — the playground keeps an in-memory database
-        // per request via the binding, so it's always fresh).
-        $this->pdo->exec('CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, name TEXT, email TEXT)');
+        $db = $this->dbal->database();
 
-        $insert = $this->pdo->prepare('INSERT INTO users (name, email) VALUES (?, ?)');
-        $insert->execute(['Alice', 'alice@adp.test']);
-        $insert->execute(['Bob', 'bob@adp.test']);
-        $insert->execute(['Charlie', 'charlie@adp.test']);
+        // Schema — table is fresh per request because the connection is in-memory.
+        $db->execute('CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, email TEXT)');
 
-        $stmt = $this->pdo->prepare('SELECT * FROM users WHERE name LIKE ?');
-        $stmt->execute(['A%']);
-        $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        $db->execute('INSERT INTO users (name, email) VALUES (?, ?)', ['Alice', 'alice@adp.test']);
+        $db->execute('INSERT INTO users (name, email) VALUES (?, ?)', ['Bob', 'bob@adp.test']);
+        $db->execute('INSERT INTO users (name, email) VALUES (?, ?)', ['Charlie', 'charlie@adp.test']);
 
-        $this->pdo->query('SELECT COUNT(*) FROM users');
+        $matched = $db->query('SELECT * FROM users WHERE name LIKE ?', ['A%'])->fetchAll();
+        $count = $db->query('SELECT COUNT(*) AS n FROM users')->fetch();
 
         return [
             'fixture' => 'database:basic',
             'status' => 'ok',
-            'matched' => $rows,
+            'matched' => $matched,
+            'total' => $count,
         ];
     }
 }

@@ -2,6 +2,12 @@ variant = "loose"
 
 [[issues]]
 file = "src/Application/Kernel.php"
+code = "kan-defect"
+message = "Class has a high kan defect score (1.6500000000000001)."
+count = 1
+
+[[issues]]
+file = "src/Application/Kernel.php"
 code = "no-redundant-use"
 message = "Unused import: `ContainerInterface`."
 count = 1
@@ -37,18 +43,6 @@ message = "Use of the `empty` construct."
 count = 1
 
 [[issues]]
-file = "src/Application/TracingPdo.php"
-code = "sensitive-parameter"
-message = "Parameters that may contain sensitive information should be marked with the `#[SensitiveParameter]` attribute."
-count = 1
-
-[[issues]]
-file = "src/Application/TracingPdo.php"
-code = "too-many-methods"
-message = "Class has too many methods."
-count = 1
-
-[[issues]]
 file = "src/Controller/TestFixtures/LogsAction.php"
 code = "no-debug-symbols"
 message = "Do not commit debug functions."
@@ -58,10 +52,4 @@ count = 1
 file = "src/Controller/TestFixtures/MultiAction.php"
 code = "no-debug-symbols"
 message = "Do not commit debug functions."
-count = 1
-
-[[issues]]
-file = "src/Controller/Web/UsersPage.php"
-code = "inline-variable-return"
-message = "Variable assignment can be inlined into the return statement."
 count = 1

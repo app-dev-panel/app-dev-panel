@@ -206,15 +206,43 @@ final class Kernel
 
         $bootloader->boot($this->container);
 
-        // Wire the TracingPdo to the DatabaseCollector lazily — both are now
-        // registered, so the next time PDO is resolved it'll forward each query
-        // to the collector. Done after `boot()` because the bootloader registers
-        // the collector singleton in `defineSingletons()`.
-        $this->container->bindSingleton(\App\Application\TracingPdo::class, function () {
-            $pdo = new \App\Application\TracingPdo('sqlite::memory:');
-            $pdo->setCollector($this->container->get(\AppDevPanel\Kernel\Collector\DatabaseCollector::class));
-            return $pdo;
+        // ─── Cycle ORM (cycle/database) ─────────────────────────────────────────
+        // File-backed SQLite (under var/) so the schema persists between requests —
+        // both /users and /inspect/api/table see the same tables. CycleQueryLogger
+        // doubles as a LoggerFactoryInterface for cycle/database — every successful
+        // query lands in DatabaseCollector with the driver-reported elapsed time.
+        $dbFile = dirname(__DIR__, 2) . '/var/db.sqlite';
+        $dbDir = dirname($dbFile);
+        if (!is_dir($dbDir)) {
+            mkdir($dbDir, 0o777, true);
+        }
+
+        $this->container->bindSingleton(\Cycle\Database\DatabaseProviderInterface::class, function () use ($dbFile) {
+            $factory =
+                new \App\Application\CycleQueryLogger($this->container->get(\AppDevPanel\Kernel\Collector\DatabaseCollector::class));
+
+            $config = new \Cycle\Database\Config\DatabaseConfig([
+                'default' => 'default',
+                'databases' => [
+                    'default' => ['connection' => 'sqlite'],
+                ],
+                'connections' => [
+                    'sqlite' => new \Cycle\Database\Config\SQLiteDriverConfig(
+                        connection: new \Cycle\Database\Config\SQLite\FileConnectionConfig($dbFile),
+                        queryCache: true,
+                    ),
+                ],
+            ]);
+
+            return new \Cycle\Database\DatabaseManager($config, $factory);
         });
+
+        // Replace NullSchemaProvider with the Cycle-backed implementation so
+        // /inspect/api/table reflects the live schema of the in-memory SQLite db.
+        $this->container->bindSingleton(
+            \AppDevPanel\Api\Inspector\Database\SchemaProviderInterface::class,
+            \AppDevPanel\Adapter\Cycle\Inspector\CycleSchemaProvider::class,
+        );
     }
 
     private function buildPipeline(): RequestHandlerInterface

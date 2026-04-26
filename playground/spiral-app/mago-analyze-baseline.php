@@ -1,10 +1,28 @@
 variant = "loose"
 
 [[issues]]
+file = "src/Application/CycleQueryLogger.php"
+code = "non-existent-class-like"
+message = 'Class `App\Application\CycleQueryLogger` cannot extend unknown type `AbstractLogger`'
+count = 1
+
+[[issues]]
+file = "src/Application/CycleQueryLogger.php"
+code = "non-existent-class-like"
+message = 'Class `App\Application\CycleQueryLogger` cannot implement unknown type `LoggerFactoryInterface`'
+count = 1
+
+[[issues]]
+file = "src/Application/CycleQueryLogger.php"
+code = "unused-property"
+message = "Property `$collector` is never used."
+count = 1
+
+[[issues]]
 file = "src/Application/Kernel.php"
 code = "impossible-assignment"
 message = "Invalid assignment: the right-hand side has type `never` and cannot produce a value."
-count = 4
+count = 5
 
 [[issues]]
 file = "src/Application/Kernel.php"
@@ -28,7 +46,7 @@ count = 1
 file = "src/Application/Kernel.php"
 code = "invalid-method-access"
 message = 'Attempting to access a method on a non-object type (`unknown-ref(Spiral\Core\Container)`).'
-count = 44
+count = 45
 
 [[issues]]
 file = "src/Application/Kernel.php"
@@ -45,7 +63,7 @@ count = 1
 [[issues]]
 file = "src/Application/Kernel.php"
 code = "mixed-argument"
-message = 'Invalid argument type for argument #1 of `App\Application\TracingPdo::setcollector`: expected `null|unknown-ref(AppDevPanel\Kernel\Collector\DatabaseCollector)`, but found `mixed`.'
+message = 'Invalid argument type for argument #1 of `app\application\cyclequerylogger::__construct`: expected `unknown-ref(AppDevPanel\Kernel\Collector\DatabaseCollector)`, but found `mixed`.'
 count = 1
 
 [[issues]]
@@ -98,8 +116,38 @@ count = 4
 
 [[issues]]
 file = "src/Application/Kernel.php"
+code = "never-return"
+message = "Cannot return value with type 'never' from this function."
+count = 1
+
+[[issues]]
+file = "src/Application/Kernel.php"
 code = "non-existent-class"
 message = 'Class `AppDevPanel\Adapter\Spiral\Bootloader\AppDevPanelBootloader` not found.'
+count = 1
+
+[[issues]]
+file = "src/Application/Kernel.php"
+code = "non-existent-class"
+message = 'Class `Cycle\Database\Config\DatabaseConfig` not found.'
+count = 1
+
+[[issues]]
+file = "src/Application/Kernel.php"
+code = "non-existent-class"
+message = 'Class `Cycle\Database\Config\SQLiteDriverConfig` not found.'
+count = 1
+
+[[issues]]
+file = "src/Application/Kernel.php"
+code = "non-existent-class"
+message = 'Class `Cycle\Database\Config\SQLite\FileConnectionConfig` not found.'
+count = 1
+
+[[issues]]
+file = "src/Application/Kernel.php"
+code = "non-existent-class"
+message = 'Class `Cycle\Database\DatabaseManager` not found.'
 count = 1
 
 [[issues]]
@@ -277,72 +325,6 @@ message = "Property `$streamFactory` is never used."
 count = 1
 
 [[issues]]
-file = "src/Application/TracingPdo.php"
-code = "invalid-method-access"
-message = 'Attempting to access a method on a non-object type (`unknown-ref(AppDevPanel\Kernel\Collector\DatabaseCollector)`).'
-count = 1
-
-[[issues]]
-file = "src/Application/TracingPdo.php"
-code = "mixed-assignment"
-message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
-count = 1
-
-[[issues]]
-file = "src/Application/TracingPdo.php"
-code = "non-existent-class"
-message = 'Class `AppDevPanel\Kernel\Collector\QueryRecord` not found.'
-count = 1
-
-[[issues]]
-file = "src/Application/TracingPdo.php"
-code = "non-existent-class-like"
-message = 'Cannot find class, interface, enum, or type alias `AppDevPanel\Kernel\Collector\DatabaseCollector`.'
-count = 2
-
-[[issues]]
-file = "src/Application/TracingPdo.php"
-code = "redundant-cast"
-message = "Redundant cast to `(string)`: the expression already has this type."
-count = 1
-
-[[issues]]
-file = "src/Application/TracingPdoStatement.php"
-code = "invalid-method-access"
-message = 'Attempting to access a method on a non-object type (`unknown-ref(AppDevPanel\Kernel\Collector\DatabaseCollector)`).'
-count = 1
-
-[[issues]]
-file = "src/Application/TracingPdoStatement.php"
-code = "mixed-assignment"
-message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
-count = 1
-
-[[issues]]
-file = "src/Application/TracingPdoStatement.php"
-code = "non-existent-class"
-message = 'Class `AppDevPanel\Kernel\Collector\QueryRecord` not found.'
-count = 1
-
-[[issues]]
-file = "src/Application/TracingPdoStatement.php"
-code = "non-existent-class-like"
-message = 'Cannot find class, interface, enum, or type alias `AppDevPanel\Kernel\Collector\DatabaseCollector`.'
-count = 1
-
-[[issues]]
-file = "src/Application/TracingPdoStatement.php"
-code = "redundant-cast"
-message = "Redundant cast to `(string)`: the expression already has this type."
-count = 1
-
-[[issues]]
-file = "src/Application/TracingPdoStatement.php"
-code = "string-member-selector"
-message = "This member selector uses a non-literal string type (`string`); its specific value cannot be statically determined."
-count = 3
-
-[[issues]]
 file = "src/Controller/TestFixtures/CacheAction.php"
 code = "invalid-method-access"
 message = 'Attempting to access a method on a non-object type (`unknown-ref(AppDevPanel\Kernel\Collector\CacheCollector)`).'
@@ -381,13 +363,25 @@ count = 1
 [[issues]]
 file = "src/Controller/TestFixtures/DatabaseAction.php"
 code = "invalid-method-access"
-message = "Attempting to access a method on a non-object type (`false`)."
-count = 5
+message = 'Attempting to access a method on a non-object type (`unknown-ref(Cycle\Database\DatabaseProviderInterface)`).'
+count = 1
 
 [[issues]]
 file = "src/Controller/TestFixtures/DatabaseAction.php"
 code = "mixed-assignment"
 message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 3
+
+[[issues]]
+file = "src/Controller/TestFixtures/DatabaseAction.php"
+code = "mixed-method-access"
+message = "Attempting to access a method on a non-object type (`mixed`)."
+count = 8
+
+[[issues]]
+file = "src/Controller/TestFixtures/DatabaseAction.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Cycle\Database\DatabaseProviderInterface`.'
 count = 1
 
 [[issues]]
@@ -884,9 +878,15 @@ count = 1
 
 [[issues]]
 file = "src/Controller/Web/UsersPage.php"
+code = "invalid-iterator"
+message = "The expression provided to `foreach` is not iterable. It resolved to type `mixed`, which is not iterable."
+count = 1
+
+[[issues]]
+file = "src/Controller/Web/UsersPage.php"
 code = "invalid-method-access"
-message = "Attempting to access a method on a non-object type (`false`)."
-count = 3
+message = 'Attempting to access a method on a non-object type (`unknown-ref(Cycle\Database\DatabaseProviderInterface)`).'
+count = 1
 
 [[issues]]
 file = "src/Controller/Web/UsersPage.php"
@@ -896,9 +896,27 @@ count = 1
 
 [[issues]]
 file = "src/Controller/Web/UsersPage.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `count`: expected `Countable|array<array-key, mixed>`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "src/Controller/Web/UsersPage.php"
+code = "mixed-array-access"
+message = "Unsafe array access on type `mixed`."
+count = 4
+
+[[issues]]
+file = "src/Controller/Web/UsersPage.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 3
+
+[[issues]]
+file = "src/Controller/Web/UsersPage.php"
 code = "mixed-method-access"
 message = "Attempting to access a method on a non-object type (`mixed`)."
-count = 1
+count = 5
 
 [[issues]]
 file = "src/Controller/Web/UsersPage.php"
@@ -910,6 +928,12 @@ count = 1
 file = "src/Controller/Web/UsersPage.php"
 code = "non-existent-class"
 message = 'Class `Nyholm\Psr7\Response` not found.'
+count = 1
+
+[[issues]]
+file = "src/Controller/Web/UsersPage.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `Cycle\Database\DatabaseProviderInterface`.'
 count = 1
 
 [[issues]]
@@ -929,12 +953,6 @@ file = "src/Controller/Web/UsersPage.php"
 code = "non-existent-method"
 message = 'Method `create` does not exist on type `Nyholm\Psr7\Stream`.'
 count = 1
-
-[[issues]]
-file = "src/Controller/Web/UsersPage.php"
-code = "redundant-cast"
-message = "Redundant cast to `(string)`: the expression already has this type."
-count = 3
 
 [[issues]]
 file = "src/Controller/Web/VarDumperPage.php"

@@ -5,7 +5,9 @@
     "license": "MIT",
     "require": {
         "php": "^8.4",
+        "app-dev-panel/adapter-cycle": "*",
         "app-dev-panel/adapter-spiral": "*",
+        "cycle/database": "^2.0",
         "monolog/monolog": "^3.5",
         "nyholm/psr7": "^1.8",
         "nyholm/psr7-server": "^1.1",
@@ -19,6 +21,10 @@
         "phpunit/phpunit": "^11.5"
     },
     "repositories": [
+        {
+            "type": "path",
+            "url": "../../libs/Adapter/Cycle"
+        },
         {
             "type": "path",
             "url": "../../libs/Adapter/Spiral"
