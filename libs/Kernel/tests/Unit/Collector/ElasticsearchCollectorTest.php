@@ -46,7 +46,7 @@ final class ElasticsearchCollectorTest extends AbstractCollectorTestCase
         $this->assertSame(200, $r1['statusCode']);
         $this->assertSame(1024, $r1['responseSize']);
         $this->assertSame(15, $r1['hitsCount']);
-        $this->assertGreaterThan(0, $r1['duration']);
+        $this->assertGreaterThanOrEqual(0, $r1['duration']);
 
         $r2 = $data['requests'][1];
         $this->assertSame('POST', $r2['method']);

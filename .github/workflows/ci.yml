@@ -33,11 +33,26 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php }}
-          extensions: mbstring, sockets, zip, redis, pcov
+          extensions: mbstring, sockets, zip, pcov
           coverage: pcov
           tools: composer:v2
         env:
           COMPOSER_ALLOW_SUPERUSER: 1
+          fail-fast: 'true'
+
+      # phpredis isn't installed via setup-php's extension shortcut because the
+      # prebuilt cache lags behind new PHP majors (PHP 8.5 silently fell back to
+      # PECL build, which then failed without failing the workflow). Install it
+      # from the sury PPA — already present after setup-php on Ubuntu — so both
+      # 8.4 and 8.5 cells get a binary build.
+      - name: Install phpredis from sury PPA
+        run: sudo apt-get install -y --no-install-recommends php${{ matrix.php }}-redis
+
+      - name: Verify required PHP extensions
+        run: |
+          for ext in redis pcov mbstring sockets zip; do
+            php -r "exit(extension_loaded('$ext') ? 0 : 1);" || { echo "::error::Missing PHP extension: $ext"; exit 1; }
+          done
 
       - name: Get Composer cache directory
         id: composer-cache

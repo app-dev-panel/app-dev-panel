@@ -681,9 +681,10 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
                         open={ui.mobileMenuOpen}
                         onClose={handleMenuClose}
                         ModalProps={{keepMounted: true}}
-                        sx={{'& .MuiDrawer-paper': {width: 240, pt: 1}}}
+                        sx={{'& .MuiDrawer-paper': {width: 'min(82vw, 320px)', borderRight: 'none'}}}
                     >
                         <UnifiedSidebar
+                            variant="plain"
                             sections={sidebarSections}
                             activePath={location.pathname}
                             activeChildKey={activeChildKey}
