@@ -23,6 +23,10 @@ const PillRoot = styled('button')(({theme}) => ({
     fontFamily: theme.typography.fontFamily,
     color: theme.palette.text.primary,
     width: '100%',
+    minWidth: 0,
+    overflow: 'hidden',
+    isolation: 'isolate',
+    [theme.breakpoints.down('sm')]: {gap: theme.spacing(0.75), padding: theme.spacing(0.5, 1.25)},
     '&:hover': {borderColor: theme.palette.primary.main},
 }));
 
@@ -52,7 +56,13 @@ const methodColor = (method: string, theme: Theme): string => {
     }
 };
 
-const Separator = styled('span')(({theme}) => ({color: theme.palette.divider, flexShrink: 0}));
+const Divider = styled('span')(({theme}) => ({
+    width: 1,
+    alignSelf: 'stretch',
+    margin: theme.spacing(0.5, 0),
+    backgroundColor: theme.palette.divider,
+    flexShrink: 0,
+}));
 
 const MethodLabel = styled('span')({fontWeight: 600, fontSize: '11px', flexShrink: 0, whiteSpace: 'nowrap'});
 
@@ -65,6 +75,7 @@ const PathLabel = styled('span')(({theme}) => ({
     textOverflow: 'ellipsis',
     whiteSpace: 'nowrap',
     textAlign: 'left',
+    [theme.breakpoints.down('sm')]: {display: 'none'},
 }));
 
 const StatusLabel = styled('span')({fontWeight: 500, fontSize: '12px', flexShrink: 0, whiteSpace: 'nowrap'});
@@ -76,6 +87,13 @@ const DurationLabel = styled('span')(({theme}) => ({
     whiteSpace: 'nowrap',
 }));
 
+const ChevronIcon = styled(Icon)(({theme}) => ({
+    fontSize: 16,
+    color: theme.palette.text.disabled,
+    flexShrink: 0,
+    marginLeft: 'auto',
+}));
+
 export const RequestPill = React.memo(({method, path, status, duration, onClick}: RequestPillProps) => {
     const theme = useTheme();
     const isCli = method.toUpperCase() === 'CLI';
@@ -85,11 +103,11 @@ export const RequestPill = React.memo(({method, path, status, duration, onClick}
             {isCli && <Icon sx={{fontSize: 14, color: 'info.main', flexShrink: 0}}>terminal</Icon>}
             <MethodLabel sx={{color: methodColor(method, theme)}}>{method}</MethodLabel>
             <PathLabel>{path}</PathLabel>
-            <Separator>&mdash;</Separator>
+            <Divider />
             <StatusLabel sx={{color: statusColor(status, isCli, theme)}}>{statusLabel}</StatusLabel>
-            <Separator>&mdash;</Separator>
+            <Divider />
             <DurationLabel>{duration}</DurationLabel>
-            <Icon sx={{fontSize: 16, color: 'text.disabled'}}>expand_more</Icon>
+            <ChevronIcon>expand_more</ChevronIcon>
         </PillRoot>
     );
 });

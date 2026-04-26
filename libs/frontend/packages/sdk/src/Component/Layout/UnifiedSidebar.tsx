@@ -20,28 +20,37 @@ type NavChild = {
 
 type NavSection = {key: string; icon: string; label: string; href: string; children?: NavChild[]};
 
+type UnifiedSidebarVariant = 'card' | 'plain';
+
 type UnifiedSidebarProps = {
     sections: NavSection[];
     activePath: string;
     activeChildKey?: string;
     onNavigate: (href: string) => void;
     onChildClick?: (sectionKey: string, childKey: string) => void;
+    /**
+     * `card` (default) — bordered Paper with rounded corners; for the desktop sidebar slot.
+     * `plain` — flat, full-width, no border, no radius; for use inside a mobile Drawer where
+     * the Drawer itself already provides the surface.
+     */
+    variant?: UnifiedSidebarVariant;
 };
 
 // ---------------------------------------------------------------------------
 // Styled components
 // ---------------------------------------------------------------------------
 
-const SidebarRoot = styled(Paper)(({theme}) => ({
-    width: componentTokens.sidebar.width,
-    borderRadius: componentTokens.sidebar.borderRadius,
+const SidebarRoot = styled(Paper, {shouldForwardProp: (p) => p !== 'plain'})<{plain?: boolean}>(({theme, plain}) => ({
+    width: plain ? '100%' : componentTokens.sidebar.width,
+    borderRadius: plain ? 0 : componentTokens.sidebar.borderRadius,
     display: 'flex',
     flexDirection: 'column',
-    padding: theme.spacing(1.5, 1),
+    padding: plain ? theme.spacing(1, 0.75) : theme.spacing(1.5, 1),
     gap: theme.spacing(0.25),
     flexShrink: 0,
-    height: 'min-content',
+    height: plain ? '100%' : 'min-content',
     overflowY: 'auto',
+    ...(plain && {border: 'none', boxShadow: 'none', backgroundColor: 'transparent'}),
 }));
 
 const ChildList = styled('div')(({theme}) => ({
@@ -201,7 +210,7 @@ const SidebarSection = React.memo(
 // ---------------------------------------------------------------------------
 
 export const UnifiedSidebar = React.memo(
-    ({sections, activePath, activeChildKey, onNavigate, onChildClick}: UnifiedSidebarProps) => {
+    ({sections, activePath, activeChildKey, onNavigate, onChildClick, variant = 'card'}: UnifiedSidebarProps) => {
         const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
         const prevPathRef = useRef(activePath);
 
@@ -240,8 +249,10 @@ export const UnifiedSidebar = React.memo(
             [sections, activePath],
         );
 
+        const plain = variant === 'plain';
+
         return (
-            <SidebarRoot variant="outlined">
+            <SidebarRoot variant={plain ? 'elevation' : 'outlined'} elevation={0} plain={plain}>
                 {sections.map((section, idx) => {
                     const isSectionMatch =
                         section.href === '/' ? activePath === '/' : activePath.startsWith(section.href);
