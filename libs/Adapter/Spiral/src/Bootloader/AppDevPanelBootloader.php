@@ -25,6 +25,7 @@ use AppDevPanel\Api\Toolbar\ToolbarConfig;
 use AppDevPanel\Api\Toolbar\ToolbarInjector;
 use AppDevPanel\Kernel\Collector\CacheCollector;
 use AppDevPanel\Kernel\Collector\CollectorInterface;
+use AppDevPanel\Kernel\Collector\DatabaseCollector;
 use AppDevPanel\Kernel\Collector\EventCollector;
 use AppDevPanel\Kernel\Collector\EventDispatcherInterfaceProxy;
 use AppDevPanel\Kernel\Collector\ExceptionCollector;
@@ -110,6 +111,7 @@ final class AppDevPanelBootloader extends Bootloader
         TemplateCollector::class => TemplateCollector::class,
         MailerCollector::class => MailerCollector::class,
         QueueCollector::class => QueueCollector::class,
+        DatabaseCollector::class => DatabaseCollector::class,
 
         // API
         CollectorRepositoryInterface::class => [self::class, 'initCollectorRepository'],
@@ -245,6 +247,7 @@ final class AppDevPanelBootloader extends Bootloader
             TemplateCollector::class,
             MailerCollector::class,
             QueueCollector::class,
+            DatabaseCollector::class,
         ];
     }
 

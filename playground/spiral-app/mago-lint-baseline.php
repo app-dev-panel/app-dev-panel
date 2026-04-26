@@ -37,6 +37,12 @@ message = "Use of the `empty` construct."
 count = 1
 
 [[issues]]
+file = "src/Application/TracingPdo.php"
+code = "sensitive-parameter"
+message = "Parameters that may contain sensitive information should be marked with the `#[SensitiveParameter]` attribute."
+count = 1
+
+[[issues]]
 file = "src/Controller/TestFixtures/LogsAction.php"
 code = "no-debug-symbols"
 message = "Do not commit debug functions."

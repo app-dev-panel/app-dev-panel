@@ -6,6 +6,7 @@ namespace App\Application;
 
 use App\Controller\TestFixtures\CacheAction;
 use App\Controller\TestFixtures\CacheHeavyAction;
+use App\Controller\TestFixtures\DatabaseAction;
 use App\Controller\TestFixtures\DumpAction;
 use App\Controller\TestFixtures\EventsAction;
 use App\Controller\TestFixtures\ExceptionAction;
@@ -154,6 +155,9 @@ final class Kernel
         // itself. Avoids a hard dependency on Guzzle while still exercising the proxy.
         $this->container->bindSingleton(ClientInterface::class, new LoopbackHttpClient());
 
+        // PDO is bound in registerAdpBootloader() once the DatabaseCollector singleton
+        // exists in the container — see the closure there.
+
         // Shared HTML layout helper for the demo pages
         $this->container->bindSingleton(Layout::class, new Layout());
 
@@ -185,6 +189,7 @@ final class Kernel
         $this->container->bindSingleton(ValidatorAction::class, ValidatorAction::class);
         $this->container->bindSingleton(CacheAction::class, CacheAction::class);
         $this->container->bindSingleton(CacheHeavyAction::class, CacheHeavyAction::class);
+        $this->container->bindSingleton(DatabaseAction::class, DatabaseAction::class);
         $this->container->bindSingleton(TranslatorAction::class, TranslatorAction::class);
         $this->container->bindSingleton(ViewAction::class, ViewAction::class);
         $this->container->bindSingleton(MailerAction::class, MailerAction::class);
@@ -200,6 +205,17 @@ final class Kernel
         }
 
         $bootloader->boot($this->container);
+
+        // Wire the TracingPdo to the DatabaseCollector lazily — both are now
+        // registered, so the next time PDO is resolved it'll forward each query
+        // to the collector. Done after `boot()` because the bootloader registers
+        // the collector singleton in `defineSingletons()`.
+        $this->container->bindSingleton(\App\Application\TracingPdo::class, function () {
+            $pdo = new \App\Application\TracingPdo('sqlite::memory:');
+            $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+            $pdo->setCollector($this->container->get(\AppDevPanel\Kernel\Collector\DatabaseCollector::class));
+            return $pdo;
+        });
     }
 
     private function buildPipeline(): RequestHandlerInterface
@@ -237,6 +253,7 @@ final class Kernel
                 '/test/fixtures/validator' => ValidatorAction::class,
                 '/test/fixtures/cache' => CacheAction::class,
                 '/test/fixtures/cache-heavy' => CacheHeavyAction::class,
+                '/test/fixtures/database' => DatabaseAction::class,
                 '/test/fixtures/translator' => TranslatorAction::class,
                 '/test/fixtures/view' => ViewAction::class,
                 '/test/fixtures/mailer' => MailerAction::class,

@@ -28,7 +28,7 @@ count = 1
 file = "src/Application/Kernel.php"
 code = "invalid-method-access"
 message = 'Attempting to access a method on a non-object type (`unknown-ref(Spiral\Core\Container)`).'
-count = 41
+count = 44
 
 [[issues]]
 file = "src/Application/Kernel.php"
@@ -40,6 +40,12 @@ count = 1
 file = "src/Application/Kernel.php"
 code = "mixed-argument"
 message = 'Invalid argument type for argument #1 of `App\Application\Kernel::emit`: expected `unknown-ref(Psr\Http\Message\ResponseInterface)`, but found `mixed`.'
+count = 1
+
+[[issues]]
+file = "src/Application/Kernel.php"
+code = "mixed-argument"
+message = 'Invalid argument type for argument #1 of `App\Application\TracingPdo::setcollector`: expected `null|unknown-ref(AppDevPanel\Kernel\Collector\DatabaseCollector)`, but found `mixed`.'
 count = 1
 
 [[issues]]
@@ -153,13 +159,13 @@ count = 2
 [[issues]]
 file = "src/Application/Kernel.php"
 code = "non-existent-class-like"
-message = "Class `class@anonymous:8718526727076628416-4056:4483` cannot implement unknown type `ListenerProviderInterface`"
+message = "Class `class@anonymous:8718526727076628416-4104:4531` cannot implement unknown type `ListenerProviderInterface`"
 count = 1
 
 [[issues]]
 file = "src/Application/Kernel.php"
 code = "non-existent-class-like"
-message = "Class `class@anonymous:8718526727076628416-4844:5325` cannot implement unknown type `EventDispatcherInterface`"
+message = "Class `class@anonymous:8718526727076628416-4892:5373` cannot implement unknown type `EventDispatcherInterface`"
 count = 1
 
 [[issues]]
@@ -177,7 +183,7 @@ count = 1
 [[issues]]
 file = "src/Application/Kernel.php"
 code = "possibly-invalid-argument"
-message = 'Possible argument type mismatch for argument #1 of `class@anonymous:8718526727076628416-4844:5325::__construct`: expected `unknown-ref(Psr\EventDispatcher\ListenerProviderInterface)`, but possibly received `class@anonymous:8718526727076628416-4056:4483`.'
+message = 'Possible argument type mismatch for argument #1 of `class@anonymous:8718526727076628416-4892:5373::__construct`: expected `unknown-ref(Psr\EventDispatcher\ListenerProviderInterface)`, but possibly received `class@anonymous:8718526727076628416-4104:4531`.'
 count = 1
 
 [[issues]]
@@ -271,6 +277,78 @@ message = "Property `$streamFactory` is never used."
 count = 1
 
 [[issues]]
+file = "src/Application/TracingPdo.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(AppDevPanel\Kernel\Collector\DatabaseCollector)`).'
+count = 1
+
+[[issues]]
+file = "src/Application/TracingPdo.php"
+code = "invalid-return-statement"
+message = 'Invalid return type for function `app\application\tracingpdo::prepare`: expected `PDOStatement|false`, but found `App\Application\TracingPdoStatement`.'
+count = 1
+
+[[issues]]
+file = "src/Application/TracingPdo.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 1
+
+[[issues]]
+file = "src/Application/TracingPdo.php"
+code = "non-existent-class"
+message = 'Class `AppDevPanel\Kernel\Collector\QueryRecord` not found.'
+count = 1
+
+[[issues]]
+file = "src/Application/TracingPdo.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `AppDevPanel\Kernel\Collector\DatabaseCollector`.'
+count = 2
+
+[[issues]]
+file = "src/Application/TracingPdo.php"
+code = "redundant-cast"
+message = "Redundant cast to `(string)`: the expression already has this type."
+count = 1
+
+[[issues]]
+file = "src/Application/TracingPdoStatement.php"
+code = "invalid-method-access"
+message = 'Attempting to access a method on a non-object type (`unknown-ref(AppDevPanel\Kernel\Collector\DatabaseCollector)`).'
+count = 1
+
+[[issues]]
+file = "src/Application/TracingPdoStatement.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 1
+
+[[issues]]
+file = "src/Application/TracingPdoStatement.php"
+code = "non-existent-class"
+message = 'Class `AppDevPanel\Kernel\Collector\QueryRecord` not found.'
+count = 1
+
+[[issues]]
+file = "src/Application/TracingPdoStatement.php"
+code = "non-existent-class-like"
+message = 'Cannot find class, interface, enum, or type alias `AppDevPanel\Kernel\Collector\DatabaseCollector`.'
+count = 1
+
+[[issues]]
+file = "src/Application/TracingPdoStatement.php"
+code = "redundant-cast"
+message = "Redundant cast to `(string)`: the expression already has this type."
+count = 1
+
+[[issues]]
+file = "src/Application/TracingPdoStatement.php"
+code = "string-member-selector"
+message = "This member selector uses a non-literal string type (`string`); its specific value cannot be statically determined."
+count = 3
+
+[[issues]]
 file = "src/Controller/TestFixtures/CacheAction.php"
 code = "invalid-method-access"
 message = 'Attempting to access a method on a non-object type (`unknown-ref(AppDevPanel\Kernel\Collector\CacheCollector)`).'
@@ -304,6 +382,18 @@ count = 1
 file = "src/Controller/TestFixtures/CacheHeavyAction.php"
 code = "non-existent-class-like"
 message = 'Cannot find class, interface, enum, or type alias `AppDevPanel\Kernel\Collector\CacheCollector`.'
+count = 1
+
+[[issues]]
+file = "src/Controller/TestFixtures/DatabaseAction.php"
+code = "invalid-method-access"
+message = "Attempting to access a method on a non-object type (`false`)."
+count = 5
+
+[[issues]]
+file = "src/Controller/TestFixtures/DatabaseAction.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
 count = 1
 
 [[issues]]
