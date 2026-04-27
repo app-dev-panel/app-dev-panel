@@ -3,7 +3,6 @@
 declare(strict_types=1);
 
 use AppDevPanel\Adapter\Symfony\Controller\AdpApiController;
-use AppDevPanel\Adapter\Symfony\Controller\AdpAssetsController;
 use Symfony\Component\Routing\Loader\Configurator\RoutingConfigurator;
 
 return static function (RoutingConfigurator $routes): void {
@@ -32,15 +31,11 @@ return static function (RoutingConfigurator $routes): void {
         ->controller(AdpApiController::class)
         ->methods(['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS']);
 
-    // Static assets — streams the panel/toolbar bundle from `app-dev-panel/frontend-assets`.
-    // Registered unconditionally; the controller 404s when the package is missing.
-    $routes
-        ->add('adp_assets', AdpAssetsController::ROUTE_PREFIX . '/{path}')
-        ->controller(AdpAssetsController::class)
-        ->requirements(['path' => '.+'])
-        ->methods(['GET']);
-
-    // Panel routes — serves the embedded SPA (catch-all for client-side routing)
+    // Panel routes — serves the embedded SPA (catch-all for client-side routing).
+    // Static assets (panel + toolbar bundle) are NOT served by PHP — run
+    // `bin/console app-dev-panel:assets:install` to copy or symlink them into
+    // `public/bundles/appdevpanel/`, then let the web server (nginx/Apache)
+    // serve them directly.
     $routes
         ->add('adp_panel', '/debug/{path}')
         ->controller(AdpApiController::class)

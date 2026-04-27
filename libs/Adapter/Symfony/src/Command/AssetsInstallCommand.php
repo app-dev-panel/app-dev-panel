@@ -16,15 +16,14 @@ use Symfony\Component\Filesystem\Filesystem;
 /**
  * Publishes the prebuilt panel + toolbar bundle from
  * `app-dev-panel/frontend-assets` into `public/bundles/appdevpanel/`, so nginx
- * (or any web server) can serve the files directly without the runtime
- * {@see \AppDevPanel\Adapter\Symfony\Controller\AdpAssetsController}.
+ * (or any web server) serves the files directly. PHP never proxies the bundle.
  *
  * Mirrors the UX of Symfony's stock `assets:install` — supports `--symlink`,
  * `--relative`, and falls back to `--copy`.
  *
- * After running, set `app_dev_panel.panel.static_url: /bundles/appdevpanel` in
- * your config to prefer the prebaked copy (the extension already prefers it
- * automatically when `Resources/public/bundle.js` is present in the bundle).
+ * After running, the bundle auto-detects the published copy and points the
+ * panel at `/bundles/appdevpanel`; until then `panel.static_url` falls back
+ * to {@see PanelConfig::DEFAULT_STATIC_URL} (the GitHub Pages CDN).
  */
 #[AsCommand(
     name: 'app-dev-panel:assets:install',
@@ -104,8 +103,9 @@ final class AssetsInstallCommand extends Command
 
         $io->success(sprintf('Installed ADP panel + toolbar assets at %s (%s from %s).', $target, $method, $source));
         $io->note(
-            'Optional: set `app_dev_panel.panel.static_url: /bundles/appdevpanel` in '
-            . 'config/packages/app_dev_panel.yaml to skip the runtime AdpAssetsController.',
+            'The bundle auto-detects the published copy. Set '
+            . '`app_dev_panel.panel.static_url: /bundles/appdevpanel` in '
+            . 'config/packages/app_dev_panel.yaml only to override the default.',
         );
 
         return Command::SUCCESS;

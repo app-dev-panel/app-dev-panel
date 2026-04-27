@@ -69,17 +69,7 @@ Additionally:
 
 ## Installing Assets
 
-The panel and toolbar bundles are shipped by the Composer package <pkg>app-dev-panel/frontend-assets</pkg> (installed transitively when you `composer require app-dev-panel/adapter-symfony`). The adapter exposes them in two complementary ways — pick whichever matches your deployment:
-
-### Runtime route — `/_adp-assets/*` (default, zero setup)
-
-`AdpAssetsController` streams files directly from `vendor/app-dev-panel/frontend-assets/dist/`. When `app_dev_panel.panel.static_url` is left empty, the bundle automatically points the panel at `/_adp-assets`, so nothing else is required. Path-traversal requests are rejected with 404.
-
-This is fine for dev environments and small installs; each static file costs one PHP request.
-
-### Prebake — `public/bundles/appdevpanel/` (for prod)
-
-Run the bundled command once to copy (or symlink) the assets into your public directory so nginx/Apache serves them directly:
+The panel and toolbar bundles are shipped by the Composer package <pkg>app-dev-panel/frontend-assets</pkg> (installed transitively when you `composer require app-dev-panel/adapter-symfony`). Static files are served by the **web server** — PHP never proxies them. Run the bundled command once after install to publish them under `public/`:
 
 ```bash
 # copy (safe on all platforms)
@@ -93,13 +83,13 @@ php bin/console app-dev-panel:assets:install --relative
 php bin/console app-dev-panel:assets:install --public-dir=/var/www/html
 ```
 
-After prebaking, set `app_dev_panel.panel.static_url: /bundles/appdevpanel` (or leave it empty — the bundle auto-detects the local copy and prefers it over the runtime route).
+The bundle auto-detects the published copy and points the panel at `/bundles/appdevpanel`. Until you run the command, the panel falls back to the GitHub Pages CDN.
 
 | `static_url` resolution order | When it kicks in |
 |-------------------------------|------------------|
-| 1. `Resources/public/bundle.js` exists → `/bundles/appdevpanel` | Legacy `make build-panel` flow, or after `app-dev-panel:assets:install` when using `--symlink` into `Resources/public/` |
-| 2. `FrontendAssets::exists()` → `/_adp-assets` | Default — works right after `composer require` |
-| 3. `PanelConfig::DEFAULT_STATIC_URL` (GitHub Pages) | Last resort |
+| 1. `<projectDir>/public/bundles/appdevpanel/bundle.js` exists → `/bundles/appdevpanel` | After `bin/console app-dev-panel:assets:install` |
+| 2. `Resources/public/bundle.js` exists → `/bundles/appdevpanel` | Legacy `make build-panel` flow before Symfony's `assets:install` |
+| 3. `PanelConfig::DEFAULT_STATIC_URL` (GitHub Pages) | Default — works right after `composer require`, no commands required |
 
 ## Translator Integration
 

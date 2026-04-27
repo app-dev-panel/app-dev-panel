@@ -44,10 +44,9 @@ src/
 │   ├── SymfonyUrlMatcherAdapter.php                # URL matching adapter
 │   └── SymfonyMatchResult.php                      # Match result DTO
 ├── Controller/
-│   ├── AdpApiController.php                        # Symfony controller bridging to ADP ApiApplication
-│   └── AdpAssetsController.php                     # Streams FrontendAssets panel + toolbar files at `/_adp-assets/*`
+│   └── AdpApiController.php                        # Symfony controller bridging to ADP ApiApplication
 └── Command/
-    └── AssetsInstallCommand.php                    # `app-dev-panel:assets:install` — prebake FrontendAssets into public/bundles/appdevpanel/
+    └── AssetsInstallCommand.php                    # `app-dev-panel:assets:install` — copies/symlinks FrontendAssets into public/bundles/appdevpanel/ for the web server
 tests/
 ├── Integration/
 │   ├── BundleBootstrapTest.php                     # Full container compilation + lifecycle
@@ -82,16 +81,15 @@ Registers in order:
 - API services: middleware stack, controllers, inspector endpoints
 - Inspector: `SymfonyConfigProvider` as `config` alias, `DoctrineSchemaProvider` or `NullSchemaProvider`
 - Bridge: `AdpApiController` maps Symfony routing to `ApiApplication`
-- Static assets: `AdpAssetsController` (tagged `controller.service_arguments`) streams `FrontendAssets::path()` at `/_adp-assets/*`. Used as `panel.static_url` when set to empty and `Resources/public/bundle.js` is absent
-- Console: `AssetsInstallCommand` (`app-dev-panel:assets:install`) tagged `console.command` — copies/symlinks `FrontendAssets::path()` into `public/bundles/appdevpanel/`
+- Console: `AssetsInstallCommand` (`app-dev-panel:assets:install`) tagged `console.command` — copies/symlinks `FrontendAssets::path()` into `public/bundles/appdevpanel/` so the web server (nginx/Apache) serves the panel + toolbar bundle directly
 
 ### Panel static URL resolution
 
-`AppDevPanelExtension::load()` picks `panel.static_url` in this order when the user leaves it empty:
+Static files are served by the web server, not by PHP. `AppDevPanelExtension::load()` picks `panel.static_url` in this order when the user leaves it empty:
 
-1. `Resources/public/bundle.js` exists → `/bundles/appdevpanel` (legacy `make build-panel` or after `app-dev-panel:assets:install --symlink`)
-2. `FrontendAssets::exists()` → `/_adp-assets` (runtime streaming via `AdpAssetsController`)
-3. `PanelConfig::DEFAULT_STATIC_URL` (GitHub Pages CDN)
+1. `<projectDir>/public/bundles/appdevpanel/bundle.js` exists (after `bin/console app-dev-panel:assets:install`) → `/bundles/appdevpanel`
+2. `Resources/public/bundle.js` exists (legacy `make build-panel` flow before Symfony's `assets:install`) → `/bundles/appdevpanel`
+3. `PanelConfig::DEFAULT_STATIC_URL` (GitHub Pages CDN) — fallback when nothing has been published yet
 
 ### 4. Compiler Pass (`CollectorProxyCompilerPass`)
 
