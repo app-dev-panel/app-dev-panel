@@ -63,6 +63,7 @@ describe('SsrPanel.slots — parsers', () => {
             'file-link',
             'filter',
             'json',
+            'page-toolbar',
             'tabs',
             'tooltip',
         ]);

@@ -3,18 +3,50 @@ import {
     useGetCommandsQuery,
     useRunCommandMutation,
 } from '@app-dev-panel/panel/Module/Inspector/API/Inspector';
+import {
+    CommandButton,
+    type CommandRunStatus,
+} from '@app-dev-panel/panel/Module/Inspector/Component/Command/CommandButton';
 import {CommandErrorAlert} from '@app-dev-panel/panel/Module/Inspector/Component/Command/CommandErrorAlert';
 import {extractCommandError} from '@app-dev-panel/panel/Module/Inspector/Component/Command/extractCommandError';
 import {ResultDialog} from '@app-dev-panel/panel/Module/Inspector/Component/Command/ResultDialog';
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
+import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
 import {FullScreenCircularProgress} from '@app-dev-panel/sdk/Component/FullScreenCircularProgress';
 import {PageHeader} from '@app-dev-panel/sdk/Component/PageHeader';
+import {PageToolbar} from '@app-dev-panel/sdk/Component/PageToolbar';
 import {QueryErrorState} from '@app-dev-panel/sdk/Component/QueryErrorState';
-import {Box, Button, CircularProgress, Link, Typography} from '@mui/material';
-import {useEffect, useMemo, useState} from 'react';
+import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
+import {searchVariants} from '@app-dev-panel/sdk/Helper/layoutTranslit';
+import {Box, Icon, Link} from '@mui/material';
+import {Fragment, useDeferredValue, useEffect, useMemo, useState} from 'react';
 
 type GroupedCommands = Record<string, CommandType[]>;
-type CommandStatusMap = Record<string, {isLoading: boolean; response: null | unknown}>;
+type CommandRunState = {status: CommandRunStatus};
+type CommandStatusMap = Record<string, CommandRunState>;
+
+const groupHeadingIcon: Record<string, string> = {
+    test: 'science',
+    tests: 'science',
+    analyse: 'insights',
+    analyze: 'insights',
+    analysis: 'insights',
+    composer: 'inventory_2',
+    coverage: 'pie_chart',
+    build: 'construction',
+    deploy: 'rocket_launch',
+    db: 'storage',
+    database: 'storage',
+    cache: 'memory',
+    server: 'dns',
+};
+
+const formatGroupLabel = (group: string): string => {
+    if (!group) return 'Other';
+    return group.charAt(0).toUpperCase() + group.slice(1);
+};
+
+const resolveGroupHeadingIcon = (group: string): string => groupHeadingIcon[group.toLowerCase()] ?? 'terminal';
 
 export const CommandsPage = () => {
     const {data: commands, isLoading, isError, error, refetch} = useGetCommandsQuery();
@@ -24,21 +56,40 @@ export const CommandsPage = () => {
     const [showResultDialog, setShowResultDialog] = useState<boolean>(false);
     const [runError, setRunError] = useState<string[] | null>(null);
     const [lastCommand, setLastCommand] = useState<CommandType | null>(null);
+    const [activeCommandName, setActiveCommandName] = useState<string | null>(null);
+    const [filter, setFilter] = useState('');
+    const deferredFilter = useDeferredValue(filter);
+
+    const filteredCommands = useMemo<CommandType[]>(() => {
+        if (!commands) return [];
+        const query = deferredFilter.trim().toLowerCase();
+        if (!query) return commands;
+        const variants = searchVariants(query).map((v) => v.toLowerCase());
+        return commands.filter((command) => {
+            const haystack = [command.title, command.description, command.group, command.name]
+                .filter(Boolean)
+                .join(' ')
+                .toLowerCase();
+            return variants.some((v) => haystack.includes(v));
+        });
+    }, [commands, deferredFilter]);
 
     const groupedCommands = useMemo<GroupedCommands>(() => {
-        if (!commands) return {};
         const grouped: GroupedCommands = {};
-        for (const command of commands) {
-            (grouped[command.group] ??= []).push(command);
+        for (const command of filteredCommands) {
+            (grouped[command.group || 'Other'] ??= []).push(command);
         }
         return grouped;
-    }, [commands]);
+    }, [filteredCommands]);
+
+    const totalCount = commands?.length ?? 0;
+    const visibleCount = filteredCommands.length;
 
     useEffect(() => {
         if (!commands) return;
         const status: CommandStatusMap = {};
         for (const command of commands) {
-            status[command.name] = {isLoading: false, response: null};
+            status[command.name] = {status: 'idle'};
         }
         setCommandStatus(status);
     }, [commands]);
@@ -46,16 +97,21 @@ export const CommandsPage = () => {
     const runCommand = async (command: CommandType) => {
         setRunError(null);
         setLastCommand(command);
-        setCommandStatus((prev) => ({...prev, [command.name]: {...prev[command.name], isLoading: true}}));
+        setActiveCommandName(command.name);
+        setCommandStatus((prev) => ({...prev, [command.name]: {status: 'loading'}}));
         const response = await runCommandQuery(command.name);
-        setCommandStatus((prev) => ({...prev, [command.name]: {...prev[command.name], isLoading: false}}));
 
         const commandError = extractCommandError(response);
         if (!('data' in response) || !response.data) {
+            setCommandStatus((prev) => ({...prev, [command.name]: {status: 'error'}}));
             setRunError(commandError?.errors ?? ['An unexpected error occurred']);
             return;
         }
 
+        setCommandStatus((prev) => ({
+            ...prev,
+            [command.name]: {status: response.data.status === 'ok' ? 'success' : 'error'},
+        }));
         setShowResultDialog(true);
     };
 
@@ -79,7 +135,7 @@ export const CommandsPage = () => {
 
     const commandEntries = Object.entries(groupedCommands);
 
-    if (commandEntries.length === 0) {
+    if (totalCount === 0) {
         return (
             <>
                 <PageHeader title="Commands" icon="terminal" description="Run application commands" />
@@ -107,29 +163,65 @@ export const CommandsPage = () => {
         );
     }
 
+    const countLabel =
+        deferredFilter.trim().length > 0 && visibleCount !== totalCount
+            ? `${visibleCount} of ${totalCount} commands`
+            : `${totalCount} ${totalCount === 1 ? 'command' : 'commands'}`;
+
     return (
         <>
             <PageHeader title="Commands" icon="terminal" description="Run application commands" />
-            {commandEntries.map(([groupName, commands], index) => (
-                <Box key={index}>
-                    <Typography sx={{fontWeight: 600, fontSize: '16px', mb: 1.5, mt: 2}}>{groupName}</Typography>
-                    {commands.map((command, index) => (
-                        <Button
-                            key={index}
-                            variant="outlined"
-                            onClick={() => runCommand(command)}
-                            disabled={commandStatus[command.name]?.isLoading}
-                            endIcon={
-                                commandStatus[command.name]?.isLoading ? (
-                                    <CircularProgress size={24} color="info" />
-                                ) : null
-                            }
-                        >
-                            Run {command.title}
-                        </Button>
+            <PageToolbar actions={<FilterInput value={filter} onChange={setFilter} placeholder="Filter commands..." />}>
+                {countLabel}
+            </PageToolbar>
+            {commandEntries.length === 0 ? (
+                <EmptyState
+                    icon="filter_alt_off"
+                    title="No matching commands"
+                    description="Try a different filter or clear the search."
+                />
+            ) : (
+                <Box>
+                    {commandEntries.map(([groupName, commands]) => (
+                        <Fragment key={groupName}>
+                            <SectionTitle>
+                                <Icon
+                                    className="material-icons"
+                                    sx={{fontSize: 16, color: 'text.disabled', flexShrink: 0}}
+                                >
+                                    {resolveGroupHeadingIcon(groupName)}
+                                </Icon>
+                                {`${formatGroupLabel(groupName)} (${commands.length})`}
+                            </SectionTitle>
+                            <Box
+                                sx={{
+                                    display: 'grid',
+                                    gap: 1.5,
+                                    px: {xs: 1.5, sm: 2.5},
+                                    gridTemplateColumns: {
+                                        xs: '1fr',
+                                        sm: 'repeat(2, minmax(0, 1fr))',
+                                        lg: 'repeat(3, minmax(0, 1fr))',
+                                    },
+                                }}
+                            >
+                                {commands.map((command) => (
+                                    <CommandButton
+                                        key={command.name}
+                                        title={command.title}
+                                        description={command.description}
+                                        group={command.group}
+                                        status={commandStatus[command.name]?.status ?? 'idle'}
+                                        disabled={runCommandQueryInfo.isLoading && activeCommandName !== command.name}
+                                        onClick={() => runCommand(command)}
+                                        fullWidth
+                                    />
+                                ))}
+                            </Box>
+                        </Fragment>
                     ))}
                 </Box>
-            ))}
+            )}
             {runError && (
                 <CommandErrorAlert
                     errors={runError}

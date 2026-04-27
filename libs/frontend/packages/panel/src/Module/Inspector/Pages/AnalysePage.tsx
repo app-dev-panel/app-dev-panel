@@ -3,6 +3,10 @@ import {
     useLazyGetCommandsQuery,
     useRunCommandMutation,
 } from '@app-dev-panel/panel/Module/Inspector/API/Inspector';
+import {
+    CommandButton,
+    type CommandRunStatus,
+} from '@app-dev-panel/panel/Module/Inspector/Component/Command/CommandButton';
 import {CommandErrorAlert} from '@app-dev-panel/panel/Module/Inspector/Component/Command/CommandErrorAlert';
 import {extractCommandError} from '@app-dev-panel/panel/Module/Inspector/Component/Command/extractCommandError';
 import {ResultDialog} from '@app-dev-panel/panel/Module/Inspector/Component/Command/ResultDialog';
@@ -10,20 +14,9 @@ import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {FileLink} from '@app-dev-panel/sdk/Component/FileLink';
 import {DataTable} from '@app-dev-panel/sdk/Component/Grid';
 import {PageHeader} from '@app-dev-panel/sdk/Component/PageHeader';
-import {Check, ContentCopy, Error} from '@mui/icons-material';
+import {ContentCopy} from '@mui/icons-material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import {
-    Accordion,
-    AccordionDetails,
-    AccordionSummary,
-    Box,
-    Button,
-    CircularProgress,
-    IconButton,
-    Link,
-    Tooltip,
-    Typography,
-} from '@mui/material';
+import {Accordion, AccordionDetails, AccordionSummary, Box, IconButton, Link, Tooltip, Typography} from '@mui/material';
 import {GridColDef, GridRenderCellParams, GridValidRowModel} from '@mui/x-data-grid';
 import clipboardCopy from 'clipboard-copy';
 import * as React from 'react';
@@ -179,40 +172,28 @@ export const AnalysePage = ({showHeader = true}: {showHeader?: boolean}) => {
         );
     }
 
+    const buttonStatus = (command: CommandType): CommandRunStatus => {
+        if (commandQueryInfo.isLoading && activeCommand?.name === command.name) return 'loading';
+        if (activeCommand?.name === command.name && commandResponse !== null) {
+            return commandResponse.isSuccessful ? 'success' : 'error';
+        }
+        return 'idle';
+    };
+
     return (
         <>
             {showHeader && <PageHeader title="Analyse" icon="analytics" description="Static analysis results" />}
-            <Box display="flex" alignItems="center" gap={1}>
+            <Box sx={{display: 'flex', flexWrap: 'wrap', gap: 1.5, mb: 2}}>
                 {availableCommands.map((command) => (
-                    <Box key={command.name} display="flex" alignItems="center">
-                        <Button
-                            variant="outlined"
-                            onClick={() => runCommand(command)}
-                            color={
-                                activeCommand?.name === command.name && commandResponse !== null
-                                    ? commandResponse.isSuccessful
-                                        ? 'success'
-                                        : 'error'
-                                    : 'primary'
-                            }
-                            disabled={commandQueryInfo.isLoading}
-                            endIcon={
-                                commandQueryInfo.isLoading && activeCommand?.name === command.name ? (
-                                    <CircularProgress size={24} color="info" />
-                                ) : null
-                            }
-                        >
-                            Run {command.title}
-                        </Button>
-                        {!commandQueryInfo.isLoading &&
-                            activeCommand?.name === command.name &&
-                            commandResponse !== null && (
-                                <>
-                                    {commandResponse.isSuccessful === true && <Check color="success" />}
-                                    {commandResponse.isSuccessful === false && <Error color="error" />}
-                                </>
-                            )}
-                    </Box>
+                    <CommandButton
+                        key={command.name}
+                        title={command.title}
+                        description={command.description}
+                        group={command.group}
+                        status={buttonStatus(command)}
+                        disabled={commandQueryInfo.isLoading && activeCommand?.name !== command.name}
+                        onClick={() => runCommand(command)}
+                    />
                 ))}
             </Box>
             {commandError && (

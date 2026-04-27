@@ -545,110 +545,112 @@ export const IndexPage = () => {
             <Box sx={{px: {xs: 1.5, sm: 2.5}}}>
                 {/* Environment strip */}
                 {(phpVersion || adapter || osName) && (
-                <EnvStrip
-                    onClick={hasEnvironment ? () => handleCardClick(CollectorsMap.EnvironmentCollector) : undefined}
-                >
-                    <Icon sx={{fontSize: 14, color: 'text.disabled', mr: 0.25}}>dns</Icon>
-                    {phpVersion && (
-                        <EnvChip>
-                            PHP <EnvChipValue>{phpVersion}</EnvChipValue>
-                        </EnvChip>
-                    )}
-                    {phpSapi && (
-                        <EnvChip>
-                            SAPI <EnvChipValue>{phpSapi}</EnvChipValue>
-                        </EnvChip>
-                    )}
-                    {adapter && (
-                        <EnvChip>
-                            Adapter <EnvChipValue>{adapter}</EnvChipValue>
-                        </EnvChip>
-                    )}
-                    {osName && (
-                        <EnvChip>
-                            OS <EnvChipValue>{osName}</EnvChipValue>
-                        </EnvChip>
-                    )}
-                    {hasEnvironment && <Icon sx={{fontSize: 14, color: 'text.disabled', ml: 'auto'}}>open_in_new</Icon>}
-                </EnvStrip>
-            )}
+                    <EnvStrip
+                        onClick={hasEnvironment ? () => handleCardClick(CollectorsMap.EnvironmentCollector) : undefined}
+                    >
+                        <Icon sx={{fontSize: 14, color: 'text.disabled', mr: 0.25}}>dns</Icon>
+                        {phpVersion && (
+                            <EnvChip>
+                                PHP <EnvChipValue>{phpVersion}</EnvChipValue>
+                            </EnvChip>
+                        )}
+                        {phpSapi && (
+                            <EnvChip>
+                                SAPI <EnvChipValue>{phpSapi}</EnvChipValue>
+                            </EnvChip>
+                        )}
+                        {adapter && (
+                            <EnvChip>
+                                Adapter <EnvChipValue>{adapter}</EnvChipValue>
+                            </EnvChip>
+                        )}
+                        {osName && (
+                            <EnvChip>
+                                OS <EnvChipValue>{osName}</EnvChipValue>
+                            </EnvChip>
+                        )}
+                        {hasEnvironment && (
+                            <Icon sx={{fontSize: 14, color: 'text.disabled', ml: 'auto'}}>open_in_new</Icon>
+                        )}
+                    </EnvStrip>
+                )}
 
-            {/* Performance breakdown */}
-            {loadingPerf && <LinearProgress sx={{mb: 1.5, borderRadius: 1}} />}
-            {webAppInfo && <PerformanceSection data={webAppInfo} />}
+                {/* Performance breakdown */}
+                {loadingPerf && <LinearProgress sx={{mb: 1.5, borderRadius: 1}} />}
+                {webAppInfo && <PerformanceSection data={webAppInfo} />}
 
-            {/* Active collectors */}
-            {activeCards.length > 0 && (
-                <>
-                    <SectionDivider>
-                        <DividerLabel>Collectors</DividerLabel>
-                        <DividerLine />
-                    </SectionDivider>
-                    <ActiveGrid>
-                        {activeCards.map((card) => {
-                            const sparkBars = generateSparkBars(card.badge ?? 0);
-                            return (
-                                <ActiveCardRoot
-                                    key={card.key}
-                                    hasError={card.isException}
-                                    onClick={() => handleCardClick(card.key)}
-                                >
-                                    <CardHeader>
-                                        <CardTitle>
-                                            <CardIconBox sx={{backgroundColor: card.iconBg}}>
-                                                <Icon sx={{fontSize: 14, color: card.iconFg}}>{card.icon}</Icon>
-                                            </CardIconBox>
-                                            <CardName>{card.label}</CardName>
-                                        </CardTitle>
-                                        <Badge isError={card.isException}>{card.badge}</Badge>
-                                    </CardHeader>
-                                    <SparklineContainer>
-                                        {sparkBars.map((height, i) => (
-                                            <SparkBar
-                                                key={i}
-                                                sx={{height: `${height}%`}}
-                                                isCurrent={i === sparkBars.length - 1}
-                                                barColor={card.isException ? theme.palette.error.main : undefined}
-                                            />
-                                        ))}
-                                    </SparklineContainer>
-                                </ActiveCardRoot>
-                            );
-                        })}
-                    </ActiveGrid>
-                </>
-            )}
-
-            {/* Empty / info collectors */}
-            {emptyCards.length > 0 && (
-                <>
-                    {activeCards.length === 0 && (
+                {/* Active collectors */}
+                {activeCards.length > 0 && (
+                    <>
                         <SectionDivider>
                             <DividerLabel>Collectors</DividerLabel>
                             <DividerLine />
                         </SectionDivider>
-                    )}
-                    <CompactGrid>
-                        {emptyCards.map((card) => (
-                            <CompactCard key={card.key} onClick={() => handleCardClick(card.key)}>
-                                <CompactIconBox sx={{backgroundColor: card.iconBg}}>
-                                    <Icon sx={{fontSize: 12, color: card.iconFg}}>{card.icon}</Icon>
-                                </CompactIconBox>
-                                <Typography sx={{fontSize: '12px', fontWeight: 500, color: 'text.secondary'}}>
-                                    {card.label}
-                                </Typography>
-                                {card.badge != null && (
-                                    <Typography
-                                        sx={{fontSize: '10px', fontWeight: 600, color: 'text.disabled', ml: 'auto'}}
+                        <ActiveGrid>
+                            {activeCards.map((card) => {
+                                const sparkBars = generateSparkBars(card.badge ?? 0);
+                                return (
+                                    <ActiveCardRoot
+                                        key={card.key}
+                                        hasError={card.isException}
+                                        onClick={() => handleCardClick(card.key)}
                                     >
-                                        {card.badge}
+                                        <CardHeader>
+                                            <CardTitle>
+                                                <CardIconBox sx={{backgroundColor: card.iconBg}}>
+                                                    <Icon sx={{fontSize: 14, color: card.iconFg}}>{card.icon}</Icon>
+                                                </CardIconBox>
+                                                <CardName>{card.label}</CardName>
+                                            </CardTitle>
+                                            <Badge isError={card.isException}>{card.badge}</Badge>
+                                        </CardHeader>
+                                        <SparklineContainer>
+                                            {sparkBars.map((height, i) => (
+                                                <SparkBar
+                                                    key={i}
+                                                    sx={{height: `${height}%`}}
+                                                    isCurrent={i === sparkBars.length - 1}
+                                                    barColor={card.isException ? theme.palette.error.main : undefined}
+                                                />
+                                            ))}
+                                        </SparklineContainer>
+                                    </ActiveCardRoot>
+                                );
+                            })}
+                        </ActiveGrid>
+                    </>
+                )}
+
+                {/* Empty / info collectors */}
+                {emptyCards.length > 0 && (
+                    <>
+                        {activeCards.length === 0 && (
+                            <SectionDivider>
+                                <DividerLabel>Collectors</DividerLabel>
+                                <DividerLine />
+                            </SectionDivider>
+                        )}
+                        <CompactGrid>
+                            {emptyCards.map((card) => (
+                                <CompactCard key={card.key} onClick={() => handleCardClick(card.key)}>
+                                    <CompactIconBox sx={{backgroundColor: card.iconBg}}>
+                                        <Icon sx={{fontSize: 12, color: card.iconFg}}>{card.icon}</Icon>
+                                    </CompactIconBox>
+                                    <Typography sx={{fontSize: '12px', fontWeight: 500, color: 'text.secondary'}}>
+                                        {card.label}
                                     </Typography>
-                                )}
-                            </CompactCard>
-                        ))}
-                    </CompactGrid>
-                </>
-            )}
+                                    {card.badge != null && (
+                                        <Typography
+                                            sx={{fontSize: '10px', fontWeight: 600, color: 'text.disabled', ml: 'auto'}}
+                                        >
+                                            {card.badge}
+                                        </Typography>
+                                    )}
+                                </CompactCard>
+                            ))}
+                        </CompactGrid>
+                    </>
+                )}
             </Box>
         </Box>
     );
