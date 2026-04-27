@@ -19,6 +19,24 @@ message = "Property `$collector` is never used."
 count = 1
 
 [[issues]]
+file = "src/Application/InMemoryCache.php"
+code = "non-existent-class-like"
+message = 'Class `App\Application\InMemoryCache` cannot implement unknown type `CacheInterface`'
+count = 1
+
+[[issues]]
+file = "src/Application/InMemoryCache.php"
+code = "unused-method"
+message = "Method `expiresat()` is never used."
+count = 1
+
+[[issues]]
+file = "src/Application/InMemoryCache.php"
+code = "unused-property"
+message = "Property `$store` is never used."
+count = 1
+
+[[issues]]
 file = "src/Application/Kernel.php"
 code = "impossible-assignment"
 message = "Invalid assignment: the right-hand side has type `never` and cannot produce a value."
@@ -46,7 +64,7 @@ count = 1
 file = "src/Application/Kernel.php"
 code = "invalid-method-access"
 message = 'Attempting to access a method on a non-object type (`unknown-ref(Spiral\Core\Container)`).'
-count = 45
+count = 46
 
 [[issues]]
 file = "src/Application/Kernel.php"

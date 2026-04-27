@@ -155,6 +155,10 @@ final class Kernel
         // itself. Avoids a hard dependency on Guzzle while still exercising the proxy.
         $this->container->bindSingleton(ClientInterface::class, new LoopbackHttpClient());
 
+        // PSR-16 cache — in-memory implementation so /inspect/api/cache has something
+        // to inspect during a request.
+        $this->container->bindSingleton(\Psr\SimpleCache\CacheInterface::class, new InMemoryCache());
+
         // PDO is bound in registerAdpBootloader() once the DatabaseCollector singleton
         // exists in the container — see the closure there.
 

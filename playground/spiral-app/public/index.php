@@ -36,7 +36,14 @@ set_error_handler(static function (int $severity, string $message, string $file,
     throw new ErrorException($message, 0, $severity, $file, $line);
 });
 
-require_once dirname(__DIR__) . '/vendor/autoload.php';
+// PHP's built-in server points CWD at the docroot (public/), but ADP inspectors
+// (composer.json/.git/file explorer/runtime cache) need the project root. Surface
+// it via env so the AppDevPanelBootloader can build PathResolver correctly.
+$projectRoot = dirname(__DIR__);
+putenv('APP_DEV_PANEL_ROOT_PATH=' . $projectRoot);
+putenv('APP_DEV_PANEL_RUNTIME_PATH=' . $projectRoot . '/var');
+
+require_once $projectRoot . '/vendor/autoload.php';
 
 $kernel = new Kernel();
 $kernel->run();

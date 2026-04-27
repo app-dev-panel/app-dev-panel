@@ -13,8 +13,14 @@ use AppDevPanel\Api\Debug\Repository\CollectorRepository;
 use AppDevPanel\Api\Debug\Repository\CollectorRepositoryInterface;
 use AppDevPanel\Api\Http\JsonResponseFactory;
 use AppDevPanel\Api\Http\JsonResponseFactoryInterface;
+use AppDevPanel\Api\Inspector\Authorization\AuthorizationConfigProviderInterface;
+use AppDevPanel\Api\Inspector\Authorization\NullAuthorizationConfigProvider;
 use AppDevPanel\Api\Inspector\Database\NullSchemaProvider;
 use AppDevPanel\Api\Inspector\Database\SchemaProviderInterface;
+use AppDevPanel\Api\Inspector\Elasticsearch\ElasticsearchProviderInterface;
+use AppDevPanel\Api\Inspector\Elasticsearch\NullElasticsearchProvider;
+use AppDevPanel\Api\Inspector\HttpMock\HttpMockProviderInterface;
+use AppDevPanel\Api\Inspector\HttpMock\NullHttpMockProvider;
 use AppDevPanel\Api\NullPathMapper;
 use AppDevPanel\Api\Panel\PanelConfig;
 use AppDevPanel\Api\Panel\PanelController;
@@ -117,8 +123,11 @@ final class AppDevPanelBootloader extends Bootloader
         CollectorRepositoryInterface::class => [self::class, 'initCollectorRepository'],
         JsonResponseFactoryInterface::class => JsonResponseFactory::class,
         PathMapperInterface::class => NullPathMapper::class,
-        PathResolverInterface::class => PathResolver::class,
+        PathResolverInterface::class => [self::class, 'initPathResolver'],
         SchemaProviderInterface::class => NullSchemaProvider::class,
+        AuthorizationConfigProviderInterface::class => NullAuthorizationConfigProvider::class,
+        ElasticsearchProviderInterface::class => NullElasticsearchProvider::class,
+        HttpMockProviderInterface::class => NullHttpMockProvider::class,
         PanelConfig::class => [self::class, 'initPanelConfig'],
         PanelController::class => PanelController::class,
         ToolbarConfig::class => ToolbarConfig::class,
@@ -152,6 +161,29 @@ final class AppDevPanelBootloader extends Bootloader
         }
 
         return new PanelConfig();
+    }
+
+    /**
+     * Build the PathResolver with project + runtime paths. Resolved from
+     * `APP_DEV_PANEL_ROOT_PATH` / `APP_DEV_PANEL_RUNTIME_PATH` env vars when set
+     * (Spiral apps typically expose `directories('root')` / `directories('runtime')`
+     * via their bootloaders — bind your own `PathResolverInterface` factory if you
+     * want to feed those values directly). Otherwise falls back to CWD-relative
+     * defaults that work for `php -S` based playgrounds.
+     */
+    public function initPathResolver(): PathResolver
+    {
+        $rootPath = getenv('APP_DEV_PANEL_ROOT_PATH');
+        if (!is_string($rootPath) || $rootPath === '') {
+            $rootPath = (string) getcwd();
+        }
+
+        $runtimePath = getenv('APP_DEV_PANEL_RUNTIME_PATH');
+        if (!is_string($runtimePath) || $runtimePath === '') {
+            $runtimePath = $rootPath . '/var';
+        }
+
+        return new PathResolver($rootPath, $runtimePath);
     }
 
     public function initLogger(ContainerInterface $container): LoggerInterface
