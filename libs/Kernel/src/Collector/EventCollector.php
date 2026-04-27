@@ -53,6 +53,6 @@ final class EventCollector implements SummaryCollectorInterface, HtmlViewProvide
 
     public static function getViewPath(): string
     {
-        return __DIR__ . '/event-collector-view.php';
+        return dirname(__DIR__, 2) . '/views/event-collector.php';
     }
 }

@@ -57,6 +57,6 @@ final class ServiceCollector implements SummaryCollectorInterface, HtmlViewProvi
 
     public static function getViewPath(): string
     {
-        return __DIR__ . '/service-collector-view.php';
+        return dirname(__DIR__, 2) . '/views/service-collector.php';
     }
 }
