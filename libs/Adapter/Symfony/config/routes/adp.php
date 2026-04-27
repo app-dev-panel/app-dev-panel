@@ -35,7 +35,7 @@ return static function (RoutingConfigurator $routes): void {
     // Static assets — streams the panel/toolbar bundle from `app-dev-panel/frontend-assets`.
     // Registered unconditionally; the controller 404s when the package is missing.
     $routes
-        ->add('adp_assets', '/_adp-assets/{path}')
+        ->add('adp_assets', AdpAssetsController::ROUTE_PREFIX . '/{path}')
         ->controller(AdpAssetsController::class)
         ->requirements(['path' => '.+'])
         ->methods(['GET']);

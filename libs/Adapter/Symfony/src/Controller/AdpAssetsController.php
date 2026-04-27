@@ -24,6 +24,9 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
  */
 final class AdpAssetsController
 {
+    /** URL prefix where the controller is mounted, also used by the routes file. */
+    public const string ROUTE_PREFIX = '/_adp-assets';
+
     public function __construct(
         private readonly string $baseDir = '',
     ) {}

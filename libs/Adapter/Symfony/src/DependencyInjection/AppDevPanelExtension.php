@@ -614,11 +614,10 @@ final class AppDevPanelExtension extends Extension
             // 2. Runtime `/_adp-assets/*` — `AdpAssetsController` streams files directly
             //    from `app-dev-panel/frontend-assets`, so installs work with no setup step.
             // 3. CDN default.
-            $bundleAssetsPath = \dirname(__DIR__, 2) . '/Resources/public/bundle.js';
-            if (file_exists($bundleAssetsPath)) {
-                $panelStaticUrl = '/bundles/appdevpanel';
+            if (file_exists(\dirname(__DIR__, 2) . '/Resources/public/bundle.js')) {
+                $panelStaticUrl = '/' . AssetsInstallCommand::PUBLIC_SUBPATH;
             } elseif (\class_exists(FrontendAssets::class) && FrontendAssets::exists()) {
-                $panelStaticUrl = '/_adp-assets';
+                $panelStaticUrl = AdpAssetsController::ROUTE_PREFIX;
             } else {
                 $panelStaticUrl = PanelConfig::DEFAULT_STATIC_URL;
             }

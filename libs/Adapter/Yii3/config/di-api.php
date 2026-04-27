@@ -229,19 +229,11 @@ return [
     PanelConfig::class => static function (ContainerInterface $container) use ($params): PanelConfig {
         $staticUrl = $params['app-dev-panel/yii3']['panel']['staticUrl'] ?? '';
         if ($staticUrl === '') {
-            // Resolution order:
-            // 1. Shared `app-dev-panel/frontend-assets` package (canonical, release-pinned).
-            // 2. Adapter-local `resources/dist` (legacy `make build-panel` workflow).
-            // 3. CDN default.
-            $sourceDir = null;
-            if (\class_exists(FrontendAssets::class) && FrontendAssets::exists()) {
-                $sourceDir = FrontendAssets::path();
-            } else {
-                $local = \dirname(__DIR__) . '/resources/dist';
-                if (file_exists($local . '/bundle.js')) {
-                    $sourceDir = $local;
-                }
-            }
+            // Prefer the shared frontend-assets package (release-pinned) and fall
+            // back to the adapter-local resources/dist for monorepo development.
+            $sourceDir = \class_exists(FrontendAssets::class)
+                ? FrontendAssets::resolve(\dirname(__DIR__) . '/resources/dist')
+                : null;
 
             if ($sourceDir !== null) {
                 $aliases = $container->get(Aliases::class);

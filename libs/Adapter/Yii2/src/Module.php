@@ -594,16 +594,11 @@ class Module extends \yii\base\Module implements BootstrapInterface
      */
     private function resolveBundledAssetsDir(): ?string
     {
-        if (\class_exists(FrontendAssets::class) && FrontendAssets::exists()) {
-            return FrontendAssets::path();
+        if (!\class_exists(FrontendAssets::class)) {
+            return null;
         }
 
-        $local = \dirname(__DIR__) . '/resources/dist';
-        if (file_exists($local . '/bundle.js') || is_dir($local . '/toolbar')) {
-            return $local;
-        }
-
-        return null;
+        return FrontendAssets::resolve(\dirname(__DIR__) . '/resources/dist');
     }
 
     private function copyDirectory(string $source, string $target): bool

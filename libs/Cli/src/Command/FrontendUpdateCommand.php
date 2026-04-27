@@ -167,12 +167,14 @@ final class FrontendUpdateCommand extends Command
             return;
         }
 
-        if (!is_file(rtrim($path, '/') . '/index.html')) {
+        $base = rtrim($path, '/');
+
+        if (!is_file($base . '/index.html')) {
             // Panel itself is missing — `check` is informational, don't nag.
             return;
         }
 
-        if (is_file(rtrim($path, '/') . '/toolbar/bundle.js')) {
+        if (is_file($base . '/toolbar/bundle.js')) {
             return;
         }
 
@@ -180,8 +182,8 @@ final class FrontendUpdateCommand extends Command
             'Toolbar bundle is missing under %s/toolbar/. '
             . 'Re-run `frontend:update download --path=%s` to fetch the latest archive '
             . '(frontend-dist.zip now ships both panel and toolbar).',
-            rtrim($path, '/'),
-            $path,
+            $base,
+            $base,
         ));
     }
 

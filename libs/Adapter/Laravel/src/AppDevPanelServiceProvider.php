@@ -188,19 +188,25 @@ final class AppDevPanelServiceProvider extends ServiceProvider
             return;
         }
 
-        $this->publishes([
-            __DIR__ . '/../config/app-dev-panel.php' => $this->app->configPath('app-dev-panel.php'),
-        ], 'app-dev-panel-config');
-
-        // Publish prebuilt panel assets. Prefer the shared
-        // `app-dev-panel/frontend-assets` package (canonical, release-pinned,
-        // includes both panel and toolbar bundles); fall back to the legacy
-        // adapter-local `resources/dist/` so `make build-panel` keeps working.
-        $assetSource = $this->resolveAssetSource();
-        if ($assetSource !== null) {
+        // `publishes()` registrations are only consumed by the `vendor:publish`
+        // artisan command. Gate them on `runningInConsole()` so web requests
+        // don't pay the cost of a `resolveAssetSource()` filesystem probe on
+        // every boot.
+        if ($this->app->runningInConsole()) {
             $this->publishes([
-                $assetSource => $this->app->publicPath('vendor/app-dev-panel'),
-            ], ['app-dev-panel-assets', 'laravel-assets']);
+                __DIR__ . '/../config/app-dev-panel.php' => $this->app->configPath('app-dev-panel.php'),
+            ], 'app-dev-panel-config');
+
+            // Publish prebuilt panel assets. Prefer the shared
+            // `app-dev-panel/frontend-assets` package (canonical, release-pinned,
+            // includes both panel and toolbar bundles); fall back to the legacy
+            // adapter-local `resources/dist/` so `make build-panel` keeps working.
+            $assetSource = $this->resolveAssetSource();
+            if ($assetSource !== null) {
+                $this->publishes([
+                    $assetSource => $this->app->publicPath('vendor/app-dev-panel'),
+                ], ['app-dev-panel-assets', 'laravel-assets']);
+            }
         }
 
         $this->loadRoutesFrom(__DIR__ . '/../routes/adp.php');
@@ -254,16 +260,11 @@ final class AppDevPanelServiceProvider extends ServiceProvider
      */
     private function resolveAssetSource(): ?string
     {
-        if (\class_exists(FrontendAssets::class) && FrontendAssets::exists()) {
-            return FrontendAssets::path();
+        if (!\class_exists(FrontendAssets::class)) {
+            return null;
         }
 
-        $local = __DIR__ . '/../resources/dist';
-        if (is_dir($local) && file_exists($local . '/bundle.js')) {
-            return $local;
-        }
-
-        return null;
+        return FrontendAssets::resolve(__DIR__ . '/../resources/dist');
     }
 
     private function registerCoreServices(): void

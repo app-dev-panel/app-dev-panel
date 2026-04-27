@@ -73,12 +73,14 @@ final class Bootstrap implements BootstrapInterface
 
     private function warnIfYiiDebugRegistered(WebApplication $app): void
     {
-        if (!$app->hasModule('debug')) {
+        // Long-running servers (RoadRunner/Swoole) reuse the PHP process across
+        // requests. The warning only needs to fire once per process.
+        static $warned = false;
+        if ($warned || !$app->hasModule('debug')) {
             return;
         }
 
-        $modules = $app->getModules();
-        $debugConfig = $modules['debug'] ?? null;
+        $debugConfig = $app->getModules()['debug'] ?? null;
         $class = is_array($debugConfig)
             ? $debugConfig['class'] ?? null
             : (is_object($debugConfig) ? $debugConfig::class : null);
@@ -87,6 +89,7 @@ final class Bootstrap implements BootstrapInterface
             return;
         }
 
+        $warned = true;
         \Yii::warning(
             'yiisoft/yii2-debug is registered as module "debug" alongside ADP. '
             . 'Both handle routes under /debug/* — yii2-debug will intercept '
@@ -99,15 +102,17 @@ final class Bootstrap implements BootstrapInterface
 
     private function warnIfPrettyUrlsDisabled(WebApplication $app): void
     {
+        static $warned = false;
+        if ($warned) {
+            return;
+        }
+
         $urlManager = $app->get('urlManager', false);
-        if (!$urlManager instanceof UrlManager) {
+        if (!$urlManager instanceof UrlManager || $urlManager->enablePrettyUrl) {
             return;
         }
 
-        if ($urlManager->enablePrettyUrl) {
-            return;
-        }
-
+        $warned = true;
         \Yii::warning(
             'ADP requires UrlManager::$enablePrettyUrl = true — without pretty '
             . 'URLs the /debug routes fall back to r=… parsing and the panel '
