@@ -651,7 +651,7 @@ count = 1
 [[issues]]
 file = "libs/Adapter/Spiral/src/Bootloader/AppDevPanelBootloader.php"
 code = "kan-defect"
-message = "Class has a high kan defect score (2.1300000000000003)."
+message = "Class has a high kan defect score (2.48)."
 count = 1
 
 [[issues]]
@@ -701,6 +701,12 @@ file = "libs/Adapter/Spiral/src/Inspector/SpiralRouteAdapter.php"
 code = "no-empty-catch-clause"
 message = "Do not use empty `catch` blocks."
 count = 3
+
+[[issues]]
+file = "libs/Adapter/Spiral/src/Mailer/TracingMailer.php"
+code = "cyclomatic-complexity"
+message = "Class has high complexity."
+count = 1
 
 [[issues]]
 file = "libs/Adapter/Spiral/src/Middleware/DebugMiddleware.php"

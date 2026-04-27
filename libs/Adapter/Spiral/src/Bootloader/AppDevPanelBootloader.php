@@ -4,9 +4,14 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Adapter\Spiral\Bootloader;
 
+use AppDevPanel\Adapter\Spiral\Container\CacheProxyInjector;
 use AppDevPanel\Adapter\Spiral\Container\EventDispatcherProxyInjector;
 use AppDevPanel\Adapter\Spiral\Container\HttpClientProxyInjector;
 use AppDevPanel\Adapter\Spiral\Container\LoggerProxyInjector;
+use AppDevPanel\Adapter\Spiral\Container\MailerProxyInjector;
+use AppDevPanel\Adapter\Spiral\Container\QueueProxyInjector;
+use AppDevPanel\Adapter\Spiral\Container\TranslatorProxyInjector;
+use AppDevPanel\Adapter\Spiral\Container\ViewsProxyInjector;
 use AppDevPanel\Adapter\Spiral\Controller\AdpApiController;
 use AppDevPanel\Adapter\Spiral\Inspector\SpiralAuthorizationConfigProvider;
 use AppDevPanel\Adapter\Spiral\Inspector\SpiralConfigProvider;
@@ -158,6 +163,11 @@ final class AppDevPanelBootloader extends Bootloader
         LoggerProxyInjector::class => LoggerProxyInjector::class,
         EventDispatcherProxyInjector::class => EventDispatcherProxyInjector::class,
         HttpClientProxyInjector::class => HttpClientProxyInjector::class,
+        CacheProxyInjector::class => CacheProxyInjector::class,
+        MailerProxyInjector::class => MailerProxyInjector::class,
+        QueueProxyInjector::class => QueueProxyInjector::class,
+        TranslatorProxyInjector::class => TranslatorProxyInjector::class,
+        ViewsProxyInjector::class => ViewsProxyInjector::class,
     ];
 
     public function initPsr17Factory(): Psr17Factory
@@ -341,6 +351,40 @@ final class AppDevPanelBootloader extends Bootloader
             EventDispatcherProxyInjector::class,
         );
         $this->installInjector($container, $binder, ClientInterface::class, HttpClientProxyInjector::class);
+
+        // Optional Spiral packages — only register injectors if the relevant interface
+        // is autoloadable. Without these guards the bootloader would crash on apps that
+        // don't install the corresponding `spiral/*` package.
+        if (interface_exists(\Psr\SimpleCache\CacheInterface::class)) {
+            $this->installInjector(
+                $container,
+                $binder,
+                \Psr\SimpleCache\CacheInterface::class,
+                CacheProxyInjector::class,
+            );
+        }
+        if (interface_exists(\Spiral\Mailer\MailerInterface::class)) {
+            $this->installInjector(
+                $container,
+                $binder,
+                \Spiral\Mailer\MailerInterface::class,
+                MailerProxyInjector::class,
+            );
+        }
+        if (interface_exists(\Spiral\Queue\QueueInterface::class)) {
+            $this->installInjector($container, $binder, \Spiral\Queue\QueueInterface::class, QueueProxyInjector::class);
+        }
+        if (interface_exists(\Spiral\Translator\TranslatorInterface::class)) {
+            $this->installInjector(
+                $container,
+                $binder,
+                \Spiral\Translator\TranslatorInterface::class,
+                TranslatorProxyInjector::class,
+            );
+        }
+        if (interface_exists(\Spiral\Views\ViewsInterface::class)) {
+            $this->installInjector($container, $binder, \Spiral\Views\ViewsInterface::class, ViewsProxyInjector::class);
+        }
 
         $this->installRouterAdapters($container);
     }
