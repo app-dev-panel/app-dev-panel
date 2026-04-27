@@ -64,14 +64,11 @@ foreach ($counts as $name => $count) {
     <?= Slot::emptyState('bolt', 'No dispatched events found') ?>
 <?php else: ?>
     <div>
-        <div class="adp-ui-toolbar">
-            <span class="adp-ui-toolbar__label">
-                <?= count($events) ?> event<?= count($events) === 1 ? '' : 's' ?>
-            </span>
-            <span class="adp-ui-toolbar__actions">
-                <?= Slot::filter('.adp-ui-event-row', 'Filter events…') ?>
-            </span>
-        </div>
+        <?= Slot::pageToolbar(
+            sprintf('%d event%s', count($events), count($events) === 1 ? '' : 's'),
+            '.adp-ui-event-row',
+            'Filter events…',
+        ) ?>
 
         <?php if (count($chipItems) > 1): ?>
             <div class="adp-ui-row adp-ui-row--wrap" style="gap: 6px; padding: 12px 12px 0;">

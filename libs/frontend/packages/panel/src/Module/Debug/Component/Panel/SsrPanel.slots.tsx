@@ -3,6 +3,7 @@ import {JsonRenderer} from '@app-dev-panel/panel/Module/Debug/Component/JsonRend
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {FileLink} from '@app-dev-panel/sdk/Component/FileLink';
 import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
+import {PageToolbar} from '@app-dev-panel/sdk/Component/PageToolbar';
 import {Chip, Tab, Tabs, Tooltip} from '@mui/material';
 import {useEffect, useMemo, useState, type ComponentType} from 'react';
 
@@ -199,6 +200,21 @@ export const ssrSlots = {
     },
 
     // Interactive
+    'page-toolbar': ({host, attrs}) => {
+        const target = attrs['filter-target'];
+        return (
+            <PageToolbar
+                sticky
+                actions={
+                    target ? (
+                        <FilterControl host={host} target={target} placeholder={attrs['filter-placeholder']} />
+                    ) : undefined
+                }
+            >
+                {attrs.label ?? ''}
+            </PageToolbar>
+        );
+    },
     filter: ({host, attrs}) => (
         <FilterControl host={host} target={attrs.target ?? ''} placeholder={attrs.placeholder} />
     ),

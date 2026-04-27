@@ -108,6 +108,28 @@ final class Slot
     }
 
     /**
+     * Sticky page header that hydrates to the SDK `<PageToolbar>` so SSR
+     * collectors share the exact toolbar styling (label uppercase, border-bottom,
+     * sticky position) of the React panels (DatabasePanel, LogPanel, …).
+     *
+     * Pass `$filterTarget` to render a filter input inside the toolbar's
+     * actions area; rows whose `data-search` does not contain the typed query
+     * are hidden, just like {@see filter()}.
+     */
+    public static function pageToolbar(
+        string $label,
+        ?string $filterTarget = null,
+        ?string $filterPlaceholder = null,
+    ): string {
+        $attrs = ['label' => $label];
+        if ($filterTarget !== null) {
+            $attrs['filter-target'] = $filterTarget;
+            $attrs['filter-placeholder'] = $filterPlaceholder ?? 'Filter…';
+        }
+        return self::attrs('page-toolbar', $attrs, '', 'div');
+    }
+
+    /**
      * Tab strip — clicking a tab shows the matching `<section data-adp-tab-panel="$value">`
      * and hides the rest. Useful for Summary/All views over the same data.
      *

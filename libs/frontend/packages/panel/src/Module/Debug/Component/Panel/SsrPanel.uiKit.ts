@@ -152,43 +152,6 @@ export const ssrUiKitSx: SxProps<Theme> = {
         wordBreak: 'break-word',
     },
 
-    // ----- Toolbar (mirrors React `PageToolbar` — sticky panel header) ------
-    '& .adp-ui-toolbar': {
-        display: 'flex',
-        alignItems: 'center',
-        gap: 2,
-        py: 1.25,
-        px: 1.5,
-        borderBottom: '1px solid',
-        borderColor: 'divider',
-        bgcolor: 'background.paper',
-        position: 'sticky',
-        top: 0,
-        zIndex: 2,
-        '@media (min-width: 600px)': {py: 1.5, px: 2.5},
-    },
-    '& .adp-ui-toolbar__label': {
-        display: 'flex',
-        alignItems: 'center',
-        gap: 1,
-        minWidth: 0,
-        fontSize: 12,
-        fontWeight: 700,
-        letterSpacing: '0.05em',
-        textTransform: 'uppercase',
-        color: 'text.disabled',
-        overflow: 'hidden',
-        textOverflow: 'ellipsis',
-        whiteSpace: 'nowrap',
-    },
-    '& .adp-ui-toolbar__actions': {
-        marginLeft: 'auto',
-        display: 'flex',
-        alignItems: 'center',
-        gap: 1,
-        flexShrink: 0,
-    },
-
     // ----- Empty state -------------------------------------------------------
     '& .adp-ui-empty': {
         p: 4,
