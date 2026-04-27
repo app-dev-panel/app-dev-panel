@@ -16,9 +16,10 @@ import {FullScreenCircularProgress} from '@app-dev-panel/sdk/Component/FullScree
 import {PageHeader} from '@app-dev-panel/sdk/Component/PageHeader';
 import {PageToolbar} from '@app-dev-panel/sdk/Component/PageToolbar';
 import {QueryErrorState} from '@app-dev-panel/sdk/Component/QueryErrorState';
+import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
 import {searchVariants} from '@app-dev-panel/sdk/Helper/layoutTranslit';
-import {Box, Icon, Link, Typography} from '@mui/material';
-import {useDeferredValue, useEffect, useMemo, useState} from 'react';
+import {Box, Icon, Link} from '@mui/material';
+import {Fragment, useDeferredValue, useEffect, useMemo, useState} from 'react';
 
 type GroupedCommands = Record<string, CommandType[]>;
 type CommandRunState = {status: CommandRunStatus};
@@ -180,41 +181,23 @@ export const CommandsPage = () => {
                     description="Try a different filter or clear the search."
                 />
             ) : (
-                <Box sx={{display: 'flex', flexDirection: 'column', gap: 3, mt: 2}}>
+                <Box>
                     {commandEntries.map(([groupName, commands]) => (
-                        <Box key={groupName} component="section">
-                            <Box sx={{display: 'flex', alignItems: 'center', gap: 1, mb: 1.5, color: 'text.secondary'}}>
-                                <Icon className="material-icons" sx={{fontSize: 18, color: 'text.secondary'}}>
+                        <Fragment key={groupName}>
+                            <SectionTitle>
+                                <Icon
+                                    className="material-icons"
+                                    sx={{fontSize: 16, color: 'text.disabled', flexShrink: 0}}
+                                >
                                     {resolveGroupHeadingIcon(groupName)}
                                 </Icon>
-                                <Typography
-                                    variant="overline"
-                                    sx={{fontWeight: 700, letterSpacing: '0.6px', color: 'text.secondary'}}
-                                >
-                                    {formatGroupLabel(groupName)}
-                                </Typography>
-                                <Box
-                                    sx={{
-                                        display: 'inline-flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        minWidth: 22,
-                                        height: 18,
-                                        px: 0.75,
-                                        borderRadius: 999,
-                                        fontSize: '11px',
-                                        fontWeight: 600,
-                                        bgcolor: 'action.hover',
-                                        color: 'text.secondary',
-                                    }}
-                                >
-                                    {commands.length}
-                                </Box>
-                            </Box>
+                                {`${formatGroupLabel(groupName)} (${commands.length})`}
+                            </SectionTitle>
                             <Box
                                 sx={{
                                     display: 'grid',
                                     gap: 1.5,
+                                    px: {xs: 1.5, sm: 2.5},
                                     gridTemplateColumns: {
                                         xs: '1fr',
                                         sm: 'repeat(2, minmax(0, 1fr))',
@@ -235,7 +218,7 @@ export const CommandsPage = () => {
                                     />
                                 ))}
                             </Box>
-                        </Box>
+                        </Fragment>
                     ))}
                 </Box>
             )}
