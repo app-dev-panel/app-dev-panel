@@ -81,6 +81,7 @@ use AppDevPanel\Api\PathMapper;
 use AppDevPanel\Api\PathMapperInterface;
 use AppDevPanel\Api\PathResolver;
 use AppDevPanel\Api\PathResolverInterface;
+use AppDevPanel\Api\Project\Controller\ProjectController;
 use AppDevPanel\Api\Toolbar\ToolbarConfig;
 use AppDevPanel\Api\Toolbar\ToolbarInjector;
 use AppDevPanel\Kernel\Collector\AssetBundleCollector;
@@ -119,6 +120,8 @@ use AppDevPanel\Kernel\DebuggerIdGenerator;
 use AppDevPanel\Kernel\DebuggerIgnoreConfig;
 use AppDevPanel\Kernel\DebugServer\Broadcaster;
 use AppDevPanel\Kernel\DebugServer\Connection;
+use AppDevPanel\Kernel\Project\FileProjectConfigStorage;
+use AppDevPanel\Kernel\Project\ProjectConfigStorageInterface;
 use AppDevPanel\Kernel\Service\FileServiceRegistry;
 use AppDevPanel\Kernel\Service\ServiceRegistryInterface;
 use AppDevPanel\Kernel\Storage\BroadcastingStorage;
@@ -163,6 +166,12 @@ class Module extends \yii\base\Module implements BootstrapInterface
      * @var string Directory for debug data storage.
      */
     public string $storagePath = '@runtime/debug';
+
+    /**
+     * @var string Directory for the committable project config (frames, OpenAPI specs).
+     *             Resolves via {@see \Yii::getAlias()}; defaults to `<app>/config/adp`.
+     */
+    public string $projectConfigPath = '@app/config/adp';
 
     /**
      * @var int Maximum number of debug entries to keep.
@@ -678,6 +687,21 @@ class Module extends \yii\base\Module implements BootstrapInterface
             static fn() => new McpSettingsController(
                 \Yii::$container->get(JsonResponseFactoryInterface::class),
                 \Yii::$container->get(McpSettings::class),
+            ),
+        );
+
+        // Project config (frames, OpenAPI specs) — committed to repo at <app>/config/adp/project.json
+        $resolvedProjectConfigPath = (string) \Yii::getAlias($this->projectConfigPath);
+        \Yii::$container->setSingleton(
+            ProjectConfigStorageInterface::class,
+            static fn() => new FileProjectConfigStorage($resolvedProjectConfigPath),
+        );
+
+        \Yii::$container->setSingleton(
+            ProjectController::class,
+            static fn() => new ProjectController(
+                \Yii::$container->get(JsonResponseFactoryInterface::class),
+                \Yii::$container->get(ProjectConfigStorageInterface::class),
             ),
         );
 

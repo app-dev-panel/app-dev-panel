@@ -68,9 +68,12 @@ use AppDevPanel\Api\Panel\PanelController;
 use AppDevPanel\Api\PathMapper;
 use AppDevPanel\Api\PathMapperInterface;
 use AppDevPanel\Api\PathResolverInterface;
+use AppDevPanel\Api\Project\Controller\ProjectController;
 use AppDevPanel\Api\Toolbar\ToolbarConfig;
 use AppDevPanel\Api\Toolbar\ToolbarInjector;
 use AppDevPanel\Kernel\DebuggerIdGenerator;
+use AppDevPanel\Kernel\Project\FileProjectConfigStorage;
+use AppDevPanel\Kernel\Project\ProjectConfigStorageInterface;
 use AppDevPanel\Kernel\Service\FileServiceRegistry;
 use AppDevPanel\Kernel\Service\ServiceRegistryInterface;
 use AppDevPanel\Kernel\Storage\StorageInterface;
@@ -374,6 +377,17 @@ return [
         JsonResponseFactoryInterface $jsonResponseFactory,
         McpSettings $mcpSettings,
     ) => new McpSettingsController($jsonResponseFactory, $mcpSettings),
+
+    // Project config (frames, OpenAPI specs) — committed to repo at <root>/config/adp/project.json
+    ProjectConfigStorageInterface::class =>
+        static fn(ContainerInterface $container) => new FileProjectConfigStorage($container->get(Aliases::class)->get(
+            $params['app-dev-panel/yii3']['projectConfigPath'] ?? '@root/config/adp',
+        )),
+
+    ProjectController::class => static fn(
+        JsonResponseFactoryInterface $jsonResponseFactory,
+        ProjectConfigStorageInterface $projectConfigStorage,
+    ) => new ProjectController($jsonResponseFactory, $projectConfigStorage),
 
     // LLM settings
     LlmSettingsInterface::class =>

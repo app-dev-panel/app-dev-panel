@@ -74,6 +74,7 @@ use AppDevPanel\Api\PathMapper;
 use AppDevPanel\Api\PathMapperInterface;
 use AppDevPanel\Api\PathResolver;
 use AppDevPanel\Api\PathResolverInterface;
+use AppDevPanel\Api\Project\Controller\ProjectController;
 use AppDevPanel\Api\Toolbar\ToolbarConfig;
 use AppDevPanel\Api\Toolbar\ToolbarInjector;
 use AppDevPanel\Cli\Command\DebugDumpCommand;
@@ -118,6 +119,8 @@ use AppDevPanel\Kernel\Collector\Web\RequestCollector;
 use AppDevPanel\Kernel\Collector\Web\WebAppInfoCollector;
 use AppDevPanel\Kernel\Debugger;
 use AppDevPanel\Kernel\DebuggerIdGenerator;
+use AppDevPanel\Kernel\Project\FileProjectConfigStorage;
+use AppDevPanel\Kernel\Project\ProjectConfigStorageInterface;
 use AppDevPanel\Kernel\Service\FileServiceRegistry;
 use AppDevPanel\Kernel\Service\ServiceRegistryInterface;
 use AppDevPanel\Kernel\Storage\BroadcastingStorage;
@@ -157,6 +160,10 @@ final class AppDevPanelExtension extends Extension
         $container->setParameter('app_dev_panel.ignored_commands', $config['ignored_commands']);
         $container->setParameter('app_dev_panel.dumper.excluded_classes', $config['dumper']['excluded_classes']);
         $container->setParameter('app_dev_panel.path_mapping', $config['path_mapping'] ?? []);
+        $container->setParameter(
+            'app_dev_panel.project_config_path',
+            $config['project_config_path'] ?? '%kernel.project_dir%/config/adp',
+        );
 
         $this->registerCoreServices($container, $config);
         $this->registerCollectors($container, $config);
@@ -672,6 +679,20 @@ final class AppDevPanelExtension extends Extension
             ->setArguments([
                 new Reference(JsonResponseFactoryInterface::class),
                 new Reference(McpSettings::class),
+            ])
+            ->setPublic(true);
+
+        // Project config (frames, OpenAPI specs) — committed to repo at config/adp/project.json
+        $container
+            ->register(ProjectConfigStorageInterface::class, FileProjectConfigStorage::class)
+            ->setArguments(['%app_dev_panel.project_config_path%'])
+            ->setPublic(true);
+
+        $container
+            ->register(ProjectController::class, ProjectController::class)
+            ->setArguments([
+                new Reference(JsonResponseFactoryInterface::class),
+                new Reference(ProjectConfigStorageInterface::class),
             ])
             ->setPublic(true);
 
