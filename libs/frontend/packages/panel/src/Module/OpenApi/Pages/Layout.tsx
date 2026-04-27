@@ -64,7 +64,7 @@ export const Layout = () => {
             {hasEntries ? (
                 <TabContext value={tab}>
                     <Stack>
-                        <Stack direction="row" justifyContent="space-between" sx={{px: 2, pt: 2}}>
+                        <Stack direction="row" justifyContent="space-between">
                             <Tabs
                                 value={tab}
                                 onChange={handleChange}
