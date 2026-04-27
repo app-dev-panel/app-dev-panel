@@ -123,6 +123,18 @@ frontend:update download --path=/path/to/dist       # Install latest panel + too
 
 Writes a `.adp-version` file next to `index.html` so subsequent `check` invocations can compare installed vs latest. Emits a warning if the installed directory has `index.html` but no `toolbar/bundle.js` — typical for archives produced before toolbar was bundled. The GitHub API call is capped at 10s; the asset download at 30s.
 
+## Standalone Binary — `bin/adp`
+
+`bin/adp` is the standalone CLI entry point (`vendor/bin/adp` after Composer install). Registers `ServeCommand`, `FrontendUpdateCommand`, and (when `app-dev-panel/testing` is installed) `DebugFixturesCommand`.
+
+Autoloader lookup order (first hit wins):
+1. `$GLOBALS['_composer_autoload_path']` — set by the Composer-generated `vendor/bin/adp` proxy, points at `vendor/autoload.php`.
+2. `__DIR__ . '/../../../autoload.php'` — Composer install layout (`vendor/app-dev-panel/cli/bin/` → `vendor/autoload.php`).
+3. `__DIR__ . '/../../../vendor/autoload.php'` — monorepo layout (`libs/Cli/bin/` → root `vendor/autoload.php`).
+4. `__DIR__ . '/../vendor/autoload.php'` — standalone checkout with its own `vendor/`.
+
+Symfony Console 8 removed `Application::add()` in favour of `addCommand()`. The binary wraps command registration in a callable that probes `method_exists($app, 'addCommand')` and falls back to `add()` on 6.x/7.x — so the full range declared in `composer.json` (`symfony/console: ^6 | ^7 | ^8`) is supported.
+
 ### `mcp:serve` — MCP Server
 
 Starts an MCP (Model Context Protocol) server over stdio, exposing ADP debug data to AI assistants.

@@ -135,8 +135,15 @@ src/
 
 | Method | Path | Description |
 |--------|------|-------------|
-| GET | `/` | Serve debug panel SPA |
-| GET | `/{path+}` | SPA catch-all routing |
+| GET | `/debug` | Serve debug panel SPA (`PanelController::index`) |
+| GET | `/debug/{path+}` | SPA catch-all for client-side routing, excludes `/debug/api/*` |
+
+`PanelController` only renders the bootstrap HTML and resolves `bundle.js`/`bundle.css` via
+`PanelConfig::$staticUrl`. Each adapter is responsible for **publishing** the
+`app-dev-panel/frontend-assets` bundle into a public directory the web server can serve directly:
+Symfony copies into `public/bundles/appdevpanel/`, Laravel into `public/vendor/app-dev-panel`,
+Yii 2/3 symlink into `@webroot/app-dev-panel`. The API module never streams static files itself —
+that work belongs to the web server.
 
 ### Debug API (`/debug/api`)
 
