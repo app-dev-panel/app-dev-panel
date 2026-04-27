@@ -20,12 +20,14 @@ Each adapter registers a `/debug` route that serves a minimal HTML page. This pa
 3. Mounts the React SPA which communicates with the `/debug/api/*` and `/inspect/api/*` endpoints
 
 ```
-Browser → GET /debug → Adapter serves HTML → Loads bundle.js from CDN
-                                            → React SPA mounts
-                                            → Fetches data from /debug/api/*
+Browser → GET /debug             → Adapter serves HTML
+        → GET /debug/static/*    → AssetsController serves bundle.js/css from
+                                   app-dev-panel/frontend-assets/dist/ (in-process)
+        → React SPA mounts
+        → Fetches data from /debug/api/*
 ```
 
-No separate frontend server is needed. The panel works out of the box after installing an adapter.
+No separate frontend server is needed. The panel works out of the box after installing an adapter — `app-dev-panel/frontend-assets` is pulled in transitively and served locally.
 
 ## Accessing the Panel
 
@@ -47,18 +49,25 @@ PHP_CLI_SERVER_WORKERS=3 php -S 127.0.0.1:8080 -t public
 
 ## Static Assets Source
 
-By default, the panel loads assets from GitHub Pages:
+By default, the panel loads assets from the local Composer-installed bundle served at `/debug/static/`:
 
 ```
-https://app-dev-panel.github.io/app-dev-panel/bundle.js
-https://app-dev-panel.github.io/app-dev-panel/bundle.css
+http://your-app/debug/static/bundle.js
+http://your-app/debug/static/bundle.css
+http://your-app/debug/static/toolbar/bundle.js
 ```
 
-You can change the static URL to load assets from a different source:
+`AssetsController` reads the files from `vendor/app-dev-panel/frontend-assets/dist/` and returns them with immutable cache headers. No external network calls.
 
-### Option 1: GitHub Pages (Default)
+You can override the static URL to load assets from a different source:
 
-No configuration needed. Assets are automatically served from the latest release on GitHub Pages.
+### Option 1: Local Composer Bundle (Default)
+
+No configuration needed. `app-dev-panel/frontend-assets` is installed transitively with the adapter; `PanelConfig::$staticUrl` defaults to `/debug/static`.
+
+### Option 1b: GitHub Pages CDN
+
+Set `staticUrl` to `PanelConfig::CDN_STATIC_URL` (or the literal `https://app-dev-panel.github.io/app-dev-panel`) to load the latest release from GitHub Pages. Handy for quick demos; fragile when the CDN version drifts from the installed package.
 
 ### Option 2: Local Assets from Release
 
@@ -131,8 +140,8 @@ To also publish the assets into playground applications:
 make build-install-panel    # Build + publish in one step
 ```
 
-::: tip Auto-Detection
-When `static_url` is left empty (the default), each adapter automatically checks whether built assets exist in its package directory. If `bundle.js` is found locally, the adapter serves assets from the local path instead of GitHub Pages — **no configuration needed**.
+::: tip Auto-Detection (Legacy)
+Before `app-dev-panel/frontend-assets`, each adapter shipped its own copy of the build under `Resources/public`, `resources/dist`, etc. That detection still works for users who prefer to host the bundle inside their adapter's asset directory:
 
 | Adapter | Local assets path | Served as |
 |---------|-------------------|-----------|
@@ -141,7 +150,7 @@ When `static_url` is left empty (the default), each adapter automatically checks
 | Yii 3 | `resources/dist/bundle.js` → symlinked to `@public/app-dev-panel/` | `/app-dev-panel` |
 | Yii 2 | `resources/dist/bundle.js` → symlinked to `@webroot/app-dev-panel/` | `/app-dev-panel` |
 
-To revert to GitHub Pages, remove the built assets from the adapter directory.
+For new installs prefer the Composer-shipped bundle served by `AssetsController` at `/debug/static`.
 :::
 
 ### Option 4: Vite Dev Server
@@ -203,7 +212,7 @@ The panel SPA includes the following modules:
 
 | Parameter | Default | Description |
 |-----------|---------|-------------|
-| `static_url` | `https://app-dev-panel.github.io/app-dev-panel` | Base URL for panel static assets (bundle.js, bundle.css) |
+| `static_url` | `/debug/static` | Base URL for panel static assets (bundle.js, bundle.css, toolbar bundle). Served locally by `AssetsController` from `app-dev-panel/frontend-assets`. Set to `https://app-dev-panel.github.io/app-dev-panel` to use the GitHub Pages CDN. |
 | `viewer_base_path` | `/debug` | Route prefix where the panel is mounted |
 
 ## Architecture

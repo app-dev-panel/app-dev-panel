@@ -37,7 +37,8 @@ src/
 │   └── ModuleFederationProviderInterface.php
 ├── Panel/
 │   ├── PanelConfig.php                      # Panel display configuration
-│   └── PanelController.php                  # Serves embedded debug panel SPA
+│   ├── PanelController.php                  # Serves embedded debug panel SPA
+│   └── AssetsController.php                 # Serves panel/toolbar dist from app-dev-panel/frontend-assets
 ├── Inspector/
 │   ├── Controller/                      # Inspector mode — live app state
 │   │   ├── InspectController.php        # config, params, classes, object, phpinfo, events
@@ -135,8 +136,19 @@ src/
 
 | Method | Path | Description |
 |--------|------|-------------|
-| GET | `/` | Serve debug panel SPA |
-| GET | `/{path+}` | SPA catch-all routing |
+| GET | `/debug` | Serve debug panel SPA (`PanelController::index`) |
+| GET | `/debug/static/{path+}` | Serve panel + toolbar bundles from `app-dev-panel/frontend-assets` (`AssetsController::serve`) |
+| GET | `/debug/{path+}` | SPA catch-all for client-side routing, excludes `/debug/api/*` and `/debug/static/*` |
+
+`AssetsController` discovers the bundle root via `AppDevPanel\FrontendAssets\FrontendAssets::path()`
+through a `class_exists` + string FQCN lookup (no `use` statement — keeps `api` independent of
+`frontend-assets` per modulite). Returns 404 when the package is missing. Serves files with
+`Cache-Control: public, max-age=31536000, immutable` and a MIME map (js/css/png/svg/ico/woff2/...).
+Rejects path traversal via `realpath` + prefix check. Adapters can pass an explicit `$assetsRoot`
+to the constructor to override discovery (used by tests and by installs that host a custom bundle).
+
+`PanelConfig::DEFAULT_STATIC_URL` is `/debug/static` (relative, served by `AssetsController`).
+`PanelConfig::CDN_STATIC_URL` points at GitHub Pages for users who want the hosted build instead.
 
 ### Debug API (`/debug/api`)
 

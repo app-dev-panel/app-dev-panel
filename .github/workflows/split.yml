@@ -48,23 +48,25 @@ jobs:
           cache: 'npm'
           cache-dependency-path: libs/frontend/package-lock.json
 
-      - name: Build panel SPA into FrontendAssets/dist
+      - name: Build panel + toolbar SPA into FrontendAssets/dist
         if: matrix.package.needs_frontend_build
         run: |
           cd libs/frontend
           npm ci
           npm run build -w packages/sdk
           npm run build -w packages/panel
+          npm run build -w packages/toolbar
           cd ../..
           rm -rf libs/FrontendAssets/dist
-          mkdir -p libs/FrontendAssets/dist
+          mkdir -p libs/FrontendAssets/dist/toolbar
           cp -R libs/frontend/packages/panel/dist/. libs/FrontendAssets/dist/
+          cp -R libs/frontend/packages/toolbar/dist/. libs/FrontendAssets/dist/toolbar/
           # Force-add the dist to a local commit so splitsh-lite sees it.
           # This commit stays local — it is never pushed back to the monorepo.
           git config --local user.name "github-actions[bot]"
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git add -f libs/FrontendAssets/dist
-          git commit -m "ci: bundle panel SPA into FrontendAssets/dist"
+          git commit -m "ci: bundle panel + toolbar SPA into FrontendAssets/dist"
 
       - name: Install splitsh-lite
         env:

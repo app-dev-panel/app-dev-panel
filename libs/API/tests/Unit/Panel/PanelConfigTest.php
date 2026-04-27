@@ -13,8 +13,14 @@ final class PanelConfigTest extends TestCase
     {
         $config = new PanelConfig();
 
+        $this->assertSame('/debug/static', PanelConfig::DEFAULT_STATIC_URL);
         $this->assertSame(PanelConfig::DEFAULT_STATIC_URL, $config->staticUrl);
         $this->assertSame('/debug', $config->viewerBasePath);
+    }
+
+    public function testCdnUrlConstantPointsAtGitHubPages(): void
+    {
+        $this->assertSame('https://app-dev-panel.github.io/app-dev-panel', PanelConfig::CDN_STATIC_URL);
     }
 
     public function testCustomValues(): void

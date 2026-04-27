@@ -20,12 +20,14 @@ description: "Панель отладки ADP -- React SPA для просмот
 3. Монтирует React SPA, который взаимодействует с эндпоинтами `/debug/api/*` и `/inspect/api/*`
 
 ```
-Браузер → GET /debug → Адаптер отдаёт HTML → Загружает bundle.js с CDN
-                                             → React SPA монтируется
-                                             → Получает данные из /debug/api/*
+Браузер → GET /debug              → Адаптер отдаёт HTML
+        → GET /debug/static/*     → AssetsController отдаёт bundle.js/css из
+                                    app-dev-panel/frontend-assets/dist/ (локально)
+        → React SPA монтируется
+        → Получает данные из /debug/api/*
 ```
 
-Отдельный фронтенд-сервер не нужен. Панель работает сразу после установки адаптера.
+Отдельный фронтенд-сервер не нужен. Панель работает сразу после установки адаптера — `app-dev-panel/frontend-assets` подтягивается транзитивно и раздаётся локально.
 
 ## Доступ к панели
 
@@ -47,18 +49,25 @@ PHP_CLI_SERVER_WORKERS=3 php -S 127.0.0.1:8080 -t public
 
 ## Источник статических ресурсов
 
-По умолчанию панель загружает ресурсы с GitHub Pages:
+По умолчанию панель загружает ресурсы из локальной Composer-сборки по адресу `/debug/static/`:
 
 ```
-https://app-dev-panel.github.io/app-dev-panel/bundle.js
-https://app-dev-panel.github.io/app-dev-panel/bundle.css
+http://ваше-приложение/debug/static/bundle.js
+http://ваше-приложение/debug/static/bundle.css
+http://ваше-приложение/debug/static/toolbar/bundle.js
 ```
 
-Вы можете изменить URL статики для загрузки ресурсов из другого источника:
+`AssetsController` читает файлы из `vendor/app-dev-panel/frontend-assets/dist/` и отдаёт их с immutable cache-заголовками. Без походов по сети.
 
-### Вариант 1: GitHub Pages (по умолчанию)
+URL статики можно переопределить и загружать ресурсы из другого источника:
 
-Настройка не требуется. Ресурсы автоматически загружаются из последнего релиза на GitHub Pages.
+### Вариант 1: Локальная сборка Composer (по умолчанию)
+
+Настройка не требуется. `app-dev-panel/frontend-assets` тянется транзитивно вместе с адаптером; `PanelConfig::$staticUrl` по умолчанию равен `/debug/static`.
+
+### Вариант 1b: GitHub Pages CDN
+
+Установите `staticUrl` в `PanelConfig::CDN_STATIC_URL` (или в литерал `https://app-dev-panel.github.io/app-dev-panel`), чтобы загружать последний релиз с GitHub Pages. Удобно для демо; ломается, когда CDN-версия расходится с установленным пакетом.
 
 ### Вариант 2: Локальные ресурсы из релиза
 
@@ -203,7 +212,7 @@ SPA панели включает следующие модули:
 
 | Параметр | По умолчанию | Описание |
 |----------|-------------|----------|
-| `static_url` | `https://app-dev-panel.github.io/app-dev-panel` | Базовый URL для статических ресурсов панели (bundle.js, bundle.css) |
+| `static_url` | `/debug/static` | Базовый URL для статических ресурсов панели (bundle.js, bundle.css, тулбар). Раздаётся локально `AssetsController` из `app-dev-panel/frontend-assets`. Установите в `https://app-dev-panel.github.io/app-dev-panel`, чтобы использовать CDN GitHub Pages. |
 | `viewer_base_path` | `/debug` | Префикс маршрута, на котором смонтирована панель |
 
 ## Архитектура
