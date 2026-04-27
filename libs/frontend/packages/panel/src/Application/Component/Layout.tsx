@@ -185,20 +185,15 @@ const MainInner = styled(Box, {shouldForwardProp: (p) => p !== 'expanded'})<{exp
     gap: componentTokens.mainGap,
 }));
 
-const ContentArea = styled(Box, {shouldForwardProp: (prop) => prop !== 'fullBleed'})<{fullBleed?: boolean}>(
-    ({theme, fullBleed}) => ({
-        flex: 1,
-        minWidth: 0,
-        borderRadius: componentTokens.contentPanel.borderRadius,
-        backgroundColor: theme.palette.background.paper,
-        border: `1px solid ${theme.palette.divider}`,
-        padding: fullBleed ? 0 : theme.spacing(2, 1.5),
-        overflowY: 'auto',
-        [theme.breakpoints.up('sm')]: {padding: fullBleed ? 0 : theme.spacing(3.5, 4.5)},
-    }),
-);
-
-const FULL_BLEED_PATTERNS: RegExp[] = [/^\/open-api(\/.*)?$/, /^\/frames(\/.*)?$/];
+const ContentArea = styled(Box)(({theme}) => ({
+    flex: 1,
+    minWidth: 0,
+    borderRadius: componentTokens.contentPanel.borderRadius,
+    backgroundColor: theme.palette.background.paper,
+    border: `1px solid ${theme.palette.divider}`,
+    padding: 0,
+    overflowY: 'auto',
+}));
 
 // ---------------------------------------------------------------------------
 // Layout component
@@ -704,10 +699,7 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
                                 onChildClick={handleChildClick}
                             />
                         )}
-                        <ContentArea
-                            ref={contentRef}
-                            fullBleed={FULL_BLEED_PATTERNS.some((pattern) => pattern.test(location.pathname))}
-                        >
+                        <ContentArea ref={contentRef}>
                             <ErrorBoundary FallbackComponent={ErrorFallback} resetKeys={[location.pathname]}>
                                 <Outlet />
                             </ErrorBoundary>
