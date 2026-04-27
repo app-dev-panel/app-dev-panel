@@ -72,6 +72,7 @@ use AppDevPanel\Api\Project\Controller\ProjectController;
 use AppDevPanel\Api\Project\Controller\SecretsController;
 use AppDevPanel\Api\Toolbar\ToolbarConfig;
 use AppDevPanel\Api\Toolbar\ToolbarInjector;
+use AppDevPanel\FrontendAssets\FrontendAssets;
 use AppDevPanel\Kernel\DebuggerIdGenerator;
 use AppDevPanel\Kernel\Project\FileProjectConfigStorage;
 use AppDevPanel\Kernel\Project\FileSecretsStorage;
@@ -228,14 +229,18 @@ return [
     PanelConfig::class => static function (ContainerInterface $container) use ($params): PanelConfig {
         $staticUrl = $params['app-dev-panel/yii3']['panel']['staticUrl'] ?? '';
         if ($staticUrl === '') {
-            // Auto-detect: if built assets exist in adapter package, symlink them
-            $adapterDist = \dirname(__DIR__) . '/resources/dist/bundle.js';
-            if (file_exists($adapterDist)) {
+            // Prefer the shared frontend-assets package (release-pinned) and fall
+            // back to the adapter-local resources/dist for monorepo development.
+            $sourceDir = \class_exists(FrontendAssets::class)
+                ? FrontendAssets::resolve(\dirname(__DIR__) . '/resources/dist')
+                : null;
+
+            if ($sourceDir !== null) {
                 $aliases = $container->get(Aliases::class);
                 $webroot = $aliases->get('@public');
                 $targetDir = $webroot . '/app-dev-panel';
-                if (!is_dir($targetDir)) {
-                    @symlink(\dirname($adapterDist), $targetDir);
+                if (!is_dir($targetDir) && !is_link($targetDir)) {
+                    @symlink($sourceDir, $targetDir);
                 }
                 if (is_dir($targetDir)) {
                     $staticUrl = '/app-dev-panel';

@@ -277,6 +277,105 @@ final class FrontendUpdateCommandTest extends TestCase
         }
     }
 
+    public function testCheckWarnsWhenToolbarMissingFromInstalledPath(): void
+    {
+        $release = [
+            'tag_name' => 'v1.0.0',
+            'published_at' => '2026-03-20T10:00:00Z',
+            'assets' => [['name' => 'frontend-dist.zip', 'browser_download_url' => 'https://example.com/d.zip']],
+        ];
+        $client = $this->createMockClient([new Response(200, [], json_encode($release))]);
+
+        $tempDir = sys_get_temp_dir() . '/adp-test-toolbar-missing-' . uniqid();
+        mkdir($tempDir, 0o777, true);
+        file_put_contents($tempDir . '/.adp-version', 'v1.0.0');
+        // Panel installed, toolbar missing (legacy archive pre-0.3)
+        file_put_contents($tempDir . '/index.html', '<html></html>');
+
+        try {
+            $tester = new CommandTester(new FrontendUpdateCommand($client));
+            $tester->execute(['action' => 'check', '--path' => $tempDir]);
+
+            $this->assertSame(0, $tester->getStatusCode());
+            $display = $tester->getDisplay();
+            $this->assertStringContainsString('Toolbar bundle is missing', $display);
+        } finally {
+            @unlink($tempDir . '/.adp-version');
+            @unlink($tempDir . '/index.html');
+            @rmdir($tempDir);
+        }
+    }
+
+    public function testCheckDoesNotWarnWhenToolbarPresent(): void
+    {
+        $release = [
+            'tag_name' => 'v1.0.0',
+            'published_at' => '2026-03-20T10:00:00Z',
+            'assets' => [['name' => 'frontend-dist.zip', 'browser_download_url' => 'https://example.com/d.zip']],
+        ];
+        $client = $this->createMockClient([new Response(200, [], json_encode($release))]);
+
+        $tempDir = sys_get_temp_dir() . '/adp-test-toolbar-present-' . uniqid();
+        mkdir($tempDir . '/toolbar', 0o777, true);
+        file_put_contents($tempDir . '/.adp-version', 'v1.0.0');
+        file_put_contents($tempDir . '/index.html', '<html></html>');
+        file_put_contents($tempDir . '/toolbar/bundle.js', "console.log('t');");
+
+        try {
+            $tester = new CommandTester(new FrontendUpdateCommand($client));
+            $tester->execute(['action' => 'check', '--path' => $tempDir]);
+
+            $this->assertSame(0, $tester->getStatusCode());
+            $this->assertStringNotContainsString('Toolbar bundle is missing', $tester->getDisplay());
+        } finally {
+            @unlink($tempDir . '/.adp-version');
+            @unlink($tempDir . '/index.html');
+            @unlink($tempDir . '/toolbar/bundle.js');
+            @rmdir($tempDir . '/toolbar');
+            @rmdir($tempDir);
+        }
+    }
+
+    public function testDownloadExtractsToolbarFromArchive(): void
+    {
+        $tempDir = sys_get_temp_dir() . '/adp-test-toolbar-dl-' . uniqid();
+
+        $zipPath = tempnam(sys_get_temp_dir(), 'adp-test-zip-') . '.zip';
+        $zip = new \ZipArchive();
+        $zip->open($zipPath, \ZipArchive::CREATE);
+        $zip->addFromString('index.html', '<html>panel</html>');
+        $zip->addFromString('bundle.js', "console.log('panel');");
+        $zip->addFromString('toolbar/bundle.js', "console.log('toolbar');");
+        $zip->close();
+        $zipContent = file_get_contents($zipPath);
+        unlink($zipPath);
+
+        $release = [
+            'tag_name' => 'v3.0.0',
+            'assets' => [['name' => 'frontend-dist.zip', 'browser_download_url' => 'https://example.com/dl.zip']],
+        ];
+        $client = $this->createMockClient([
+            new Response(200, [], json_encode($release)),
+            new Response(200, [], $zipContent),
+        ]);
+
+        try {
+            $tester = new CommandTester(new FrontendUpdateCommand($client));
+            $tester->execute(['action' => 'download', '--path' => $tempDir]);
+
+            $this->assertSame(0, $tester->getStatusCode());
+            $this->assertFileExists($tempDir . '/toolbar/bundle.js');
+            $this->assertStringNotContainsString('Toolbar bundle is missing', $tester->getDisplay());
+        } finally {
+            @unlink($tempDir . '/index.html');
+            @unlink($tempDir . '/bundle.js');
+            @unlink($tempDir . '/toolbar/bundle.js');
+            @unlink($tempDir . '/.adp-version');
+            @rmdir($tempDir . '/toolbar');
+            @rmdir($tempDir);
+        }
+    }
+
     private function createMockClient(array $responses): Client
     {
         $mock = new MockHandler($responses);

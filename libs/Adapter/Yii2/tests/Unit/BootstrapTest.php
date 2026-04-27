@@ -14,7 +14,8 @@ final class BootstrapTest extends TestCase
     public function testBootstrapRegistersModuleWhenNotPresent(): void
     {
         $app = $this->createMock(Application::class);
-        $app->method('hasModule')->with('app-dev-panel')->willReturn(false);
+        // hasModule() is called for both 'app-dev-panel' (main) and 'debug' (conflict check).
+        $app->method('hasModule')->willReturnCallback(static fn(string $id): bool => false);
 
         $module = $this->createMock(Module::class);
         $module->expects($this->once())->method('bootstrap')->with($app);
@@ -46,7 +47,8 @@ final class BootstrapTest extends TestCase
         $module->expects($this->once())->method('bootstrap');
 
         $app = $this->createMock(Application::class);
-        $app->method('hasModule')->with('app-dev-panel')->willReturn(true);
+        // hasModule() is called for both 'app-dev-panel' (main) and 'debug' (conflict check).
+        $app->method('hasModule')->willReturnCallback(static fn(string $id): bool => $id === 'app-dev-panel');
         $app->method('getModules')->willReturn([
             'app-dev-panel' => ['class' => Module::class],
         ]);

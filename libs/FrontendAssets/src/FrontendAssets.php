@@ -23,4 +23,25 @@ final class FrontendAssets
     {
         return is_file(self::path() . '/index.html');
     }
+
+    /**
+     * Resolve the canonical bundle directory for a framework adapter.
+     *
+     * Prefers this package's `dist/` (release-pinned, contains both panel and
+     * toolbar) and falls back to the adapter-local `resources/dist/` so
+     * `make build-panel` development workflows keep working inside the
+     * monorepo. Returns `null` when neither has a usable bundle.
+     */
+    public static function resolve(?string $localFallbackDir = null): ?string
+    {
+        if (self::exists()) {
+            return self::path();
+        }
+
+        if ($localFallbackDir !== null && is_file($localFallbackDir . '/bundle.js')) {
+            return $localFallbackDir;
+        }
+
+        return null;
+    }
 }

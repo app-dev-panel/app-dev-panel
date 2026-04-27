@@ -43,8 +43,11 @@ src/
 │   ├── SymfonyRouteAdapter.php                     # Single route adapter
 │   ├── SymfonyUrlMatcherAdapter.php                # URL matching adapter
 │   └── SymfonyMatchResult.php                      # Match result DTO
-└── Controller/
-    └── AdpApiController.php                        # Symfony controller bridging to ADP ApiApplication
+├── Controller/
+│   ├── AdpApiController.php                        # Symfony controller bridging to ADP ApiApplication
+│   └── AdpAssetsController.php                     # Streams FrontendAssets panel + toolbar files at `/_adp-assets/*`
+└── Command/
+    └── AssetsInstallCommand.php                    # `app-dev-panel:assets:install` — prebake FrontendAssets into public/bundles/appdevpanel/
 tests/
 ├── Integration/
 │   ├── BundleBootstrapTest.php                     # Full container compilation + lifecycle
@@ -79,6 +82,16 @@ Registers in order:
 - API services: middleware stack, controllers, inspector endpoints
 - Inspector: `SymfonyConfigProvider` as `config` alias, `DoctrineSchemaProvider` or `NullSchemaProvider`
 - Bridge: `AdpApiController` maps Symfony routing to `ApiApplication`
+- Static assets: `AdpAssetsController` (tagged `controller.service_arguments`) streams `FrontendAssets::path()` at `/_adp-assets/*`. Used as `panel.static_url` when set to empty and `Resources/public/bundle.js` is absent
+- Console: `AssetsInstallCommand` (`app-dev-panel:assets:install`) tagged `console.command` — copies/symlinks `FrontendAssets::path()` into `public/bundles/appdevpanel/`
+
+### Panel static URL resolution
+
+`AppDevPanelExtension::load()` picks `panel.static_url` in this order when the user leaves it empty:
+
+1. `Resources/public/bundle.js` exists → `/bundles/appdevpanel` (legacy `make build-panel` or after `app-dev-panel:assets:install --symlink`)
+2. `FrontendAssets::exists()` → `/_adp-assets` (runtime streaming via `AdpAssetsController`)
+3. `PanelConfig::DEFAULT_STATIC_URL` (GitHub Pages CDN)
 
 ### 4. Compiler Pass (`CollectorProxyCompilerPass`)
 
