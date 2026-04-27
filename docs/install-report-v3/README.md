@@ -11,7 +11,7 @@ code changes are fixed in master**; the remaining ones are release/CI orchestrat
 | 1 | Stable Packagist release is stale (`v0.2` from 22 Apr) | **Blocker for newcomers** | Open — needs a tag |
 | 2 | `frontend-assets` Packagist tags are missing — only `dev-master` is available | Blocker | Open — needs CI tag |
 | 3 | Mixed-stability install leaves `api/cli/kernel/mcp-server` at `v0.2` while pulling `adapter-yii3:dev-master` | Blocker | Open — needs `:dev-master` on every package or a stable release |
-| 4 | Split repo `frontend-assets` lags behind the monorepo — `FrontendAssets::resolve()` is missing in the published `dev-master` even though it exists on master | Blocker (HTTP 500) | Open — needs an atomic split push |
+| 4 | Split repo `frontend-assets` lags behind the monorepo — `FrontendAssets::resolve()` is missing in the published `dev-master` even though it exists on master | Blocker (HTTP 500) | **Fixed** — `.github/workflows/split.yml` now publishes packages sequentially in topological order (`max-parallel: 1`, leaves first) |
 | 5 | `yiisoft/app` template doesn't auto-configure middleware | UX | Documented now |
 | 6 | `PHP_CLI_SERVER_WORKERS=3` is mandatory for SSE | UX | Documented |
 
@@ -104,7 +104,14 @@ Cause:
 
 The split workflow that pushes `libs/FrontendAssets/` to the standalone `app-dev-panel/frontend-assets` repo lagged behind the workflow that pushed `libs/Adapter/Yii3/`. End result: an adapter dev-master that depends on an unreleased API in its dev-master sibling. The app crashes on first request.
 
-**Fix**: ensure the split workflow either runs every package on every push or is sequenced so dependents can never publish before their dependencies. Today's workflow uses a matrix with no ordering between packages.
+**Fix applied** (`d3f6a0d0` → next push): `.github/workflows/split.yml` now sets
+`strategy.max-parallel: 1` and orders the matrix in dependency order (L0 leaves first:
+`kernel`, `testing`, `frontend-assets`; then `mcp-server`, `api`, `cli`/`adapter-cycle`,
+finally the framework adapters). For any commit on `master`, every dependency is on
+Packagist before the dependent package's split is pushed, so a `composer require :dev-master`
+will never hit the API-mismatch crash again. Trade-off: workflow runs sequentially
+(~10–12 min for the full chain instead of ~5 min parallel) — acceptable for a once-per-merge
+release path.
 
 #### Issue 5 — middleware needs manual wiring (now documented)
 

@@ -17,20 +17,35 @@ jobs:
     name: "Split ${{ matrix.package.name }}"
     runs-on: ubuntu-latest
     strategy:
+      # Publish split repositories sequentially in topological order: leaves first,
+      # adapters last. A parallel matrix can land `app-dev-panel/adapter-yii3:dev-master`
+      # on Packagist before `app-dev-panel/frontend-assets:dev-master` has caught up,
+      # which is exactly what produced the `Call to undefined method
+      # AppDevPanel\FrontendAssets\FrontendAssets::resolve()` failure observed in the
+      # `claude/setup-ui3-driver-OtakO` install report. `max-parallel: 1` plus the order
+      # below guarantees that for any monorepo commit, every dependency of a package is
+      # already pushed by the time the package itself is.
+      max-parallel: 1
       fail-fast: false
       matrix:
         package:
+          # L0 — leaves with no internal deps. frontend-assets goes here too because
+          #      adapters reference its API; if it lags, dev-master adapters crash.
           - { name: "kernel",           local_path: "libs/Kernel",          split_repository: "kernel" }
-          - { name: "api",              local_path: "libs/API",             split_repository: "api" }
-          - { name: "cli",              local_path: "libs/Cli",             split_repository: "cli" }
-          - { name: "mcp-server",       local_path: "libs/McpServer",       split_repository: "mcp-server" }
           - { name: "testing",          local_path: "libs/Testing",         split_repository: "testing" }
+          - { name: "frontend-assets",  local_path: "libs/FrontendAssets",  split_repository: "frontend-assets", needs_frontend_build: true }
+          # L1 — depends on kernel
+          - { name: "mcp-server",       local_path: "libs/McpServer",       split_repository: "mcp-server" }
+          # L2 — depends on kernel + mcp-server
+          - { name: "api",              local_path: "libs/API",             split_repository: "api" }
+          # L3 — depend on api/cli/etc but no adapter depends on these two
+          - { name: "cli",              local_path: "libs/Cli",             split_repository: "cli" }
+          - { name: "adapter-cycle",    local_path: "libs/Adapter/Cycle",   split_repository: "adapter-cycle" }
+          # L4 — full framework adapters: depend on kernel, api, cli, mcp-server, frontend-assets
           - { name: "adapter-symfony",  local_path: "libs/Adapter/Symfony", split_repository: "adapter-symfony" }
           - { name: "adapter-laravel",  local_path: "libs/Adapter/Laravel", split_repository: "adapter-laravel" }
           - { name: "adapter-yii2",     local_path: "libs/Adapter/Yii2",    split_repository: "adapter-yii2" }
-          - { name: "adapter-cycle",    local_path: "libs/Adapter/Cycle",   split_repository: "adapter-cycle" }
           - { name: "adapter-yii3",     local_path: "libs/Adapter/Yii3",    split_repository: "adapter-yii3" }
-          - { name: "frontend-assets",  local_path: "libs/FrontendAssets",  split_repository: "frontend-assets", needs_frontend_build: true }
 
     steps:
       - name: Checkout
