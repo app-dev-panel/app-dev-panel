@@ -31,7 +31,7 @@ import {DuckIcon} from '@app-dev-panel/sdk/Component/DuckIcon';
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {ErrorFallback} from '@app-dev-panel/sdk/Component/ErrorFallback';
 import {InfoBox} from '@app-dev-panel/sdk/Component/InfoBox';
-import {SectionBreadcrumb} from '@app-dev-panel/sdk/Component/SectionBreadcrumb';
+import {PanelBreadcrumbProvider} from '@app-dev-panel/sdk/Component/PanelBreadcrumb';
 import {getCollectorLabel} from '@app-dev-panel/sdk/Helper/collectorMeta';
 import {CollectorsMap} from '@app-dev-panel/sdk/Helper/collectors';
 import {isDebugEntryAboutConsole, isDebugEntryAboutWeb} from '@app-dev-panel/sdk/Helper/debugEntry';
@@ -424,8 +424,9 @@ const Layout = () => {
                 )}
                 {collectorQueryInfo.isSuccess && (
                     <ErrorBoundary FallbackComponent={ErrorFallback} resetKeys={[selectedCollector, debugEntry]}>
-                        <SectionBreadcrumb items={['Debug', getCollectorLabel(selectedCollector)]} />
-                        <CollectorData selectedCollector={selectedCollector} collectorData={collectorData} />
+                        <PanelBreadcrumbProvider label={getCollectorLabel(selectedCollector)}>
+                            <CollectorData selectedCollector={selectedCollector} collectorData={collectorData} />
+                        </PanelBreadcrumbProvider>
                     </ErrorBoundary>
                 )}
             </>

@@ -174,7 +174,8 @@ const MainArea = styled(Box)(({theme}) => ({
     justifyContent: 'center',
     padding: theme.spacing(1),
     gap: theme.spacing(1),
-    overflow: 'auto',
+    overflow: 'hidden',
+    minHeight: 0,
     [theme.breakpoints.up('sm')]: {padding: componentTokens.mainGap, gap: componentTokens.mainGap},
 }));
 
