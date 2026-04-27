@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace AppDevPanel\Api\Debug\Controller;
 
 use AppDevPanel\Api\Debug\Exception\NotFoundException;
-use AppDevPanel\Api\Debug\HtmlViewProviderInterface;
 use AppDevPanel\Api\Debug\LiveEventStreamFactory;
 use AppDevPanel\Api\Debug\Repository\CollectorRepositoryInterface;
 use AppDevPanel\Api\Http\JsonResponseFactoryInterface;
 use AppDevPanel\Api\ServerSentEventsStream;
+use AppDevPanel\Kernel\Collector\HtmlViewProviderInterface;
 use AppDevPanel\Kernel\Storage\StorageInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;

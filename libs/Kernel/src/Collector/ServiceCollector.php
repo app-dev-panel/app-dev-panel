@@ -6,7 +6,7 @@ namespace AppDevPanel\Kernel\Collector;
 
 use AppDevPanel\Kernel\Event\MethodCallRecord;
 
-final class ServiceCollector implements SummaryCollectorInterface
+final class ServiceCollector implements SummaryCollectorInterface, HtmlViewProviderInterface
 {
     use CollectorTrait;
 
@@ -53,5 +53,10 @@ final class ServiceCollector implements SummaryCollectorInterface
     private function reset(): void
     {
         $this->items = [];
+    }
+
+    public static function getViewPath(): string
+    {
+        return __DIR__ . '/service-collector-view.php';
     }
 }

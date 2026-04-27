@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace AppDevPanel\Api\Debug\Slot;
+namespace AppDevPanel\Kernel\Slot;
 
 use AppDevPanel\Kernel\Helper\Json;
 

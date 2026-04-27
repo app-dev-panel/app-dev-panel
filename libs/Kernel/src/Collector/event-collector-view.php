@@ -2,15 +2,14 @@
 
 declare(strict_types=1);
 
-use AppDevPanel\Api\Debug\Slot\Slot;
+use AppDevPanel\Kernel\Slot\Slot;
 
 /**
- * SSR Event panel — server-rendered fragment.
+ * Server-rendered view for {@see \AppDevPanel\Kernel\Collector\EventCollector}.
  *
- * Renders the EventCollector items mirrored by SsrEventPanelCollector. All
- * styling lives in the shared `adp-ui-*` UI kit (`SsrPanel.uiKit.ts`); this
- * template only emits structure + slot markers, which the React host hydrates
- * into real `<ClassName>`/`<JsonRenderer>`/`<FileLink>` instances.
+ * Emits structure + slot markers only — all visual styling lives on the
+ * frontend in `SsrPanel.uiKit.ts`. Slots `class-name`, `file-link`, `json`
+ * are hydrated by `SsrPanel` into real React components after mount.
  *
  * @var list<array{name: string, event: mixed, file: string|false, line: string, time: float|int}> $data
  */
@@ -35,7 +34,6 @@ $h = static fn(string $s): string => htmlspecialchars($s, ENT_QUOTES, 'UTF-8');
         <span class="adp-ui-text-secondary adp-ui-text-strong">
             <?= count($events) ?> event<?= count($events) === 1 ? '' : 's' ?>
         </span>
-        <span class="adp-ui-badge">SSR · backend-rendered</span>
     </div>
 
     <?php if ($events === []): ?>

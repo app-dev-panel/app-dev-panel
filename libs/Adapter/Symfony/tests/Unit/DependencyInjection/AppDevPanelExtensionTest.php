@@ -10,8 +10,6 @@ use AppDevPanel\Adapter\Symfony\EventSubscriber\HttpSubscriber;
 use AppDevPanel\Adapter\Symfony\Inspector\SymfonyConfigProvider;
 use AppDevPanel\Adapter\Symfony\Inspector\SymfonyRouteCollectionAdapter;
 use AppDevPanel\Adapter\Symfony\Inspector\SymfonyUrlMatcherAdapter;
-use AppDevPanel\Api\Debug\Ssr\SsrEventPanelCollector;
-use AppDevPanel\Api\Debug\Ssr\SsrServicePanelCollector;
 use AppDevPanel\Api\Inspector\Controller\DatabaseController;
 use AppDevPanel\Api\Inspector\Controller\RoutingController;
 use AppDevPanel\Api\Inspector\Database\SchemaProviderInterface;
@@ -86,8 +84,6 @@ final class AppDevPanelExtensionTest extends TestCase
             ValidatorCollector::class,
             RouterCollector::class,
             AssetBundleCollector::class,
-            SsrEventPanelCollector::class,
-            SsrServicePanelCollector::class,
         ];
 
         foreach ($expectedCollectors as $collectorClass) {

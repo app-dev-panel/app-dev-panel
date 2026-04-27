@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace AppDevPanel\Api\Tests\Unit\Debug\Slot;
+namespace AppDevPanel\Kernel\Tests\Unit\Slot;
 
-use AppDevPanel\Api\Debug\Slot\Slot;
+use AppDevPanel\Kernel\Slot\Slot;
 use PHPUnit\Framework\TestCase;
 
 final class SlotTest extends TestCase

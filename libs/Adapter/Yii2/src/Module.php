@@ -35,8 +35,6 @@ use AppDevPanel\Api\Debug\Controller\SettingsController;
 use AppDevPanel\Api\Debug\Middleware\ResponseDataWrapper;
 use AppDevPanel\Api\Debug\Repository\CollectorRepository;
 use AppDevPanel\Api\Debug\Repository\CollectorRepositoryInterface;
-use AppDevPanel\Api\Debug\Ssr\SsrEventPanelCollector;
-use AppDevPanel\Api\Debug\Ssr\SsrServicePanelCollector;
 use AppDevPanel\Api\Http\JsonResponseFactory;
 use AppDevPanel\Api\Http\JsonResponseFactoryInterface;
 use AppDevPanel\Api\Inspector\Authorization\AuthorizationConfigProviderInterface;
@@ -755,14 +753,8 @@ class Module extends \yii\base\Module implements BootstrapInterface
             'exception' => static fn(): array => [new ExceptionCollector($timeline)],
             'deprecation' => static fn(): array => [new DeprecationCollector($timeline)],
             'log' => static fn(): array => [new LogCollector($timeline)],
-            'event' => static function () use ($timeline): array {
-                $event = new EventCollector($timeline);
-                return [$event, new SsrEventPanelCollector($event)];
-            },
-            'service' => static function () use ($timeline): array {
-                $service = new ServiceCollector($timeline);
-                return [$service, new SsrServicePanelCollector($service)];
-            },
+            'event' => static fn(): array => [new EventCollector($timeline)],
+            'service' => static fn(): array => [new ServiceCollector($timeline)],
             'http_client' => static fn(): array => [new HttpClientCollector($timeline)],
             'var_dumper' => static function () use ($timeline): array {
                 $varDumperCollector = new VarDumperCollector($timeline);

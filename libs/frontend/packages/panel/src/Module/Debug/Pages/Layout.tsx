@@ -7,7 +7,6 @@ import {CommandPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/Co
 import {DatabasePanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/DatabasePanel';
 import {ElasticsearchPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/ElasticsearchPanel';
 import {EnvironmentPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/EnvironmentPanel';
-import {EventPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/EventPanel';
 import {ExceptionPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/ExceptionPanel';
 import {IOPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/IOPanel';
 import {MailerPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/MailerPanel';
@@ -17,7 +16,6 @@ import {QueuePanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/Queu
 import {RedisPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/RedisPanel';
 import {RequestPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/RequestPanel';
 import {RouterPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/RouterPanel';
-import {ServicesPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/ServicesPanel';
 import {SsrPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/SsrPanel';
 import {TemplatePanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/TemplatePanel';
 import {TimelinePanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/TimelinePanel';
@@ -133,7 +131,6 @@ function CollectorData({collectorData, selectedCollector}: CollectorDataProps) {
     const baseUrl = useSelector((state) => state.application.baseUrl) as string;
     const pages: {[name: string]: (data: any) => React.JSX.Element} = {
         [CollectorsMap.MailerCollector]: (data: any) => <MailerPanel data={data} />,
-        [CollectorsMap.ServiceCollector]: (data: any) => <ServicesPanel data={data} />,
         [CollectorsMap.TimelineCollector]: (data: any) => <TimelinePanel data={data} />,
         [CollectorsMap.LogCollector]: (data: any) => <UnifiedLogWrapper logs={data} />,
         [CollectorsMap.DatabaseCollector]: (data: any) => <DatabasePanel data={data} />,
@@ -146,7 +143,6 @@ function CollectorData({collectorData, selectedCollector}: CollectorDataProps) {
         [CollectorsMap.RequestCollector]: (data: any) => <RequestPanel data={data} />,
         [CollectorsMap.CommandCollector]: (data: any) => <CommandPanel data={data} />,
         [CollectorsMap.MiddlewareCollector]: (data: any) => <MiddlewarePanel {...data} />,
-        [CollectorsMap.EventCollector]: (data: any) => <EventPanel events={data} />,
         [CollectorsMap.ExceptionCollector]: (data: any) => <ExceptionPanel exceptions={data} />,
         [CollectorsMap.DeprecationCollector]: (data: any) => (
             <UnifiedLogPanel logs={[]} deprecations={data} dumps={[]} />

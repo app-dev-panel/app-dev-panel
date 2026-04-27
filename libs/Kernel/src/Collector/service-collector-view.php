@@ -2,15 +2,14 @@
 
 declare(strict_types=1);
 
-use AppDevPanel\Api\Debug\Slot\Slot;
+use AppDevPanel\Kernel\Slot\Slot;
 
 /**
- * SSR Service panel — server-rendered fragment.
+ * Server-rendered view for {@see \AppDevPanel\Kernel\Collector\ServiceCollector}.
  *
- * Renders the ServiceCollector method-call records mirrored by
- * SsrServicePanelCollector. Service id / class hydrate into `<ClassName>`
- * (with Inspector + Open-in-Editor buttons), arguments and result hydrate
- * into `<JsonRenderer>`, status flips chip color via `data-severity`.
+ * Service id / class hydrate into `<ClassName>` (Inspector + Open-in-Editor),
+ * arguments and result hydrate into `<JsonRenderer>`, status flips chip color
+ * via `data-severity`. All visual styling lives in `SsrPanel.uiKit.ts`.
  *
  * @var list<array{
  *     service: string,
@@ -66,7 +65,6 @@ foreach ($items as $entry) {
                 · <span data-severity="error" style="color: var(--adp-sev);"><?= $errorCount ?> failed</span>
             <?php endif; ?>
         </span>
-        <span class="adp-ui-badge">SSR · backend-rendered</span>
     </div>
 
     <?php if ($items === []): ?>

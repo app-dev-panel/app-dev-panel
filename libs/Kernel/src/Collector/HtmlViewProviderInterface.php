@@ -2,9 +2,7 @@
 
 declare(strict_types=1);
 
-namespace AppDevPanel\Api\Debug;
-
-use AppDevPanel\Kernel\Collector\CollectorInterface;
+namespace AppDevPanel\Kernel\Collector;
 
 /**
  * Marks a collector that ships its own server-rendered HTML view.

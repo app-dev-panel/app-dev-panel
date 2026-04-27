@@ -25,8 +25,6 @@ use AppDevPanel\Api\Debug\Middleware\ResponseDataWrapper;
 use AppDevPanel\Api\Debug\Middleware\TokenAuthMiddleware;
 use AppDevPanel\Api\Debug\Repository\CollectorRepository;
 use AppDevPanel\Api\Debug\Repository\CollectorRepositoryInterface;
-use AppDevPanel\Api\Debug\Ssr\SsrEventPanelCollector;
-use AppDevPanel\Api\Debug\Ssr\SsrServicePanelCollector;
 use AppDevPanel\Api\Http\JsonResponseFactory;
 use AppDevPanel\Api\Http\JsonResponseFactoryInterface;
 use AppDevPanel\Api\Ingestion\Controller\IngestionController;
@@ -270,24 +268,6 @@ final class AppDevPanelExtension extends Extension
             $container
                 ->register($class, $class)
                 ->setArguments([new Reference(TimelineCollector::class)])
-                ->setPublic(false)
-                ->addTag('app_dev_panel.collector');
-        }
-
-        // SSR panels — backend-rendered views over existing collectors.
-        // Each one is registered only when its wrapped collector is on, since
-        // it has no data of its own.
-        if ($collectors['event']) {
-            $container
-                ->register(SsrEventPanelCollector::class, SsrEventPanelCollector::class)
-                ->setArguments([new Reference(EventCollector::class)])
-                ->setPublic(false)
-                ->addTag('app_dev_panel.collector');
-        }
-        if ($collectors['service']) {
-            $container
-                ->register(SsrServicePanelCollector::class, SsrServicePanelCollector::class)
-                ->setArguments([new Reference(ServiceCollector::class)])
                 ->setPublic(false)
                 ->addTag('app_dev_panel.collector');
         }

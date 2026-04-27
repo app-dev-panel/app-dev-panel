@@ -6,10 +6,10 @@ namespace AppDevPanel\Api\Tests\Unit\Debug\Controller;
 
 use AppDevPanel\Api\Debug\Controller\DebugController;
 use AppDevPanel\Api\Debug\Exception\NotFoundException;
-use AppDevPanel\Api\Debug\HtmlViewProviderInterface;
 use AppDevPanel\Api\Debug\Repository\CollectorRepositoryInterface;
 use AppDevPanel\Api\Http\JsonResponseFactoryInterface;
 use AppDevPanel\Kernel\Collector\CollectorTrait;
+use AppDevPanel\Kernel\Collector\HtmlViewProviderInterface;
 use AppDevPanel\Kernel\Storage\StorageInterface;
 use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\Psr7\ServerRequest;

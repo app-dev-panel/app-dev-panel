@@ -9,8 +9,6 @@ use AppDevPanel\Adapter\Yii3\Collector\Router\UrlMatcherInterfaceProxy;
 use AppDevPanel\Adapter\Yii3\Collector\Translator\TranslatorInterfaceProxy;
 use AppDevPanel\Adapter\Yii3\Collector\Validator\ValidatorInterfaceProxy;
 use AppDevPanel\Adapter\Yii3\Proxy\ContainerInterfaceProxy;
-use AppDevPanel\Api\Debug\Ssr\SsrEventPanelCollector;
-use AppDevPanel\Api\Debug\Ssr\SsrServicePanelCollector;
 use AppDevPanel\Cli\Command\DebugDumpCommand;
 use AppDevPanel\Cli\Command\DebugQueryCommand;
 use AppDevPanel\Cli\Command\DebugResetCommand;
@@ -104,8 +102,6 @@ return [
             QueueCollector::class,
             RedisCollector::class,
             ElasticsearchCollector::class,
-            SsrEventPanelCollector::class,
-            SsrServicePanelCollector::class,
         ],
         'collectors.web' => [
             WebAppInfoCollector::class,

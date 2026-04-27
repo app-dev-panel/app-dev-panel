@@ -7,8 +7,6 @@ namespace AppDevPanel\Adapter\Symfony\Tests\Integration;
 use AppDevPanel\Adapter\Symfony\AppDevPanelBundle;
 use AppDevPanel\Adapter\Symfony\EventSubscriber\ConsoleSubscriber;
 use AppDevPanel\Adapter\Symfony\EventSubscriber\HttpSubscriber;
-use AppDevPanel\Api\Debug\Ssr\SsrEventPanelCollector;
-use AppDevPanel\Api\Debug\Ssr\SsrServicePanelCollector;
 use AppDevPanel\Api\Panel\PanelConfig;
 use AppDevPanel\Api\Panel\PanelController;
 use AppDevPanel\Kernel\Collector\AuthorizationCollector;
@@ -112,8 +110,6 @@ final class BundleBootstrapTest extends TestCase
             QueueCollector::class,
             ValidatorCollector::class,
             RouterCollector::class,
-            SsrEventPanelCollector::class,
-            SsrServicePanelCollector::class,
         ];
 
         foreach ($expectedCollectors as $class) {
