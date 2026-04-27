@@ -398,4 +398,25 @@ final class StreamWrapperTest extends TestCase
 
         $this->assertFalse($result);
     }
+
+    public function testStreamOpenNonExistentFileDoesNotEmitWarning(): void
+    {
+        $wrapper = new \AppDevPanel\Kernel\Helper\StreamWrapper\StreamWrapper();
+
+        $warnings = [];
+        set_error_handler(static function (int $errno, string $errstr) use (&$warnings): bool {
+            $warnings[] = $errstr;
+            return true;
+        });
+
+        try {
+            $opened = null;
+            $result = $wrapper->stream_open('/nonexistent/path/file.txt', 'r', 0, $opened);
+        } finally {
+            restore_error_handler();
+        }
+
+        $this->assertFalse($result);
+        $this->assertSame([], $warnings, 'stream_open must not emit warnings when the target file is missing');
+    }
 }

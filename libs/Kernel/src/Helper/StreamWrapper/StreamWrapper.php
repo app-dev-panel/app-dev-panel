@@ -128,12 +128,21 @@ final class StreamWrapper implements StreamWrapperInterface
         ) {
             opcache_invalidate($path, false);
         }
-        $this->stream = fopen(
-            $path,
-            $mode,
-            ($options & STREAM_USE_PATH) === STREAM_USE_PATH,
-            (self::STREAM_OPEN_FOR_INCLUDE & $options) === self::STREAM_OPEN_FOR_INCLUDE ? null : $this->context,
-        );
+        // stream_open semantics are "return false on failure"; a warning here would double-fire
+        // on the caller that already checks the return value (e.g. Symfony's ClassLoader
+        // invoking include on a just-deleted cache file). `@` alone is not enough under custom
+        // error handlers (PHPUnit's failOnWarning), so wrap with a scoped no-op handler.
+        set_error_handler(static fn(): bool => true);
+        try {
+            $this->stream = fopen(
+                $path,
+                $mode,
+                ($options & STREAM_USE_PATH) === STREAM_USE_PATH,
+                (self::STREAM_OPEN_FOR_INCLUDE & $options) === self::STREAM_OPEN_FOR_INCLUDE ? null : $this->context,
+            );
+        } finally {
+            restore_error_handler();
+        }
 
         if (!is_resource($this->stream)) {
             return false;

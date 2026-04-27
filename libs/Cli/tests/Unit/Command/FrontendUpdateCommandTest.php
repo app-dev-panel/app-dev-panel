@@ -8,6 +8,7 @@ use AppDevPanel\Cli\Command\FrontendUpdateCommand;
 use GuzzleHttp\Client;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
+use GuzzleHttp\Middleware;
 use GuzzleHttp\Psr7\Response;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Tester\CommandTester;
@@ -277,109 +278,90 @@ final class FrontendUpdateCommandTest extends TestCase
         }
     }
 
-    public function testCheckWarnsWhenToolbarMissingFromInstalledPath(): void
+    public function testCheckWithPinnedVersionHitsTagsEndpoint(): void
     {
         $release = [
-            'tag_name' => 'v1.0.0',
-            'published_at' => '2026-03-20T10:00:00Z',
-            'assets' => [['name' => 'frontend-dist.zip', 'browser_download_url' => 'https://example.com/d.zip']],
+            'tag_name' => 'v0.2',
+            'published_at' => '2026-04-23T10:00:00Z',
+            'assets' => [
+                ['name' => 'frontend-dist.zip', 'browser_download_url' => 'https://example.com/frontend-dist.zip'],
+            ],
         ];
-        $client = $this->createMockClient([new Response(200, [], json_encode($release))]);
+        $history = [];
+        $client = $this->createMockClient([new Response(200, [], json_encode($release))], $history);
 
-        $tempDir = sys_get_temp_dir() . '/adp-test-toolbar-missing-' . uniqid();
-        mkdir($tempDir, 0o777, true);
-        file_put_contents($tempDir . '/.adp-version', 'v1.0.0');
-        // Panel installed, toolbar missing (legacy archive pre-0.3)
-        file_put_contents($tempDir . '/index.html', '<html></html>');
+        $tester = new CommandTester(new FrontendUpdateCommand($client));
+        $tester->execute(['action' => 'check', '--version' => 'v0.2']);
 
-        try {
-            $tester = new CommandTester(new FrontendUpdateCommand($client));
-            $tester->execute(['action' => 'check', '--path' => $tempDir]);
-
-            $this->assertSame(0, $tester->getStatusCode());
-            $display = $tester->getDisplay();
-            $this->assertStringContainsString('Toolbar bundle is missing', $display);
-        } finally {
-            @unlink($tempDir . '/.adp-version');
-            @unlink($tempDir . '/index.html');
-            @rmdir($tempDir);
-        }
+        $this->assertSame(0, $tester->getStatusCode());
+        $this->assertCount(1, $history);
+        $this->assertSame(
+            'https://api.github.com/repos/app-dev-panel/app-dev-panel/releases/tags/v0.2',
+            (string) $history[0]['request']->getUri(),
+        );
     }
 
-    public function testCheckDoesNotWarnWhenToolbarPresent(): void
+    public function testCheckWithTokenOptionSendsAuthorizationHeader(): void
     {
-        $release = [
-            'tag_name' => 'v1.0.0',
-            'published_at' => '2026-03-20T10:00:00Z',
-            'assets' => [['name' => 'frontend-dist.zip', 'browser_download_url' => 'https://example.com/d.zip']],
-        ];
-        $client = $this->createMockClient([new Response(200, [], json_encode($release))]);
+        $release = ['tag_name' => 'v0.2', 'published_at' => '2026-04-23T10:00:00Z', 'assets' => []];
+        $history = [];
+        $client = $this->createMockClient([new Response(200, [], json_encode($release))], $history);
 
-        $tempDir = sys_get_temp_dir() . '/adp-test-toolbar-present-' . uniqid();
-        mkdir($tempDir . '/toolbar', 0o777, true);
-        file_put_contents($tempDir . '/.adp-version', 'v1.0.0');
-        file_put_contents($tempDir . '/index.html', '<html></html>');
-        file_put_contents($tempDir . '/toolbar/bundle.js', "console.log('t');");
+        $tester = new CommandTester(new FrontendUpdateCommand($client));
+        $tester->execute(['action' => 'check', '--token' => 'ghp_secret']);
 
-        try {
-            $tester = new CommandTester(new FrontendUpdateCommand($client));
-            $tester->execute(['action' => 'check', '--path' => $tempDir]);
-
-            $this->assertSame(0, $tester->getStatusCode());
-            $this->assertStringNotContainsString('Toolbar bundle is missing', $tester->getDisplay());
-        } finally {
-            @unlink($tempDir . '/.adp-version');
-            @unlink($tempDir . '/index.html');
-            @unlink($tempDir . '/toolbar/bundle.js');
-            @rmdir($tempDir . '/toolbar');
-            @rmdir($tempDir);
-        }
+        $this->assertSame(0, $tester->getStatusCode());
+        $this->assertSame('Bearer ghp_secret', $history[0]['request']->getHeaderLine('Authorization'));
     }
 
-    public function testDownloadExtractsToolbarFromArchive(): void
+    public function testCheckPicksUpGithubTokenEnvVar(): void
     {
-        $tempDir = sys_get_temp_dir() . '/adp-test-toolbar-dl-' . uniqid();
+        $release = ['tag_name' => 'v0.2', 'published_at' => '2026-04-23T10:00:00Z', 'assets' => []];
+        $history = [];
+        $client = $this->createMockClient([new Response(200, [], json_encode($release))], $history);
 
-        $zipPath = tempnam(sys_get_temp_dir(), 'adp-test-zip-') . '.zip';
-        $zip = new \ZipArchive();
-        $zip->open($zipPath, \ZipArchive::CREATE);
-        $zip->addFromString('index.html', '<html>panel</html>');
-        $zip->addFromString('bundle.js', "console.log('panel');");
-        $zip->addFromString('toolbar/bundle.js', "console.log('toolbar');");
-        $zip->close();
-        $zipContent = file_get_contents($zipPath);
-        unlink($zipPath);
-
-        $release = [
-            'tag_name' => 'v3.0.0',
-            'assets' => [['name' => 'frontend-dist.zip', 'browser_download_url' => 'https://example.com/dl.zip']],
-        ];
-        $client = $this->createMockClient([
-            new Response(200, [], json_encode($release)),
-            new Response(200, [], $zipContent),
-        ]);
-
+        $previous = getenv('GITHUB_TOKEN');
+        putenv('GITHUB_TOKEN=env_token_value');
         try {
             $tester = new CommandTester(new FrontendUpdateCommand($client));
-            $tester->execute(['action' => 'download', '--path' => $tempDir]);
-
-            $this->assertSame(0, $tester->getStatusCode());
-            $this->assertFileExists($tempDir . '/toolbar/bundle.js');
-            $this->assertStringNotContainsString('Toolbar bundle is missing', $tester->getDisplay());
+            $tester->execute(['action' => 'check']);
         } finally {
-            @unlink($tempDir . '/index.html');
-            @unlink($tempDir . '/bundle.js');
-            @unlink($tempDir . '/toolbar/bundle.js');
-            @unlink($tempDir . '/.adp-version');
-            @rmdir($tempDir . '/toolbar');
-            @rmdir($tempDir);
+            putenv($previous === false ? 'GITHUB_TOKEN' : 'GITHUB_TOKEN=' . $previous);
         }
+
+        $this->assertSame('Bearer env_token_value', $history[0]['request']->getHeaderLine('Authorization'));
     }
 
-    private function createMockClient(array $responses): Client
+    public function testCheckWithoutTokenSendsNoAuthorizationHeader(): void
+    {
+        $release = ['tag_name' => 'v0.2', 'published_at' => '2026-04-23T10:00:00Z', 'assets' => []];
+        $history = [];
+        $client = $this->createMockClient([new Response(200, [], json_encode($release))], $history);
+
+        $previousGh = getenv('GITHUB_TOKEN');
+        $previousGhShort = getenv('GH_TOKEN');
+        putenv('GITHUB_TOKEN');
+        putenv('GH_TOKEN');
+        try {
+            $tester = new CommandTester(new FrontendUpdateCommand($client));
+            $tester->execute(['action' => 'check']);
+        } finally {
+            putenv($previousGh === false ? 'GITHUB_TOKEN' : 'GITHUB_TOKEN=' . $previousGh);
+            putenv($previousGhShort === false ? 'GH_TOKEN' : 'GH_TOKEN=' . $previousGhShort);
+        }
+
+        $this->assertSame('', $history[0]['request']->getHeaderLine('Authorization'));
+    }
+
+    /**
+     * @param list<Response> $responses
+     * @param list<array{request: \Psr\Http\Message\RequestInterface, response: Response}> $history
+     */
+    private function createMockClient(array $responses, array &$history = []): Client
     {
         $mock = new MockHandler($responses);
         $handlerStack = HandlerStack::create($mock);
+        $handlerStack->push(Middleware::history($history));
         return new Client(['handler' => $handlerStack]);
     }
 }

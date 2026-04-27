@@ -32,6 +32,18 @@ final class FrontendUpdateCommand extends Command
         $this
             ->addArgument('action', InputArgument::OPTIONAL, 'Action: check, download', 'check')
             ->addOption('path', 'p', InputOption::VALUE_OPTIONAL, 'Path to install frontend assets')
+            ->addOption(
+                'version',
+                null,
+                InputOption::VALUE_REQUIRED,
+                'Release tag to pin (bypasses /releases/latest lookup)',
+            )
+            ->addOption(
+                'token',
+                null,
+                InputOption::VALUE_REQUIRED,
+                'GitHub API token (falls back to GITHUB_TOKEN / GH_TOKEN env vars)',
+            )
             ->addOption('json', null, InputOption::VALUE_NONE, 'Output raw JSON')
             ->setHelp(<<<'HELP'
                 Check for updates and download the latest frontend build.
@@ -41,6 +53,13 @@ final class FrontendUpdateCommand extends Command
 
                 Download and install:
                   <info>frontend:update download --path=/path/to/frontend</info>
+
+                Pin to a specific release (skips /releases/latest and anonymous rate limit):
+                  <info>frontend:update download --version=v0.2 --path=/path/to/frontend</info>
+
+                Authenticate to lift the 60/hour anonymous rate limit on api.github.com:
+                  <info>GITHUB_TOKEN=xxx frontend:update check</info>
+                  <info>frontend:update check --token=xxx</info>
                 HELP);
     }
 
@@ -61,7 +80,7 @@ final class FrontendUpdateCommand extends Command
         $json = (bool) $input->getOption('json');
 
         try {
-            $release = $this->getLatestRelease();
+            $release = $this->getRelease($input);
         } catch (\Throwable $e) {
             $io->error(sprintf('Failed to check for updates: %s', $e->getMessage()));
             return Command::FAILURE;
@@ -100,8 +119,6 @@ final class FrontendUpdateCommand extends Command
             $io->success('Already up to date.');
         }
 
-        $this->warnIfToolbarMissing($input, $io);
-
         return Command::SUCCESS;
     }
 
@@ -114,7 +131,7 @@ final class FrontendUpdateCommand extends Command
         }
 
         try {
-            $release = $this->getLatestRelease();
+            $release = $this->getRelease($input);
         } catch (\Throwable $e) {
             $io->error(sprintf('Failed to fetch release info: %s', $e->getMessage()));
             return Command::FAILURE;
@@ -149,57 +166,50 @@ final class FrontendUpdateCommand extends Command
 
         $io->success(sprintf('Frontend updated to %s at %s', (string) ($release['tag_name'] ?? 'unknown'), $path));
 
-        $this->warnIfToolbarMissing($input, $io);
-
         return Command::SUCCESS;
     }
 
-    /**
-     * Emit a notice when the installed frontend is missing the toolbar bundle
-     * — typically a holdover from the pre-0.3 archive that shipped the panel
-     * only. Covers both the `check` and `download` flows so users get the
-     * prompt either way.
-     */
-    private function warnIfToolbarMissing(InputInterface $input, SymfonyStyle $io): void
+    private function getRelease(InputInterface $input): array
     {
-        $path = $input->getOption('path');
-        if (!is_string($path) || $path === '' || !is_dir($path)) {
-            return;
+        $version = $input->getOption('version');
+        $version = is_string($version) && $version !== '' ? $version : null;
+
+        $endpoint = $version !== null
+            ? sprintf('%s/repos/%s/releases/tags/%s', self::GITHUB_API, self::REPO, rawurlencode($version))
+            : sprintf('%s/repos/%s/releases/latest', self::GITHUB_API, self::REPO);
+
+        $headers = [
+            'Accept' => 'application/vnd.github.v3+json',
+            'User-Agent' => 'ADP-CLI',
+        ];
+        $token = $this->resolveToken($input);
+        if ($token !== null) {
+            $headers['Authorization'] = 'Bearer ' . $token;
         }
 
-        $base = rtrim($path, '/');
-
-        if (!is_file($base . '/index.html')) {
-            // Panel itself is missing — `check` is informational, don't nag.
-            return;
-        }
-
-        if (is_file($base . '/toolbar/bundle.js')) {
-            return;
-        }
-
-        $io->warning(sprintf(
-            'Toolbar bundle is missing under %s/toolbar/. '
-            . 'Re-run `frontend:update download --path=%s` to fetch the latest archive '
-            . '(frontend-dist.zip now ships both panel and toolbar).',
-            $base,
-            $base,
-        ));
-    }
-
-    private function getLatestRelease(): array
-    {
         $client = $this->httpClient ?? new Client();
-        $response = $client->get(sprintf('%s/repos/%s/releases/latest', self::GITHUB_API, self::REPO), [
-            RequestOptions::HEADERS => [
-                'Accept' => 'application/vnd.github.v3+json',
-                'User-Agent' => 'ADP-CLI',
-            ],
+        $response = $client->get($endpoint, [
+            RequestOptions::HEADERS => $headers,
             RequestOptions::TIMEOUT => 10,
             RequestOptions::CONNECT_TIMEOUT => 5,
         ]);
 
         return json_decode((string) $response->getBody(), true, 512, JSON_THROW_ON_ERROR);
+    }
+
+    private function resolveToken(InputInterface $input): ?string
+    {
+        $token = $input->getOption('token');
+        if (is_string($token) && $token !== '') {
+            return $token;
+        }
+        foreach (['GITHUB_TOKEN', 'GH_TOKEN'] as $env) {
+            $value = getenv($env);
+            if (is_string($value) && $value !== '') {
+                return $value;
+            }
+        }
+        return null;
     }
 
     private function findAssetUrl(array $release): ?string
