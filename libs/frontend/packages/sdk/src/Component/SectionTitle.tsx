@@ -27,9 +27,6 @@ const Container = styled(Box)(({theme}) => ({
     gap: theme.spacing(2),
     marginTop: theme.spacing(3.5),
     marginBottom: theme.spacing(1.25),
-    paddingLeft: theme.spacing(1.5),
-    paddingRight: theme.spacing(1.5),
-    [theme.breakpoints.up('sm')]: {paddingLeft: theme.spacing(2.5), paddingRight: theme.spacing(2.5)},
     '&:first-of-type': {marginTop: 0},
 }));
 
