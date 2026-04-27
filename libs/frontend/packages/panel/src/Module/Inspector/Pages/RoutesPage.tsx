@@ -474,7 +474,7 @@ export const RoutesPage = () => {
 
     if (isError) {
         return (
-            <>
+            <Box sx={{p: {xs: 1.5, sm: 3.5}}}>
                 <PageHeader title="Routes" icon="alt_route" description="View and check application routes" />
                 <QueryErrorState
                     error={error}
@@ -482,21 +482,24 @@ export const RoutesPage = () => {
                     fallback="Failed to load routes."
                     onRetry={refetch}
                 />
-            </>
+            </Box>
         );
     }
 
     return (
         <>
-            <PageHeader title="Routes" icon="alt_route" description="View and check application routes" />
+            <Box sx={{px: {xs: 1.5, sm: 3.5}, pt: {xs: 1.5, sm: 3.5}}}>
+                <PageHeader title="Routes" icon="alt_route" description="View and check application routes" />
+            </Box>
 
             <RouteChecker />
 
             {/* Routes list */}
-            {routes.length === 0 ? (
-                <EmptyState icon="alt_route" title="No routes found" />
-            ) : (
-                <Box>
+            <Box sx={{p: {xs: 1.5, sm: 3.5}}}>
+                {routes.length === 0 ? (
+                    <EmptyState icon="alt_route" title="No routes found" />
+                ) : (
+                    <Box>
                     <SectionTitle
                         action={<FilterInput value={filter} onChange={setFilter} placeholder="Filter routes..." />}
                     >{`${filtered.length} routes`}</SectionTitle>
@@ -583,7 +586,8 @@ export const RoutesPage = () => {
                         );
                     })}
                 </Box>
-            )}
+                )}
+            </Box>
         </>
     );
 };
