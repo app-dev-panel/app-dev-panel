@@ -12,17 +12,11 @@ final class TimelineCollector implements SummaryCollectorInterface
 
     public function getCollected(): array
     {
-        if (!$this->isActive()) {
-            return [];
-        }
         return $this->events;
     }
 
     public function getSummary(): array
     {
-        if (!$this->isActive()) {
-            return [];
-        }
         return [
             'timeline' => [
                 'total' => count($this->events),

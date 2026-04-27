@@ -135,8 +135,15 @@ src/
 
 | Method | Path | Description |
 |--------|------|-------------|
-| GET | `/` | Serve debug panel SPA |
-| GET | `/{path+}` | SPA catch-all routing |
+| GET | `/debug` | Serve debug panel SPA (`PanelController::index`) |
+| GET | `/debug/{path+}` | SPA catch-all for client-side routing, excludes `/debug/api/*` |
+
+`PanelController` only renders the bootstrap HTML and resolves `bundle.js`/`bundle.css` via
+`PanelConfig::$staticUrl`. Each adapter is responsible for **publishing** the
+`app-dev-panel/frontend-assets` bundle into a public directory the web server can serve directly:
+Symfony copies into `public/bundles/appdevpanel/`, Laravel into `public/vendor/app-dev-panel`,
+Yii 2/3 symlink into `@webroot/app-dev-panel`. The API module never streams static files itself —
+that work belongs to the web server.
 
 ### Debug API (`/debug/api`)
 
@@ -317,6 +324,25 @@ AI-powered chat and analysis integration.
 | POST | `/history` | Add history entry |
 | DELETE | `/history/{index}` | Delete specific history entry |
 | DELETE | `/history` | Clear all history |
+
+### Project Config API (`/debug/api/project`)
+
+Persists team-shared panel configuration (Frames, OpenAPI specs) into a VCS-tracked
+`config/adp/project.json` so every developer sees the same setup after `git pull`.
+Implemented in `Project/Controller/ProjectController.php`, backed by Kernel's
+`ProjectConfigStorageInterface`. Each adapter wires the storage to a framework-specific
+config dir (see Kernel module CLAUDE.md).
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/config` | Returns `{config: {version, frames, openapi}, configDir}`. `configDir` is the absolute path the user can `git add` |
+| PUT | `/config` | Accepts either a bare `{frames, openapi}` document or the GET wrapper `{config: {...}}`. Malformed entries (non-string keys/values, empty strings) are dropped silently |
+
+The frontend's `Module/Project` keeps a `localStorage` cache via `redux-persist`. On
+boot it dispatches `getProjectConfig` and overwrites the local Frames/OpenAPI slices
+with the server document — except when the server is empty and the local cache has
+data, which fires a one-shot migration `PUT` to seed the new file. User edits to either
+slice are debounced (500 ms) into a single `PUT`.
 
 ### Service Registry API (`/debug/api/services`)
 

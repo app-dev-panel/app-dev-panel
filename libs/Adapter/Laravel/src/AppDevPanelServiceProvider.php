@@ -7,7 +7,6 @@ namespace AppDevPanel\Adapter\Laravel;
 use AppDevPanel\Adapter\Laravel\Collector\RouterDataExtractor;
 use AppDevPanel\Adapter\Laravel\Collector\TemplateCollectorCompilerEngine;
 use AppDevPanel\Adapter\Laravel\Controller\AdpApiController;
-use AppDevPanel\Adapter\Laravel\Controller\FrontendAssetsController;
 use AppDevPanel\Adapter\Laravel\EventListener\AuthorizationListener;
 use AppDevPanel\Adapter\Laravel\EventListener\CacheListener;
 use AppDevPanel\Adapter\Laravel\EventListener\ConsoleListener;
@@ -84,6 +83,8 @@ use AppDevPanel\Api\PathMapper;
 use AppDevPanel\Api\PathMapperInterface;
 use AppDevPanel\Api\PathResolver;
 use AppDevPanel\Api\PathResolverInterface;
+use AppDevPanel\Api\Project\Controller\ProjectController;
+use AppDevPanel\Api\Project\Controller\SecretsController;
 use AppDevPanel\Api\Toolbar\ToolbarConfig;
 use AppDevPanel\Api\Toolbar\ToolbarInjector;
 use AppDevPanel\Cli\Command\DebugDumpCommand;
@@ -136,6 +137,10 @@ use AppDevPanel\Kernel\DebuggerIgnoreConfig;
 use AppDevPanel\Kernel\DebugServer\Broadcaster;
 use AppDevPanel\Kernel\DebugServer\Connection;
 use AppDevPanel\Kernel\DebugServer\LoggerDecorator;
+use AppDevPanel\Kernel\Project\FileProjectConfigStorage;
+use AppDevPanel\Kernel\Project\FileSecretsStorage;
+use AppDevPanel\Kernel\Project\ProjectConfigStorageInterface;
+use AppDevPanel\Kernel\Project\SecretsStorageInterface;
 use AppDevPanel\Kernel\Service\FileServiceRegistry;
 use AppDevPanel\Kernel\Service\ServiceRegistryInterface;
 use AppDevPanel\Kernel\Storage\BroadcastingStorage;
@@ -183,17 +188,25 @@ final class AppDevPanelServiceProvider extends ServiceProvider
             return;
         }
 
-        $this->publishes([
-            __DIR__ . '/../config/app-dev-panel.php' => $this->app->configPath('app-dev-panel.php'),
-        ], 'app-dev-panel-config');
-
-        // Optional: allow users to copy the frontend bundle into their public directory
-        // (useful behind strict CDNs or when serving via a non-PHP worker). Default
-        // delivery is via FrontendAssetsController, no `vendor:publish` required.
-        if (FrontendAssets::exists()) {
+        // `publishes()` registrations are only consumed by the `vendor:publish`
+        // artisan command. Gate them on `runningInConsole()` so web requests
+        // don't pay the cost of a `resolveAssetSource()` filesystem probe on
+        // every boot.
+        if ($this->app->runningInConsole()) {
             $this->publishes([
-                FrontendAssets::path() => $this->app->publicPath('vendor/app-dev-panel'),
-            ], ['app-dev-panel-assets', 'laravel-assets']);
+                __DIR__ . '/../config/app-dev-panel.php' => $this->app->configPath('app-dev-panel.php'),
+            ], 'app-dev-panel-config');
+
+            // Publish prebuilt panel assets. Prefer the shared
+            // `app-dev-panel/frontend-assets` package (canonical, release-pinned,
+            // includes both panel and toolbar bundles); fall back to the legacy
+            // adapter-local `resources/dist/` so `make build-panel` keeps working.
+            $assetSource = $this->resolveAssetSource();
+            if ($assetSource !== null) {
+                $this->publishes([
+                    $assetSource => $this->app->publicPath('vendor/app-dev-panel'),
+                ], ['app-dev-panel-assets', 'laravel-assets']);
+            }
         }
 
         $this->loadRoutesFrom(__DIR__ . '/../routes/adp.php');
@@ -235,6 +248,23 @@ final class AppDevPanelServiceProvider extends ServiceProvider
     private function isEnabled(): bool
     {
         return (bool) $this->app->make('config')->get('app-dev-panel.enabled', false);
+    }
+
+    /**
+     * Locate the directory holding the prebuilt panel/toolbar bundles to publish.
+     *
+     * Prefers the shared `app-dev-panel/frontend-assets` package — its `dist/`
+     * is filled by the release pipeline and contains both panel and toolbar
+     * bundles. Falls back to the adapter's own `resources/dist/` so local
+     * `make build-panel` workflows continue to work inside the monorepo.
+     */
+    private function resolveAssetSource(): ?string
+    {
+        if (!\class_exists(FrontendAssets::class)) {
+            return null;
+        }
+
+        return FrontendAssets::resolve(__DIR__ . '/../resources/dist');
     }
 
     private function registerCoreServices(): void
@@ -570,19 +600,15 @@ final class AppDevPanelServiceProvider extends ServiceProvider
         );
 
         $this->app->singleton(PanelConfig::class, function () {
-            $staticUrl = (string) config('app-dev-panel.panel.static_url', '');
+            $staticUrl = config('app-dev-panel.panel.static_url', '');
             if ($staticUrl === '') {
-                // Auto-detect delivery source:
-                // 1. `vendor:publish` copy already sitting in public/ (fastest, no PHP).
-                // 2. The frontend-assets Composer package — served by FrontendAssetsController.
-                // 3. CDN fallback.
-                if (file_exists($this->app->publicPath('vendor/app-dev-panel/bundle.js'))) {
-                    $staticUrl = '/vendor/app-dev-panel';
-                } elseif (FrontendAssets::exists()) {
-                    $staticUrl = '/vendor/app-dev-panel';
-                } else {
-                    $staticUrl = PanelConfig::DEFAULT_STATIC_URL;
-                }
+                // Auto-detect: if assets were published locally
+                // (`vendor:publish --tag=app-dev-panel-assets`), use them. Either the
+                // FrontendAssets-sourced or legacy resources/dist-sourced publish ends up
+                // at the same `public/vendor/app-dev-panel/` path, so the URL is the same.
+                $staticUrl = file_exists($this->app->publicPath('vendor/app-dev-panel/bundle.js'))
+                    ? '/vendor/app-dev-panel'
+                    : PanelConfig::DEFAULT_STATIC_URL;
             }
             return new PanelConfig($staticUrl);
         });
@@ -719,9 +745,46 @@ final class AppDevPanelServiceProvider extends ServiceProvider
             ),
         );
 
+        // Project config (frames, OpenAPI specs) — committed to repo at config/adp/project.json
+        $this->app->singleton(
+            ProjectConfigStorageInterface::class,
+            fn() => new FileProjectConfigStorage(
+                $this->app->make('config')->get('app-dev-panel.project_config_path') ?? base_path('config/adp'),
+            ),
+        );
+
+        // Secrets file — gitignored sibling of project.json holding API keys / OAuth tokens / ACP env.
+        $this->app->singleton(
+            SecretsStorageInterface::class,
+            fn() => new FileSecretsStorage(
+                $this->app->make('config')->get('app-dev-panel.project_config_path') ?? base_path('config/adp'),
+            ),
+        );
+
+        $this->app->singleton(
+            ProjectController::class,
+            fn() => new ProjectController(
+                $this->app->make(JsonResponseFactoryInterface::class),
+                $this->app->make(ProjectConfigStorageInterface::class),
+                $this->app->make(ResponseFactoryInterface::class),
+            ),
+        );
+
+        $this->app->singleton(
+            SecretsController::class,
+            fn() => new SecretsController(
+                $this->app->make(JsonResponseFactoryInterface::class),
+                $this->app->make(SecretsStorageInterface::class),
+            ),
+        );
+
+        // LLM settings — backed by SecretsStorage; legacy `runtime/.llm-settings.json` is auto-migrated.
         $this->app->singleton(
             LlmSettingsInterface::class,
-            fn() => new FileLlmSettings($this->app->make('config')->get('app-dev-panel.storage.path')),
+            fn() => new FileLlmSettings(
+                $this->app->make('config')->get('app-dev-panel.storage.path'),
+                $this->app->make(SecretsStorageInterface::class),
+            ),
         );
 
         $this->app->singleton(

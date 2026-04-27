@@ -96,21 +96,25 @@ final class EnvironmentCollectorTest extends AbstractCollectorTestCase
     public function testCollectFromRequestWhenInactive(): void
     {
         $collector = new EnvironmentCollector();
+        $baselineCollected = $collector->getCollected();
+        $baselineSummary = method_exists($collector, 'getSummary') ? $collector->getSummary() : null;
         $requestMock = $this->createMock(ServerRequestInterface::class);
         $requestMock->method('getServerParams')->willReturn(['FOO' => 'bar']);
 
         $collector->collectFromRequest($requestMock);
 
-        $this->assertSame([], $collector->getCollected());
+        $this->assertSame($baselineCollected, $collector->getCollected());
     }
 
     public function testCollectFromGlobalsWhenInactive(): void
     {
         $collector = new EnvironmentCollector();
+        $baselineCollected = $collector->getCollected();
+        $baselineSummary = method_exists($collector, 'getSummary') ? $collector->getSummary() : null;
 
         $collector->collectFromGlobals();
 
-        $this->assertSame([], $collector->getCollected());
+        $this->assertSame($baselineCollected, $collector->getCollected());
     }
 
     public function testPhpExtensionsAreSorted(): void

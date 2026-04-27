@@ -1,6 +1,6 @@
 ---
 title: Начало работы
-description: "Установка ADP в PHP-приложение. Быстрая настройка для Symfony, Laravel, Yii 3 и Yii 2 через Composer."
+description: "Установка ADP в PHP-приложение. Быстрая настройка для Symfony, Laravel, Yii 3, Yii 2 и Spiral через Composer."
 ---
 
 # Начало работы
@@ -49,6 +49,10 @@ composer require app-dev-panel/adapter-yii3
 ```bash
 composer require app-dev-panel/adapter-laravel
 ```
+== Spiral
+```bash
+composer require app-dev-panel/adapter-spiral
+```
 :::
 
 Каждый адаптер автоматически подтягивает <pkg>app-dev-panel/kernel</pkg> и <pkg>app-dev-panel/api</pkg> как зависимости.
@@ -63,6 +67,14 @@ return [
     // ...
     AppDevPanel\Adapter\Symfony\AppDevPanelBundle::class => ['dev' => true, 'test' => true],
 ];
+```
+```php
+// config/routes/app_dev_panel.php — подключает /debug, /debug/api/*, /inspect/api/*
+use Symfony\Component\Routing\Loader\Configurator\RoutingConfigurator;
+
+return static function (RoutingConfigurator $routes): void {
+    $routes->import('@AppDevPanelBundle/config/routes/adp.php');
+};
 ```
 == Yii 2
 ```php
@@ -86,6 +98,18 @@ return [
 // Опционально опубликуйте конфиг:
 // php artisan vendor:publish --tag=app-dev-panel-config
 ```
+== Spiral
+```php
+// app/src/Application/Kernel.php — зарегистрируйте Bootloader
+public function defineBootloaders(): array
+{
+    return [
+        // ...
+        \AppDevPanel\Adapter\Spiral\Bootloader\AppDevPanelBootloader::class,
+    ];
+}
+// затем добавьте AdpApiMiddleware + DebugMiddleware в HTTP-конвейер
+```
 :::
 
 ### 3. Начинайте отладку
@@ -99,10 +123,6 @@ return [
 PHP_CLI_SERVER_WORKERS=3 php -S 127.0.0.1:8080 -t public
 ```
 :::
-
-### Фронтенд через Composer
-
-Каждый адаптер требует <pkg>app-dev-panel/frontend-assets</pkg> — пакет с предсобранной SPA панели и виджетом тулбара. Composer ставит его транзитивно, адаптер локально резолвит сборку, и панель/тулбар работают из коробки без обращения к CDN. Обновление сборки: `composer update app-dev-panel/frontend-assets`. На странице конкретного адаптера описан URL, по которому она подключена, и как переопределить источник через `panel.static_url`.
 
 ## Попробуйте демо
 
@@ -134,6 +154,10 @@ cd playground/yii3-app && ./yii serve --port=8101
 == Laravel
 ```bash
 cd playground/laravel-app && PHP_CLI_SERVER_WORKERS=3 php -S 127.0.0.1:8104 -t public
+```
+== Spiral
+```bash
+cd playground/spiral-app && PHP_CLI_SERVER_WORKERS=3 php -S 127.0.0.1:8105 -t public
 ```
 :::
 

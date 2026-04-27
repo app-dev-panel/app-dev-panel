@@ -76,17 +76,11 @@ final class HttpClientCollector implements SummaryCollectorInterface
 
     public function getCollected(): array
     {
-        if (!$this->isActive()) {
-            return [];
-        }
         return array_merge(...array_values($this->requests));
     }
 
     public function getSummary(): array
     {
-        if (!$this->isActive()) {
-            return [];
-        }
         return [
             'http' => [
                 'count' => array_sum(array_map(static fn(array $requests) => count($requests), $this->requests)),

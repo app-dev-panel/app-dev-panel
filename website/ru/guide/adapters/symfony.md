@@ -23,6 +23,24 @@ return [
 ];
 ```
 
+## Маршруты
+
+Создайте `config/routes/app_dev_panel.php`, чтобы подключить `/debug`, `/debug/api/*` и `/inspect/api/*`:
+
+```php
+<?php
+
+declare(strict_types=1);
+
+use Symfony\Component\Routing\Loader\Configurator\RoutingConfigurator;
+
+return static function (RoutingConfigurator $routes): void {
+    $routes->import('@AppDevPanelBundle/config/routes/adp.php');
+};
+```
+
+Без этого файла маршруты панели не зарегистрируются, и `/debug` будет возвращать 404. (Когда появится Flex-рецепт, этот файл будет создаваться автоматически по `composer require`.)
+
 ## Конфигурация
 
 Создайте `config/packages/app_dev_panel.yaml`:
@@ -43,7 +61,7 @@ app_dev_panel:
         security: true         # требуется symfony/security-bundle
         cache: true
         mailer: true           # требуется symfony/mailer
-        messenger: true        # требуется symfony/messenger
+        queue: true            # требуется symfony/messenger
         assets: true           # требуется symfony/asset-mapper
         code_coverage: false   # opt-in; требуется pcov или xdebug
     ignored_requests:
@@ -70,24 +88,3 @@ app_dev_panel:
 ## Инспектор базы данных
 
 При наличии `doctrine/dbal` инспекция схемы БД осуществляется через <class>AppDevPanel\Adapter\Symfony\Inspector\DoctrineSchemaProvider</class>. Без Doctrine используется <class>AppDevPanel\Adapter\Symfony\Inspector\NullSchemaProvider</class>.
-
-## Фронтенд-ассеты
-
-`composer require app-dev-panel/adapter-symfony` транзитивно подтягивает <pkg>app-dev-panel/frontend-assets</pkg>. `AppDevPanelExtension` автодетектит источник в три шага и подставляет его в `panel.static_url`:
-
-1. **Копия после `assets:install`** в `Resources/public/bundle.js` — отдаётся напрямую веб-сервером через `try_files`.
-2. **Composer-инсталляция** в `vendor/app-dev-panel/frontend-assets/dist/` — отдаётся по запросу через <class>AppDevPanel\Adapter\Symfony\Controller\FrontendAssetsController</class> по `GET /bundles/appdevpanel/{file}`. URL совпадает с конвенцией `assets:install`, поэтому при наличии скопированных файлов веб-сервер всё ещё перехватывает их через `try_files`.
-3. **CDN-fallback**: `https://app-dev-panel.github.io/app-dev-panel`.
-
-Поведение переопределяется через `app_dev_panel.panel.static_url` (и `app_dev_panel.toolbar.static_url`) в `app_dev_panel.yaml`. Обновление сборки: `composer update app-dev-panel/frontend-assets`.
-
-## Ручная работа с API через curl
-
-Корень debug-API — `/debug/api`, **не** `/debug/api/debug`:
-
-```bash
-curl http://127.0.0.1:8000/debug/api                  # список последних debug-записей
-curl http://127.0.0.1:8000/debug/api/summary/{id}
-curl http://127.0.0.1:8000/debug/api/view/{id}
-curl http://127.0.0.1:8000/debug/api/event-stream     # SSE
-```

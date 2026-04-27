@@ -15,20 +15,27 @@ declare(strict_types=1);
  *   ADP_STORAGE_PATH — Path to debug data storage directory
  */
 
-// Find autoloader
-$autoloadPaths = [
-    __DIR__ . '/../../../vendor/autoload.php', // From libs/McpServer/bin/
-    __DIR__ . '/../vendor/autoload.php', // Standalone install
-];
-
+// Find autoloader. `$GLOBALS['_composer_autoload_path']` is set by the Composer-generated
+// bin proxy (vendor/bin/adp-mcp) and points at vendor/autoload.php directly — prefer it when
+// available so we don't have to juggle relative paths across install layouts.
 $autoloaded = false;
-foreach ($autoloadPaths as $autoloadPath) {
-    if (!file_exists($autoloadPath)) {
-        continue;
-    }
-    require $autoloadPath;
+if (isset($GLOBALS['_composer_autoload_path']) && file_exists((string) $GLOBALS['_composer_autoload_path'])) {
+    require (string) $GLOBALS['_composer_autoload_path'];
     $autoloaded = true;
-    break;
+} else {
+    $autoloadPaths = [
+        __DIR__ . '/../../../autoload.php',          // Composer install: vendor/app-dev-panel/mcp-server/bin/ → vendor/autoload.php
+        __DIR__ . '/../../../vendor/autoload.php',   // Monorepo: libs/McpServer/bin/ → vendor/autoload.php
+        __DIR__ . '/../vendor/autoload.php',         // Standalone checkout with its own vendor/
+    ];
+    foreach ($autoloadPaths as $autoloadPath) {
+        if (!file_exists($autoloadPath)) {
+            continue;
+        }
+        require $autoloadPath;
+        $autoloaded = true;
+        break;
+    }
 }
 
 if (!$autoloaded) {

@@ -1,6 +1,6 @@
 ---
 title: Playgrounds
-description: "Demo applications showing ADP integration with Symfony, Laravel, Yii 3, and Yii 2. Use them as reference setups."
+description: "Demo applications showing ADP integration with Symfony, Laravel, Yii 3, Yii 2, and Spiral. Use them as reference setups."
 ---
 
 # Playgrounds
@@ -15,6 +15,7 @@ Playgrounds are minimal, working applications demonstrating ADP integration with
 | `symfony-app` | Symfony 7 | 8102 | <pkg>app-dev-panel/adapter-symfony</pkg> |
 | `yii2-basic-app` | Yii 2 | 8103 | <pkg>app-dev-panel/adapter-yii2</pkg> |
 | `laravel-app` | Laravel 12 | 8104 | <pkg>app-dev-panel/adapter-laravel</pkg> |
+| `spiral-app` | Spiral 3 | 8105 | <pkg>app-dev-panel/adapter-spiral</pkg> |
 
 ## Running Playgrounds
 
@@ -45,6 +46,11 @@ cd playground/yii3-app && ./yii serve --port=8101
 ```bash
 cd playground/laravel-app && PHP_CLI_SERVER_WORKERS=3 php -S 127.0.0.1:8104 -t public
 ```
+== Spiral
+```bash
+make serve-spiral
+# (or: cd playground/spiral-app && PHP_CLI_SERVER_WORKERS=3 php -S 127.0.0.1:8105 -t public)
+```
 :::
 
 ::: tip
@@ -74,6 +80,7 @@ Each framework uses a different adapter registration approach:
 | Symfony | Bundle | Manual in `config/bundles.php` (dev/test only) |
 | Laravel | Package discovery | Automatic via `extra.laravel.providers` |
 | Yii 2 | Module + Bootstrap | Auto-bootstrap via `extra.bootstrap` in composer |
+| Spiral | Bootloader + PSR-15 middleware | Manual `defineBootloaders()` + HTTP pipeline |
 
 ### Storage Paths
 
@@ -83,6 +90,7 @@ Each framework uses a different adapter registration approach:
 | Symfony | `var/debug/` | `%kernel.project_dir%` |
 | Laravel | `storage/debug/` | `storage_path('debug')` |
 | Yii2 | `runtime/debug/` | `@runtime` alias |
+| Spiral | `sys_get_temp_dir()/app-dev-panel` | overridable via `APP_DEV_PANEL_STORAGE_PATH` |
 
 ## Running Test Fixtures
 
@@ -94,6 +102,7 @@ make fixtures-yii3         # Yii 3 only
 make fixtures-symfony      # Symfony only
 make fixtures-yii2         # Yii2 only
 make fixtures-laravel      # Laravel only
+make fixtures-spiral       # Spiral only
 ```
 
 For PHPUnit E2E tests (requires running servers):
@@ -126,7 +135,7 @@ To add a playground for a new framework:
 3. Configure collectors, storage, and API routes per the adapter's documentation
 4. Implement `/test/fixtures/*` endpoints matching `FixtureRegistry` (see [Contributing](/guide/contributing))
 5. Add Makefile targets for serve, fixtures, and Mago checks
-6. Assign the next available port (8105+)
+6. Assign the next available port (8106+)
 
 ### Port Allocation
 
@@ -137,4 +146,5 @@ To add a playground for a new framework:
 | 8102 | Symfony |
 | 8103 | Yii2 |
 | 8104 | Laravel |
-| 8105+ | Available |
+| 8105 | Spiral |
+| 8106+ | Available |

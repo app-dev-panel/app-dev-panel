@@ -82,13 +82,3 @@ Code coverage — **opt-in** (`'code_coverage' => false` по умолчанию
 ## Инспектор базы данных
 
 `Yii2DbSchemaProvider` предоставляет инспекцию схемы БД через `yii\db\Schema`. Без настроенного компонента базы данных используется <class>AppDevPanel\Adapter\Yii2\Inspector\NullSchemaProvider</class>.
-
-## Фронтенд-ассеты
-
-`composer require app-dev-panel/adapter-yii2` транзитивно подтягивает <pkg>app-dev-panel/frontend-assets</pkg>. <class>AppDevPanel\Adapter\Yii2\Module</class> автодетектит источник:
-
-1. Если `FrontendAssets::exists()` — создаётся симлинк `vendor/app-dev-panel/frontend-assets/dist/` → `@webroot/app-dev-panel`, `panelStaticUrl = '/app-dev-panel'`.
-2. Иначе fallback на `libs/Adapter/Yii2/resources/dist` (для разработки в монорепе).
-3. Иначе — CDN (`https://app-dev-panel.github.io/app-dev-panel`).
-
-Поведение переопределяется ключами `panelStaticUrl` / `toolbarStaticUrl` в конфиге модуля. Обновление сборки: `composer update app-dev-panel/frontend-assets`.

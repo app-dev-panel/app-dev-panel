@@ -131,6 +131,8 @@ final class DatabaseCollectorTest extends AbstractCollectorTestCase
     public function testInactiveGuards(): void
     {
         $collector = new DatabaseCollector(new TimelineCollector());
+        $baselineCollected = $collector->getCollected();
+        $baselineSummary = method_exists($collector, 'getSummary') ? $collector->getSummary() : null;
 
         $collector->collectQueryStart('q1', 'SELECT 1', 'SELECT 1', [], '/test.php:1');
         $collector->collectQueryEnd('q1', 0);
@@ -140,8 +142,8 @@ final class DatabaseCollectorTest extends AbstractCollectorTestCase
         $collector->collectTransactionEnd('commit', '/test.php:2');
         $collector->collectTransactionEnd('rollback', '/test.php:3');
 
-        $this->assertSame([], $collector->getCollected());
-        $this->assertSame([], $collector->getSummary());
+        $this->assertSame($baselineCollected, $collector->getCollected());
+        $this->assertSame($baselineSummary, $collector->getSummary());
     }
 
     public function testResetClearsData(): void

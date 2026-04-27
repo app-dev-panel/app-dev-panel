@@ -4,7 +4,7 @@ import {VarDumpValue} from '@app-dev-panel/panel/Module/Debug/Component/VarDumpV
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {FileLink} from '@app-dev-panel/sdk/Component/FileLink';
 import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
-import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
+import {PageToolbar} from '@app-dev-panel/sdk/Component/PageToolbar';
 import {formatMicrotime} from '@app-dev-panel/sdk/Helper/formatDate';
 import {searchVariants} from '@app-dev-panel/sdk/Helper/layoutTranslit';
 import {usePathMapper} from '@app-dev-panel/sdk/Helper/usePathMapper';
@@ -408,13 +408,14 @@ export const UnifiedLogPanel = ({logs, deprecations, dumps}: UnifiedLogPanelProp
     return (
         <Box>
             {/* Header with counts */}
-            <SectionTitle
-                action={<FilterInput value={filter} onChange={setFilter} placeholder="Filter entries..." />}
-            >{`${filtered.length} entries`}</SectionTitle>
+            <PageToolbar
+                sticky
+                actions={<FilterInput value={filter} onChange={setFilter} placeholder="Filter entries..." />}
+            >{`${filtered.length} entries`}</PageToolbar>
 
             {/* Type filter chips */}
             {presentKinds.length > 1 && (
-                <Box sx={{display: 'flex', flexWrap: 'wrap', gap: 0.75, mb: 1.5}}>
+                <Box sx={{display: 'flex', flexWrap: 'wrap', gap: 0.75, mb: 1.5, px: {xs: 1.5, sm: 2.5}, pt: 1.5}}>
                     {presentKinds.map((kind) => {
                         const color = kindColor(kind, theme);
                         const isActive = isKindActive(kind);
@@ -462,7 +463,7 @@ export const UnifiedLogPanel = ({logs, deprecations, dumps}: UnifiedLogPanelProp
 
             {/* Log level + deprecation category sub-filters (combined in one row) */}
             {(showLogSubFilters || showDeprecationSubFilters) && (
-                <Box sx={{display: 'flex', flexWrap: 'wrap', gap: 0.5, mb: 1.5, pl: 1}}>
+                <Box sx={{display: 'flex', flexWrap: 'wrap', gap: 0.5, mb: 1.5, px: {xs: 1.5, sm: 2.5}}}>
                     {showLogSubFilters &&
                         presentLevels.map((level) => {
                             const color = levelColor(level, theme);

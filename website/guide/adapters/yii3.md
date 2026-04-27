@@ -16,7 +16,9 @@ composer require app-dev-panel/adapter-yii3
 <pkg>app-dev-panel/adapter-yiisoft</pkg>
 :::
 
-The package auto-registers via Yii 3's config plugin system — no manual wiring needed.
+The config plugin system wires DI, event listeners, and collectors automatically. One piece the plugin
+cannot set for you is the middleware stack — Yii 3's `config/web/di/application.php` is owned by the
+application, so the three ADP middleware have to be added there by hand (see [Middleware](#middleware) below).
 
 ## Configuration
 
@@ -45,16 +47,66 @@ All settings are managed in `config/params.php`:
 
 ## Middleware
 
-Add the following middleware to your web application stack. **Order matters** — incorrect ordering will cause the panel to malfunction:
+Three middleware have to be added to `config/web/di/application.php`. **Order matters** — the
+adapter assumes this stack:
 
 ```
-ErrorCatcher → YiiApiMiddleware → ... → Router
+ToolbarMiddleware → ErrorCatcher → YiiApiMiddleware → SessionMiddleware → CsrfTokenMiddleware → RequestCatcherMiddleware → Router
 ```
 
-- <class>AppDevPanel\Adapter\Yii3\Api\YiiApiMiddleware</class> — must be before `Router` to intercept `/debug/api/*` and `/inspect/api/*` requests
+| Middleware | Purpose |
+|-----------|---------|
+| <class>AppDevPanel\Adapter\Yii3\Api\ToolbarMiddleware</class> | Injects the ADP debug toolbar into HTML responses, just before `</body>`. Must be outermost so it can rewrite the body produced by any downstream middleware (including error pages). |
+| <class>AppDevPanel\Adapter\Yii3\Api\YiiApiMiddleware</class> | Intercepts `/debug/*` (panel SPA + `/debug/api/*`) and `/inspect/api/*` and delegates them to the ADP API application. Must be before `Router` so the user's routes don't shadow ADP's, and after `ErrorCatcher` so exceptions bubble up through Yii's error pipeline. Static panel assets are served by the web server directly from the public directory the adapter symlinks into (`@public/app-dev-panel`), not by this middleware. |
 
-::: warning Middleware Order is Critical
-`YiiApiMiddleware` **must** be placed before the `Router` middleware but after `ErrorCatcher`. If placed after the router, ADP API routes will not be intercepted. If placed before error handling, exceptions in ADP itself won't be caught gracefully.
+Copy-paste-ready `config/web/di/application.php` for the stock `yiisoft/app` template:
+
+```php
+<?php
+
+declare(strict_types=1);
+
+use App\Web\NotFound\NotFoundHandler;
+use AppDevPanel\Adapter\Yii3\Api\ToolbarMiddleware;
+use AppDevPanel\Adapter\Yii3\Api\YiiApiMiddleware;
+use Yiisoft\Csrf\CsrfTokenMiddleware;
+use Yiisoft\Definitions\DynamicReference;
+use Yiisoft\Definitions\Reference;
+use Yiisoft\ErrorHandler\Middleware\ErrorCatcher;
+use Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher;
+use Yiisoft\RequestProvider\RequestCatcherMiddleware;
+use Yiisoft\Router\Middleware\Router;
+use Yiisoft\Session\SessionMiddleware;
+use Yiisoft\Yii\Http\Application;
+
+return [
+    Application::class => [
+        '__construct()' => [
+            'dispatcher' => DynamicReference::to([
+                'class' => MiddlewareDispatcher::class,
+                'withMiddlewares()' => [
+                    [
+                        ToolbarMiddleware::class,
+                        ErrorCatcher::class,
+                        YiiApiMiddleware::class,
+                        SessionMiddleware::class,
+                        CsrfTokenMiddleware::class,
+                        RequestCatcherMiddleware::class,
+                        Router::class,
+                    ],
+                ],
+            ]),
+            'fallbackHandler' => Reference::to(NotFoundHandler::class),
+        ],
+    ],
+];
+```
+
+::: warning Middleware Order
+`YiiApiMiddleware` **must** be placed before the `Router` middleware but after `ErrorCatcher`. If
+placed after the router, ADP routes will not be intercepted. If placed before error handling,
+exceptions in ADP itself won't be caught gracefully. `ToolbarMiddleware` **must** be outermost —
+it rewrites the HTML body returned by everything below it.
 :::
 
 ## Collectors
@@ -73,13 +125,3 @@ When `yiisoft/translator` is installed, the adapter registers <class>AppDevPanel
 ## Database Inspector
 
 Database schema inspection is provided via `Yiisoft\Db` through <class>AppDevPanel\Adapter\Yii3\Inspector\DbSchemaProvider</class>.
-
-## Frontend Assets
-
-`composer require app-dev-panel/adapter-yii3` transitively pulls <pkg>app-dev-panel/frontend-assets</pkg>. The DI factory in `config/di-api.php` resolves `panel.staticUrl` automatically:
-
-1. If `FrontendAssets::exists()` — symlink `vendor/app-dev-panel/frontend-assets/dist/` to `@public/app-dev-panel`, set `panel.staticUrl = '/app-dev-panel'`.
-2. Otherwise, fall back to `libs/Adapter/Yii3/resources/dist` (monorepo dev) if it contains a build.
-3. Otherwise, CDN fallback (`https://app-dev-panel.github.io/app-dev-panel`).
-
-Override via the `app-dev-panel/yii3.panel.staticUrl` parameter. Update with `composer update app-dev-panel/frontend-assets`.

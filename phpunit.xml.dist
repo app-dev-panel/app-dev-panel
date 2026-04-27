@@ -68,6 +68,9 @@
         <testsuite name="Adapter-Cycle">
             <directory>libs/Adapter/Cycle/tests</directory>
         </testsuite>
+        <testsuite name="Adapter-Spiral">
+            <directory>libs/Adapter/Spiral/tests</directory>
+        </testsuite>
         <testsuite name="McpServer">
             <directory>libs/McpServer/tests</directory>
         </testsuite>
@@ -93,6 +96,7 @@
             <directory>libs/Adapter/Yii2/src</directory>
             <directory>libs/McpServer/src</directory>
             <directory>libs/Adapter/Cycle/src</directory>
+            <directory>libs/Adapter/Spiral/src</directory>
         </include>
     </source>
 </phpunit>

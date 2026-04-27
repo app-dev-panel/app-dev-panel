@@ -33,9 +33,8 @@ final class DummyCollector implements CollectorInterface
 
     public function getCollected(): array
     {
-        if (!$this->isActive) {
-            return [];
-        }
+        // No `isActive` guard on read methods — storage flush calls
+        // `getCollected()` AFTER `shutdown()` (see {@see CollectorInterface}).
         return [
             'int' => 123,
             'str' => 'asdas',

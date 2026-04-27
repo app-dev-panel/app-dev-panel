@@ -5,13 +5,12 @@ declare(strict_types=1);
 namespace AppDevPanel\FrontendAssets;
 
 /**
- * Locates the prebuilt ADP panel SPA and toolbar widget shipped with this package.
+ * Locates the prebuilt ADP panel SPA shipped with this package.
  *
- * The `dist/` directory is produced by `libs/frontend/packages/panel` and
- * `libs/frontend/packages/toolbar` (Vite builds) and is populated by the
- * release pipeline before the package is split into its own repository.
- * When installed via Composer, the assets sit next to this file at
- * `../dist/index.html` (panel) and `../dist/toolbar/bundle.js` (toolbar).
+ * The `dist/` directory is produced by `libs/frontend/packages/panel`
+ * (Vite build) and is populated by the release pipeline before the
+ * package is split into its own repository. When installed via Composer,
+ * the assets sit next to this file at `../dist/index.html`.
  */
 final class FrontendAssets
 {
@@ -25,13 +24,24 @@ final class FrontendAssets
         return is_file(self::path() . '/index.html');
     }
 
-    public static function toolbarPath(): string
+    /**
+     * Resolve the canonical bundle directory for a framework adapter.
+     *
+     * Prefers this package's `dist/` (release-pinned, contains both panel and
+     * toolbar) and falls back to the adapter-local `resources/dist/` so
+     * `make build-panel` development workflows keep working inside the
+     * monorepo. Returns `null` when neither has a usable bundle.
+     */
+    public static function resolve(?string $localFallbackDir = null): ?string
     {
-        return self::path() . '/toolbar';
-    }
+        if (self::exists()) {
+            return self::path();
+        }
 
-    public static function toolbarExists(): bool
-    {
-        return is_file(self::toolbarPath() . '/bundle.js');
+        if ($localFallbackDir !== null && is_file($localFallbackDir . '/bundle.js')) {
+            return $localFallbackDir;
+        }
+
+        return null;
     }
 }

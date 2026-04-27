@@ -16,7 +16,17 @@ composer require app-dev-panel/adapter-yii2
 <pkg>app-dev-panel/adapter-yii2</pkg>
 :::
 
-The package auto-registers via `extra.bootstrap` in composer.json. The <class>AppDevPanel\Adapter\Yii2\Bootstrap</class> class registers the `app-dev-panel` module automatically when `YII_DEBUG` is enabled.
+The package auto-registers via `extra.bootstrap` in composer.json (handled by `yiisoft/yii2-composer`, already present in every official Yii 2 template). The <class>AppDevPanel\Adapter\Yii2\Bootstrap</class> class registers the `app-dev-panel` module automatically when `YII_DEBUG` is enabled.
+
+### Install-time requirements
+
+The adapter's bootstrap surfaces install-time problems through `Yii::warning(...)` under the `app-dev-panel` log category. If the panel is not reachable after `composer require`, check your log for these entries first:
+
+| Requirement | Why | Fix |
+|-------------|-----|-----|
+| `UrlManager::$enablePrettyUrl = true` | ADP adds URL rules for `/debug/*`. Without pretty URLs Yii parses the path through the `r` query param and falls through to `site/index`. | Enable pretty URLs in `components.urlManager`. The stock `yii2-app-basic` template ships this block commented out. |
+| No `debug` module registered by `yiisoft/yii2-debug` | yii2-debug claims the same `/debug/*` routes and wins the rule race — you get its toolbar instead of the ADP panel. | Remove `debug` from `bootstrap` and `modules`, or rename ADP's prefix (see `$routePrefix` below). |
+| `yiisoft/yii2-composer` is present | Executes the `extra.bootstrap` entry that wires <class>AppDevPanel\Adapter\Yii2\Bootstrap</class>. Shipped with every official Yii 2 template. | Add it to `require` if you stripped it from a customised template. |
 
 ## Configuration
 
@@ -26,6 +36,8 @@ Configure the module in your application config:
 'modules' => [
     'app-dev-panel' => [
         'class' => \AppDevPanel\Adapter\Yii2\Module::class,
+        'routePrefix' => 'debug',          // URL prefix for panel + API (default 'debug')
+        'inspectorRoutePrefix' => 'inspect',
         'storagePath' => '@runtime/debug',
         'historySize' => 50,
         'collectors' => [
@@ -82,13 +94,3 @@ The adapter replaces Yii 2's `i18n` application component with <class>AppDevPane
 ## Database Inspector
 
 `Yii2DbSchemaProvider` provides database schema inspection via `yii\db\Schema`. Falls back to <class>AppDevPanel\Adapter\Yii2\Inspector\NullSchemaProvider</class> when no database component is configured.
-
-## Frontend Assets
-
-`composer require app-dev-panel/adapter-yii2` transitively pulls <pkg>app-dev-panel/frontend-assets</pkg>. <class>AppDevPanel\Adapter\Yii2\Module</class> resolves `panelStaticUrl` automatically:
-
-1. If `FrontendAssets::exists()` — symlink `vendor/app-dev-panel/frontend-assets/dist/` to `@webroot/app-dev-panel`, set `panelStaticUrl = '/app-dev-panel'`.
-2. Otherwise fall back to `libs/Adapter/Yii2/resources/dist` (monorepo dev).
-3. Otherwise, CDN fallback (`https://app-dev-panel.github.io/app-dev-panel`).
-
-Override via the module's `panelStaticUrl` / `toolbarStaticUrl` config keys. Update with `composer update app-dev-panel/frontend-assets`.

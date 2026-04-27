@@ -5,15 +5,16 @@
 
 .PHONY: help build-panel install-panel build-install-panel test test-php test-frontend test-frontend-e2e test-ci \
         mago mago-format mago-lint mago-analyze mago-fix \
-        mago-playgrounds mago-playground-yii3 mago-playground-symfony mago-playground-yii2 mago-playground-laravel \
-        mago-playgrounds-fix mago-playground-yii3-fix mago-playground-symfony-fix mago-playground-yii2-fix mago-playground-laravel-fix \
+        mago-playgrounds mago-playground-yii3 mago-playground-symfony mago-playground-yii2 mago-playground-laravel mago-playground-spiral \
+        mago-playgrounds-fix mago-playground-yii3-fix mago-playground-symfony-fix mago-playground-yii2-fix mago-playground-laravel-fix mago-playground-spiral-fix \
         modulite \
         check check-ci fix \
         install install-php install-frontend install-playgrounds \
-        serve-yii3 serve-symfony serve-yii2 serve-laravel serve \
-        fixtures fixtures-yii3 fixtures-symfony fixtures-yii2 fixtures-laravel \
-        test-fixtures test-fixtures-yii3 test-fixtures-symfony test-fixtures-yii2 test-fixtures-laravel \
-        test-scenario test-scenario-yii3 test-scenario-symfony test-scenario-yii2 test-scenario-laravel \
+        spiral-panel-sync \
+        serve-yii3 serve-symfony serve-yii2 serve-laravel serve-spiral serve \
+        fixtures fixtures-yii3 fixtures-symfony fixtures-yii2 fixtures-laravel fixtures-spiral \
+        test-fixtures test-fixtures-yii3 test-fixtures-symfony test-fixtures-yii2 test-fixtures-laravel test-fixtures-spiral \
+        test-scenario test-scenario-yii3 test-scenario-symfony test-scenario-yii2 test-scenario-laravel test-scenario-spiral \
         test-playground test-playground-yii3 test-playground-symfony test-playground-laravel \
         test-mcp test-mcp-yii3 test-mcp-symfony test-mcp-yii2 test-mcp-laravel \
         test-pages test-pages-yii3 test-pages-symfony test-pages-yii2 test-pages-laravel
@@ -26,6 +27,7 @@ YII3_PORT  ?= 8101
 SYMFONY_PORT  ?= 8102
 YII2_PORT     ?= 8103
 LARAVEL_PORT  ?= 8104
+SPIRAL_PORT   ?= 8105
 
 # --- Binaries ---
 # Use vendor/bin/mago locally (absolute path); CI installs mago globally via setup-mago action
@@ -165,6 +167,7 @@ install-playgrounds: ## Install playground deps
 	cd $(PLAYGROUND_DIR)/symfony-app && composer install --prefer-dist --no-progress --no-interaction
 	cd $(PLAYGROUND_DIR)/yii2-basic-app && composer install --prefer-dist --no-progress --no-interaction
 	cd $(PLAYGROUND_DIR)/laravel-app && composer install --prefer-dist --no-progress --no-interaction
+	cd $(PLAYGROUND_DIR)/spiral-app && composer install --prefer-dist --no-progress --no-interaction
 
 # ============================================================================
 # Build
@@ -176,6 +179,8 @@ SYMFONY_ASSETS := $(ROOT_DIR)/libs/Adapter/Symfony/Resources/public
 LARAVEL_ASSETS := $(ROOT_DIR)/libs/Adapter/Laravel/resources/dist
 YII2_ASSETS    := $(ROOT_DIR)/libs/Adapter/Yii2/resources/dist
 YII3_ASSETS := $(ROOT_DIR)/libs/Adapter/Yii3/resources/dist
+FRONTEND_ASSETS_DIST := $(ROOT_DIR)/libs/FrontendAssets/dist
+SPIRAL_PANEL_DIST := $(PLAYGROUND_DIR)/spiral-app/public/panel-dist
 
 build-panel: ## Build panel + toolbar and copy to all adapter asset directories
 	@echo "$(CYAN)Building frontend panel...$(RESET)"
@@ -190,12 +195,24 @@ build-panel: ## Build panel + toolbar and copy to all adapter asset directories
 		cp $(TOOLBAR_DIST)/bundle.js $(TOOLBAR_DIST)/bundle*.css $$dir/toolbar/; \
 		if [ -d "$(TOOLBAR_DIST)/assets" ]; then cp -r $(TOOLBAR_DIST)/assets $$dir/toolbar/assets; fi; \
 	done
+	@echo "$(CYAN)Populating libs/FrontendAssets/dist (Composer-shipped SPA)...$(RESET)"
+	@mkdir -p $(FRONTEND_ASSETS_DIST)
+	@find $(FRONTEND_ASSETS_DIST) -mindepth 1 -maxdepth 1 -not -name '.gitignore' -not -name '.gitkeep' -exec rm -rf {} + 2>/dev/null
+	@cp -r $(PANEL_DIST)/. $(FRONTEND_ASSETS_DIST)/
+	@echo "$(CYAN)Syncing panel to Spiral playground (public/panel-dist)...$(RESET)"
+	@rm -rf $(SPIRAL_PANEL_DIST) && mkdir -p $(SPIRAL_PANEL_DIST)
+	@cp -r $(PANEL_DIST)/. $(SPIRAL_PANEL_DIST)/
 	@echo "$(GREEN)Done. Run 'make install-panel' to publish assets to playgrounds.$(RESET)"
 
 install-panel: ## Publish built panel assets into playground applications
 	@echo "$(CYAN)Publishing panel assets to playgrounds...$(RESET)"
 	cd $(PLAYGROUND_DIR)/symfony-app && rm -rf public/bundles/appdevpanel && php bin/console assets:install public --symlink --relative
 	cd $(PLAYGROUND_DIR)/laravel-app && rm -rf public/vendor/app-dev-panel && php artisan vendor:publish --tag=app-dev-panel-assets --force --ansi
+	@if [ -d "$(FRONTEND_ASSETS_DIST)" ] && [ -f "$(FRONTEND_ASSETS_DIST)/bundle.js" ]; then \
+		rm -rf $(SPIRAL_PANEL_DIST) && mkdir -p $(SPIRAL_PANEL_DIST); \
+		cp -r $(FRONTEND_ASSETS_DIST)/. $(SPIRAL_PANEL_DIST)/; \
+		echo "$(GREEN)[Spiral] Panel published to $(SPIRAL_PANEL_DIST)$(RESET)"; \
+	fi
 	@echo "$(GREEN)Done. Panel available at /debug on each playground.$(RESET)"
 
 build-install-panel: build-panel install-panel ## Build panel + publish to all playgrounds
@@ -280,9 +297,15 @@ mago-playground-laravel: ## Mago checks for Laravel playground
 	cd $(PLAYGROUND_DIR)/laravel-app && $(MAGO) lint
 	cd $(PLAYGROUND_DIR)/laravel-app && $(MAGO) analyze
 
+mago-playground-spiral: ## Mago checks for Spiral playground
+	@echo "$(CYAN)[Playground: Spiral] Running Mago checks...$(RESET)"
+	cd $(PLAYGROUND_DIR)/spiral-app && $(MAGO) fmt --check
+	cd $(PLAYGROUND_DIR)/spiral-app && $(MAGO) lint
+	cd $(PLAYGROUND_DIR)/spiral-app && $(MAGO) analyze
+
 mago-playgrounds: ## Run Mago checks on all playgrounds (parallel)
 	@echo "$(CYAN)Running Mago checks on all playgrounds...$(RESET)"
-	@$(MAKE) -j4 --output-sync=target mago-playground-yii3 mago-playground-symfony mago-playground-yii2 mago-playground-laravel
+	@$(MAKE) -j5 --output-sync=target mago-playground-yii3 mago-playground-symfony mago-playground-yii2 mago-playground-laravel mago-playground-spiral
 	@echo "$(GREEN)All playground Mago checks passed!$(RESET)"
 
 mago-playground-yii3-fix: ## Fix Yii 3 playground formatting
@@ -309,9 +332,15 @@ mago-playground-laravel-fix: ## Fix Laravel playground formatting
 	cd $(PLAYGROUND_DIR)/laravel-app && $(MAGO) lint
 	cd $(PLAYGROUND_DIR)/laravel-app && $(MAGO) analyze
 
+mago-playground-spiral-fix: ## Fix Spiral playground formatting
+	@echo "$(CYAN)[Playground: Spiral] Fixing formatting...$(RESET)"
+	cd $(PLAYGROUND_DIR)/spiral-app && $(MAGO) fmt
+	cd $(PLAYGROUND_DIR)/spiral-app && $(MAGO) lint
+	cd $(PLAYGROUND_DIR)/spiral-app && $(MAGO) analyze
+
 mago-playgrounds-fix: ## Fix formatting in all playgrounds (parallel)
 	@echo "$(CYAN)Fixing formatting in all playgrounds...$(RESET)"
-	@$(MAKE) -j4 --output-sync=target mago-playground-yii3-fix mago-playground-symfony-fix mago-playground-yii2-fix mago-playground-laravel-fix
+	@$(MAKE) -j5 --output-sync=target mago-playground-yii3-fix mago-playground-symfony-fix mago-playground-yii2-fix mago-playground-laravel-fix mago-playground-spiral-fix
 	@echo "$(GREEN)All playground formatting fixed!$(RESET)"
 
 # ============================================================================
@@ -382,19 +411,37 @@ serve-laravel: ## Start Laravel playground server (port $(LARAVEL_PORT))
 	@echo "$(CYAN)[Playground: Laravel] Starting server on port $(LARAVEL_PORT)...$(RESET)"
 	cd $(PLAYGROUND_DIR)/laravel-app && bash ../../bin/serve.sh $(LARAVEL_PORT)
 
+# Spiral playground has no native asset publishing step (unlike Symfony/Laravel). If the panel
+# has been built but not yet copied in (e.g. someone ran `build-panel` on a stale checkout),
+# sync on demand before starting the server.
+spiral-panel-sync:
+	@if [ ! -f "$(SPIRAL_PANEL_DIST)/bundle.js" ] && [ -f "$(PANEL_DIST)/bundle.js" ]; then \
+		mkdir -p $(SPIRAL_PANEL_DIST); \
+		cp -r $(PANEL_DIST)/. $(SPIRAL_PANEL_DIST)/; \
+		echo "$(GREEN)[Playground: Spiral] Panel SPA synced to public/panel-dist$(RESET)"; \
+	elif [ ! -f "$(SPIRAL_PANEL_DIST)/bundle.js" ]; then \
+		echo "$(YELLOW)[Playground: Spiral] No local panel build — /debug will fall back to the GitHub CDN. Run 'make build-panel' to serve it locally.$(RESET)"; \
+	fi
+
+serve-spiral: spiral-panel-sync ## Start Spiral playground server (port $(SPIRAL_PORT))
+	@echo "$(CYAN)[Playground: Spiral] Starting server on port $(SPIRAL_PORT)...$(RESET)"
+	cd $(PLAYGROUND_DIR)/spiral-app && APP_DEV_PANEL_STATIC_URL=/panel-dist bash ../../bin/serve.sh $(SPIRAL_PORT)
+
 serve: ## Start all playground servers in background
 	@echo "$(CYAN)Starting all playground servers...$(RESET)"
 	@$(MAKE) serve-yii3 &
 	@$(MAKE) serve-symfony &
 	@$(MAKE) serve-yii2 &
 	@$(MAKE) serve-laravel &
+	@$(MAKE) serve-spiral &
 	@sleep 1
 	@echo ""
 	@echo "$(GREEN)Playground servers started:$(RESET)"
-	@echo "  Yii3:  http://127.0.0.1:$(YII3_PORT)"
+	@echo "  Yii3:     http://127.0.0.1:$(YII3_PORT)"
 	@echo "  Symfony:  http://127.0.0.1:$(SYMFONY_PORT)"
 	@echo "  Yii2:     http://127.0.0.1:$(YII2_PORT)"
 	@echo "  Laravel:  http://127.0.0.1:$(LARAVEL_PORT)"
+	@echo "  Spiral:   http://127.0.0.1:$(SPIRAL_PORT)"
 	@echo ""
 	@echo "$(YELLOW)Press Ctrl+C to stop all servers$(RESET)"
 	@wait
@@ -419,9 +466,13 @@ fixtures-laravel: ## Run test fixtures against Laravel playground
 	@echo "$(CYAN)[Scenarios: Laravel] Running test fixtures on port $(LARAVEL_PORT) (timeout: $(FIXTURE_TIMEOUT)s)...$(RESET)"
 	$(call with_timeout,$(FIXTURE_TIMEOUT),php libs/Cli/bin/adp debug:fixtures http://127.0.0.1:$(LARAVEL_PORT))
 
+fixtures-spiral: ## Run test fixtures against Spiral playground
+	@echo "$(CYAN)[Scenarios: Spiral] Running test fixtures on port $(SPIRAL_PORT) (timeout: $(FIXTURE_TIMEOUT)s)...$(RESET)"
+	$(call with_timeout,$(FIXTURE_TIMEOUT),php libs/Cli/bin/adp debug:fixtures http://127.0.0.1:$(SPIRAL_PORT))
+
 fixtures: ## Run test fixtures against all playgrounds (requires running servers)
 	@echo "$(CYAN)Running test fixtures against all playgrounds...$(RESET)"
-	@$(MAKE) -j4 --output-sync=target fixtures-yii3 fixtures-symfony fixtures-yii2 fixtures-laravel
+	@$(MAKE) -j5 --output-sync=target fixtures-yii3 fixtures-symfony fixtures-yii2 fixtures-laravel fixtures-spiral
 	@echo "$(GREEN)All test fixtures passed!$(RESET)"
 
 test-fixtures-yii3: ## Run PHPUnit E2E fixtures against Yii 3 playground
@@ -440,9 +491,13 @@ test-fixtures-laravel: ## Run PHPUnit E2E fixtures against Laravel playground
 	@echo "$(CYAN)[E2E Fixtures: Laravel] Running PHPUnit E2E tests on port $(LARAVEL_PORT)...$(RESET)"
 	PLAYGROUND_URL=http://127.0.0.1:$(LARAVEL_PORT) $(call with_timeout,$(FIXTURE_TIMEOUT),php vendor/bin/phpunit --testsuite Fixtures --testdox)
 
+test-fixtures-spiral: ## Run PHPUnit E2E fixtures against Spiral playground
+	@echo "$(CYAN)[E2E Fixtures: Spiral] Running PHPUnit E2E tests on port $(SPIRAL_PORT)...$(RESET)"
+	PLAYGROUND_URL=http://127.0.0.1:$(SPIRAL_PORT) $(call with_timeout,$(FIXTURE_TIMEOUT),php vendor/bin/phpunit --testsuite Fixtures --testdox)
+
 test-fixtures: ## Run PHPUnit E2E fixtures against all playgrounds (requires running servers)
 	@echo "$(CYAN)Running PHPUnit E2E fixtures against all playgrounds...$(RESET)"
-	@$(MAKE) -j4 --output-sync=target test-fixtures-yii3 test-fixtures-symfony test-fixtures-yii2 test-fixtures-laravel
+	@$(MAKE) -j5 --output-sync=target test-fixtures-yii3 test-fixtures-symfony test-fixtures-yii2 test-fixtures-laravel test-fixtures-spiral
 	@echo "$(GREEN)All E2E fixture tests passed!$(RESET)"
 
 test-scenario-yii3: ## Run full scenario test against Yii 3 playground
@@ -461,9 +516,13 @@ test-scenario-laravel: ## Run full scenario test against Laravel playground
 	@echo "$(CYAN)[Scenario: Laravel] Running full scenario on port $(LARAVEL_PORT)...$(RESET)"
 	PLAYGROUND_URL=http://127.0.0.1:$(LARAVEL_PORT) $(call with_timeout,$(FIXTURE_TIMEOUT),php vendor/bin/phpunit --testsuite Fixtures --group scenario --testdox)
 
+test-scenario-spiral: ## Run full scenario test against Spiral playground
+	@echo "$(CYAN)[Scenario: Spiral] Running full scenario on port $(SPIRAL_PORT)...$(RESET)"
+	PLAYGROUND_URL=http://127.0.0.1:$(SPIRAL_PORT) $(call with_timeout,$(FIXTURE_TIMEOUT),php vendor/bin/phpunit --testsuite Fixtures --group scenario --testdox)
+
 test-scenario: ## Run full scenario test against all playgrounds (requires running servers)
 	@echo "$(CYAN)Running full scenario tests against all playgrounds...$(RESET)"
-	@$(MAKE) -j4 --output-sync=target test-scenario-yii3 test-scenario-symfony test-scenario-yii2 test-scenario-laravel
+	@$(MAKE) -j5 --output-sync=target test-scenario-yii3 test-scenario-symfony test-scenario-yii2 test-scenario-laravel test-scenario-spiral
 	@echo "$(GREEN)All scenario tests passed!$(RESET)"
 
 test-mcp-yii3: ## Run MCP API E2E tests against Yii 3 playground

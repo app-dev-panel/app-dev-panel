@@ -5,7 +5,7 @@ import {addFavoriteUrl, changeBaseUrl, removeFavoriteUrl} from '@app-dev-panel/s
 import {useGetDebugQuery} from '@app-dev-panel/sdk/API/Debug/Debug';
 import {PageHeader} from '@app-dev-panel/sdk/Component/PageHeader';
 import {StatusCard} from '@app-dev-panel/sdk/Component/StatusCard';
-import {Chip, Icon, IconButton, InputBase, Tooltip, Typography} from '@mui/material';
+import {Box, Chip, Icon, IconButton, InputBase, Tooltip, Typography} from '@mui/material';
 import {styled} from '@mui/material/styles';
 import {useEffect, useState} from 'react';
 import {useDispatch} from 'react-redux';
@@ -133,7 +133,7 @@ export function IndexPage() {
     }, [baseUrl]);
 
     return (
-        <>
+        <Box sx={{p: {xs: 1.5, sm: 3.5}}}>
             <PageHeader
                 title="Application Development Panel"
                 icon="dashboard"
@@ -245,6 +245,6 @@ export function IndexPage() {
 
             <SectionLabel>Debug Entries</SectionLabel>
             <DebugEntryList />
-        </>
+        </Box>
     );
 }

@@ -148,6 +148,9 @@ return [
                 | ContainerInterfaceProxy::LOG_ERROR,
         'storage.driver' => 'file',
         'path' => '@runtime/debug',
+        // Directory holding the committable project config (frames, OpenAPI specs).
+        // Resolved via the Yii Aliases service; defaults to <root>/config/adp.
+        'projectConfigPath' => '@root/config/adp',
         'ignoredRequests' => [
             '/debug/**',
             '/inspect/**',

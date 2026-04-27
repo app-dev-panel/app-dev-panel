@@ -29,14 +29,12 @@ final class FilesystemStreamCollector implements SummaryCollectorInterface
 
     public function getCollected(): array
     {
-        if (!$this->isActive()) {
-            return [];
-        }
         return array_map('array_values', $this->operations);
     }
 
     public function startup(): void
     {
+        $this->reset();
         $this->isActive = true;
         FilesystemStreamProxy::register();
         FilesystemStreamProxy::$collector = $this;
@@ -46,12 +44,15 @@ final class FilesystemStreamCollector implements SummaryCollectorInterface
 
     public function shutdown(): void
     {
+        // Detach the stream wrapper FIRST so the upcoming storage flush (which
+        // writes data.json.gz / objects.json.gz / summary.json through file://)
+        // does not feed itself back into $operations. The buffer is preserved so
+        // `getCollected()` / `getSummary()` still see the pre-flush snapshot.
         FilesystemStreamProxy::unregister();
         FilesystemStreamProxy::$collector = null;
         FilesystemStreamProxy::$ignoredPathPatterns = [];
         FilesystemStreamProxy::$ignoredClasses = [];
 
-        $this->reset();
         $this->isActive = false;
     }
 
@@ -69,10 +70,6 @@ final class FilesystemStreamCollector implements SummaryCollectorInterface
 
     public function getSummary(): array
     {
-        if (!$this->isActive()) {
-            return [];
-        }
-
         return [
             'fs_stream' => array_map(fn(array $operations) => count($operations), $this->operations),
         ];

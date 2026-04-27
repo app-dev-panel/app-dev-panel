@@ -1,6 +1,6 @@
 ---
 title: Getting Started
-description: "Install ADP in your PHP application. Quick setup guide for Symfony, Laravel, Yii 3, and Yii 2 with Composer."
+description: "Install ADP in your PHP application. Quick setup guide for Symfony, Laravel, Yii 3, Yii 2, and Spiral with Composer."
 ---
 
 # Getting Started
@@ -49,6 +49,10 @@ composer require app-dev-panel/adapter-yii3
 ```bash
 composer require app-dev-panel/adapter-laravel
 ```
+== Spiral
+```bash
+composer require app-dev-panel/adapter-spiral
+```
 :::
 
 Each adapter pulls in <pkg>app-dev-panel/kernel</pkg> and <pkg>app-dev-panel/api</pkg> as dependencies automatically.
@@ -64,6 +68,14 @@ return [
     AppDevPanel\Adapter\Symfony\AppDevPanelBundle::class => ['dev' => true, 'test' => true],
 ];
 ```
+```php
+// config/routes/app_dev_panel.php — mounts /debug, /debug/api/*, /inspect/api/*
+use Symfony\Component\Routing\Loader\Configurator\RoutingConfigurator;
+
+return static function (RoutingConfigurator $routes): void {
+    $routes->import('@AppDevPanelBundle/config/routes/adp.php');
+};
+```
 == Yii 2
 ```php
 // config/web.php
@@ -74,8 +86,32 @@ return [
             'class' => \AppDevPanel\Adapter\Yii2\Module::class,
         ],
     ],
+    'components' => [
+        // REQUIRED: ADP mounts the panel at /debug via urlManager rules.
+        'urlManager' => [
+            'enablePrettyUrl' => true,
+            'showScriptName'  => false,
+        ],
+    ],
 ];
 ```
+
+::: warning yii2-app-basic / yii2-app-advanced
+These templates register `yiisoft/yii2-debug` at module id `debug`, which
+claims the same `/debug/*` routes as ADP and will intercept the panel. Either
+remove it from `bootstrap` and `modules` in your config, or mount ADP under
+a different prefix:
+
+```php
+'modules' => [
+    'app-dev-panel' => [
+        'class' => \AppDevPanel\Adapter\Yii2\Module::class,
+        'routePrefix' => 'adp',         // panel at /adp
+        'inspectorRoutePrefix' => 'adp-inspect',
+    ],
+],
+```
+:::
 == Yii 3
 ```php
 // No configuration needed — auto-registered via yiisoft/config plugin
@@ -85,6 +121,18 @@ return [
 // Auto-registered via package discovery
 // Optionally publish config:
 // php artisan vendor:publish --tag=app-dev-panel-config
+```
+== Spiral
+```php
+// app/src/Application/Kernel.php — register the bootloader
+public function defineBootloaders(): array
+{
+    return [
+        // ...
+        \AppDevPanel\Adapter\Spiral\Bootloader\AppDevPanelBootloader::class,
+    ];
+}
+// then add AdpApiMiddleware + DebugMiddleware to the HTTP pipeline
 ```
 :::
 
@@ -99,10 +147,6 @@ When using PHP's built-in server, always set `PHP_CLI_SERVER_WORKERS=3` or highe
 PHP_CLI_SERVER_WORKERS=3 php -S 127.0.0.1:8080 -t public
 ```
 :::
-
-### Frontend served from Composer
-
-Each adapter requires <pkg>app-dev-panel/frontend-assets</pkg>, the prebuilt panel SPA + toolbar widget. Composer installs it transitively, and the adapter resolves the bundle locally so the panel and toolbar work out of the box without CDN access. To update the bundle: `composer update app-dev-panel/frontend-assets`. See your adapter page for the URL it is mounted under and how to override the source via `panel.static_url`.
 
 ## Try the Demo
 
@@ -127,6 +171,8 @@ cd playground/symfony-app && PHP_CLI_SERVER_WORKERS=3 php -S 127.0.0.1:8102 -t p
 ```bash
 cd playground/yii2-basic-app && PHP_CLI_SERVER_WORKERS=3 php -S 127.0.0.1:8103 -t public
 ```
+`PHP_CLI_SERVER_WORKERS>=3` is required — ADP makes concurrent requests
+(SSE + data fetching) that deadlock a single-worker server.
 == Yii 3
 ```bash
 cd playground/yii3-app && ./yii serve --port=8101
@@ -134,6 +180,10 @@ cd playground/yii3-app && ./yii serve --port=8101
 == Laravel
 ```bash
 cd playground/laravel-app && PHP_CLI_SERVER_WORKERS=3 php -S 127.0.0.1:8104 -t public
+```
+== Spiral
+```bash
+cd playground/spiral-app && PHP_CLI_SERVER_WORKERS=3 php -S 127.0.0.1:8105 -t public
 ```
 :::
 

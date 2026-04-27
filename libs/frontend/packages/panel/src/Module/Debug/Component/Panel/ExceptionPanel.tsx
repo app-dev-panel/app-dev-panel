@@ -3,7 +3,7 @@ import {InspectorFileContent, useLazyGetFilesQuery} from '@app-dev-panel/panel/M
 import {CodeHighlight} from '@app-dev-panel/sdk/Component/CodeHighlight';
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {FileLink} from '@app-dev-panel/sdk/Component/FileLink';
-import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
+import {PageToolbar} from '@app-dev-panel/sdk/Component/PageToolbar';
 import {StackTrace} from '@app-dev-panel/sdk/Component/StackTrace';
 import {monoFontFamily} from '@app-dev-panel/sdk/Component/Theme/DefaultTheme';
 import {parseFilename, parseFilePath} from '@app-dev-panel/sdk/Helper/filePathParser';
@@ -186,9 +186,7 @@ export const ExceptionPanel = ({exceptions}: ExceptionPanelProps) => {
 
     return (
         <Box>
-            <Box sx={{display: 'flex', alignItems: 'center', gap: 2, mb: 2}}>
-                <SectionTitle>{`${items.length} exception${items.length !== 1 ? 's' : ''}`}</SectionTitle>
-            </Box>
+            <PageToolbar sticky>{`${items.length} exception${items.length !== 1 ? 's' : ''}`}</PageToolbar>
 
             {items.map((exception, index) => {
                 const expanded = expandedIndex === index;

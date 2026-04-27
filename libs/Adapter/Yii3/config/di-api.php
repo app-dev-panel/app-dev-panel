@@ -68,10 +68,16 @@ use AppDevPanel\Api\Panel\PanelController;
 use AppDevPanel\Api\PathMapper;
 use AppDevPanel\Api\PathMapperInterface;
 use AppDevPanel\Api\PathResolverInterface;
+use AppDevPanel\Api\Project\Controller\ProjectController;
+use AppDevPanel\Api\Project\Controller\SecretsController;
 use AppDevPanel\Api\Toolbar\ToolbarConfig;
 use AppDevPanel\Api\Toolbar\ToolbarInjector;
 use AppDevPanel\FrontendAssets\FrontendAssets;
 use AppDevPanel\Kernel\DebuggerIdGenerator;
+use AppDevPanel\Kernel\Project\FileProjectConfigStorage;
+use AppDevPanel\Kernel\Project\FileSecretsStorage;
+use AppDevPanel\Kernel\Project\ProjectConfigStorageInterface;
+use AppDevPanel\Kernel\Project\SecretsStorageInterface;
 use AppDevPanel\Kernel\Service\FileServiceRegistry;
 use AppDevPanel\Kernel\Service\ServiceRegistryInterface;
 use AppDevPanel\Kernel\Storage\StorageInterface;
@@ -223,26 +229,20 @@ return [
     PanelConfig::class => static function (ContainerInterface $container) use ($params): PanelConfig {
         $staticUrl = $params['app-dev-panel/yii3']['panel']['staticUrl'] ?? '';
         if ($staticUrl === '') {
-            // Auto-detect: prefer the frontend-assets Composer package, fall back to
-            // adapter-local resources/dist (for monorepo dev). Either way, expose
-            // the bundle to the webserver via a symlink under @public/app-dev-panel.
-            $sourceDist = null;
-            if (FrontendAssets::exists()) {
-                $sourceDist = FrontendAssets::path();
-            } else {
-                $adapterDist = \dirname(__DIR__) . '/resources/dist';
-                if (file_exists($adapterDist . '/bundle.js')) {
-                    $sourceDist = $adapterDist;
-                }
-            }
-            if ($sourceDist !== null) {
+            // Prefer the shared frontend-assets package (release-pinned) and fall
+            // back to the adapter-local resources/dist for monorepo development.
+            $sourceDir = \class_exists(FrontendAssets::class)
+                ? FrontendAssets::resolve(\dirname(__DIR__) . '/resources/dist')
+                : null;
+
+            if ($sourceDir !== null) {
                 $aliases = $container->get(Aliases::class);
                 $webroot = $aliases->get('@public');
                 $targetDir = $webroot . '/app-dev-panel';
                 if (!is_dir($targetDir) && !is_link($targetDir)) {
-                    @symlink($sourceDist, $targetDir);
+                    @symlink($sourceDir, $targetDir);
                 }
-                if (is_dir($targetDir) || is_link($targetDir)) {
+                if (is_dir($targetDir)) {
                     $staticUrl = '/app-dev-panel';
                 }
             }
@@ -386,11 +386,37 @@ return [
         McpSettings $mcpSettings,
     ) => new McpSettingsController($jsonResponseFactory, $mcpSettings),
 
-    // LLM settings
-    LlmSettingsInterface::class =>
-        static fn(ContainerInterface $container) => new FileLlmSettings($container->get(Aliases::class)->get(
-            $params['app-dev-panel/yii3']['path'] ?? '@runtime/debug',
+    // Project config (frames, OpenAPI specs) — committed to repo at <root>/config/adp/project.json
+    ProjectConfigStorageInterface::class =>
+        static fn(ContainerInterface $container) => new FileProjectConfigStorage($container->get(Aliases::class)->get(
+            $params['app-dev-panel/yii3']['projectConfigPath'] ?? '@root/config/adp',
         )),
+
+    // Secrets file (API keys, OAuth tokens, ACP env) — gitignored sibling of project.json
+    SecretsStorageInterface::class =>
+        static fn(ContainerInterface $container) => new FileSecretsStorage($container->get(Aliases::class)->get(
+            $params['app-dev-panel/yii3']['projectConfigPath'] ?? '@root/config/adp',
+        )),
+
+    ProjectController::class => static fn(
+        JsonResponseFactoryInterface $jsonResponseFactory,
+        ProjectConfigStorageInterface $projectConfigStorage,
+        ResponseFactoryInterface $psrResponseFactory,
+    ) => new ProjectController($jsonResponseFactory, $projectConfigStorage, $psrResponseFactory),
+
+    SecretsController::class => static fn(
+        JsonResponseFactoryInterface $jsonResponseFactory,
+        SecretsStorageInterface $secretsStorage,
+    ) => new SecretsController($jsonResponseFactory, $secretsStorage),
+
+    // LLM settings — backed by SecretsStorage; legacy `runtime/.llm-settings.json` is auto-migrated.
+    LlmSettingsInterface::class => static fn(
+        ContainerInterface $container,
+        SecretsStorageInterface $secrets,
+    ) => new FileLlmSettings(
+        $container->get(Aliases::class)->get($params['app-dev-panel/yii3']['path'] ?? '@runtime/debug'),
+        $secrets,
+    ),
 
     // LLM history storage
     LlmHistoryStorageInterface::class =>

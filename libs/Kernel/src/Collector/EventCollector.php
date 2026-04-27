@@ -6,7 +6,7 @@ namespace AppDevPanel\Kernel\Collector;
 
 use ReflectionClass;
 
-final class EventCollector implements SummaryCollectorInterface
+final class EventCollector implements SummaryCollectorInterface, HtmlViewProviderInterface
 {
     use CollectorTrait;
 
@@ -18,9 +18,6 @@ final class EventCollector implements SummaryCollectorInterface
 
     public function getCollected(): array
     {
-        if (!$this->isActive()) {
-            return [];
-        }
         return $this->events;
     }
 
@@ -42,9 +39,6 @@ final class EventCollector implements SummaryCollectorInterface
 
     public function getSummary(): array
     {
-        if (!$this->isActive()) {
-            return [];
-        }
         return [
             'event' => [
                 'total' => count($this->events),
@@ -55,5 +49,10 @@ final class EventCollector implements SummaryCollectorInterface
     private function reset(): void
     {
         $this->events = [];
+    }
+
+    public static function getViewPath(): string
+    {
+        return dirname(__DIR__, 2) . '/views/event-collector.php';
     }
 }

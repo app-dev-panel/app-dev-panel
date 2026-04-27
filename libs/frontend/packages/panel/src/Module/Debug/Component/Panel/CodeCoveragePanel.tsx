@@ -1,6 +1,6 @@
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
-import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
+import {PageToolbar} from '@app-dev-panel/sdk/Component/PageToolbar';
 import {Box, Chip, LinearProgress, Typography} from '@mui/material';
 import {styled, useTheme} from '@mui/material/styles';
 import {useDeferredValue, useMemo, useState} from 'react';
@@ -153,9 +153,12 @@ export const CoverageFileList = ({files}: {files: Record<string, FileInfo>}) => 
 
     return (
         <>
-            <SectionTitle action={<FilterInput value={filter} onChange={setFilter} placeholder="Filter files..." />}>
+            <PageToolbar
+                sticky
+                actions={<FilterInput value={filter} onChange={setFilter} placeholder="Filter files..." />}
+            >
                 {`${filtered.length} files`}
-            </SectionTitle>
+            </PageToolbar>
 
             {filtered.map(({path, info}) => {
                 const fileColor = coverageColor(info.percentage);

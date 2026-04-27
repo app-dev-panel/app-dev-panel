@@ -101,6 +101,7 @@ final class ApiRoutesTest extends TestCase
             + count(ApiRoutes::serviceRoutes())
             + count(ApiRoutes::inspectorRoutes())
             + count(ApiRoutes::llmRoutes())
+            + count(ApiRoutes::projectRoutes())
             + count(ApiRoutes::panelRoutes());
 
         $this->assertCount($expected, $router->getRoutes());

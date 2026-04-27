@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace AppDevPanel\Adapter\Symfony\DependencyInjection;
 
 use AppDevPanel\Adapter\Symfony\Collector\RouterDataExtractor;
+use AppDevPanel\Adapter\Symfony\Command\AssetsInstallCommand;
 use AppDevPanel\Adapter\Symfony\Controller\AdpApiController;
-use AppDevPanel\Adapter\Symfony\Controller\FrontendAssetsController;
 use AppDevPanel\Adapter\Symfony\EventSubscriber\AssetMapperSubscriber;
 use AppDevPanel\Adapter\Symfony\EventSubscriber\AuthorizationSubscriber;
 use AppDevPanel\Adapter\Symfony\EventSubscriber\ConsoleSubscriber;
@@ -75,6 +75,8 @@ use AppDevPanel\Api\PathMapper;
 use AppDevPanel\Api\PathMapperInterface;
 use AppDevPanel\Api\PathResolver;
 use AppDevPanel\Api\PathResolverInterface;
+use AppDevPanel\Api\Project\Controller\ProjectController;
+use AppDevPanel\Api\Project\Controller\SecretsController;
 use AppDevPanel\Api\Toolbar\ToolbarConfig;
 use AppDevPanel\Api\Toolbar\ToolbarInjector;
 use AppDevPanel\Cli\Command\DebugDumpCommand;
@@ -88,7 +90,6 @@ use AppDevPanel\Cli\Command\FrontendUpdateCommand;
 use AppDevPanel\Cli\Command\InspectConfigCommand;
 use AppDevPanel\Cli\Command\InspectDatabaseCommand;
 use AppDevPanel\Cli\Command\InspectRoutesCommand;
-use AppDevPanel\FrontendAssets\FrontendAssets;
 use AppDevPanel\Kernel\Collector\AssetBundleCollector;
 use AppDevPanel\Kernel\Collector\AuthorizationCollector;
 use AppDevPanel\Kernel\Collector\CacheCollector;
@@ -120,6 +121,10 @@ use AppDevPanel\Kernel\Collector\Web\RequestCollector;
 use AppDevPanel\Kernel\Collector\Web\WebAppInfoCollector;
 use AppDevPanel\Kernel\Debugger;
 use AppDevPanel\Kernel\DebuggerIdGenerator;
+use AppDevPanel\Kernel\Project\FileProjectConfigStorage;
+use AppDevPanel\Kernel\Project\FileSecretsStorage;
+use AppDevPanel\Kernel\Project\ProjectConfigStorageInterface;
+use AppDevPanel\Kernel\Project\SecretsStorageInterface;
 use AppDevPanel\Kernel\Service\FileServiceRegistry;
 use AppDevPanel\Kernel\Service\ServiceRegistryInterface;
 use AppDevPanel\Kernel\Storage\BroadcastingStorage;
@@ -159,6 +164,10 @@ final class AppDevPanelExtension extends Extension
         $container->setParameter('app_dev_panel.ignored_commands', $config['ignored_commands']);
         $container->setParameter('app_dev_panel.dumper.excluded_classes', $config['dumper']['excluded_classes']);
         $container->setParameter('app_dev_panel.path_mapping', $config['path_mapping'] ?? []);
+        $container->setParameter(
+            'app_dev_panel.project_config_path',
+            $config['project_config_path'] ?? '%kernel.project_dir%/config/adp',
+        );
 
         $this->registerCoreServices($container, $config);
         $this->registerCollectors($container, $config);
@@ -596,15 +605,22 @@ final class AppDevPanelExtension extends Extension
 
         $panelStaticUrl = $config['panel']['static_url'] ?? '';
         if ($panelStaticUrl === '') {
-            // Auto-detect delivery source:
-            // 1. `assets:install` copied the bundle to Resources/public/ → webserver serves it.
-            // 2. The frontend-assets Composer package → FrontendAssetsController serves it.
-            // 3. CDN fallback.
-            $bundleAssetsPath = \dirname(__DIR__, 2) . '/Resources/public/bundle.js';
-            if (file_exists($bundleAssetsPath)) {
-                $panelStaticUrl = '/bundles/appdevpanel';
-            } elseif (FrontendAssets::exists()) {
-                $panelStaticUrl = '/bundles/appdevpanel';
+            // Resolution order:
+            // 1. Prebaked `public/bundles/appdevpanel/` — produced by
+            //    `bin/console app-dev-panel:assets:install` (or the legacy
+            //    `make build-panel` + Symfony `assets:install` flow). Web
+            //    server (nginx/Apache) serves these directly.
+            // 2. CDN default.
+            $projectDir = $container->hasParameter('kernel.project_dir')
+                ? (string) $container->getParameter('kernel.project_dir')
+                : null;
+            $publicBundle = $projectDir !== null
+                ? $projectDir . '/public/' . AssetsInstallCommand::PUBLIC_SUBPATH . '/bundle.js'
+                : null;
+            $resourcesBundle = \dirname(__DIR__, 2) . '/Resources/public/bundle.js';
+
+            if ($publicBundle !== null && file_exists($publicBundle) || file_exists($resourcesBundle)) {
+                $panelStaticUrl = '/' . AssetsInstallCommand::PUBLIC_SUBPATH;
             } else {
                 $panelStaticUrl = PanelConfig::DEFAULT_STATIC_URL;
             }
@@ -683,6 +699,35 @@ final class AppDevPanelExtension extends Extension
             ->setArguments([
                 new Reference(JsonResponseFactoryInterface::class),
                 new Reference(McpSettings::class),
+            ])
+            ->setPublic(true);
+
+        // Project config (frames, OpenAPI specs) — committed to repo at config/adp/project.json
+        $container
+            ->register(ProjectConfigStorageInterface::class, FileProjectConfigStorage::class)
+            ->setArguments(['%app_dev_panel.project_config_path%'])
+            ->setPublic(true);
+
+        // Secrets file — gitignored sibling holding API keys / OAuth tokens / ACP env.
+        $container
+            ->register(SecretsStorageInterface::class, FileSecretsStorage::class)
+            ->setArguments(['%app_dev_panel.project_config_path%'])
+            ->setPublic(true);
+
+        $container
+            ->register(ProjectController::class, ProjectController::class)
+            ->setArguments([
+                new Reference(JsonResponseFactoryInterface::class),
+                new Reference(ProjectConfigStorageInterface::class),
+                new Reference(ResponseFactoryInterface::class),
+            ])
+            ->setPublic(true);
+
+        $container
+            ->register(SecretsController::class, SecretsController::class)
+            ->setArguments([
+                new Reference(JsonResponseFactoryInterface::class),
+                new Reference(SecretsStorageInterface::class),
             ])
             ->setPublic(true);
 
@@ -810,10 +855,13 @@ final class AppDevPanelExtension extends Extension
             ])
             ->setPublic(true);
 
-        // LLM settings
+        // LLM settings — backed by SecretsStorage; legacy `runtime/.llm-settings.json` is auto-migrated.
         $container
             ->register(LlmSettingsInterface::class, FileLlmSettings::class)
-            ->setArguments(['%app_dev_panel.storage.path%'])
+            ->setArguments([
+                '%app_dev_panel.storage.path%',
+                new Reference(SecretsStorageInterface::class),
+            ])
             ->setPublic(true);
 
         // LLM history storage
@@ -945,17 +993,16 @@ final class AppDevPanelExtension extends Extension
             ->setArguments([new Reference(ApiApplication::class)])
             ->addTag('controller.service_arguments')
             ->setPublic(true);
-
-        // Frontend assets controller — serves prebuilt panel + toolbar from the
-        // app-dev-panel/frontend-assets Composer package under /bundles/appdevpanel/*.
-        $container
-            ->register(FrontendAssetsController::class, FrontendAssetsController::class)
-            ->addTag('controller.service_arguments')
-            ->setPublic(true);
     }
 
     private function registerCliCommands(ContainerBuilder $container): void
     {
+        $container
+            ->register(AssetsInstallCommand::class, AssetsInstallCommand::class)
+            ->setArguments(['%kernel.project_dir%'])
+            ->addTag('console.command')
+            ->setPublic(false);
+
         $container
             ->register(DebugResetCommand::class, DebugResetCommand::class)
             ->setArguments([

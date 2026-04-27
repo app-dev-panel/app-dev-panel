@@ -16,9 +16,6 @@ class LogCollector implements SummaryCollectorInterface
 
     public function getCollected(): array
     {
-        if (!$this->isActive()) {
-            return [];
-        }
         return $this->messages;
     }
 
@@ -45,10 +42,6 @@ class LogCollector implements SummaryCollectorInterface
 
     public function getSummary(): array
     {
-        if (!$this->isActive()) {
-            return [];
-        }
-
         $byLevel = [];
         foreach ($this->messages as $message) {
             $level = $message['level'];

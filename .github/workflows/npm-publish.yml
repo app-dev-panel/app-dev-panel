@@ -67,11 +67,13 @@ jobs:
 
       - name: Package panel + toolbar as frontend-dist.zip
         run: |
-          rm -rf /tmp/frontend-dist
-          mkdir -p /tmp/frontend-dist/toolbar
-          cp -R packages/panel/dist/.   /tmp/frontend-dist/
-          cp -R packages/toolbar/dist/. /tmp/frontend-dist/toolbar/
-          cd /tmp/frontend-dist && zip -r "$GITHUB_WORKSPACE/libs/frontend/frontend-dist.zip" .
+          rm -rf frontend-dist
+          mkdir -p frontend-dist/toolbar
+          cp -R packages/panel/dist/. frontend-dist/
+          # Toolbar lives at dist/toolbar/* to match the layout expected by the
+          # framework adapters' ToolbarInjector and by FrontendAssets.
+          cp -R packages/toolbar/dist/. frontend-dist/toolbar/
+          cd frontend-dist && zip -r ../frontend-dist.zip .
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4

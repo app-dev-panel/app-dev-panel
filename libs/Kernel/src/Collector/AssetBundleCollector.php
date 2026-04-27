@@ -57,10 +57,6 @@ final class AssetBundleCollector implements SummaryCollectorInterface
 
     public function getCollected(): array
     {
-        if (!$this->isActive()) {
-            return [];
-        }
-
         return [
             'bundles' => $this->bundles,
             'bundleCount' => count($this->bundles),
@@ -69,10 +65,6 @@ final class AssetBundleCollector implements SummaryCollectorInterface
 
     public function getSummary(): array
     {
-        if (!$this->isActive()) {
-            return [];
-        }
-
         return [
             'assets' => [
                 'bundleCount' => count($this->bundles),

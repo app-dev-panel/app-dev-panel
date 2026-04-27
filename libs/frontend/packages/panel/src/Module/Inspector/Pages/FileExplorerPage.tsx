@@ -6,7 +6,6 @@ import {
 } from '@app-dev-panel/panel/Module/Inspector/API/Inspector';
 import {TreeView} from '@app-dev-panel/panel/Module/Inspector/Component/TreeView/TreeView';
 import {CodeHighlight} from '@app-dev-panel/sdk/Component/CodeHighlight';
-import {PageHeader} from '@app-dev-panel/sdk/Component/PageHeader';
 import {SearchFilter, type SearchMatch} from '@app-dev-panel/sdk/Component/SearchFilter';
 import {parseFilePath, parsePathLineAnchor} from '@app-dev-panel/sdk/Helper/filePathParser';
 import {formatBytes} from '@app-dev-panel/sdk/Helper/formatBytes';
@@ -271,33 +270,45 @@ export const FileExplorerPage = () => {
         changePath(clickedPath);
     };
 
+    const toolbarSx = {
+        display: 'flex',
+        alignItems: 'center',
+        gap: 1,
+        py: 1.25,
+        px: 1.5,
+        borderBottom: '1px solid',
+        borderColor: 'divider',
+        bgcolor: 'background.paper',
+        position: 'sticky' as const,
+        top: 0,
+        zIndex: 2,
+        '@media (min-width: 600px)': {py: 1.5, px: 2.5},
+    };
+
     return (
         <>
-            <PageHeader
-                title="File Explorer"
-                icon="folder_open"
-                description="Browse application files and source code"
-            />
             {error && (
-                <Box sx={{display: 'flex', flexDirection: 'column', gap: 2}}>
-                    <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
+                <>
+                    <Box sx={toolbarSx}>
                         <PathBreadcrumbs path={path} onClick={handleBreadcrumbClick} />
                     </Box>
-                    <Alert severity="error">
-                        <AlertTitle>
-                            {error.status === 403
-                                ? 'Access denied'
-                                : error.status === 404
-                                  ? 'Not found'
-                                  : `Error ${error.status}`}
-                        </AlertTitle>
-                        {error.message}
-                    </Alert>
-                </Box>
+                    <Box sx={{p: {xs: 1.5, sm: 2.5}}}>
+                        <Alert severity="error">
+                            <AlertTitle>
+                                {error.status === 403
+                                    ? 'Access denied'
+                                    : error.status === 404
+                                      ? 'Not found'
+                                      : `Error ${error.status}`}
+                            </AlertTitle>
+                            {error.message}
+                        </Alert>
+                    </Box>
+                </>
             )}
             {!error && file && (
-                <Box sx={{display: 'flex', flexDirection: 'column', gap: 2}}>
-                    <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
+                <>
+                    <Box sx={toolbarSx}>
                         <PathBreadcrumbs
                             path={file.path}
                             onClick={handleBreadcrumbClick}
@@ -305,22 +316,23 @@ export const FileExplorerPage = () => {
                         />
                         <ActionButtons editorUrl={editorUrl} fullPath={file.path} />
                     </Box>
+                    <Box sx={{p: {xs: 1.5, sm: 2.5}, display: 'flex', flexDirection: 'column', gap: 2}}>
+                        <FileMetaBar file={file} onDirectoryClick={handleBreadcrumbClick} />
 
-                    <FileMetaBar file={file} onDirectoryClick={handleBreadcrumbClick} />
-
-                    <Paper variant="outlined" sx={{overflow: 'hidden', borderRadius: 2}}>
-                        <CodeHighlight
-                            language={file.extension}
-                            code={file.content}
-                            highlightLines={highlightLines}
-                            onLineClick={handleLineClick}
-                        />
-                    </Paper>
-                </Box>
+                        <Paper variant="outlined" sx={{overflow: 'hidden', borderRadius: 2}}>
+                            <CodeHighlight
+                                language={file.extension}
+                                code={file.content}
+                                highlightLines={highlightLines}
+                                onLineClick={handleLineClick}
+                            />
+                        </Paper>
+                    </Box>
+                </>
             )}
             {!error && !file && (
-                <Box sx={{display: 'flex', flexDirection: 'column', gap: 2}}>
-                    <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
+                <>
+                    <Box sx={toolbarSx}>
                         <PathBreadcrumbs path={path} onClick={handleBreadcrumbClick} />
                         <ActionButtons editorUrl={directoryEditorUrl} fullPath={path} showCopy={path !== '/'} />
                         <Box sx={{ml: 'auto'}}>
@@ -332,10 +344,12 @@ export const FileExplorerPage = () => {
                             />
                         </Box>
                     </Box>
-                    <Paper variant="outlined" sx={{borderRadius: 2}}>
-                        <TreeView tree={filteredTree} onSelect={changePath} />
-                    </Paper>
-                </Box>
+                    <Box sx={{p: {xs: 1.5, sm: 2.5}}}>
+                        <Paper variant="outlined" sx={{borderRadius: 2}}>
+                            <TreeView tree={filteredTree} onSelect={changePath} />
+                        </Paper>
+                    </Box>
+                </>
             )}
         </>
     );

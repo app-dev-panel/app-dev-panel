@@ -179,13 +179,3 @@ To integrate ADP with another framework (e.g., Laravel), follow this adapter's p
 3. **Config**: Provide sensible defaults, let users customize
 4. **Bootstrap**: Wire VarDumper handler early in the boot process
 5. **Context separation**: Different collectors for web vs. CLI
-
-## Frontend Assets
-
-Adapter requires `app-dev-panel/frontend-assets`. The `PanelConfig::class` factory in `config/di-api.php` resolves `panel.staticUrl` in this priority order:
-
-1. `FrontendAssets::exists()` → symlink `FrontendAssets::path()` to `@public/app-dev-panel`, set `panel.staticUrl = '/app-dev-panel'`
-2. Otherwise, `libs/Adapter/Yii3/resources/dist/bundle.js` exists (monorepo dev) → symlink that, same URL
-3. Otherwise → `PanelConfig::DEFAULT_STATIC_URL` (CDN)
-
-Symlink creation is best-effort (`@symlink`); when the webroot is read-only the resolver falls through to the CDN. Toolbar URL is computed by `ToolbarInjector` as `{panel.staticUrl}/toolbar/bundle.js`. Override via `app-dev-panel/yii3.panel.staticUrl` in `params.php`.

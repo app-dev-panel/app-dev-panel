@@ -43,8 +43,10 @@ src/
 │   ├── SymfonyRouteAdapter.php                     # Single route adapter
 │   ├── SymfonyUrlMatcherAdapter.php                # URL matching adapter
 │   └── SymfonyMatchResult.php                      # Match result DTO
-└── Controller/
-    └── AdpApiController.php                        # Symfony controller bridging to ADP ApiApplication
+├── Controller/
+│   └── AdpApiController.php                        # Symfony controller bridging to ADP ApiApplication
+└── Command/
+    └── AssetsInstallCommand.php                    # `app-dev-panel:assets:install` — copies/symlinks FrontendAssets into public/bundles/appdevpanel/ for the web server
 tests/
 ├── Integration/
 │   ├── BundleBootstrapTest.php                     # Full container compilation + lifecycle
@@ -79,6 +81,15 @@ Registers in order:
 - API services: middleware stack, controllers, inspector endpoints
 - Inspector: `SymfonyConfigProvider` as `config` alias, `DoctrineSchemaProvider` or `NullSchemaProvider`
 - Bridge: `AdpApiController` maps Symfony routing to `ApiApplication`
+- Console: `AssetsInstallCommand` (`app-dev-panel:assets:install`) tagged `console.command` — copies/symlinks `FrontendAssets::path()` into `public/bundles/appdevpanel/` so the web server (nginx/Apache) serves the panel + toolbar bundle directly
+
+### Panel static URL resolution
+
+Static files are served by the web server, not by PHP. `AppDevPanelExtension::load()` picks `panel.static_url` in this order when the user leaves it empty:
+
+1. `<projectDir>/public/bundles/appdevpanel/bundle.js` exists (after `bin/console app-dev-panel:assets:install`) → `/bundles/appdevpanel`
+2. `Resources/public/bundle.js` exists (legacy `make build-panel` flow before Symfony's `assets:install`) → `/bundles/appdevpanel`
+3. `PanelConfig::DEFAULT_STATIC_URL` (GitHub Pages CDN) — fallback when nothing has been published yet
 
 ### 4. Compiler Pass (`CollectorProxyCompilerPass`)
 
@@ -262,15 +273,3 @@ Use this Symfony adapter as a reference. A new adapter must:
 5. **Register inspector services**: `SymfonyConfigProvider`-equivalent as `config` alias, `SchemaProviderInterface` for database
 6. **Pass container parameters** to `InspectController` (3rd constructor arg)
 7. **Bridge API**: route `/debug/api/*` and `/inspect/api/*` to `ApiApplication`
-
-## Frontend Assets
-
-Adapter requires `app-dev-panel/frontend-assets`. `AppDevPanelExtension` resolves `panel.static_url` in this priority order:
-
-1. `Resources/public/bundle.js` exists (after `assets:install`) → `panel.static_url = '/bundles/appdevpanel'` (webserver static)
-2. `FrontendAssets::exists()` → `panel.static_url = '/bundles/appdevpanel'`, served by `Controller\FrontendAssetsController` via route `/bundles/appdevpanel/{file}` registered in `config/routes/adp.php`
-3. Otherwise → `PanelConfig::DEFAULT_STATIC_URL` (CDN)
-
-The `/bundles/appdevpanel/{file}` URL matches Symfony's historical `assets:install` layout, so `try_files $uri /index.php` lets the webserver win when files are present and only falls through to the controller when they aren't.
-
-Toolbar URL is computed by `ToolbarInjector` as `{panel.static_url}/toolbar/bundle.js`. Override via `app_dev_panel.panel.static_url` / `app_dev_panel.toolbar.static_url` in `app_dev_panel.yaml`.

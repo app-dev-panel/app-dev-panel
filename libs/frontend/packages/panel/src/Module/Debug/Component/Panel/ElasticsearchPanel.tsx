@@ -2,7 +2,7 @@ import {JsonRenderer} from '@app-dev-panel/panel/Module/Debug/Component/JsonRend
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {FilterChip} from '@app-dev-panel/sdk/Component/FilterChip';
 import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
-import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
+import {PageToolbar} from '@app-dev-panel/sdk/Component/PageToolbar';
 import {monoFontFamily} from '@app-dev-panel/sdk/Component/Theme/DefaultTheme';
 import {Box, Chip, Collapse, Icon, IconButton, type Theme, Typography} from '@mui/material';
 import {styled, useTheme} from '@mui/material/styles';
@@ -311,12 +311,15 @@ export const ElasticsearchPanel = ({data}: ElasticsearchPanelProps) => {
 
     return (
         <Box>
-            <SectionTitle action={<FilterInput value={filter} onChange={setFilter} placeholder="Filter requests..." />}>
+            <PageToolbar
+                sticky
+                actions={<FilterInput value={filter} onChange={setFilter} placeholder="Filter requests..." />}
+            >
                 {[`${filtered.length} elasticsearch requests`, `${formatDuration(totalTime)} total`]}
-            </SectionTitle>
+            </PageToolbar>
 
             {(methodBadgeCounts.length > 1 || statusBadgeCounts.length > 1) && (
-                <Box sx={{display: 'flex', flexWrap: 'wrap', gap: 0.75, mb: 2}}>
+                <Box sx={{display: 'flex', flexWrap: 'wrap', gap: 0.75, mb: 2, px: {xs: 1.5, sm: 2.5}, pt: 1.5}}>
                     {statusBadgeCounts.map(([label, count]) => {
                         const color = label === 'error' ? theme.palette.error.main : theme.palette.success.main;
                         return (

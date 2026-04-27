@@ -27,6 +27,24 @@ return [
 ];
 ```
 
+## Routes
+
+Create `config/routes/app_dev_panel.php` to mount `/debug`, `/debug/api/*`, and `/inspect/api/*`:
+
+```php
+<?php
+
+declare(strict_types=1);
+
+use Symfony\Component\Routing\Loader\Configurator\RoutingConfigurator;
+
+return static function (RoutingConfigurator $routes): void {
+    $routes->import('@AppDevPanelBundle/config/routes/adp.php');
+};
+```
+
+Without this file the panel routes are not registered and `/debug` returns 404. (Once a Flex recipe lands, this file will be created automatically by `composer require`.)
+
 ## Configuration
 
 Create `config/packages/app_dev_panel.yaml`:
@@ -47,7 +65,7 @@ app_dev_panel:
         security: true         # requires symfony/security-bundle
         cache: true
         mailer: true           # requires symfony/mailer
-        messenger: true        # requires symfony/messenger
+        queue: true            # requires symfony/messenger
         assets: true           # requires symfony/asset-mapper
         code_coverage: false   # opt-in; requires pcov or xdebug
     ignored_requests:
@@ -67,6 +85,30 @@ Additionally:
 
 - **Asset bundles** — <class>AppDevPanel\Adapter\Symfony\EventSubscriber\AssetMapperSubscriber</class> collects mapped assets from `AssetMapperInterface` at the end of each request (requires `symfony/asset-mapper`).
 
+## Installing Assets
+
+The panel and toolbar bundles are shipped by the Composer package <pkg>app-dev-panel/frontend-assets</pkg> (installed transitively when you `composer require app-dev-panel/adapter-symfony`). Static files are served by the **web server** — PHP never proxies them. Run the bundled command once after install to publish them under `public/`:
+
+```bash
+# copy (safe on all platforms)
+php bin/console app-dev-panel:assets:install
+
+# or symlink for zero-cost updates when FrontendAssets changes
+php bin/console app-dev-panel:assets:install --symlink
+php bin/console app-dev-panel:assets:install --relative
+
+# override the public dir (defaults to %kernel.project_dir%/public)
+php bin/console app-dev-panel:assets:install --public-dir=/var/www/html
+```
+
+The bundle auto-detects the published copy and points the panel at `/bundles/appdevpanel`. Until you run the command, the panel falls back to the GitHub Pages CDN.
+
+| `static_url` resolution order | When it kicks in |
+|-------------------------------|------------------|
+| 1. `<projectDir>/public/bundles/appdevpanel/bundle.js` exists → `/bundles/appdevpanel` | After `bin/console app-dev-panel:assets:install` |
+| 2. `Resources/public/bundle.js` exists → `/bundles/appdevpanel` | Legacy `make build-panel` flow before Symfony's `assets:install` |
+| 3. `PanelConfig::DEFAULT_STATIC_URL` (GitHub Pages) | Default — works right after `composer require`, no commands required |
+
 ## Translator Integration
 
 The adapter automatically decorates Symfony's <class>Symfony\Contracts\Translation\TranslatorInterface</class> with <class>AppDevPanel\Adapter\Symfony\Proxy\SymfonyTranslatorProxy</class> via the compiler pass. All `trans()` calls are intercepted and logged to <class>AppDevPanel\Kernel\Collector\TranslatorCollector</class> — no code changes needed. See [Translator](/guide/translator) for details.
@@ -74,24 +116,3 @@ The adapter automatically decorates Symfony's <class>Symfony\Contracts\Translati
 ## Database Inspector
 
 When `doctrine/dbal` is available, <class>AppDevPanel\Adapter\Symfony\Inspector\DoctrineSchemaProvider</class> provides database schema inspection. Falls back to <class>AppDevPanel\Adapter\Symfony\Inspector\NullSchemaProvider</class> otherwise.
-
-## Frontend Assets
-
-`composer require app-dev-panel/adapter-symfony` transitively pulls <pkg>app-dev-panel/frontend-assets</pkg>, which ships the prebuilt panel SPA and toolbar widget. `AppDevPanelExtension` auto-detects the source in three steps and resolves `panel.static_url` accordingly:
-
-1. **`assets:install` copy** in `Resources/public/bundle.js` — webserver serves it directly via `try_files`.
-2. **Composer-installed bundle** in `vendor/app-dev-panel/frontend-assets/dist/` — served on demand by <class>AppDevPanel\Adapter\Symfony\Controller\FrontendAssetsController</class> under `GET /bundles/appdevpanel/{file}`. The URL matches the existing `assets:install` convention, so a webserver fallback (`try_files $uri /index.php`) still wins when files are present.
-3. **CDN fallback**: `https://app-dev-panel.github.io/app-dev-panel`.
-
-Override via `app_dev_panel.panel.static_url` (and `app_dev_panel.toolbar.static_url`) in `app_dev_panel.yaml`. Update the bundle with `composer update app-dev-panel/frontend-assets`.
-
-## Manual API exploration (curl)
-
-The debug API root is at `/debug/api`, **not** `/debug/api/debug`:
-
-```bash
-curl http://127.0.0.1:8000/debug/api                  # list recent debug entries
-curl http://127.0.0.1:8000/debug/api/summary/{id}
-curl http://127.0.0.1:8000/debug/api/view/{id}
-curl http://127.0.0.1:8000/debug/api/event-stream     # SSE
-```
