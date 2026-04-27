@@ -1,5 +1,6 @@
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
+import {PageToolbar} from '@app-dev-panel/sdk/Component/PageToolbar';
 import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
 import {monoFontFamily} from '@app-dev-panel/sdk/Component/Theme/DefaultTheme';
 import {formatMicrotime} from '@app-dev-panel/sdk/Helper/formatDate';
@@ -479,9 +480,9 @@ export const OpenTelemetryPanel = ({data}: OpenTelemetryPanelProps) => {
 
     return (
         <Box>
-            <SectionTitle action={summaryAction}>
+            <PageToolbar sticky actions={summaryAction}>
                 {`${filteredTraces.length} trace${filteredTraces.length !== 1 ? 's' : ''} — ${spans.length} span${spans.length !== 1 ? 's' : ''}`}
-            </SectionTitle>
+            </PageToolbar>
 
             {filteredTraces.map(([traceId, traceSpans]) => (
                 <TraceGroup key={traceId} traceId={traceId} spans={traceSpans} />

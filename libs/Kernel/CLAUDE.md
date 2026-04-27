@@ -209,6 +209,28 @@ The application code is completely unaware of the interception.
 
 The `ProxyDecoratedCalls` trait remains in Kernel as shared infrastructure for all proxies.
 
+## Project Config
+
+Lives under `src/Project/`. Holds team-wide panel configuration that travels with the
+codebase via VCS (so every developer gets the same Frames + OpenAPI specs after `git pull`).
+
+| Class | Purpose |
+|-------|---------|
+| `ProjectConfig` | Immutable VO with `frames` and `openapi` (both `array<string, string>` of `name → url`). `fromArray()` / `toArray()` round-trip JSON; unknown keys ignored. `withFrames()` / `withOpenApi()` for safe mutation. |
+| `ProjectConfigStorageInterface` | `load()` / `save()` / `getConfigDir()` |
+| `FileProjectConfigStorage` | JSON-file impl. Atomic save via temp + rename. Auto-creates the config directory and writes/updates a `.gitignore` next to `project.json` with `secrets.json` pre-listed (anticipates a future companion file for API keys). |
+
+Adapters wire `FileProjectConfigStorage` to a framework-appropriate path:
+
+- Yii 3: `<root>/config/adp` (alias `@root/config/adp`, override via `app-dev-panel/yii3.projectConfigPath`)
+- Symfony: `%kernel.project_dir%/config/adp` (override via `app_dev_panel.project_config_path`)
+- Laravel: `base_path('config/adp')` (override via `app-dev-panel.project_config_path`)
+- Yii 2: `@app/config/adp` (override via the module's `projectConfigPath` property)
+
+The API endpoint that surfaces this config is `GET/PUT /debug/api/project/config` (see API module).
+The frontend keeps a `localStorage` cache so the panel works offline; the backend file is the
+source of truth and overwrites local state on every successful GET.
+
 ## Service Registry
 
 Tracks external application instances that register with ADP for multi-app inspector proxying.

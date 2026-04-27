@@ -88,10 +88,6 @@ final class QueueCollector implements SummaryCollectorInterface
 
     public function getCollected(): array
     {
-        if (!$this->isActive()) {
-            return [];
-        }
-
         return [
             'pushes' => $this->pushes,
             'statuses' => $this->statuses,
@@ -108,10 +104,6 @@ final class QueueCollector implements SummaryCollectorInterface
 
     public function getSummary(): array
     {
-        if (!$this->isActive()) {
-            return [];
-        }
-
         $duplicates = $this->detectDuplicates($this->messages, static fn(array $message) => $message['messageClass']);
 
         return [

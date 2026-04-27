@@ -161,6 +161,7 @@ export default defineConfig({
               { text: "Yii 2 Adapter", link: "/guide/adapters/yii2" },
               { text: "Yii 3 Adapter", link: "/guide/adapters/yii3" },
               { text: "Laravel Adapter", link: "/guide/adapters/laravel" },
+              { text: "Spiral Adapter", link: "/guide/adapters/spiral" },
             ],
           },
         ],
@@ -276,6 +277,7 @@ export default defineConfig({
                 { text: "Yii 2", link: "/guide/adapters/yii2" },
                 { text: "Yii 3", link: "/guide/adapters/yii3" },
                 { text: "Laravel", link: "/guide/adapters/laravel" },
+                { text: "Spiral", link: "/guide/adapters/spiral" },
               ],
             },
             {
@@ -291,6 +293,7 @@ export default defineConfig({
                 },
                 { text: "Toolbar", link: "/guide/toolbar" },
                 { text: "OpenAPI Viewer", link: "/guide/openapi" },
+                { text: "Project Config", link: "/guide/project-config" },
                 { text: "Frontend Packages", link: "/guide/frontend-packages" },
               ],
             },
@@ -357,6 +360,7 @@ export default defineConfig({
               { text: "Адаптер Yii 2", link: "/ru/guide/adapters/yii2" },
               { text: "Адаптер Yii 3", link: "/ru/guide/adapters/yii3" },
               { text: "Адаптер Laravel", link: "/ru/guide/adapters/laravel" },
+              { text: "Адаптер Spiral", link: "/ru/guide/adapters/spiral" },
             ],
           },
         ],
@@ -502,6 +506,7 @@ export default defineConfig({
                 { text: "Yii 2", link: "/ru/guide/adapters/yii2" },
                 { text: "Yii 3", link: "/ru/guide/adapters/yii3" },
                 { text: "Laravel", link: "/ru/guide/adapters/laravel" },
+                { text: "Spiral", link: "/ru/guide/adapters/spiral" },
               ],
             },
             {
@@ -512,6 +517,10 @@ export default defineConfig({
                 { text: "ИИ чат", link: "/ru/guide/ai-chat" },
                 { text: "Тулбар", link: "/ru/guide/toolbar" },
                 { text: "OpenAPI Viewer", link: "/guide/openapi" },
+                {
+                  text: "Конфигурация проекта",
+                  link: "/ru/guide/project-config",
+                },
                 {
                   text: "Фронтенд-пакеты",
                   link: "/ru/guide/frontend-packages",

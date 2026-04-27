@@ -55,6 +55,7 @@ Every framework adapter, plus the CLI module itself:
 - `app-dev-panel/adapter-symfony`
 - `app-dev-panel/adapter-laravel`
 - `app-dev-panel/adapter-yii2`
+- `app-dev-panel/adapter-spiral`
 
 ## Build Flow (Release Time)
 

@@ -330,6 +330,25 @@ AI-powered chat and analysis integration.
 | DELETE | `/history/{index}` | Delete specific history entry |
 | DELETE | `/history` | Clear all history |
 
+### Project Config API (`/debug/api/project`)
+
+Persists team-shared panel configuration (Frames, OpenAPI specs) into a VCS-tracked
+`config/adp/project.json` so every developer sees the same setup after `git pull`.
+Implemented in `Project/Controller/ProjectController.php`, backed by Kernel's
+`ProjectConfigStorageInterface`. Each adapter wires the storage to a framework-specific
+config dir (see Kernel module CLAUDE.md).
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/config` | Returns `{config: {version, frames, openapi}, configDir}`. `configDir` is the absolute path the user can `git add` |
+| PUT | `/config` | Accepts either a bare `{frames, openapi}` document or the GET wrapper `{config: {...}}`. Malformed entries (non-string keys/values, empty strings) are dropped silently |
+
+The frontend's `Module/Project` keeps a `localStorage` cache via `redux-persist`. On
+boot it dispatches `getProjectConfig` and overwrites the local Frames/OpenAPI slices
+with the server document — except when the server is empty and the local cache has
+data, which fires a one-shot migration `PUT` to seed the new file. User edits to either
+slice are debounced (500 ms) into a single `PUT`.
+
 ### Service Registry API (`/debug/api/services`)
 
 Manages external application registrations for multi-app inspector proxying.

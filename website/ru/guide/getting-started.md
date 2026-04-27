@@ -1,6 +1,6 @@
 ---
 title: Начало работы
-description: "Установка ADP в PHP-приложение. Быстрая настройка для Symfony, Laravel, Yii 3 и Yii 2 через Composer."
+description: "Установка ADP в PHP-приложение. Быстрая настройка для Symfony, Laravel, Yii 3, Yii 2 и Spiral через Composer."
 ---
 
 # Начало работы
@@ -49,6 +49,10 @@ composer require app-dev-panel/adapter-yii3
 ```bash
 composer require app-dev-panel/adapter-laravel
 ```
+== Spiral
+```bash
+composer require app-dev-panel/adapter-spiral
+```
 :::
 
 Каждый адаптер автоматически подтягивает <pkg>app-dev-panel/kernel</pkg> и <pkg>app-dev-panel/api</pkg> как зависимости.
@@ -85,6 +89,18 @@ return [
 // Авторегистрация через package discovery
 // Опционально опубликуйте конфиг:
 // php artisan vendor:publish --tag=app-dev-panel-config
+```
+== Spiral
+```php
+// app/src/Application/Kernel.php — зарегистрируйте Bootloader
+public function defineBootloaders(): array
+{
+    return [
+        // ...
+        \AppDevPanel\Adapter\Spiral\Bootloader\AppDevPanelBootloader::class,
+    ];
+}
+// затем добавьте AdpApiMiddleware + DebugMiddleware в HTTP-конвейер
 ```
 :::
 
@@ -130,6 +146,10 @@ cd playground/yii3-app && ./yii serve --port=8101
 == Laravel
 ```bash
 cd playground/laravel-app && PHP_CLI_SERVER_WORKERS=3 php -S 127.0.0.1:8104 -t public
+```
+== Spiral
+```bash
+cd playground/spiral-app && PHP_CLI_SERVER_WORKERS=3 php -S 127.0.0.1:8105 -t public
 ```
 :::
 

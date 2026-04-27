@@ -1,7 +1,7 @@
 import {ClassName} from '@app-dev-panel/panel/Application/Component/ClassName';
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
-import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
+import {PageToolbar} from '@app-dev-panel/sdk/Component/PageToolbar';
 import {formatMicrotime} from '@app-dev-panel/sdk/Helper/formatDate';
 import {searchVariants} from '@app-dev-panel/sdk/Helper/layoutTranslit';
 import {Box, Chip, Collapse, Icon, IconButton, type Theme, Typography} from '@mui/material';
@@ -148,12 +148,13 @@ export const DeprecationPanel = ({data}: DeprecationPanelProps) => {
 
     return (
         <Box>
-            <SectionTitle
-                action={<FilterInput value={filter} onChange={setFilter} placeholder="Filter deprecations..." />}
-            >{`${filtered.length} deprecation${filtered.length !== 1 ? 's' : ''}`}</SectionTitle>
+            <PageToolbar
+                sticky
+                actions={<FilterInput value={filter} onChange={setFilter} placeholder="Filter deprecations..." />}
+            >{`${filtered.length} deprecation${filtered.length !== 1 ? 's' : ''}`}</PageToolbar>
 
             {presentCategories.length > 1 && (
-                <Box sx={{display: 'flex', flexWrap: 'wrap', gap: 0.75, mb: 2}}>
+                <Box sx={{display: 'flex', flexWrap: 'wrap', gap: 0.75, mb: 2, px: {xs: 1.5, sm: 2.5}, pt: 1.5}}>
                     {presentCategories.map((category) => {
                         const color = categoryColor(category, theme);
                         const isActive = activeCategories.has(category);

@@ -2,7 +2,7 @@ import {JsonRenderer} from '@app-dev-panel/panel/Module/Debug/Component/JsonRend
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {FileLink} from '@app-dev-panel/sdk/Component/FileLink';
 import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
-import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
+import {PageToolbar} from '@app-dev-panel/sdk/Component/PageToolbar';
 import {formatMillisecondsAsDuration} from '@app-dev-panel/sdk/Helper/formatDate';
 import {
     Box,
@@ -380,8 +380,9 @@ export const TemplatePanel = ({data}: TemplatePanelProps) => {
 
     return (
         <Box>
-            <SectionTitle
-                action={
+            <PageToolbar
+                sticky
+                actions={
                     <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
                         {hasDuplicates && (
                             <ToggleButtonGroup
@@ -423,7 +424,7 @@ export const TemplatePanel = ({data}: TemplatePanelProps) => {
                         sx={{fontSize: '10px', height: 18, borderRadius: 1, ml: 1}}
                     />
                 )}
-            </SectionTitle>
+            </PageToolbar>
 
             {viewMode === 'grouped' && groupedView
                 ? groupedView.map((group) => (

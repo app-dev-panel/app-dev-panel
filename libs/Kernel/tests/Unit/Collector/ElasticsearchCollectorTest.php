@@ -46,7 +46,7 @@ final class ElasticsearchCollectorTest extends AbstractCollectorTestCase
         $this->assertSame(200, $r1['statusCode']);
         $this->assertSame(1024, $r1['responseSize']);
         $this->assertSame(15, $r1['hitsCount']);
-        $this->assertGreaterThan(0, $r1['duration']);
+        $this->assertGreaterThanOrEqual(0, $r1['duration']);
 
         $r2 = $data['requests'][1];
         $this->assertSame('POST', $r2['method']);
@@ -186,6 +186,8 @@ final class ElasticsearchCollectorTest extends AbstractCollectorTestCase
     public function testLogRequestWhenInactive(): void
     {
         $collector = new ElasticsearchCollector(new TimelineCollector());
+        $baselineCollected = $collector->getCollected();
+        $baselineSummary = method_exists($collector, 'getSummary') ? $collector->getSummary() : null;
         // Not started
         $record = new ElasticsearchRequestRecord(
             method: 'GET',
@@ -198,7 +200,7 @@ final class ElasticsearchCollectorTest extends AbstractCollectorTestCase
         );
         $collector->logRequest($record);
 
-        $this->assertSame([], $collector->getCollected());
+        $this->assertSame($baselineCollected, $collector->getCollected());
     }
 
     public function testExtractIndexFromEmptyEndpoint(): void

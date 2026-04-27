@@ -7,6 +7,7 @@ import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {FileLink} from '@app-dev-panel/sdk/Component/FileLink';
 import {FilterChip} from '@app-dev-panel/sdk/Component/FilterChip';
 import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
+import {PageToolbar} from '@app-dev-panel/sdk/Component/PageToolbar';
 import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
 import {monoFontFamily} from '@app-dev-panel/sdk/Component/Theme/DefaultTheme';
 import {CollectorsMap} from '@app-dev-panel/sdk/Helper/collectors';
@@ -711,12 +712,15 @@ const HttpClientTabContent = ({data}: HttpClientPanelProps) => {
 
     return (
         <Box>
-            <SectionTitle action={<FilterInput value={filter} onChange={setFilter} placeholder="Filter requests..." />}>
+            <PageToolbar
+                sticky
+                actions={<FilterInput value={filter} onChange={setFilter} placeholder="Filter requests..." />}
+            >
                 {[`${filtered.length} http requests`, `${formatDuration(totalTime)} total`]}
-            </SectionTitle>
+            </PageToolbar>
 
             {(badgeCounts.length > 1 || statusBadgeCounts.length > 1) && (
-                <Box sx={{display: 'flex', flexWrap: 'wrap', gap: 0.75, mb: 2}}>
+                <Box sx={{display: 'flex', flexWrap: 'wrap', gap: 0.75, mb: 2, px: {xs: 1.5, sm: 2.5}, pt: 1.5}}>
                     {statusBadgeCounts.map(([group, count]) => (
                         <FilterChip
                             key={group}

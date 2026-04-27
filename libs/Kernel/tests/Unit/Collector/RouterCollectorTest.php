@@ -73,10 +73,12 @@ final class RouterCollectorTest extends AbstractCollectorTestCase
     public function testCollectMatchTimeWhenInactive(): void
     {
         $collector = new RouterCollector();
+        $baselineCollected = $collector->getCollected();
+        $baselineSummary = method_exists($collector, 'getSummary') ? $collector->getSummary() : null;
         // Not started
         $collector->collectMatchTime(0.5);
 
-        $this->assertSame([], $collector->getCollected());
+        $this->assertSame($baselineCollected, $collector->getCollected());
     }
 
     public function testGetSummaryWithNoMatchedRoute(): void

@@ -542,8 +542,9 @@ export const IndexPage = () => {
                 )}
             </SummaryBar>
 
-            {/* Environment strip */}
-            {(phpVersion || adapter || osName) && (
+            <Box sx={{px: {xs: 1.5, sm: 2.5}}}>
+                {/* Environment strip */}
+                {(phpVersion || adapter || osName) && (
                 <EnvStrip
                     onClick={hasEnvironment ? () => handleCardClick(CollectorsMap.EnvironmentCollector) : undefined}
                 >
@@ -648,6 +649,7 @@ export const IndexPage = () => {
                     </CompactGrid>
                 </>
             )}
+            </Box>
         </Box>
     );
 };

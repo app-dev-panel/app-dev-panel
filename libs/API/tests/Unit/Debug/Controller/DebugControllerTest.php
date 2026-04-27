@@ -8,6 +8,8 @@ use AppDevPanel\Api\Debug\Controller\DebugController;
 use AppDevPanel\Api\Debug\Exception\NotFoundException;
 use AppDevPanel\Api\Debug\Repository\CollectorRepositoryInterface;
 use AppDevPanel\Api\Http\JsonResponseFactoryInterface;
+use AppDevPanel\Kernel\Collector\CollectorTrait;
+use AppDevPanel\Kernel\Collector\HtmlViewProviderInterface;
 use AppDevPanel\Kernel\Storage\StorageInterface;
 use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\Psr7\ServerRequest;
@@ -81,6 +83,30 @@ final class DebugControllerTest extends TestCase
         $response = $controller->view($request);
 
         $this->assertSame(200, $response->getStatusCode());
+    }
+
+    public function testViewRendersHtmlForSsrCollector(): void
+    {
+        $detailData = [
+            DebugControllerTestSsrCollectorStub::class => ['logs' => [['level' => 'info', 'message' => 'Hi']]],
+        ];
+
+        $repository = $this->createMock(CollectorRepositoryInterface::class);
+        $repository->expects($this->once())->method('getDetail')->with('123')->willReturn($detailData);
+
+        $controller = $this->createController($repository);
+        $request = new ServerRequest('GET', '/test')
+            ->withAttribute('id', '123')
+            ->withQueryParams(['collector' => DebugControllerTestSsrCollectorStub::class]);
+        $response = $controller->view($request);
+
+        $this->assertSame(200, $response->getStatusCode());
+        $body = (string) $response->getBody();
+        $payload = json_decode($body, true);
+        $this->assertIsArray($payload);
+        $this->assertArrayHasKey('__html', $payload);
+        $this->assertStringContainsString('SSR-LOGS-1', $payload['__html']);
+        $this->assertStringContainsString('Hi', $payload['__html']);
     }
 
     public function testViewWithCollectorNotFound(): void
@@ -313,5 +339,26 @@ final class DebugControllerTest extends TestCase
         $psr17 = new Psr17Factory();
 
         return new DebugController($this->createJsonResponseFactory(), $repository, $storage, $psr17);
+    }
+}
+
+/**
+ * Tiny SSR collector used to drive {@see DebugControllerTest::testViewRendersHtmlForSsrCollector}.
+ * Its view template lives at {@see __DIR__}/Fixture/ssr-collector.php.
+ */
+final class DebugControllerTestSsrCollectorStub implements HtmlViewProviderInterface
+{
+    use CollectorTrait;
+
+    public function getCollected(): array
+    {
+        return [];
+    }
+
+    private function reset(): void {}
+
+    public static function getViewPath(): string
+    {
+        return __DIR__ . '/Fixture/ssr-collector.php';
     }
 }

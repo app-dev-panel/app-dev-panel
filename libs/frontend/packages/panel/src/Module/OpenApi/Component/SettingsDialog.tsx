@@ -1,8 +1,10 @@
 import {addApiEntry, deleteApiEntry, useOpenApiEntries} from '@app-dev-panel/panel/Module/OpenApi/Context/Context';
 import {useSelector} from '@app-dev-panel/panel/store';
+import {useGetProjectConfigQuery} from '@app-dev-panel/sdk/API/Project/Project';
 import {Close, Remove} from '@mui/icons-material';
 import CheckIcon from '@mui/icons-material/Check';
 import {
+    Alert,
     FormHelperText,
     IconButton,
     List,
@@ -28,6 +30,7 @@ export const SettingsDialog = (props: SettingsDialogProps) => {
     const dispatch = useDispatch();
 
     const apiEntries = useOpenApiEntries();
+    const {data: projectConfig, isError: projectConfigUnreachable} = useGetProjectConfigQuery();
 
     const handleClose = () => {
         props.onClose();
@@ -91,6 +94,17 @@ export const SettingsDialog = (props: SettingsDialogProps) => {
                 <FormHelperText>
                     Enter the full path to the Open API JSON schema (e.g. http://localhost/docs/openapi.json)
                 </FormHelperText>
+                {projectConfig?.configDir && (
+                    <Alert severity="info" sx={{mt: 2}}>
+                        Synced to <code>{projectConfig.configDir}/project.json</code>. Commit it to share with your
+                        team.
+                    </Alert>
+                )}
+                {projectConfigUnreachable && (
+                    <Alert severity="warning" sx={{mt: 2}}>
+                        Backend unreachable — entries are saved locally and will sync when the connection is restored.
+                    </Alert>
+                )}
             </DialogContent>
             <DialogActions sx={{px: 3, py: 1.5}}>
                 <Button variant="text" color="inherit" onClick={handleClose} sx={{color: 'text.secondary'}}>

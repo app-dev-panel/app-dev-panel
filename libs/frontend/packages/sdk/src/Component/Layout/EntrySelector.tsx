@@ -12,7 +12,7 @@ import {formatBytes} from '@app-dev-panel/sdk/Helper/formatBytes';
 import {formatDate} from '@app-dev-panel/sdk/Helper/formatDate';
 import {fuzzyMatch, type FuzzyMatch} from '@app-dev-panel/sdk/Helper/fuzzyMatch';
 import {searchVariants} from '@app-dev-panel/sdk/Helper/layoutTranslit';
-import {Box, Chip, Icon, Popover, type Theme, Typography} from '@mui/material';
+import {Box, Chip, Icon, Popover, type Theme, Typography, useMediaQuery} from '@mui/material';
 import {styled, useTheme} from '@mui/material/styles';
 import React, {useCallback, useEffect, useRef, useState} from 'react';
 
@@ -112,6 +112,7 @@ const EntryRow = styled(Box, {shouldForwardProp: (p) => p !== 'active' && p !== 
     fontSize: '13px',
     backgroundColor: highlighted ? theme.palette.action.selected : active ? theme.palette.primary.light : 'transparent',
     '&:hover': {backgroundColor: theme.palette.action.hover},
+    [theme.breakpoints.down('sm')]: {gap: theme.spacing(0.75), padding: theme.spacing(1, 1.25)},
 }));
 
 const MethodLabel = styled('span')({fontWeight: 600, fontSize: '11px', minWidth: 40});
@@ -131,6 +132,7 @@ const TimeLabel = styled('span')(({theme}) => ({
     color: theme.palette.text.disabled,
     flexShrink: 0,
     whiteSpace: 'nowrap',
+    [theme.breakpoints.down('sm')]: {display: 'none'},
 }));
 
 const statusColor = (status: number, theme: Theme): string => {
@@ -296,6 +298,7 @@ export const EntrySelector = ({
     onAllClick,
 }: EntrySelectorProps) => {
     const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
     const [filter, setFilter] = useState('');
     const inputRef = useRef<HTMLInputElement>(null);
     const listRef = useRef<HTMLDivElement>(null);
@@ -428,25 +431,42 @@ export const EntrySelector = ({
     return (
         <Popover
             open={open}
-            anchorEl={anchorEl}
+            anchorEl={isMobile ? undefined : anchorEl}
+            anchorReference={isMobile ? 'anchorPosition' : 'anchorEl'}
+            anchorPosition={isMobile ? {top: 48, left: 0} : undefined}
             onClose={handleClose}
             anchorOrigin={{vertical: 'bottom', horizontal: 'left'}}
             transformOrigin={{vertical: 'top', horizontal: 'left'}}
+            marginThreshold={isMobile ? 0 : 16}
             slotProps={{
                 paper: {
-                    sx: {
-                        width: anchorEl ? anchorEl.offsetWidth : 520,
-                        minWidth: 420,
-                        maxHeight: 440,
-                        mt: 0.5,
-                        borderRadius: 1.5,
-                        border: 1,
-                        borderColor: 'divider',
-                        boxShadow: '0 8px 32px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.08)',
-                        backdropFilter: 'blur(12px)',
-                        backgroundColor: (t) =>
-                            t.palette.mode === 'dark' ? 'rgba(30, 41, 59, 0.92)' : 'rgba(255, 255, 255, 0.92)',
-                    },
+                    sx: isMobile
+                        ? {
+                              width: '100vw',
+                              maxWidth: '100vw',
+                              maxHeight: 'calc(100vh - 48px)',
+                              borderRadius: 0,
+                              borderTop: 1,
+                              borderColor: 'divider',
+                              borderBottom: 1,
+                              boxShadow: '0 8px 24px rgba(0,0,0,0.18)',
+                              backdropFilter: 'blur(12px)',
+                              backgroundColor: (t) =>
+                                  t.palette.mode === 'dark' ? 'rgba(30, 41, 59, 0.96)' : 'rgba(255, 255, 255, 0.96)',
+                          }
+                        : {
+                              width: anchorEl ? anchorEl.offsetWidth : 520,
+                              minWidth: 420,
+                              maxHeight: 440,
+                              mt: 0.5,
+                              borderRadius: 1.5,
+                              border: 1,
+                              borderColor: 'divider',
+                              boxShadow: '0 8px 32px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.08)',
+                              backdropFilter: 'blur(12px)',
+                              backgroundColor: (t) =>
+                                  t.palette.mode === 'dark' ? 'rgba(30, 41, 59, 0.92)' : 'rgba(255, 255, 255, 0.92)',
+                          },
                 },
             }}
         >
@@ -498,7 +518,7 @@ export const EntrySelector = ({
                 filterState={filterState}
                 onChange={setFilterState}
             />
-            <Box ref={listRef} sx={{overflowY: 'auto', maxHeight: 360}}>
+            <Box ref={listRef} sx={{overflowY: 'auto', maxHeight: isMobile ? 'calc(100vh - 140px)' : 360}}>
                 {matched.length === 0 && <EmptyState icon="search_off" title={`No entries match "${filter}"`} />}
                 {matched.map(({entry, indices}, idx) => {
                     const active = entry.id === currentEntryId;

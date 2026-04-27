@@ -27,9 +27,6 @@ final class ConsoleAppInfoCollector implements SummaryCollectorInterface
 
     public function getCollected(): array
     {
-        if (!$this->isActive()) {
-            return [];
-        }
         return [
             'applicationProcessingTime' =>
                 $this->applicationProcessingTimeStopped - $this->applicationProcessingTimeStarted,
@@ -80,9 +77,6 @@ final class ConsoleAppInfoCollector implements SummaryCollectorInterface
 
     public function getSummary(): array
     {
-        if (!$this->isActive()) {
-            return [];
-        }
         return [
             'console' => [
                 'adapter' => $this->adapterName,
