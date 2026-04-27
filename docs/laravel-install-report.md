@@ -1,9 +1,13 @@
-# Laravel ADP Install Report
+# Laravel ADP Install Report (v0.2 from Packagist)
 
-Practical installation walk-through of `app-dev-panel/adapter-laravel` on a fresh
-Laravel 13.6.0 application, following the docs at `website/guide/adapters/laravel.md`
-and `website/guide/getting-started.md`. The adapter is installed **from Packagist**
-(not from the local monorepo).
+End-to-end walk-through of installing `app-dev-panel/adapter-laravel` v0.2 from
+Packagist on a fresh Laravel 13.6.0 application, following
+`website/guide/adapters/laravel.md` and `website/guide/getting-started.md`.
+
+This run is performed **after** PR #248 (frontend-assets package) and PR #264
+(refactor: drop AdpAssetsController, web server serves statics) landed in
+master. Master has the right architecture but the Packagist v0.2 release
+predates both PRs, so the user-visible flow on a fresh install is broken.
 
 ## Environment
 
@@ -14,184 +18,229 @@ and `website/guide/getting-started.md`. The adapter is installed **from Packagis
 | Composer | 2.8.12 |
 | Laravel | 13.6.0 (fresh `laravel/laravel` skeleton) |
 | ADP adapter | `app-dev-panel/adapter-laravel` **v0.2** (Packagist) |
-| Kernel/API/Cli/Mcp | v0.2 (pulled transitively) |
+| Kernel/API/Cli/McpServer | v0.2 (transitive) |
+| `app-dev-panel/frontend-assets` | **NOT installed** — v0.2 of adapter-laravel does not require it |
 
-## What I did (exactly as the docs say)
+## TL;DR — recommended install on Packagist v0.2
 
 ```bash
 # 1. Fresh Laravel
-composer create-project laravel/laravel laravel-adp-test
+composer create-project laravel/laravel my-app
+cd my-app
 
-# 2. Install ADP adapter from Packagist
-cd laravel-adp-test
-composer require app-dev-panel/adapter-laravel         # -> pulls v0.2.0
+# 2. ADP adapter (auto-discovered via package discovery, no manual provider)
+composer require app-dev-panel/adapter-laravel
 
-# 3. Publish config (as per website/guide/adapters/laravel.md)
-php artisan vendor:publish \
-  --provider="AppDevPanel\Adapter\Laravel\AppDevPanelServiceProvider"
+# 3. Publish config
+php artisan vendor:publish --tag=app-dev-panel-config
 
-# 4. Run the app
-PHP_CLI_SERVER_WORKERS=4 php -S 127.0.0.1:8555 -t public
-```
-
-Auto-discovery worked, no manual service-provider registration was needed.
-`APP_DEBUG=true` on a fresh Laravel install is enough to enable ADP
-(`APP_DEV_PANEL_ENABLED` falls back to `APP_DEBUG`).
-
-## Verification
-
-- `GET /` → Laravel welcome page, **toolbar injected** (bottom-right).
-- `GET /debug` → ADP SPA loads, sidebar (Home/Debug/Inspector/LLM/Open API/Frames),
-  Debug+Inspector both show "Connected", debug entries list populated.
-- `GET /debug/api` → JSON debug index with 28+ entries; all default collectors
-  registered (Timeline, Environment, Log, Event, Service, HttpClient, VarDumper,
-  Deprecation, Database, Cache, Mailer, Queue, OpenTelemetry, Assets, Template,
-  Redis, Elasticsearch, Request, WebAppInfo, …).
-- `storage/debug/2026-04-24/…` files are written per request.
-
-## Problems encountered
-
-### 1. `frontend:update download` breaks on v0.2 release assets — BUG
-
-The docs say nothing about downloading the frontend, and the service provider's
-auto-detection logic expects `public/vendor/app-dev-panel/bundle.js` to exist.
-The only way to install it locally is the Artisan command shipped by the
-adapter:
-
-```bash
-php artisan frontend:update download --path=public/vendor/app-dev-panel
-```
-
-On v0.2 this fails with:
-
-```
-[ERROR] No "frontend-dist.zip" asset found in latest release "v0.2".
-Available assets:
-  - panel-dist.tar.gz
-  - toolbar-dist.tar.gz
-```
-
-The command hard-codes `frontend-dist.zip` but the GitHub release was split
-into two tarballs (`panel-dist.tar.gz` + `toolbar-dist.tar.gz`). See
-`libs/Cli/src/Command/FrontendUpdateCommand.php` — this is **broken** in
-the published package.
-
-**Workaround:** download the tarballs manually:
-
-```bash
+# 4. WORKAROUND (will not be needed once v0.3 is tagged):
+#    download panel + toolbar from the GitHub release directly
 mkdir -p public/vendor/app-dev-panel/toolbar
 curl -sSL https://github.com/app-dev-panel/app-dev-panel/releases/download/v0.2/panel-dist.tar.gz \
   | tar -xz -C public/vendor/app-dev-panel --strip-components=1
 curl -sSL https://github.com/app-dev-panel/app-dev-panel/releases/download/v0.2/toolbar-dist.tar.gz \
   | tar -xz -C public/vendor/app-dev-panel/toolbar --strip-components=1
+
+# 5. Boot
+PHP_CLI_SERVER_WORKERS=4 php -S 127.0.0.1:8000 -t public
+# → http://127.0.0.1:8000          : your app, with the ADP toolbar pinned bottom-right
+# → http://127.0.0.1:8000/debug    : the panel SPA, fully populated
 ```
 
-Once this is done the service provider's auto-detection kicks in and the
-HTML switches from CDN URLs (`https://app-dev-panel.github.io/app-dev-panel/…`)
-to local `/vendor/app-dev-panel/bundle.js` + `/vendor/app-dev-panel/toolbar/bundle.js`.
+The `vendor/app-dev-panel/bundle.js` heuristic in `AppDevPanelServiceProvider`
+flips `panel.static_url` to `/vendor/app-dev-panel` once that file exists, so
+the manual extraction in step 4 is enough — no further config changes.
 
-### 2. Docs don't mention the frontend distribution at all
+## What works out of the box
 
-`website/guide/adapters/laravel.md` stops at "publish the config" and never
-tells the user where the panel JS/CSS come from. What actually happens out of
-the box is that the SPA HTML references:
+- `composer require` succeeds, package auto-discovered via
+  `extra.laravel.providers`. No manual provider registration.
+- `vendor:publish --tag=app-dev-panel-config` creates
+  `config/app-dev-panel.php`.
+- `APP_DEBUG=true` (Laravel default) is enough — `enabled` falls back to it.
+- All 25+ collectors register: Timeline, Environment, Filesystem/Http stream,
+  Validator, Translator, Authorization, Exception, Log, Event, Service,
+  HttpClient, VarDumper, Deprecation, Database, Cache, Mailer, Queue,
+  OpenTelemetry, AssetBundle, Template, Redis, Elasticsearch, Request,
+  WebAppInfo. Visible at `GET /debug/api`.
+- Per-request `summary.json` written under `storage/debug/<date>/<id>/`.
+- `GET /debug/api` returns the JSON index (24+ entries after a few hits).
 
-```html
-<script type="module" src="https://app-dev-panel.github.io/app-dev-panel/bundle.js"></script>
-<link rel="stylesheet"  href="https://app-dev-panel.github.io/app-dev-panel/bundle.css" />
+## Issues encountered
+
+### 1. `app-dev-panel/frontend-assets` not pulled in by Packagist v0.2 — **CRITICAL**
+
+`composer require app-dev-panel/adapter-laravel` brings:
+
+```
+app-dev-panel/adapter-laravel v0.2
+app-dev-panel/api             v0.2
+app-dev-panel/cli             v0.2
+app-dev-panel/kernel          v0.2
+app-dev-panel/mcp-server      v0.2
 ```
 
-This is fine as long as the user has outbound HTTPS to GitHub Pages. It fails
-silently in environments where:
+— but **not** `app-dev-panel/frontend-assets`. The v0.2 tag was cut before
+PR #248 added that package to every adapter's `require`. Confirmed by reading
+`vendor/app-dev-panel/adapter-laravel/composer.json`:
 
-- outbound HTTPS is blocked (corporate proxy, offline dev),
-- the TLS CA bundle is outdated (this test environment hit
-  `net::ERR_CERT_AUTHORITY_INVALID`),
-- the page is viewed over `http://` from an IP that browsers now class as
-  non-secure context for mixed content.
-
-When that happens the toolbar markup is injected but the JS never executes —
-so the toolbar is invisible and the user has no idea why. Docs should spell
-out: *"for offline/air-gapped installs, run `php artisan frontend:update
-download …`"* — and that command needs to be fixed first (see #1).
-
-### 3. `vendor:publish --provider=…` does publish the config, but the docs
-imply a `--tag=app-dev-panel-config` shortcut in getting-started.md
-
-`website/guide/getting-started.md:87` has:
-
-```php
-// php artisan vendor:publish --tag=app-dev-panel-config
-```
-
-This tag **does work** (the service provider registers it at `boot()`), but
-the two docs pages suggest two different incantations. Minor — not a bug,
-just confusing for first-time users.
-
-### 4. Packagist release is empty `resources/dist/`
-
-The Packagist tarball for `app-dev-panel/adapter-laravel` v0.2 ships an empty
-`resources/dist/` with just `.gitignore` + `.gitkeep`. That's why the Laravel
-`boot()` asset-publishing block is a no-op:
-
-```php
-// AppDevPanelServiceProvider.php
-$assetSource = __DIR__ . '/../resources/dist';
-if (is_dir($assetSource) && file_exists($assetSource . '/bundle.js')) {
-    $this->publishes([...], ['app-dev-panel-assets', 'laravel-assets']);
+```json
+"require": {
+    "php": "^8.4",
+    "app-dev-panel/api": "*",
+    "app-dev-panel/kernel": "*",
+    "app-dev-panel/cli": "*",
+    ...
 }
 ```
 
-The condition is false on a Packagist install, so `php artisan vendor:publish
---tag=app-dev-panel-assets` does nothing and the user has no in-package fallback
-when the CDN is unreachable. Combined with #1 this means a fresh install is
-effectively CDN-only.
+Consequence: the new `AppDevPanelServiceProvider::resolveAssetSource()` chain
+falls all the way through to `PanelConfig::DEFAULT_STATIC_URL` (the GitHub
+Pages CDN). Both panel and toolbar URLs point at
+`https://app-dev-panel.github.io/app-dev-panel/...`. In any environment
+without outbound HTTPS, with a stale CA bundle, or with mixed-content
+restrictions, the panel renders blank and the toolbar never paints.
 
-### 5. `/debug/api/debug` returns 404 — confusing default for exploring the API
+In this run the headless browser hit
+`net::ERR_CERT_AUTHORITY_INVALID` for every CDN asset and both `/` and
+`/debug` came back blank — see `01-home-cdn-fail.png` /
+`02-debug-cdn-fail.png`.
 
-`curl http://127.0.0.1:8555/debug/api/debug` → `{"error":"Not found.","success":false}`.
-The actual index endpoint is `/debug/api` (no `/debug` suffix) —
-see `libs/API/src/ApiRoutes.php:43`:
+**Fix:** cut a v0.3 (or whatever the next tag is) so Packagist serves the
+master `composer.json` that already lists `app-dev-panel/frontend-assets`.
+Until then the workaround in the TL;DR is the only reliable path.
+
+### 2. `frontend:update download` is unusable on this release
+
+The CLI's recovery path is `php artisan frontend:update download --path=...`,
+which is supposed to fetch the latest release from GitHub and unpack it. Two
+problems:
+
+a. **GitHub API rate limit on first call.** `FrontendUpdateCommand` always
+   hits `GET https://api.github.com/repos/.../releases/latest`. Anonymous
+   requests share the runner's outbound IP, which is rate-limited:
+
+   ```
+   [ERROR] Failed to fetch release info:
+   GET https://api.github.com/repos/app-dev-panel/app-dev-panel/releases/latest
+   resulted in a 403 Forbidden response:
+   {"message":"API rate limit exceeded for <ip>. ..."}
+   ```
+
+   Reproduced two consecutive runs from two different IPs. No retry, no
+   `Authorization: Bearer $GITHUB_TOKEN` env support — fail closed.
+
+b. **The asset name does not exist.** Even if the API call succeeds, the
+   command looks for an asset literally named `frontend-dist.zip`:
+
+   ```
+   private const ASSET_NAME = 'frontend-dist.zip';
+   ```
+
+   The v0.2 release publishes only `panel-dist.tar.gz` and
+   `toolbar-dist.tar.gz` (verified by hitting both URLs):
+
+   ```
+   panel-dist.tar.gz   -> HTTP 200
+   toolbar-dist.tar.gz -> HTTP 200
+   frontend-dist.zip   -> HTTP 404
+   ```
+
+   The matching CI step (`npm-publish.yml: Package panel + toolbar as
+   frontend-dist.zip`) was added in master but, again, only takes effect on
+   the next tag.
+
+**Fix:** add a token-aware retry path in `FrontendUpdateCommand` and either
+(a) pin the asset list to the actual release (`panel-dist.tar.gz` +
+`toolbar-dist.tar.gz`) or (b) document `frontend-dist.zip` as a hard
+requirement and tag a release that produces it.
+
+### 3. Adapter docs still link to the old `--provider=` publish form
+
+`website/guide/adapters/laravel.md:25-27` (master HEAD) still shows:
 
 ```
-GET /debug/api                        -> DebugController::index
-GET /debug/api/summary/{id}           -> DebugController::summary
-GET /debug/api/view/{id}              -> DebugController::view
+php artisan vendor:publish --provider="AppDevPanel\Adapter\Laravel\AppDevPanelServiceProvider"
 ```
 
-It's an easy stumbling block when poking at the API manually. Docs could
-include a quick curl example.
+while `getting-started.md` shows the canonical `--tag=app-dev-panel-config`.
+Both work, but presenting two recipes side-by-side is confusing for first-time
+installs. Fold the long form into a single canonical `--tag=app-dev-panel-config`.
 
-## Files produced by this test
+### 4. Adapter docs do not mention the frontend resolution chain at all
 
-Screenshots are gitignored repo-wide (`screenshots/` rule in `.gitignore`),
-so they are not committed. They live in `/tmp/adp-shots/` on the test box:
+The Laravel page (`website/guide/adapters/laravel.md`) ends at "Database
+Inspector". A reader has no way to know:
+
+- the bundle is supposed to come from `app-dev-panel/frontend-assets`
+  (transitive on a future release),
+- the SPA at `/debug` will fall back to the GitHub Pages CDN if the bundle is
+  missing,
+- `panel.static_url` / `toolbar.static_url` overrides exist in the published
+  config.
+
+Add a "Frontend Assets" section spelling out the three-tier resolution
+(`public/vendor/app-dev-panel` → `vendor/app-dev-panel/frontend-assets/dist`
+→ CDN), the override knobs, and the manual install fallback.
+
+### 5. `GET /debug/api/debug` returns 404 — easy stumbling block
+
+The debug-API root is at `/debug/api`, not `/debug/api/debug`. New users
+trying to "look at the debug data" via curl land on a `Not found.` JSON.
+
+```
+$ curl http://127.0.0.1:8000/debug/api/debug
+{"error":"Not found.","success":false}
+
+$ curl http://127.0.0.1:8000/debug/api
+{"id":null,"data":[{"id":"...","collectors":[...]}]}    # ← actual index
+```
+
+Worth a one-liner in the adapter doc with the canonical curl examples
+(`/debug/api`, `/debug/api/summary/{id}`, `/debug/api/view/{id}`,
+`/debug/api/event-stream`).
+
+## Verification (after step 4 workaround)
+
+```
+$ curl -sS http://127.0.0.1:8000/debug | grep bundle.
+    <link rel="stylesheet" href="/vendor/app-dev-panel/bundle.css" />
+    <script type="module" crossorigin src="/vendor/app-dev-panel/bundle.js"></script>
+
+$ curl -sS http://127.0.0.1:8000/ | grep -E "toolbar/bundle"
+<link rel="stylesheet" href="/vendor/app-dev-panel/toolbar/bundle.css" />
+<script type="module" crossorigin src="/vendor/app-dev-panel/toolbar/bundle.js"></script>
+
+$ curl -sS -o /dev/null -w "%{http_code}\n" http://127.0.0.1:8000/vendor/app-dev-panel/bundle.js
+200
+
+$ curl -sS -o /dev/null -w "%{http_code}\n" http://127.0.0.1:8000/vendor/app-dev-panel/toolbar/bundle.js
+200
+```
+
+Screenshots (not committed — `screenshots/` is gitignored project-wide):
 
 | Path | What |
 | --- | --- |
-| `/tmp/adp-shots/01-homepage-with-toolbar.png` | Laravel welcome page + ADP toolbar (bottom-right) |
-| `/tmp/adp-shots/02-debug-panel.png` | `/debug` SPA — Home dashboard, debug/inspector connected, entries list |
-| `/tmp/adp-shots/03-toolbar-closeup.png` | Zoomed toolbar widget (🐤 200 72ms) |
-| `/tmp/adp-shots/06-debug-menu-open.png` | `/debug` SPA with the top entry-picker dropdown open (30 entries) |
+| `/tmp/laravel-demo-shots/01-home-cdn-fail.png` | Default install: Laravel welcome page renders, ADP toolbar markup is injected but JS never loads (CDN cert error) |
+| `/tmp/laravel-demo-shots/02-debug-cdn-fail.png` | Default install: `/debug` route returns the SPA shell, but `bundle.js` never loads → blank page |
+| `/tmp/laravel-demo-shots/03-home-with-toolbar.png` | After workaround: Laravel home + ADP toolbar pinned bottom-right (🐤 200 64ms) |
+| `/tmp/laravel-demo-shots/03b-toolbar-zoom.png` | Toolbar widget closeup |
+| `/tmp/laravel-demo-shots/04-debug-panel.png` | After workaround: `/debug` SPA — Home, Debug, Inspector, LLM, Open API, Frames sidebar; Debug + Inspector both "Connected"; 24 entries listed |
 
-The test project itself lives at `/home/user/test-installation/laravel-adp-test/`
-(outside this repo — not committed).
+## Action items for the project (priority order)
 
-## Summary
+1. **Cut a release** that includes the master `composer.json` with the
+   `frontend-assets` dependency. This single change makes the happy path work
+   for everyone. (Closes #1, partially closes #2.)
+2. **Fix `FrontendUpdateCommand`** to (a) accept `GITHUB_TOKEN` env for the
+   API call, (b) match the assets the release pipeline actually publishes.
+   Otherwise this CLI is dead code. (Closes #2.)
+3. **Update `website/guide/adapters/laravel.md`** with a "Frontend Assets"
+   section + curl examples + canonical `vendor:publish` form.
+   (Closes #3, #4, #5.)
 
-Happy-path install works: one `composer require` + one `vendor:publish` and
-the adapter is live with auto-discovery. The toolbar is injected, the debug
-panel renders, the collectors fire and write to `storage/debug/…`.
+## Test project location
 
-The rough edges are all around **frontend asset delivery**:
-- no docs about where the JS comes from,
-- CDN is the only default,
-- the Artisan command that's supposed to localise the assets is broken in v0.2
-  because the release was renamed from `frontend-dist.zip` to
-  `panel-dist.tar.gz` + `toolbar-dist.tar.gz`,
-- the package ships an empty `resources/dist/`.
-
-Fixing `FrontendUpdateCommand` to understand the new release layout (or
-shipping the compiled panel/toolbar inside the Packagist tarball) plus a short
-"offline / air-gapped install" section in the Laravel adapter docs would clear
-the whole class of issues.
+`/home/user/test-installation/laravel-adp-demo/` (not committed, lives outside the repo).
