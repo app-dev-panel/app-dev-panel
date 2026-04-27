@@ -3,19 +3,19 @@
 declare(strict_types=1);
 
 /**
- * SSR Log Panel — server-rendered fragment loaded into the ADP debug panel.
+ * SSR Log Panel — server-rendered fragment.
  *
- * The template emits **only structure + semantic classes**. All visual styling
- * (typography, colors, spacing, dark mode) lives on the frontend in
- * `packages/panel/src/Module/Debug/Component/Panel/SsrPanel.tsx`, which scopes
- * its rules to `.adp-ssr-panel` and reads `data-level` to color severity badges
- * via MUI theme tokens.
+ * Uses **only** the generic `adp-ui-*` UI kit shipped by `SsrPanel` (see
+ * `libs/frontend/packages/panel/src/Module/Debug/Component/Panel/SsrPanel.uiKit.ts`).
+ * The template carries no colors and no theme-mode awareness — severity tinting
+ * is driven by `data-severity="…"` attributes, layout numbers that are genuinely
+ * log-specific (the time column width, the indent of the detail block) ride on
+ * inline `style` attributes.
  *
  * @var list<array{time: float|int, level: string, message: mixed, context: mixed, line: string}> $data
  */
 
 $logs = $data;
-
 $severityOrder = ['emergency', 'alert', 'critical', 'error', 'warning', 'notice', 'info', 'debug'];
 
 $formatMicrotime = static function (float|int $ts): string {
@@ -37,30 +37,31 @@ foreach ($logs as $entry) {
     $counts[$level] = ($counts[$level] ?? 0) + 1;
 }
 $presentLevels = array_values(array_filter($severityOrder, static fn(string $l): bool => isset($counts[$l])));
+
+$h = static fn(string $s): string => htmlspecialchars($s, ENT_QUOTES, 'UTF-8');
 ?>
-<div class="adp-ssr-panel adp-ssr-logs">
-    <div class="adp-ssr-logs__header">
-        <h2 class="adp-ssr-logs__title">
+<div class="adp-ui-stack">
+    <div class="adp-ui-row adp-ui-row--center adp-ui-row--between">
+        <span class="adp-ui-text-secondary adp-ui-text-strong">
             <?= count($logs) ?> log <?= count($logs) === 1 ? 'entry' : 'entries' ?>
-        </h2>
-        <span class="adp-ssr-logs__badge">SSR · backend-rendered</span>
+        </span>
+        <span class="adp-ui-badge">SSR · backend-rendered</span>
     </div>
 
     <?php if (count($presentLevels) > 1): ?>
-        <div class="adp-ssr-logs__chips">
+        <div class="adp-ui-row adp-ui-row--wrap" style="gap: 6px;">
             <?php foreach ($presentLevels as $level): ?>
-                <span class="adp-ssr-logs__chip" data-level="<?= htmlspecialchars($level, ENT_QUOTES, 'UTF-8') ?>">
-                    <?= htmlspecialchars(strtoupper($level), ENT_QUOTES, 'UTF-8') ?>
-                    (<?= (int) $counts[$level] ?>)
+                <span class="adp-ui-chip" data-severity="<?= $h($level) ?>">
+                    <?= $h(strtoupper($level)) ?> (<?= (int) $counts[$level] ?>)
                 </span>
             <?php endforeach; ?>
         </div>
     <?php endif; ?>
 
     <?php if ($logs === []): ?>
-        <div class="adp-ssr-logs__empty">No logs were collected for this entry.</div>
+        <div class="adp-ui-empty">No logs were collected for this entry.</div>
     <?php else: ?>
-        <div class="adp-ssr-logs__list">
+        <div class="adp-ui-card adp-ui-list">
             <?php foreach ($logs as $entry):
                 $level = (string) ($entry['level'] ?? 'debug');
                 $time = (float) ($entry['time'] ?? 0);
@@ -68,46 +69,36 @@ $presentLevels = array_values(array_filter($severityOrder, static fn(string $l):
                 $context = $entry['context'] ?? null;
                 $hasDetails = $line !== '' || is_array($context) && $context !== [];
                 ?>
-                <details class="adp-ssr-logs__row">
-                    <summary class="adp-ssr-logs__summary">
-                        <span class="adp-ssr-logs__time"><?= htmlspecialchars(
-                            $formatMicrotime($time),
-                            ENT_QUOTES,
-                            'UTF-8',
-                        ) ?></span>
-                        <span class="adp-ssr-logs__level" data-level="<?= htmlspecialchars(
-                            $level,
-                            ENT_QUOTES,
-                            'UTF-8',
-                        ) ?>">
-                            <?= htmlspecialchars(strtoupper($level), ENT_QUOTES, 'UTF-8') ?>
+                <details class="adp-ui-details">
+                    <summary>
+                        <span class="adp-ui-mono adp-ui-text-disabled" style="width: 110px; flex-shrink: 0; padding-top: 2px; font-size: 11px;">
+                            <?= $h($formatMicrotime($time)) ?>
                         </span>
-                        <span class="adp-ssr-logs__message"><?= htmlspecialchars(
-                            $formatMessage($entry['message'] ?? ''),
-                            ENT_QUOTES,
-                            'UTF-8',
-                        ) ?></span>
-                        <span class="adp-ssr-logs__caret" aria-hidden="true"><?= $hasDetails
-                            ? '&#9662;'
-                            : '&middot;' ?></span>
+                        <span class="adp-ui-chip adp-ui-chip--filled" data-severity="<?= $h(
+                            $level,
+                        ) ?>" style="min-width: 64px; justify-content: center; height: 20px; font-size: 10px; margin-top: 1px;">
+                            <?= $h(strtoupper($level)) ?>
+                        </span>
+                        <span class="adp-ui-fill" style="font-size: 13px;">
+                            <?= $h($formatMessage($entry['message'] ?? '')) ?>
+                        </span>
+                        <span class="adp-ui-caret" aria-hidden="true" style="font-size: 12px; padding-top: 3px;">
+                            <?= $hasDetails ? '&#9662;' : '&middot;' ?>
+                        </span>
                     </summary>
                     <?php if ($hasDetails): ?>
-                        <div class="adp-ssr-logs__detail">
+                        <div class="adp-ui-card-section adp-ui-card--inset" style="padding-left: 134px; border-top: 1px solid; border-color: inherit; font-size: 12px;">
                             <?php if ($line !== ''): ?>
-                                <div class="adp-ssr-logs__detail-line"><?= htmlspecialchars(
-                                    $line,
-                                    ENT_QUOTES,
-                                    'UTF-8',
-                                ) ?></div>
+                                <div class="adp-ui-mono" style="color: var(--adp-sev, inherit); margin-bottom: 8px; word-break: break-all;" data-severity="notice">
+                                    <?= $h($line) ?>
+                                </div>
                             <?php endif; ?>
                             <?php if (is_array($context) && $context !== []): ?>
-                                <pre class="adp-ssr-logs__detail-context"><?= htmlspecialchars(
+                                <pre class="adp-ui-code"><?= $h(
                                     json_encode(
                                         $context,
                                         JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES,
                                     ) ?: '',
-                                    ENT_QUOTES,
-                                    'UTF-8',
                                 ) ?></pre>
                             <?php endif; ?>
                         </div>
