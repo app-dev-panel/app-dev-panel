@@ -11,7 +11,7 @@ export const Layout = () => {
     const connected = status?.connected ?? false;
 
     return (
-        <Box sx={{display: 'flex', flexDirection: 'column', gap: 3, p: {xs: 1.5, sm: 3.5}}}>
+        <Box sx={{display: 'flex', flexDirection: 'column', gap: 3}}>
             <ConnectionCard />
             {connected && (
                 <Box>
