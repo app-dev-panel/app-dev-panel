@@ -7,6 +7,7 @@ import {
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {JsonRenderer} from '@app-dev-panel/sdk/Component/JsonRenderer';
 import {PageHeader} from '@app-dev-panel/sdk/Component/PageHeader';
+import {PageToolbar} from '@app-dev-panel/sdk/Component/PageToolbar';
 import {QueryErrorState} from '@app-dev-panel/sdk/Component/QueryErrorState';
 import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
 import {Box, Chip, LinearProgress, Typography} from '@mui/material';
@@ -214,12 +215,6 @@ export const AuthorizationPage = () => {
 
     return (
         <Box>
-            <PageHeader
-                title="Authorization"
-                icon="shield"
-                description="Security guards, roles, voters, and configuration"
-            />
-
             {isEmpty && (
                 <EmptyState
                     icon="shield"
@@ -230,7 +225,7 @@ export const AuthorizationPage = () => {
 
             {hasGuards && (
                 <>
-                    <SectionTitle>{`Guards (${data.guards.length})`}</SectionTitle>
+                    <PageToolbar sticky>{`Guards (${data.guards.length})`}</PageToolbar>
                     <GuardsTable guards={data.guards} />
                 </>
             )}
