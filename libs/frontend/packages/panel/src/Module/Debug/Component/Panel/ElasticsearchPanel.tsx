@@ -2,7 +2,7 @@ import {JsonRenderer} from '@app-dev-panel/panel/Module/Debug/Component/JsonRend
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {FilterChip} from '@app-dev-panel/sdk/Component/FilterChip';
 import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
-import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
+import {PageToolbar} from '@app-dev-panel/sdk/Component/PageToolbar';
 import {monoFontFamily} from '@app-dev-panel/sdk/Component/Theme/DefaultTheme';
 import {Box, Chip, Collapse, Icon, IconButton, type Theme, Typography} from '@mui/material';
 import {styled, useTheme} from '@mui/material/styles';
