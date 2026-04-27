@@ -35,6 +35,8 @@ use AppDevPanel\Api\Debug\Middleware\ResponseDataWrapper;
 use AppDevPanel\Api\Debug\Middleware\TokenAuthMiddleware;
 use AppDevPanel\Api\Debug\Repository\CollectorRepository;
 use AppDevPanel\Api\Debug\Repository\CollectorRepositoryInterface;
+use AppDevPanel\Api\Debug\Ssr\SsrEventPanelCollector;
+use AppDevPanel\Api\Debug\Ssr\SsrServicePanelCollector;
 use AppDevPanel\Api\Http\JsonResponseFactory;
 use AppDevPanel\Api\Http\JsonResponseFactoryInterface;
 use AppDevPanel\Api\Ingestion\Controller\IngestionController;
@@ -330,6 +332,24 @@ final class AppDevPanelServiceProvider extends ServiceProvider
                 fn() => new CodeCoverageCollector($this->app->make(TimelineCollector::class), [], ['vendor']),
             );
             $this->collectorClasses[] = CodeCoverageCollector::class;
+        }
+
+        // SSR panels — backend-rendered views over existing collectors. Registered
+        // only when the wrapped collector is on, since SSR collectors hold no data
+        // of their own (they mirror the wrapped collector's items at flush time).
+        if ($collectors['event'] ?? true) {
+            $this->app->singleton(
+                SsrEventPanelCollector::class,
+                fn() => new SsrEventPanelCollector($this->app->make(EventCollector::class)),
+            );
+            $this->collectorClasses[] = SsrEventPanelCollector::class;
+        }
+        if ($collectors['service'] ?? true) {
+            $this->app->singleton(
+                SsrServicePanelCollector::class,
+                fn() => new SsrServicePanelCollector($this->app->make(ServiceCollector::class)),
+            );
+            $this->collectorClasses[] = SsrServicePanelCollector::class;
         }
     }
 

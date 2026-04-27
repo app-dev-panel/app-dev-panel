@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use App\Debug\SsrLogPanelCollector;
 use App\Shared\ApplicationParams;
 use Yiisoft\Aliases\Aliases;
 use Yiisoft\Assets\AssetManager;
@@ -45,7 +44,6 @@ return [
             \AppDevPanel\Kernel\Collector\ValidatorCollector::class,
             \AppDevPanel\Kernel\Collector\TranslatorCollector::class,
             \AppDevPanel\Kernel\Collector\TemplateCollector::class,
-            SsrLogPanelCollector::class,
         ],
     ],
 
