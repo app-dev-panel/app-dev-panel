@@ -1,4 +1,3 @@
-import {PanelBreadcrumbInline, usePanelBreadcrumb} from '@app-dev-panel/sdk/Component/PanelBreadcrumb';
 import {Box} from '@mui/material';
 import {styled} from '@mui/material/styles';
 import React from 'react';
@@ -34,15 +33,9 @@ const Container = styled(Box)(({theme}) => ({
     '&:first-of-type': {marginTop: 0},
 }));
 
-export const SectionTitle = ({children, action}: SectionTitleProps) => {
-    const breadcrumb = usePanelBreadcrumb();
-    return (
-        <Container>
-            <StyledTitle>
-                {breadcrumb && <PanelBreadcrumbInline label={breadcrumb} />}
-                {children}
-            </StyledTitle>
-            {action && <Box sx={{ml: 'auto', display: 'flex', alignItems: 'center'}}>{action}</Box>}
-        </Container>
-    );
-};
+export const SectionTitle = ({children, action}: SectionTitleProps) => (
+    <Container>
+        <StyledTitle>{children}</StyledTitle>
+        {action && <Box sx={{ml: 'auto', display: 'flex', alignItems: 'center'}}>{action}</Box>}
+    </Container>
+);

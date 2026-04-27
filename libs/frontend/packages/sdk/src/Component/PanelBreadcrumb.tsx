@@ -1,30 +1,18 @@
 import {styled} from '@mui/material/styles';
-import {createContext, ReactNode, useContext, useRef} from 'react';
+import {createContext, ReactNode, useContext} from 'react';
 
-type PanelBreadcrumbValue = {
-    label: ReactNode;
-    consumed: {current: boolean};
-};
-
-const PanelBreadcrumbContext = createContext<PanelBreadcrumbValue | null>(null);
+const PanelBreadcrumbContext = createContext<ReactNode | null>(null);
 
 type ProviderProps = {
     label: ReactNode;
     children: ReactNode;
 };
 
-export const PanelBreadcrumbProvider = ({label, children}: ProviderProps) => {
-    const consumed = useRef(false);
-    consumed.current = false;
-    return <PanelBreadcrumbContext.Provider value={{label, consumed}}>{children}</PanelBreadcrumbContext.Provider>;
-};
+export const PanelBreadcrumbProvider = ({label, children}: ProviderProps) => (
+    <PanelBreadcrumbContext value={label}>{children}</PanelBreadcrumbContext>
+);
 
-export const usePanelBreadcrumb = (): ReactNode | null => {
-    const ctx = useContext(PanelBreadcrumbContext);
-    if (!ctx || ctx.consumed.current) return null;
-    ctx.consumed.current = true;
-    return ctx.label;
-};
+export const usePanelBreadcrumb = (): ReactNode | null => useContext(PanelBreadcrumbContext);
 
 const Crumb = styled('span')(({theme}) => ({
     display: 'inline-flex',

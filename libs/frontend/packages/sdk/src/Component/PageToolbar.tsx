@@ -48,7 +48,7 @@ export const PageToolbar = ({children, actions, sticky}: PageToolbarProps) => {
     return (
         <Root sticky={sticky}>
             <Label>
-                {breadcrumb && <PanelBreadcrumbInline label={breadcrumb} />}
+                {sticky && breadcrumb && <PanelBreadcrumbInline label={breadcrumb} />}
                 {children}
             </Label>
             {actions && <Actions>{actions}</Actions>}
