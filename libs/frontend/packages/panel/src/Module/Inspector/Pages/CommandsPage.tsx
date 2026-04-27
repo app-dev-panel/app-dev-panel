@@ -11,11 +11,14 @@ import {CommandErrorAlert} from '@app-dev-panel/panel/Module/Inspector/Component
 import {extractCommandError} from '@app-dev-panel/panel/Module/Inspector/Component/Command/extractCommandError';
 import {ResultDialog} from '@app-dev-panel/panel/Module/Inspector/Component/Command/ResultDialog';
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
+import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
 import {FullScreenCircularProgress} from '@app-dev-panel/sdk/Component/FullScreenCircularProgress';
 import {PageHeader} from '@app-dev-panel/sdk/Component/PageHeader';
+import {PageToolbar} from '@app-dev-panel/sdk/Component/PageToolbar';
 import {QueryErrorState} from '@app-dev-panel/sdk/Component/QueryErrorState';
+import {searchVariants} from '@app-dev-panel/sdk/Helper/layoutTranslit';
 import {Box, Icon, Link, Typography} from '@mui/material';
-import {useEffect, useMemo, useState} from 'react';
+import {useDeferredValue, useEffect, useMemo, useState} from 'react';
 
 type GroupedCommands = Record<string, CommandType[]>;
 type CommandRunState = {status: CommandRunStatus};
@@ -53,15 +56,33 @@ export const CommandsPage = () => {
     const [runError, setRunError] = useState<string[] | null>(null);
     const [lastCommand, setLastCommand] = useState<CommandType | null>(null);
     const [activeCommandName, setActiveCommandName] = useState<string | null>(null);
+    const [filter, setFilter] = useState('');
+    const deferredFilter = useDeferredValue(filter);
+
+    const filteredCommands = useMemo<CommandType[]>(() => {
+        if (!commands) return [];
+        const query = deferredFilter.trim().toLowerCase();
+        if (!query) return commands;
+        const variants = searchVariants(query).map((v) => v.toLowerCase());
+        return commands.filter((command) => {
+            const haystack = [command.title, command.description, command.group, command.name]
+                .filter(Boolean)
+                .join(' ')
+                .toLowerCase();
+            return variants.some((v) => haystack.includes(v));
+        });
+    }, [commands, deferredFilter]);
 
     const groupedCommands = useMemo<GroupedCommands>(() => {
-        if (!commands) return {};
         const grouped: GroupedCommands = {};
-        for (const command of commands) {
+        for (const command of filteredCommands) {
             (grouped[command.group || 'Other'] ??= []).push(command);
         }
         return grouped;
-    }, [commands]);
+    }, [filteredCommands]);
+
+    const totalCount = commands?.length ?? 0;
+    const visibleCount = filteredCommands.length;
 
     useEffect(() => {
         if (!commands) return;
@@ -113,7 +134,7 @@ export const CommandsPage = () => {
 
     const commandEntries = Object.entries(groupedCommands);
 
-    if (commandEntries.length === 0) {
+    if (totalCount === 0) {
         return (
             <>
                 <PageHeader title="Commands" icon="terminal" description="Run application commands" />
@@ -141,67 +162,83 @@ export const CommandsPage = () => {
         );
     }
 
+    const countLabel =
+        deferredFilter.trim().length > 0 && visibleCount !== totalCount
+            ? `${visibleCount} of ${totalCount} commands`
+            : `${totalCount} ${totalCount === 1 ? 'command' : 'commands'}`;
+
     return (
         <>
             <PageHeader title="Commands" icon="terminal" description="Run application commands" />
-            <Box sx={{display: 'flex', flexDirection: 'column', gap: 3}}>
-                {commandEntries.map(([groupName, commands]) => (
-                    <Box key={groupName} component="section">
-                        <Box sx={{display: 'flex', alignItems: 'center', gap: 1, mb: 1.5, color: 'text.secondary'}}>
-                            <Icon className="material-icons" sx={{fontSize: 18, color: 'text.secondary'}}>
-                                {resolveGroupHeadingIcon(groupName)}
-                            </Icon>
-                            <Typography
-                                variant="overline"
-                                sx={{fontWeight: 700, letterSpacing: '0.6px', color: 'text.secondary'}}
-                            >
-                                {formatGroupLabel(groupName)}
-                            </Typography>
+            <PageToolbar actions={<FilterInput value={filter} onChange={setFilter} placeholder="Filter commands..." />}>
+                {countLabel}
+            </PageToolbar>
+            {commandEntries.length === 0 ? (
+                <EmptyState
+                    icon="filter_alt_off"
+                    title="No matching commands"
+                    description="Try a different filter or clear the search."
+                />
+            ) : (
+                <Box sx={{display: 'flex', flexDirection: 'column', gap: 3, mt: 2}}>
+                    {commandEntries.map(([groupName, commands]) => (
+                        <Box key={groupName} component="section">
+                            <Box sx={{display: 'flex', alignItems: 'center', gap: 1, mb: 1.5, color: 'text.secondary'}}>
+                                <Icon className="material-icons" sx={{fontSize: 18, color: 'text.secondary'}}>
+                                    {resolveGroupHeadingIcon(groupName)}
+                                </Icon>
+                                <Typography
+                                    variant="overline"
+                                    sx={{fontWeight: 700, letterSpacing: '0.6px', color: 'text.secondary'}}
+                                >
+                                    {formatGroupLabel(groupName)}
+                                </Typography>
+                                <Box
+                                    sx={{
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        minWidth: 22,
+                                        height: 18,
+                                        px: 0.75,
+                                        borderRadius: 999,
+                                        fontSize: '11px',
+                                        fontWeight: 600,
+                                        bgcolor: 'action.hover',
+                                        color: 'text.secondary',
+                                    }}
+                                >
+                                    {commands.length}
+                                </Box>
+                            </Box>
                             <Box
                                 sx={{
-                                    display: 'inline-flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    minWidth: 22,
-                                    height: 18,
-                                    px: 0.75,
-                                    borderRadius: 999,
-                                    fontSize: '11px',
-                                    fontWeight: 600,
-                                    bgcolor: 'action.hover',
-                                    color: 'text.secondary',
+                                    display: 'grid',
+                                    gap: 1.5,
+                                    gridTemplateColumns: {
+                                        xs: '1fr',
+                                        sm: 'repeat(2, minmax(0, 1fr))',
+                                        lg: 'repeat(3, minmax(0, 1fr))',
+                                    },
                                 }}
                             >
-                                {commands.length}
+                                {commands.map((command) => (
+                                    <CommandButton
+                                        key={command.name}
+                                        title={command.title}
+                                        description={command.description}
+                                        group={command.group}
+                                        status={commandStatus[command.name]?.status ?? 'idle'}
+                                        disabled={runCommandQueryInfo.isLoading && activeCommandName !== command.name}
+                                        onClick={() => runCommand(command)}
+                                        fullWidth
+                                    />
+                                ))}
                             </Box>
                         </Box>
-                        <Box
-                            sx={{
-                                display: 'grid',
-                                gap: 1.5,
-                                gridTemplateColumns: {
-                                    xs: '1fr',
-                                    sm: 'repeat(2, minmax(0, 1fr))',
-                                    lg: 'repeat(3, minmax(0, 1fr))',
-                                },
-                            }}
-                        >
-                            {commands.map((command) => (
-                                <CommandButton
-                                    key={command.name}
-                                    title={command.title}
-                                    description={command.description}
-                                    group={command.group}
-                                    status={commandStatus[command.name]?.status ?? 'idle'}
-                                    disabled={runCommandQueryInfo.isLoading && activeCommandName !== command.name}
-                                    onClick={() => runCommand(command)}
-                                    fullWidth
-                                />
-                            ))}
-                        </Box>
-                    </Box>
-                ))}
-            </Box>
+                    ))}
+                </Box>
+            )}
             {runError && (
                 <CommandErrorAlert
                     errors={runError}

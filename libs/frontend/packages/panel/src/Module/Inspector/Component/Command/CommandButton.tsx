@@ -102,6 +102,7 @@ const TextColumn = styled('span')(({theme}) => ({
     flexDirection: 'column',
     alignItems: 'flex-start',
     minWidth: 0,
+    flex: 1,
     gap: theme.spacing(0.25),
 }));
 
@@ -113,16 +114,21 @@ const TitleLine = styled(Typography)(({theme}) => ({
     alignItems: 'center',
     gap: theme.spacing(0.75),
     color: 'inherit',
+    width: '100%',
+    minWidth: 0,
 }));
 
 const DescriptionLine = styled(Typography)(({theme}) => ({
     fontSize: '12px',
     color: theme.palette.text.secondary,
     lineHeight: 1.35,
+    width: '100%',
+    minWidth: 0,
+    display: '-webkit-box',
+    WebkitLineClamp: 2,
+    WebkitBoxOrient: 'vertical',
     overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap',
-    maxWidth: 280,
+    wordBreak: 'break-word',
 }));
 
 const RunHint = styled('span')(({theme}) => ({
@@ -192,7 +198,10 @@ export const CommandButton = ({
             <TextColumn>
                 <TitleLine>
                     <RunHint>Run</RunHint>
-                    <Box component="span" sx={{minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis'}}>
+                    <Box
+                        component="span"
+                        sx={{minWidth: 0, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}
+                    >
                         {title}
                     </Box>
                 </TitleLine>
