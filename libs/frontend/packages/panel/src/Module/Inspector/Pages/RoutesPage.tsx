@@ -5,8 +5,8 @@ import {FilterChip} from '@app-dev-panel/sdk/Component/FilterChip';
 import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
 import {FullScreenCircularProgress} from '@app-dev-panel/sdk/Component/FullScreenCircularProgress';
 import {PageHeader} from '@app-dev-panel/sdk/Component/PageHeader';
+import {PageToolbar} from '@app-dev-panel/sdk/Component/PageToolbar';
 import {QueryErrorState} from '@app-dev-panel/sdk/Component/QueryErrorState';
-import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
 import {serializeCallable} from '@app-dev-panel/sdk/Helper/callableSerializer';
 import {concatClassMethod} from '@app-dev-panel/sdk/Helper/classMethodConcater';
 import {ContentCopy, OpenInNew} from '@mui/icons-material';
@@ -488,25 +488,20 @@ export const RoutesPage = () => {
 
     return (
         <>
-            <Box sx={{px: {xs: 1.5, sm: 3.5}, pt: {xs: 1.5, sm: 3.5}, '& > div': {mb: 0}}}>
-                <PageHeader title="Routes" icon="alt_route" description="View and check application routes" />
-            </Box>
+            <PageToolbar
+                sticky
+                actions={<FilterInput value={filter} onChange={setFilter} placeholder="Filter routes..." />}
+            >{`${filtered.length} routes`}</PageToolbar>
 
             <RouteChecker />
 
-            {/* Routes list */}
-            <Box sx={{p: {xs: 1.5, sm: 3.5}}}>
-                {routes.length === 0 ? (
-                    <EmptyState icon="alt_route" title="No routes found" />
-                ) : (
-                    <Box>
-                    <SectionTitle
-                        action={<FilterInput value={filter} onChange={setFilter} placeholder="Filter routes..." />}
-                    >{`${filtered.length} routes`}</SectionTitle>
-
+            {routes.length === 0 ? (
+                <EmptyState icon="alt_route" title="No routes found" />
+            ) : (
+                <Box>
                     {/* Method filter badges */}
                     {badgeCounts.length > 1 && (
-                        <Box sx={{display: 'flex', flexWrap: 'wrap', gap: 0.75, mb: 2}}>
+                        <Box sx={{display: 'flex', flexWrap: 'wrap', gap: 0.75, mb: 2, px: {xs: 1.5, sm: 2.5}}}>
                             {badgeCounts.map(([method, count]) => (
                                 <FilterChip
                                     key={method}
@@ -586,8 +581,7 @@ export const RoutesPage = () => {
                         );
                     })}
                 </Box>
-                )}
-            </Box>
+            )}
         </>
     );
 };
