@@ -186,6 +186,8 @@ final class ElasticsearchCollectorTest extends AbstractCollectorTestCase
     public function testLogRequestWhenInactive(): void
     {
         $collector = new ElasticsearchCollector(new TimelineCollector());
+        $baselineCollected = $collector->getCollected();
+        $baselineSummary = method_exists($collector, 'getSummary') ? $collector->getSummary() : null;
         // Not started
         $record = new ElasticsearchRequestRecord(
             method: 'GET',
@@ -198,7 +200,7 @@ final class ElasticsearchCollectorTest extends AbstractCollectorTestCase
         );
         $collector->logRequest($record);
 
-        $this->assertSame([], $collector->getCollected());
+        $this->assertSame($baselineCollected, $collector->getCollected());
     }
 
     public function testExtractIndexFromEmptyEndpoint(): void

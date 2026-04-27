@@ -63,7 +63,7 @@ libs/Testing/tests/
 ## Adding a New Fixture
 
 1. Add a new `Fixture` to `FixtureRegistry` with expectations
-2. Add the endpoint to each playground controller (Symfony, Yii2, Yii3)
+2. Add the endpoint to each playground controller (Symfony, Yii2, Yii3, Laravel, Spiral)
 3. Run `debug:fixtures` to verify
 
 ## Endpoint Contract

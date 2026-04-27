@@ -127,10 +127,6 @@ final class ElasticsearchCollector implements SummaryCollectorInterface
 
     public function getCollected(): array
     {
-        if (!$this->isActive()) {
-            return [];
-        }
-
         return [
             'requests' => array_values($this->requests),
             'duplicates' => $this->getDuplicates(),
@@ -139,10 +135,6 @@ final class ElasticsearchCollector implements SummaryCollectorInterface
 
     public function getSummary(): array
     {
-        if (!$this->isActive()) {
-            return [];
-        }
-
         $duplicates = $this->getDuplicates();
 
         return [

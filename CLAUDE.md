@@ -71,7 +71,7 @@ It collects runtime data (logs, events, requests, exceptions, database queries, 
 a web UI to inspect, analyze, and debug them.
 
 The project is currently a fork/consolidation from Yii Debug into a single monorepo, with the goal of becoming
-fully framework-independent. Adapters exist for Yii 3, Symfony, Laravel, Yii 2, and Cycle ORM (database schema only).
+fully framework-independent. Adapters exist for Yii 3, Symfony, Laravel, Yii 2, Spiral, and Cycle ORM (database schema only).
 
 ## Tech Stack
 
@@ -89,7 +89,8 @@ fully framework-independent. Adapters exist for Yii 3, Symfony, Laravel, Yii 2, 
 │   ├── yii3-app/                 # Yii 3 reference application
 │   ├── symfony-app/        # Symfony 7 minimal demo
 │   ├── laravel-app/              # Laravel 11/12/13 minimal demo
-│   └── yii2-basic-app/          # Yii 2 minimal demo
+│   ├── yii2-basic-app/          # Yii 2 minimal demo
+│   └── spiral-app/              # Spiral Framework minimal demo
 ├── libs/
 │   ├── Kernel/                   # Core: debugger lifecycle, collectors, storage, proxies
 │   ├── API/                      # HTTP API: debug endpoints, inspector endpoints, SSE
@@ -102,6 +103,7 @@ fully framework-independent. Adapters exist for Yii 3, Symfony, Laravel, Yii 2, 
 │   │   ├── Symfony/              # Symfony framework adapter
 │   │   ├── Laravel/              # Laravel framework adapter
 │   │   ├── Yii2/                 # Yii 2 framework adapter
+│   │   ├── Spiral/               # Spiral Framework adapter
 │   │   └── Cycle/                # Cycle ORM adapter (database schema only)
 │   └── frontend/                 # Frontend monorepo
 │       └── packages/
@@ -251,11 +253,13 @@ make fixtures-yii3        # CLI fixtures against Yii 3 (port 8101)
 make fixtures-symfony     # CLI fixtures against Symfony (port 8102)
 make fixtures-yii2        # CLI fixtures against Yii2 (port 8103)
 make fixtures-laravel     # CLI fixtures against Laravel (port 8104)
+make fixtures-spiral      # CLI fixtures against Spiral (port 8105)
 make test-fixtures        # PHPUnit E2E scenarios against all playgrounds
 make test-fixtures-yii3     # PHPUnit E2E against Yii 3
 make test-fixtures-symfony  # PHPUnit E2E against Symfony
 make test-fixtures-yii2     # PHPUnit E2E against Yii2
 make test-fixtures-laravel  # PHPUnit E2E against Laravel
+make test-fixtures-spiral   # PHPUnit E2E against Spiral
 
 # Frontend dev (still via npm)
 cd libs/frontend
@@ -294,6 +298,7 @@ Inspired by [VK Modulite](https://github.com/VKCOM/modulite). Enforces that each
 | `adapter-symfony` | `kernel`, `api`, `cli`, `mcp-server`, `frontend-assets` |
 | `adapter-laravel` | `kernel`, `api`, `cli`, `mcp-server`, `frontend-assets` |
 | `adapter-yii2` | `kernel`, `api`, `cli`, `mcp-server`, `frontend-assets` |
+| `adapter-spiral` | `kernel`, `api`, `cli`, `mcp-server`, `frontend-assets` |
 | `adapter-cycle` | `api` |
 
 ### Rules
@@ -476,6 +481,7 @@ Each module under `libs/` has its own `CLAUDE.md` with internal architecture det
 - `libs/Adapter/Symfony/CLAUDE.md` — Symfony adapter integration
 - `libs/Adapter/Laravel/CLAUDE.md` — Laravel adapter integration
 - `libs/Adapter/Yii2/CLAUDE.md` — Yii 2 adapter integration
+- `libs/Adapter/Spiral/CLAUDE.md` — Spiral Framework adapter integration
 - `libs/Adapter/Cycle/CLAUDE.md` — Cycle ORM adapter (database schema only)
 - `libs/frontend/CLAUDE.md` — Frontend architecture
 

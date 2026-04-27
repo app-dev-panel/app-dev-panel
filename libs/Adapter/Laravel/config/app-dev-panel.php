@@ -67,6 +67,14 @@ return [
      */
     'path_mapping' => [],
 
+    /*
+     * Directory holding the committable project config (frames, OpenAPI specs).
+     * The panel writes `project.json` here; commit it so every developer sees
+     * the same setup. A sibling `secrets.json` (gitignored automatically) holds
+     * future per-machine overrides like API keys.
+     */
+    'project_config_path' => base_path('config/adp'),
+
     'panel' => [
         'static_url' => '', // Base URL for panel assets (empty = GitHub Pages default). Use http://localhost:3000 for Vite dev with HMR.
     ],

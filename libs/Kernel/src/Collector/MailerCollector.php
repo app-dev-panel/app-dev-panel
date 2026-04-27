@@ -89,10 +89,6 @@ final class MailerCollector implements SummaryCollectorInterface
 
     public function getCollected(): array
     {
-        if (!$this->isActive()) {
-            return [];
-        }
-
         return [
             'messages' => $this->messages,
         ];
@@ -100,10 +96,6 @@ final class MailerCollector implements SummaryCollectorInterface
 
     public function getSummary(): array
     {
-        if (!$this->isActive()) {
-            return [];
-        }
-
         return [
             'mailer' => [
                 'total' => count($this->messages),

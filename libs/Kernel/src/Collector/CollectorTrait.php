@@ -10,12 +10,18 @@ trait CollectorTrait
 
     public function startup(): void
     {
+        $this->reset();
         $this->isActive = true;
     }
 
     public function shutdown(): void
     {
-        $this->reset();
+        // NOTE: `reset()` is intentionally NOT called here. After `shutdown()` the
+        // collector is frozen — `collect*()` is gated by `isActive` so no further
+        // mutation happens, but `getCollected()` / `getSummary()` must still read
+        // the buffer because storage flush runs AFTER shutdown. The buffer is
+        // wiped on the next `startup()` (matters for long-running processes that
+        // re-use the same collector instance across requests).
         $this->isActive = false;
     }
 

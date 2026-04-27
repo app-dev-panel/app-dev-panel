@@ -1,6 +1,6 @@
 ---
 title: Playground-приложения
-description: "Демо-приложения ADP для Symfony, Laravel, Yii 3 и Yii 2. Используйте как эталонные примеры интеграции."
+description: "Демо-приложения ADP для Symfony, Laravel, Yii 3, Yii 2 и Spiral. Используйте как эталонные примеры интеграции."
 ---
 
 # Playground-приложения
@@ -15,6 +15,7 @@ Playground-приложения — это минимальные рабочие
 | `symfony-app` | Symfony 7 | 8102 | <pkg>app-dev-panel/adapter-symfony</pkg> |
 | `yii2-basic-app` | Yii 2 | 8103 | <pkg>app-dev-panel/adapter-yii2</pkg> |
 | `laravel-app` | Laravel 12 | 8104 | <pkg>app-dev-panel/adapter-laravel</pkg> |
+| `spiral-app` | Spiral 3 | 8105 | <pkg>app-dev-panel/adapter-spiral</pkg> |
 
 ## Запуск playground-приложений
 
@@ -45,6 +46,11 @@ cd playground/yii3-app && ./yii serve --port=8101
 ```bash
 cd playground/laravel-app && PHP_CLI_SERVER_WORKERS=3 php -S 127.0.0.1:8104 -t public
 ```
+== Spiral
+```bash
+make serve-spiral
+# (или: cd playground/spiral-app && PHP_CLI_SERVER_WORKERS=3 php -S 127.0.0.1:8105 -t public)
+```
 :::
 
 ::: tip
@@ -74,6 +80,7 @@ cd playground/laravel-app && PHP_CLI_SERVER_WORKERS=3 php -S 127.0.0.1:8104 -t p
 | Symfony | Bundle | Вручную в `config/bundles.php` (только dev/test) |
 | Laravel | Package discovery | Автоматически через `extra.laravel.providers` |
 | Yii 2 | Module + Bootstrap | Авто-bootstrap через `extra.bootstrap` в composer |
+| Spiral | Bootloader + PSR-15 middleware | Вручную `defineBootloaders()` + HTTP-конвейер |
 
 ### Пути хранилищ
 
@@ -83,6 +90,7 @@ cd playground/laravel-app && PHP_CLI_SERVER_WORKERS=3 php -S 127.0.0.1:8104 -t p
 | Symfony | `var/debug/` | `%kernel.project_dir%` |
 | Laravel | `storage/debug/` | `storage_path('debug')` |
 | Yii2 | `runtime/debug/` | Алиас `@runtime` |
+| Spiral | `sys_get_temp_dir()/app-dev-panel` | переопределяется через `APP_DEV_PANEL_STORAGE_PATH` |
 
 ## Запуск тестовых fixture
 
@@ -94,6 +102,7 @@ make fixtures-yii3         # Только Yii 3
 make fixtures-symfony      # Только Symfony
 make fixtures-yii2         # Только Yii2
 make fixtures-laravel      # Только Laravel
+make fixtures-spiral       # Только Spiral
 ```
 
 Для PHPUnit E2E-тестов (требуются запущенные серверы):
@@ -126,7 +135,7 @@ make test-fixtures-yii3    # Только Yii 3
 3. Настройте коллекторы, хранилище и API-маршруты согласно документации адаптера
 4. Реализуйте эндпоинты `/test/fixtures/*`, соответствующие `FixtureRegistry` (см. [Участие в разработке](/ru/guide/contributing))
 5. Добавьте цели в Makefile для serve, fixtures и проверок Mago
-6. Назначьте следующий свободный порт (8105+)
+6. Назначьте следующий свободный порт (8106+)
 
 ### Распределение портов
 
@@ -137,4 +146,5 @@ make test-fixtures-yii3    # Только Yii 3
 | 8102 | Symfony |
 | 8103 | Yii2 |
 | 8104 | Laravel |
-| 8105+ | Свободны |
+| 8105 | Spiral |
+| 8106+ | Свободны |

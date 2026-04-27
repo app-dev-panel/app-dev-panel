@@ -1,6 +1,6 @@
 ---
 title: Матрица возможностей
-description: "Сравнение поддержки коллекторов и инспекторов в адаптерах ADP для Symfony, Laravel, Yii 3 и Yii 2."
+description: "Сравнение поддержки коллекторов и инспекторов в адаптерах ADP для Symfony, Laravel, Yii 3, Yii 2 и Spiral."
 ---
 
 # Матрица возможностей
@@ -13,7 +13,7 @@ ADP поддерживает несколько PHP-фреймворков че�
 
 ### Универсальные коллекторы
 
-Эти коллекторы зарегистрированы во **всех четырёх адаптерах**:
+Эти коллекторы зарегистрированы во **всех пяти полных адаптерах**:
 
 | Коллектор | Панель | Описание |
 |-----------|--------|----------|
@@ -40,20 +40,28 @@ ADP поддерживает несколько PHP-фреймворков че�
 
 ### Матрица доступности коллекторов
 
-| Коллектор | Yii 3 | Symfony | Laravel | Yii2 | Панель |
-|-----------|:-------:|:-------:|:-------:|:----:|--------|
-| Database | ✅ | ✅ | ✅ | ✅ | Database |
-| Cache | ✅ | ✅ | ✅ | ✅ | Cache |
-| Mailer | ✅ | ✅ | ✅ | ✅ | Mailer |
-| Queue | ✅ | ✅ | ✅ | ✅ | Queue |
-| Redis | ✅ | ✅ | ✅ | ✅ | Redis |
-| Elasticsearch | ✅ | ✅ | ✅ | ✅ | Elasticsearch |
-| View | ✅ | — | — | ✅ | WebView |
-| Templates | — | ✅ | ✅ | ✅ | Templates |
-| Code Coverage | ✅ | ✅ | ✅ | ✅ | Coverage |
-| Asset Bundles | ✅ | ✅ | ✅ | ✅ | Asset Bundles |
-| Middleware | ✅ | — | — | — | Middleware |
-| Messenger | — | ✅ | — | — | Messenger |
+| Коллектор | Yii 3 | Symfony | Laravel | Yii2 | Spiral | Панель |
+|-----------|:-------:|:-------:|:-------:|:----:|:------:|--------|
+| Database | ✅ | ✅ | ✅ | ✅ | — | Database |
+| Cache | ✅ | ✅ | ✅ | ✅ | ✅ | Cache |
+| Mailer | ✅ | ✅ | ✅ | ✅ | ✅ | Mailer |
+| Queue | ✅ | ✅ | ✅ | ✅ | ✅ | Queue |
+| Redis | ✅ | ✅ | ✅ | ✅ | — | Redis |
+| Elasticsearch | ✅ | ✅ | ✅ | ✅ | — | Elasticsearch |
+| View | ✅ | — | — | ✅ | — | WebView |
+| Templates | — | ✅ | ✅ | ✅ | ✅ | Templates |
+| Code Coverage | ✅ | ✅ | ✅ | ✅ | — | Coverage |
+| Asset Bundles | ✅ | ✅ | ✅ | ✅ | — | Asset Bundles |
+| Middleware | ✅ | — | — | — | — | Middleware |
+| Messenger | — | ✅ | — | — | — | Messenger |
+
+::: info Spiral — авто-подключение
+Адаптер Spiral подключает каждый коллектор через `Container/*ProxyInjector` (см.
+[Инжекторы контейнера](/ru/guide/adapters/spiral#инжекторы-контейнера)) — коллекторы
+кеша, mailer, queue, переводчика и шаблонов наполняются автоматически, как только в
+приложении установлен соответствующий пакет `spiral/*`. Никаких ручных вызовов
+`collect()` не требуется.
+:::
 
 ### Итого коллекторов по адаптерам
 
@@ -63,29 +71,32 @@ ADP поддерживает несколько PHP-фреймворков че�
 | Symfony | 20 | 10 | **30** |
 | Yii2 | 20 | 10 | **30** |
 | Laravel | 20 | 10 | **30** |
+| Spiral | 20 | 4 | **24** |
 
 ## Механизмы проксирования / перехвата
 
 Каждый адаптер использует разные стратегии для перехвата внутренних механизмов фреймворка и передачи данных в коллекторы:
 
-| Интерфейс | Yii 3 | Symfony | Laravel | Yii2 |
-|-----------|---------|---------|---------|------|
-| PSR-3 Logger | <class>AppDevPanel\Kernel\Collector\LoggerInterfaceProxy</class> | <class>AppDevPanel\Kernel\Collector\LoggerInterfaceProxy</class> | <class>AppDevPanel\Kernel\Collector\LoggerInterfaceProxy</class> | <class>AppDevPanel\Adapter\Yii2\Collector\DebugLogTarget</class> |
-| PSR-14 Events | <class>AppDevPanel\Kernel\Collector\EventDispatcherInterfaceProxy</class> | <class>AppDevPanel\Adapter\Symfony\Proxy\SymfonyEventDispatcherProxy</class> | <class>AppDevPanel\Adapter\Laravel\Proxy\LaravelEventDispatcherProxy</class> | Wildcard `Event::on('*')` |
-| PSR-18 HTTP Client | <class>AppDevPanel\Kernel\Collector\HttpClientInterfaceProxy</class> | <class>AppDevPanel\Kernel\Collector\HttpClientInterfaceProxy</class> | <class>AppDevPanel\Kernel\Collector\HttpClientInterfaceProxy</class> | <class>AppDevPanel\Kernel\Collector\HttpClientInterfaceProxy</class> |
-| PSR-11 Container | <class>AppDevPanel\Adapter\Yii3\Proxy\ContainerInterfaceProxy</class> | Compiler pass | — | — |
-| VarDumper | <class>AppDevPanel\Adapter\Yii3\Proxy\VarDumperHandlerInterfaceProxy</class> | Handler hook | Handler hook | Handler hook |
-| Database | <class>AppDevPanel\Adapter\Yii3\Collector\Db\ConnectionInterfaceProxy</class> | DBAL middleware | Event listener | <class>AppDevPanel\Adapter\Yii2\Collector\DbProfilingTarget</class> |
-| Mailer | <class>AppDevPanel\Adapter\Yii3\Collector\Mailer\MailerInterfaceProxy</class> | Event listener | Event listener | Event hook |
-| Router | <class>AppDevPanel\Adapter\Yii3\Collector\Router\UrlMatcherInterfaceProxy</class> | — | <class>AppDevPanel\Adapter\Laravel\Collector\RouterDataExtractor</class> | <class>AppDevPanel\Adapter\Yii2\Proxy\UrlRuleProxy</class> |
-| Validator | <class>AppDevPanel\Adapter\Yii3\Collector\Validator\ValidatorInterfaceProxy</class> | — | — | — |
-| Queue | <class>AppDevPanel\Adapter\Yii3\Collector\Queue\QueueProviderInterfaceProxy</class> | — | Event listener | — |
-| View/Templates | — | Twig profiler extension | <class>AppDevPanel\Adapter\Laravel\Collector\TemplateCollectorCompilerEngine</class> | `View::EVENT_AFTER_RENDER` |
-| Cache | — | Decorated `CacheAdapter` | Event listener | — |
-| Messenger | — | Messenger middleware | — | — |
-| Asset Bundles | <class>AppDevPanel\Adapter\Yii3\Collector\Asset\AssetLoaderInterfaceProxy</class> | <class>AppDevPanel\Adapter\Symfony\EventSubscriber\AssetMapperSubscriber</class> | <class>AppDevPanel\Adapter\Laravel\EventListener\ViteAssetListener</class> | `View::EVENT_END_PAGE` |
-| OpenTelemetry | <class>AppDevPanel\Kernel\Collector\SpanProcessorInterfaceProxy</class> | <class>AppDevPanel\Kernel\Collector\SpanProcessorInterfaceProxy</class> | <class>AppDevPanel\Kernel\Collector\SpanProcessorInterfaceProxy</class> | <class>AppDevPanel\Kernel\Collector\SpanProcessorInterfaceProxy</class> |
-| Translator | <class>AppDevPanel\Adapter\Yii3\Collector\Translator\TranslatorInterfaceProxy</class> | <class>AppDevPanel\Adapter\Symfony\Proxy\SymfonyTranslatorProxy</class> | <class>AppDevPanel\Adapter\Laravel\Proxy\LaravelTranslatorProxy</class> | <class>AppDevPanel\Adapter\Yii2\Proxy\I18NProxy</class> |
+| Интерфейс | Yii 3 | Symfony | Laravel | Yii2 | Spiral |
+|-----------|---------|---------|---------|------|--------|
+| PSR-3 Logger | <class>AppDevPanel\Kernel\Collector\LoggerInterfaceProxy</class> | <class>AppDevPanel\Kernel\Collector\LoggerInterfaceProxy</class> | <class>AppDevPanel\Kernel\Collector\LoggerInterfaceProxy</class> | <class>AppDevPanel\Adapter\Yii2\Collector\DebugLogTarget</class> | <class>AppDevPanel\Adapter\Spiral\Container\LoggerProxyInjector</class> |
+| PSR-14 Events | <class>AppDevPanel\Kernel\Collector\EventDispatcherInterfaceProxy</class> | <class>AppDevPanel\Adapter\Symfony\Proxy\SymfonyEventDispatcherProxy</class> | <class>AppDevPanel\Adapter\Laravel\Proxy\LaravelEventDispatcherProxy</class> | Wildcard `Event::on('*')` | <class>AppDevPanel\Adapter\Spiral\Container\EventDispatcherProxyInjector</class> |
+| PSR-18 HTTP Client | <class>AppDevPanel\Kernel\Collector\HttpClientInterfaceProxy</class> | <class>AppDevPanel\Kernel\Collector\HttpClientInterfaceProxy</class> | <class>AppDevPanel\Kernel\Collector\HttpClientInterfaceProxy</class> | <class>AppDevPanel\Kernel\Collector\HttpClientInterfaceProxy</class> | <class>AppDevPanel\Adapter\Spiral\Container\HttpClientProxyInjector</class> |
+| PSR-11 Container | <class>AppDevPanel\Adapter\Yii3\Proxy\ContainerInterfaceProxy</class> | Compiler pass | — | — | — |
+| VarDumper | <class>AppDevPanel\Adapter\Yii3\Proxy\VarDumperHandlerInterfaceProxy</class> | Handler hook | Handler hook | Handler hook | Handler hook |
+| Database | <class>AppDevPanel\Adapter\Yii3\Collector\Db\ConnectionInterfaceProxy</class> | DBAL middleware | Event listener | <class>AppDevPanel\Adapter\Yii2\Collector\DbProfilingTarget</class> | — |
+| Mailer | <class>AppDevPanel\Adapter\Yii3\Collector\Mailer\MailerInterfaceProxy</class> | Event listener | Event listener | Event hook | <class>AppDevPanel\Adapter\Spiral\Container\MailerProxyInjector</class> |
+| Router | <class>AppDevPanel\Adapter\Yii3\Collector\Router\UrlMatcherInterfaceProxy</class> | — | <class>AppDevPanel\Adapter\Laravel\Collector\RouterDataExtractor</class> | <class>AppDevPanel\Adapter\Yii2\Proxy\UrlRuleProxy</class> | <class>AppDevPanel\Adapter\Spiral\Inspector\SpiralRouteCollectionAdapter</class> + <class>AppDevPanel\Adapter\Spiral\Interceptor\DebugRouteInterceptor</class> |
+| Validator | <class>AppDevPanel\Adapter\Yii3\Collector\Validator\ValidatorInterfaceProxy</class> | — | — | — | — |
+| Queue (push) | <class>AppDevPanel\Adapter\Yii3\Collector\Queue\QueueProviderInterfaceProxy</class> | — | Event listener | — | <class>AppDevPanel\Adapter\Spiral\Container\QueueProxyInjector</class> |
+| Queue (consume) | — | — | Event listener | — | <class>AppDevPanel\Adapter\Spiral\Interceptor\DebugQueueInterceptor</class> |
+| Консольные команды | — | События ядра | События ядра | События консоли | <class>AppDevPanel\Adapter\Spiral\Interceptor\DebugConsoleInterceptor</class> |
+| View/Templates | — | Twig profiler extension | <class>AppDevPanel\Adapter\Laravel\Collector\TemplateCollectorCompilerEngine</class> | `View::EVENT_AFTER_RENDER` | <class>AppDevPanel\Adapter\Spiral\Container\ViewsProxyInjector</class> |
+| Cache | — | Decorated `CacheAdapter` | Event listener | — | <class>AppDevPanel\Adapter\Spiral\Container\CacheProxyInjector</class> |
+| Messenger | — | Messenger middleware | — | — | — |
+| Asset Bundles | <class>AppDevPanel\Adapter\Yii3\Collector\Asset\AssetLoaderInterfaceProxy</class> | <class>AppDevPanel\Adapter\Symfony\EventSubscriber\AssetMapperSubscriber</class> | <class>AppDevPanel\Adapter\Laravel\EventListener\ViteAssetListener</class> | `View::EVENT_END_PAGE` | — |
+| OpenTelemetry | <class>AppDevPanel\Kernel\Collector\SpanProcessorInterfaceProxy</class> | <class>AppDevPanel\Kernel\Collector\SpanProcessorInterfaceProxy</class> | <class>AppDevPanel\Kernel\Collector\SpanProcessorInterfaceProxy</class> | <class>AppDevPanel\Kernel\Collector\SpanProcessorInterfaceProxy</class> | — |
+| Translator | <class>AppDevPanel\Adapter\Yii3\Collector\Translator\TranslatorInterfaceProxy</class> | <class>AppDevPanel\Adapter\Symfony\Proxy\SymfonyTranslatorProxy</class> | <class>AppDevPanel\Adapter\Laravel\Proxy\LaravelTranslatorProxy</class> | <class>AppDevPanel\Adapter\Yii2\Proxy\I18NProxy</class> | <class>AppDevPanel\Adapter\Spiral\Container\TranslatorProxyInjector</class> |
 
 ## Возможности инспектора
 

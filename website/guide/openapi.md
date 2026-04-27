@@ -37,7 +37,7 @@ The viewer fetches an OpenAPI 3.x (or Swagger 2.x) JSON spec from a URL you prov
 4. Click the **checkmark** to confirm
 5. Close the dialog — Swagger UI loads automatically
 
-Entries are persisted in your browser's localStorage, so they survive page reloads.
+Entries are persisted to a [committable project config file](/guide/project-config) (`config/adp/project.json`) on the backend, with a `localStorage` fallback for offline use. Commit that file and your teammates pick up the same Swagger entries after `git pull`.
 
 You can add multiple entries. Each one appears as a separate tab.
 
@@ -206,6 +206,6 @@ Each ADP playground application includes an OpenAPI endpoint out of the box:
 ## Technical Details
 
 - **Frontend module**: `libs/frontend/packages/panel/src/Module/OpenApi/`
-- **State**: Stored in Redux slice `store.openApi` (persisted to localStorage)
+- **State**: Redux slice `store.openApi`, mirrored to `localStorage` for offline use and synced to `config/adp/project.json` on the backend (see [Project Config](/guide/project-config))
 - **Swagger UI**: Rendered via `swagger-ui-react` package
 - **Dark mode**: Supported — CSS overrides applied based on the current theme

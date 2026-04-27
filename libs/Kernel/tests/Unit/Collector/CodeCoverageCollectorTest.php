@@ -60,6 +60,8 @@ final class CodeCoverageCollectorTest extends AbstractCollectorTestCase
     public function testInactiveCollector(): void
     {
         $collector = $this->getCollector();
+        $baselineCollected = $collector->getCollected();
+        $baselineSummary = method_exists($collector, 'getSummary') ? $collector->getSummary() : null;
 
         $this->collectTestData($collector);
 

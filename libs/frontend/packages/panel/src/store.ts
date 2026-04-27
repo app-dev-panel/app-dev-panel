@@ -6,6 +6,7 @@ import {
 } from '@app-dev-panel/panel/Module/Inspector/api';
 import {middlewares as LlmMiddlewares, reducers as LlmReducers} from '@app-dev-panel/panel/Module/Llm/api';
 import {middlewares as OpenApiMiddlewares, reducers as OpenApiReducers} from '@app-dev-panel/panel/Module/OpenApi/api';
+import {middlewares as ProjectMiddlewares, reducers as ProjectReducers} from '@app-dev-panel/panel/Module/Project/api';
 import {
     middlewares as ApplicationMiddlewares,
     reducers as ApplicationReducers,
@@ -28,6 +29,7 @@ const rootReducer = combineReducers({
     ...LlmReducers,
     ...OpenApiReducers,
     ...FramesReducers,
+    ...ProjectReducers,
     // ...ToolbarApiReducers,
 });
 
@@ -47,6 +49,7 @@ export const createStore = (preloadedState: Partial<ReturnType<typeof rootReduce
                     ...LlmMiddlewares,
                     ...OpenApiMiddlewares,
                     ...FramesMiddlewares,
+                    ...ProjectMiddlewares,
                     // ...ToolbarApiMiddlewares,
                     errorNotificationMiddleware,
                 ]),

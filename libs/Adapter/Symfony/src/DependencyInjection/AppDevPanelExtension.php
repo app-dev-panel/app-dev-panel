@@ -74,6 +74,8 @@ use AppDevPanel\Api\PathMapper;
 use AppDevPanel\Api\PathMapperInterface;
 use AppDevPanel\Api\PathResolver;
 use AppDevPanel\Api\PathResolverInterface;
+use AppDevPanel\Api\Project\Controller\ProjectController;
+use AppDevPanel\Api\Project\Controller\SecretsController;
 use AppDevPanel\Api\Toolbar\ToolbarConfig;
 use AppDevPanel\Api\Toolbar\ToolbarInjector;
 use AppDevPanel\Cli\Command\DebugDumpCommand;
@@ -118,6 +120,10 @@ use AppDevPanel\Kernel\Collector\Web\RequestCollector;
 use AppDevPanel\Kernel\Collector\Web\WebAppInfoCollector;
 use AppDevPanel\Kernel\Debugger;
 use AppDevPanel\Kernel\DebuggerIdGenerator;
+use AppDevPanel\Kernel\Project\FileProjectConfigStorage;
+use AppDevPanel\Kernel\Project\FileSecretsStorage;
+use AppDevPanel\Kernel\Project\ProjectConfigStorageInterface;
+use AppDevPanel\Kernel\Project\SecretsStorageInterface;
 use AppDevPanel\Kernel\Service\FileServiceRegistry;
 use AppDevPanel\Kernel\Service\ServiceRegistryInterface;
 use AppDevPanel\Kernel\Storage\BroadcastingStorage;
@@ -157,6 +163,10 @@ final class AppDevPanelExtension extends Extension
         $container->setParameter('app_dev_panel.ignored_commands', $config['ignored_commands']);
         $container->setParameter('app_dev_panel.dumper.excluded_classes', $config['dumper']['excluded_classes']);
         $container->setParameter('app_dev_panel.path_mapping', $config['path_mapping'] ?? []);
+        $container->setParameter(
+            'app_dev_panel.project_config_path',
+            $config['project_config_path'] ?? '%kernel.project_dir%/config/adp',
+        );
 
         $this->registerCoreServices($container, $config);
         $this->registerCollectors($container, $config);
@@ -675,6 +685,35 @@ final class AppDevPanelExtension extends Extension
             ])
             ->setPublic(true);
 
+        // Project config (frames, OpenAPI specs) — committed to repo at config/adp/project.json
+        $container
+            ->register(ProjectConfigStorageInterface::class, FileProjectConfigStorage::class)
+            ->setArguments(['%app_dev_panel.project_config_path%'])
+            ->setPublic(true);
+
+        // Secrets file — gitignored sibling holding API keys / OAuth tokens / ACP env.
+        $container
+            ->register(SecretsStorageInterface::class, FileSecretsStorage::class)
+            ->setArguments(['%app_dev_panel.project_config_path%'])
+            ->setPublic(true);
+
+        $container
+            ->register(ProjectController::class, ProjectController::class)
+            ->setArguments([
+                new Reference(JsonResponseFactoryInterface::class),
+                new Reference(ProjectConfigStorageInterface::class),
+                new Reference(ResponseFactoryInterface::class),
+            ])
+            ->setPublic(true);
+
+        $container
+            ->register(SecretsController::class, SecretsController::class)
+            ->setArguments([
+                new Reference(JsonResponseFactoryInterface::class),
+                new Reference(SecretsStorageInterface::class),
+            ])
+            ->setPublic(true);
+
         $container
             ->register(ServiceController::class, ServiceController::class)
             ->setArguments([
@@ -799,10 +838,13 @@ final class AppDevPanelExtension extends Extension
             ])
             ->setPublic(true);
 
-        // LLM settings
+        // LLM settings — backed by SecretsStorage; legacy `runtime/.llm-settings.json` is auto-migrated.
         $container
             ->register(LlmSettingsInterface::class, FileLlmSettings::class)
-            ->setArguments(['%app_dev_panel.storage.path%'])
+            ->setArguments([
+                '%app_dev_panel.storage.path%',
+                new Reference(SecretsStorageInterface::class),
+            ])
             ->setPublic(true);
 
         // LLM history storage

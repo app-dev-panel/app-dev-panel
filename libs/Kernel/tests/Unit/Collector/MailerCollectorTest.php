@@ -78,12 +78,14 @@ final class MailerCollectorTest extends AbstractCollectorTestCase
     public function testInactiveGuards(): void
     {
         $collector = new MailerCollector(new TimelineCollector());
+        $baselineCollected = $collector->getCollected();
+        $baselineSummary = method_exists($collector, 'getSummary') ? $collector->getSummary() : null;
 
         $collector->collectMessage($this->makeMessage('test@test.com', 'Test'));
         $collector->collectMessages([$this->makeMessage('test@test.com', 'Test')]);
 
-        $this->assertSame([], $collector->getCollected());
-        $this->assertSame([], $collector->getSummary());
+        $this->assertSame($baselineCollected, $collector->getCollected());
+        $this->assertSame($baselineSummary, $collector->getSummary());
     }
 
     public function testCollectMessageNormalizesAttachmentsAndSize(): void

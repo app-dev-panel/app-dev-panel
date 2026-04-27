@@ -19,6 +19,7 @@ final class DeprecationCollector implements SummaryCollectorInterface
 
     public function startup(): void
     {
+        $this->reset();
         $this->isActive = true;
         if (!$this->handlerRegistered) {
             $this->registerErrorHandler();
@@ -27,24 +28,20 @@ final class DeprecationCollector implements SummaryCollectorInterface
 
     public function shutdown(): void
     {
+        // Restore the error handler before flush so deprecations triggered while
+        // serializing the debug payload don't get appended to this same entry.
+        // Buffer preserved for post-shutdown getCollected()/getSummary() reads.
         $this->restoreErrorHandler();
-        $this->reset();
         $this->isActive = false;
     }
 
     public function getCollected(): array
     {
-        if (!$this->isActive()) {
-            return [];
-        }
         return $this->deprecations;
     }
 
     public function getSummary(): array
     {
-        if (!$this->isActive()) {
-            return [];
-        }
         return [
             'deprecation' => [
                 'total' => count($this->deprecations),
