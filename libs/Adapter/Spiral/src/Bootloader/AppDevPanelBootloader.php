@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Adapter\Spiral\Bootloader;
 
+use AppDevPanel\Adapter\Spiral\Config\AdpConfig;
 use AppDevPanel\Adapter\Spiral\Container\CacheProxyInjector;
 use AppDevPanel\Adapter\Spiral\Container\EventDispatcherProxyInjector;
 use AppDevPanel\Adapter\Spiral\Container\HttpClientProxyInjector;
@@ -105,6 +106,13 @@ final class AppDevPanelBootloader extends Bootloader
         UploadedFileFactoryInterface::class => [self::class, 'initPsr17Factory'],
         UriFactoryInterface::class => [self::class, 'initPsr17Factory'],
 
+        // Adapter configuration — InjectableConfig parent lets Spiral inject overrides
+        // from `app/config/app-dev-panel.php` via ConfigsInterface when wired into a
+        // full Spiral Kernel. On plain containers (the playground, the integration
+        // tests) the factory below builds an instance with default values, falling
+        // back to APP_DEV_PANEL_* env vars at access time.
+        AdpConfig::class => [self::class, 'initAdpConfig'],
+
         // Kernel infrastructure
         DebuggerIdGenerator::class => DebuggerIdGenerator::class,
         StorageInterface::class => [self::class, 'initStorage'],
@@ -176,17 +184,31 @@ final class AppDevPanelBootloader extends Bootloader
     }
 
     /**
-     * Build PanelConfig honouring `APP_DEV_PANEL_STATIC_URL` (so the playground can point
-     * the panel SPA at a locally-served `/panel-dist` instead of the flaky GitHub Pages CDN).
+     * Build a default {@see AdpConfig} for plain containers (playground, integration
+     * tests) where Spiral's `ConfigsInterface` is not bound. With a full Spiral Kernel
+     * the `Spiral\Config\ConfigManager` injector wins via the `InjectableInterface`
+     * marker on `InjectableConfig`, loading overrides from `app/config/app-dev-panel.php`.
      */
-    public function initPanelConfig(): PanelConfig
+    public function initAdpConfig(): AdpConfig
     {
-        $staticUrl = getenv('APP_DEV_PANEL_STATIC_URL');
-        if (is_string($staticUrl) && $staticUrl !== '') {
-            return new PanelConfig(staticUrl: $staticUrl);
+        return new AdpConfig();
+    }
+
+    /**
+     * Build PanelConfig from {@see AdpConfig::staticUrl()} / {@see AdpConfig::basePath()}.
+     * Both accessors fall back to `APP_DEV_PANEL_STATIC_URL` / the `/debug` default when
+     * the config file leaves them unset, preserving the existing playground behaviour.
+     */
+    public function initPanelConfig(AdpConfig $config): PanelConfig
+    {
+        $staticUrl = $config->staticUrl();
+        $basePath = $config->basePath();
+
+        if ($staticUrl !== null && $staticUrl !== '') {
+            return new PanelConfig(staticUrl: $staticUrl, viewerBasePath: $basePath);
         }
 
-        return new PanelConfig();
+        return new PanelConfig(viewerBasePath: $basePath);
     }
 
     /**
@@ -222,9 +244,9 @@ final class AppDevPanelBootloader extends Bootloader
         return new NullLogger();
     }
 
-    public function initStorage(DebuggerIdGenerator $idGenerator): StorageInterface
+    public function initStorage(DebuggerIdGenerator $idGenerator, AdpConfig $config): StorageInterface
     {
-        $path = $this->resolveStoragePath();
+        $path = $config->storagePath();
         if (!is_dir($path)) {
             mkdir($path, 0o777, true);
         }
@@ -237,11 +259,15 @@ final class AppDevPanelBootloader extends Bootloader
      *
      * Collectors may decorate PSR services (logger, event dispatcher, http client) —
      * the decoration is applied when this bootloader's boot() runs the singleton factory.
+     *
+     * Ignored-request / ignored-command patterns are sourced from {@see AdpConfig}
+     * so apps can opt extra paths out of tracing via `app/config/app-dev-panel.php`.
      */
     public function initDebugger(
         ContainerInterface $container,
         DebuggerIdGenerator $idGenerator,
         StorageInterface $storage,
+        AdpConfig $config,
     ): Debugger {
         $collectors = [];
         foreach ($this->collectorClasses() as $class) {
@@ -255,7 +281,9 @@ final class AppDevPanelBootloader extends Bootloader
             }
         }
 
-        return new Debugger($idGenerator, $storage, $collectors, new DebuggerIgnoreConfig([], []));
+        $ignoreConfig = new DebuggerIgnoreConfig($config->ignoredRequests(), $config->ignoredCommands());
+
+        return new Debugger($idGenerator, $storage, $collectors, $ignoreConfig);
     }
 
     public function initCollectorRepository(StorageInterface $storage): CollectorRepositoryInterface
@@ -481,15 +509,5 @@ final class AppDevPanelBootloader extends Bootloader
             QueueCollector::class,
             DatabaseCollector::class,
         ];
-    }
-
-    private function resolveStoragePath(): string
-    {
-        $envPath = getenv('APP_DEV_PANEL_STORAGE_PATH');
-        if (is_string($envPath) && $envPath !== '') {
-            return $envPath;
-        }
-
-        return sys_get_temp_dir() . '/app-dev-panel';
     }
 }
