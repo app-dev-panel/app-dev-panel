@@ -48,7 +48,7 @@ export const SsrPanel = ({html}: SsrPanelProps) => {
                 console.warn(`[SsrPanel] unknown slot "${name}"`, el);
                 continue;
             }
-            const data = parseSlotEntry(el);
+            const data = parseSlotEntry(el, root);
             // Wipe pre-hydration content (the JSON <script> + fallback label) so
             // the portal owns the slot exclusively and there's no flash of raw
             // payload between commit and paint.

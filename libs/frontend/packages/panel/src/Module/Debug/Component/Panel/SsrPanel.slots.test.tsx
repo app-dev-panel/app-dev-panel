@@ -7,6 +7,8 @@ const mount = (html: string): Element => {
     return wrapper.firstElementChild!;
 };
 
+const HOST = document.createElement('div');
+
 describe('SsrPanel.slots — parsers', () => {
     it('readSlotPayload parses a JSON <script> payload', () => {
         const el = mount(
@@ -42,17 +44,27 @@ describe('SsrPanel.slots — parsers', () => {
                 '<script type="application/json" data-adp-payload>{"x":1}</script>' +
                 '</div>',
         );
-        expect(parseSlotEntry(jsonEl)).toEqual({payload: {x: 1}, attrs: {}, label: ''});
+        expect(parseSlotEntry(jsonEl, HOST)).toEqual({payload: {x: 1}, attrs: {}, label: '', host: HOST});
 
         const linkEl = mount('<a data-adp-slot="file-link" data-path="/app/Foo.php" data-line="3">/app/Foo.php:3</a>');
-        expect(parseSlotEntry(linkEl)).toEqual({
+        expect(parseSlotEntry(linkEl, HOST)).toEqual({
             payload: undefined,
             attrs: {path: '/app/Foo.php', line: '3'},
             label: '/app/Foo.php:3',
+            host: HOST,
         });
     });
 
-    it('only known slot names live in the registry', () => {
-        expect(Object.keys(ssrSlots).sort()).toEqual(['class-name', 'file-link', 'json']);
+    it('all known slot names live in the registry', () => {
+        expect(Object.keys(ssrSlots).sort()).toEqual([
+            'chips',
+            'class-name',
+            'empty-state',
+            'file-link',
+            'filter',
+            'json',
+            'tabs',
+            'tooltip',
+        ]);
     });
 });

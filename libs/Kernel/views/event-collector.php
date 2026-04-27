@@ -7,9 +7,9 @@ use AppDevPanel\Kernel\Slot\Slot;
 /**
  * Server-rendered view for {@see \AppDevPanel\Kernel\Collector\EventCollector}.
  *
- * Emits structure + slot markers only — all visual styling lives on the
- * frontend in `SsrPanel.uiKit.ts`. Slots `class-name`, `file-link`, `json`
- * are hydrated by `SsrPanel` into real React components after mount.
+ * Visual styling lives in `SsrPanel.uiKit.ts`. Interactive primitives (filter,
+ * chips, tooltip, empty-state) are emitted as `Slot::*` markers and hydrated
+ * into MUI components after mount.
  *
  * @var list<array{name: string, event: mixed, file: string|false, line: string, time: float|int}> $data
  */
@@ -21,40 +21,99 @@ $shortClass = static function (string $fqcn): string {
     return $pos === false ? $fqcn : substr($fqcn, $pos + 1);
 };
 
+$colorIndex = static function (string $name): int {
+    $hash = 0;
+    $len = strlen($name);
+    for ($i = 0; $i < $len; $i++) {
+        $hash = (($hash * 31) + ord($name[$i])) & 0x7FFFFFFF;
+    }
+    return $hash % 4;
+};
+
 $formatMicrotime = static function (float|int $ts): string {
     $seconds = (int) $ts;
     $micro = (int) round(($ts - $seconds) * 1_000_000);
     return date('H:i:s', $seconds) . '.' . str_pad((string) $micro, 6, '0', STR_PAD_LEFT);
 };
 
-$h = static fn(string $s): string => htmlspecialchars($s, ENT_QUOTES, 'UTF-8');
-?>
-<div class="adp-ui-stack">
-    <div class="adp-ui-row adp-ui-row--center adp-ui-row--between">
-        <span class="adp-ui-text-secondary adp-ui-text-strong">
-            <?= count($events) ?> event<?= count($events) === 1 ? '' : 's' ?>
-        </span>
-    </div>
+$formatDelta = static function (float $ms): string {
+    if ($ms < 1) {
+        return '+' . (int) round($ms * 1000) . 'µs';
+    }
+    if ($ms < 1000) {
+        return '+' . number_format($ms, 1, '.', '') . 'ms';
+    }
+    return '+' . number_format($ms / 1000, 2, '.', '') . 's';
+};
 
-    <?php if ($events === []): ?>
-        <div class="adp-ui-empty">No events were dispatched for this entry.</div>
-    <?php else: ?>
+$h = static fn(string $s): string => htmlspecialchars($s, ENT_QUOTES, 'UTF-8');
+
+// Pre-compute counts for the multi-select chip filter.
+$counts = [];
+foreach ($events as $entry) {
+    $short = $shortClass((string) ($entry['name'] ?? ''));
+    $counts[$short] = ($counts[$short] ?? 0) + 1;
+}
+arsort($counts);
+$chipItems = [];
+foreach ($counts as $name => $count) {
+    $chipItems[] = ['value' => $name, 'label' => $name, 'count' => $count];
+}
+?>
+<?php if ($events === []): ?>
+    <?= Slot::emptyState('bolt', 'No dispatched events found') ?>
+<?php else: ?>
+    <div class="adp-ui-stack">
+        <div class="adp-ui-row adp-ui-row--center adp-ui-row--between adp-ui-row--wrap">
+            <span class="adp-ui-text-secondary adp-ui-text-strong">
+                <?= count($events) ?> event<?= count($events) === 1 ? '' : 's' ?>
+            </span>
+            <?= Slot::filter('.adp-ui-event-row', 'Filter events…') ?>
+        </div>
+
+        <?php if (count($chipItems) > 1): ?>
+            <div class="adp-ui-row adp-ui-row--wrap" style="gap: 6px;">
+                <?= Slot::chips('.adp-ui-event-row', 'data-tag', $chipItems) ?>
+            </div>
+        <?php endif; ?>
+
         <div class="adp-ui-card adp-ui-list">
-            <?php foreach ($events as $entry):
+            <?php $prevTime = null;
+            foreach ($events as $entry):
                 $name = (string) ($entry['name'] ?? '');
+                $short = $shortClass($name);
                 $event = $entry['event'] ?? null;
                 $line = (string) ($entry['line'] ?? '');
+                $fileShort = $line !== '' ? basename(preg_replace('/[:#]\d+$/', '', $line) ?? $line) : '';
                 $time = (float) ($entry['time'] ?? 0);
+                $deltaMs = $prevTime !== null ? max(0, ($time - $prevTime) * 1000) : null;
+                $prevTime = $time;
+                $idx = $colorIndex($short);
                 $hasDetails = $line !== '' || $event !== null;
+                $searchHaystack = strtolower($name . ' ' . $line);
                 ?>
-                <details class="adp-ui-details">
-                    <summary>
+                <details class="adp-ui-details adp-ui-event-row"
+                         data-tag="<?= $h($short) ?>"
+                         data-color-index="<?= $idx ?>"
+                         data-search="<?= $h($searchHaystack) ?>">
+                    <summary class="adp-ui-accent-bar">
                         <span class="adp-ui-mono adp-ui-text-disabled" style="width: 110px; flex-shrink: 0; padding-top: 2px; font-size: 11px;">
                             <?= $h($formatMicrotime($time)) ?>
                         </span>
+                        <span class="adp-ui-dot" data-color-index="<?= $idx ?>" style="margin-top: 6px;"></span>
                         <span class="adp-ui-fill" style="font-size: 13px;">
-                            <?= Slot::attrs('class-name', ['fqcn' => $name], $shortClass($name)) ?>
+                            <?= Slot::attrs('class-name', ['fqcn' => $name], $short) ?>
                         </span>
+                        <?php if ($deltaMs !== null): ?>
+                            <span class="adp-ui-mono adp-ui-text-disabled adp-ui-hide-sm" style="font-size: 10px; flex-shrink: 0; padding-top: 2px;">
+                                <?= Slot::tooltip('Time since previous event', $formatDelta($deltaMs)) ?>
+                            </span>
+                        <?php endif; ?>
+                        <?php if ($fileShort !== ''): ?>
+                            <span class="adp-ui-mono adp-ui-text-disabled adp-ui-hide-sm" style="font-size: 11px; flex-shrink: 0; padding-top: 2px;">
+                                <?= $h($fileShort) ?>
+                            </span>
+                        <?php endif; ?>
                         <span class="adp-ui-caret" aria-hidden="true" style="font-size: 12px; padding-top: 3px;">
                             <?= $hasDetails ? '&#9662;' : '&middot;' ?>
                         </span>
@@ -74,5 +133,5 @@ $h = static fn(string $s): string => htmlspecialchars($s, ENT_QUOTES, 'UTF-8');
                 </details>
             <?php endforeach; ?>
         </div>
-    <?php endif; ?>
-</div>
+    </div>
+<?php endif;

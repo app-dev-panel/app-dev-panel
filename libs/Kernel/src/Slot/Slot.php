@@ -16,17 +16,16 @@ use AppDevPanel\Kernel\Helper\Json;
  * element via a portal — so the rendered fragment shares theme, Redux store,
  * and router context with the rest of the SPA.
  *
- * Three flavours of slots:
+ * Three primitives:
+ *   - `json($name, $payload)`  — complex value travels in `<script type="application/json">`.
+ *   - `attrs($name, $attrs, $label)` — scalar props as `data-*`, `$label` is fallback text.
+ *   - `text($name, $content)`   — payload is plain text content.
  *
- *   - `json($name, $payload)`  — complex object/array; payload travels in an inert
- *                                `<script type="application/json" data-adp-payload>`
- *                                child so neither HTML escaping nor double encoding
- *                                applies.
- *   - `attrs($name, $attrs, $label)` — simple scalar props (path, fqcn, line, …)
- *                                travel in `data-*` attributes; `$label` becomes the
- *                                no-JS / hydration-fallback text content.
- *   - `text($name, $content)`   — payload is plain text (e.g. SQL, code) and lives
- *                                in the element's text content.
+ * Plus bespoke helpers for the standard interactive/display slots:
+ *   - `tooltip`, `emptyState` (display)
+ *   - `filter`, `chips`, `tabs` (interactive — render MUI controls that mutate
+ *     the visibility of host descendants by data-search / data-tag /
+ *     data-adp-tab-panel markers).
  */
 final class Slot
 {
@@ -36,65 +35,21 @@ final class Slot
     /**
      * Slot whose payload is a structured value rendered as JSON inside an
      * inert `<script type="application/json">` child.
-     *
-     * Example:
-     * ```
-     * <?= Slot::json('json', $context) ?>
-     * ```
-     * produces (panel renders <JsonRenderer value=... />):
-     * ```
-     * <div data-adp-slot="json">
-     *   <script type="application/json" data-adp-payload>{"foo":"bar"}</script>
-     * </div>
-     * ```
      */
     public static function json(string $name, mixed $payload, string $tag = 'div'): string
     {
-        $json = Json::encode($payload);
-        // The only sequence that is unsafe inside a <script> body is "</" — escape
-        // it so a stray "</script>" inside string data can't terminate the block.
-        $safe = str_replace('</', '<\/', $json);
-
-        return sprintf(
-            '<%1$s %2$s="%3$s"><script type="application/json" %4$s>%5$s</script></%1$s>',
-            self::escapeTag($tag),
-            self::ATTR_NAME,
-            self::escapeAttr($name),
-            self::PAYLOAD_ATTR,
-            $safe,
-        );
+        return self::compound($name, $payload, [], '', $tag);
     }
 
     /**
      * Slot whose props travel in `data-*` attributes; `$label` is the
      * pre-hydration fallback that's visible when JS is disabled.
      *
-     * Example:
-     * ```
-     * <?= Slot::attrs('file-link', ['path' => $line], $line) ?>
-     * <?= Slot::attrs('class-name', ['fqcn' => $event['class'], 'method' => 'handle'], shortName($event['class'])) ?>
-     * ```
-     *
      * @param array<string, scalar|null> $attrs
      */
     public static function attrs(string $name, array $attrs, string $label = '', string $tag = 'span'): string
     {
-        $attrHtml = '';
-        foreach ($attrs as $key => $value) {
-            if ($value === null || $value === '') {
-                continue;
-            }
-            $attrHtml .= sprintf(' data-%s="%s"', self::escapeAttr((string) $key), self::escapeAttr((string) $value));
-        }
-
-        return sprintf(
-            '<%1$s %2$s="%3$s"%4$s>%5$s</%1$s>',
-            self::escapeTag($tag),
-            self::ATTR_NAME,
-            self::escapeAttr($name),
-            $attrHtml,
-            self::escapeText($label),
-        );
+        return self::compound($name, null, $attrs, $label, $tag);
     }
 
     /**
@@ -111,6 +66,101 @@ final class Slot
         );
     }
 
+    /**
+     * Wraps `$label` in a tooltip; the panel hydrates this into a MUI `<Tooltip>`.
+     */
+    public static function tooltip(string $text, string $label): string
+    {
+        return self::attrs('tooltip', ['text' => $text], $label);
+    }
+
+    /**
+     * Empty-state placeholder rendered as `<EmptyState icon="…" title="…" />`.
+     */
+    public static function emptyState(string $icon, string $title, ?string $description = null): string
+    {
+        return self::json('empty-state', [
+            'icon' => $icon,
+            'title' => $title,
+            'description' => $description,
+        ]);
+    }
+
+    /**
+     * Free-text filter that hides target rows whose `data-search` attribute does
+     * not contain the typed query. Items keep their original positioning; the
+     * filter only toggles `display: none`.
+     */
+    public static function filter(string $target, string $placeholder = 'Filter…'): string
+    {
+        return self::attrs('filter', ['target' => $target, 'placeholder' => $placeholder]);
+    }
+
+    /**
+     * Multi-select chip set. Each chip toggles inclusion; rows whose
+     * `$attr` (e.g. `data-tag`) does not match any active chip are hidden.
+     *
+     * @param list<array{value: string, label?: string, count?: int|float}> $items
+     */
+    public static function chips(string $target, string $attr, array $items): string
+    {
+        return self::compound('chips', $items, ['target' => $target, 'attr' => $attr]);
+    }
+
+    /**
+     * Tab strip — clicking a tab shows the matching `<section data-adp-tab-panel="$value">`
+     * and hides the rest. Useful for Summary/All views over the same data.
+     *
+     * @param list<array{value: string, label: string}> $items
+     */
+    public static function tabs(array $items, ?string $default = null): string
+    {
+        $attrs = $default !== null ? ['default' => $default] : [];
+        return self::compound('tabs', $items, $attrs);
+    }
+
+    /**
+     * @param array<string, scalar|null> $attrs
+     */
+    private static function compound(
+        string $name,
+        mixed $payload,
+        array $attrs,
+        string $label = '',
+        string $tag = 'div',
+    ): string {
+        $attrHtml = '';
+        foreach ($attrs as $key => $value) {
+            if ($value === null || $value === '') {
+                continue;
+            }
+            $attrHtml .= sprintf(' data-%s="%s"', self::escapeAttr((string) $key), self::escapeAttr((string) $value));
+        }
+
+        $body = '';
+        if ($payload !== null) {
+            $json = Json::encode($payload);
+            // Neutralise stray `</script>` inside string data.
+            $body = sprintf(
+                '<script type="application/json" %s>%s</script>',
+                self::PAYLOAD_ATTR,
+                str_replace('</', '<\/', $json),
+            );
+        }
+        if ($label !== '') {
+            $body .= self::escapeText($label);
+        }
+
+        return sprintf(
+            '<%1$s %2$s="%3$s"%4$s>%5$s</%1$s>',
+            self::escapeTag($tag),
+            self::ATTR_NAME,
+            self::escapeAttr($name),
+            $attrHtml,
+            $body,
+        );
+    }
+
     private static function escapeAttr(string $value): string
     {
         return htmlspecialchars($value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
@@ -123,7 +173,6 @@ final class Slot
 
     private static function escapeTag(string $tag): string
     {
-        // Tags are always developer-supplied and must be a simple identifier.
         if (preg_match('/^[a-zA-Z][a-zA-Z0-9-]*$/', $tag) !== 1) {
             throw new \InvalidArgumentException(sprintf('Invalid HTML tag name: %s', $tag));
         }

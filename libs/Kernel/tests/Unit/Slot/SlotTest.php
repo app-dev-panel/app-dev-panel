@@ -90,4 +90,55 @@ final class SlotTest extends TestCase
         $this->assertStringNotContainsString('"><img', $html);
         $this->assertStringContainsString('data-adp-slot="&quot;&gt;&lt;img onerror=x&gt;"', $html);
     }
+
+    public function testTooltipWrapsLabelWithDataText(): void
+    {
+        $html = Slot::tooltip('Time since previous event', '+0.5ms');
+        $this->assertStringStartsWith('<span data-adp-slot="tooltip"', $html);
+        $this->assertStringContainsString('data-text="Time since previous event"', $html);
+        $this->assertStringEndsWith('>+0.5ms</span>', $html);
+    }
+
+    public function testEmptyStateEmitsJsonPayload(): void
+    {
+        $html = Slot::emptyState('bolt', 'No events found', 'Try dispatching one');
+        $this->assertStringContainsString('data-adp-slot="empty-state"', $html);
+        $this->assertStringContainsString('"icon":"bolt"', $html);
+        $this->assertStringContainsString('"title":"No events found"', $html);
+        $this->assertStringContainsString('"description":"Try dispatching one"', $html);
+    }
+
+    public function testFilterEmitsTargetAndPlaceholder(): void
+    {
+        $html = Slot::filter('.adp-event-row', 'Filter events…');
+        $this->assertStringContainsString('data-adp-slot="filter"', $html);
+        $this->assertStringContainsString('data-target=".adp-event-row"', $html);
+        $this->assertStringContainsString('data-target=', $html);
+        $this->assertStringContainsString('Filter events', $html);
+    }
+
+    public function testChipsEmitsAttrsAndJsonItems(): void
+    {
+        $html = Slot::chips('.adp-event-row', 'data-tag', [
+            ['value' => 'Foo', 'label' => 'Foo', 'count' => 3],
+            ['value' => 'Bar', 'label' => 'Bar', 'count' => 1],
+        ]);
+        $this->assertStringContainsString('data-adp-slot="chips"', $html);
+        $this->assertStringContainsString('data-target=".adp-event-row"', $html);
+        $this->assertStringContainsString('data-attr="data-tag"', $html);
+        $this->assertStringContainsString('"value":"Foo"', $html);
+        $this->assertStringContainsString('"count":3', $html);
+    }
+
+    public function testTabsEmitsItemsWithOptionalDefault(): void
+    {
+        $html = Slot::tabs([
+            ['value' => 'summary', 'label' => 'Summary'],
+            ['value' => 'all', 'label' => 'All'],
+        ], 'all');
+        $this->assertStringContainsString('data-adp-slot="tabs"', $html);
+        $this->assertStringContainsString('data-default="all"', $html);
+        $this->assertStringContainsString('"value":"summary"', $html);
+        $this->assertStringContainsString('"value":"all"', $html);
+    }
 }

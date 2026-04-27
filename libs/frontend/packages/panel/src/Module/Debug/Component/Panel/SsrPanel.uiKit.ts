@@ -48,6 +48,26 @@ export const ssrUiKitSx: SxProps<Theme> = {
     '& [data-severity="info"]': {'--adp-sev': (theme: Theme) => theme.palette.success.main},
     '& [data-severity="debug"]': {'--adp-sev': (theme: Theme) => theme.palette.text.disabled},
 
+    // ----- Accent colour token -----------------------------------------------
+    // Set on any element via `data-color-index="0..3"`. Hash-bucketed colors
+    // for non-severity highlights (event names, tag clusters, etc.).
+    '& [data-color-index="0"]': {'--adp-accent': (theme: Theme) => theme.palette.primary.main},
+    '& [data-color-index="1"]': {'--adp-accent': (theme: Theme) => theme.palette.success.main},
+    '& [data-color-index="2"]': {'--adp-accent': (theme: Theme) => theme.palette.warning.main},
+    '& [data-color-index="3"]': {'--adp-accent': (theme: Theme) => theme.palette.error.main},
+    '& .adp-ui-accent-bar': {borderLeft: '3px solid', borderLeftColor: 'var(--adp-accent, transparent)'},
+    '& .adp-ui-dot': {
+        display: 'inline-block',
+        width: 8,
+        height: 8,
+        borderRadius: '50%',
+        backgroundColor: 'var(--adp-accent, currentColor)',
+        flexShrink: 0,
+    },
+
+    // ----- Responsive helpers ------------------------------------------------
+    '@media (max-width: 600px)': {'& .adp-ui-hide-sm': {display: 'none'}},
+
     // ----- Chip (mirrors <Chip size="small" variant="outlined">) -------------
     '& .adp-ui-chip': {
         display: 'inline-flex',
