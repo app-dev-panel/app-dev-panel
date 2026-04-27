@@ -2,11 +2,17 @@
 
 declare(strict_types=1);
 
+use AppDevPanel\Api\Debug\Slot\Slot;
+
 /**
  * SSR Log Panel — server-rendered fragment.
  *
  * Uses **only** the generic `adp-ui-*` UI kit shipped by `SsrPanel` (see
  * `libs/frontend/packages/panel/src/Module/Debug/Component/Panel/SsrPanel.uiKit.ts`).
+ * Live React primitives (file links, structured payloads, class names…) are
+ * embedded via the `Slot::*` helper — the panel hydrates each marker into the
+ * matching React component on mount, with full theme/Redux/router context.
+ *
  * The template carries no colors and no theme-mode awareness — severity tinting
  * is driven by `data-severity="…"` attributes, layout numbers that are genuinely
  * log-specific (the time column width, the indent of the detail block) ride on
@@ -89,17 +95,12 @@ $h = static fn(string $s): string => htmlspecialchars($s, ENT_QUOTES, 'UTF-8');
                     <?php if ($hasDetails): ?>
                         <div class="adp-ui-card-section adp-ui-card--inset" style="padding-left: 134px; border-top: 1px solid; border-color: inherit; font-size: 12px;">
                             <?php if ($line !== ''): ?>
-                                <div class="adp-ui-mono" style="color: var(--adp-sev, inherit); margin-bottom: 8px; word-break: break-all;" data-severity="notice">
-                                    <?= $h($line) ?>
+                                <div style="margin-bottom: 8px; word-break: break-all;">
+                                    <?= Slot::attrs('file-link', ['path' => $line], $line, 'a') ?>
                                 </div>
                             <?php endif; ?>
                             <?php if (is_array($context) && $context !== []): ?>
-                                <pre class="adp-ui-code"><?= $h(
-                                    json_encode(
-                                        $context,
-                                        JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES,
-                                    ) ?: '',
-                                ) ?></pre>
+                                <?= Slot::json('json', $context) ?>
                             <?php endif; ?>
                         </div>
                     <?php endif; ?>
