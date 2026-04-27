@@ -5,7 +5,7 @@ import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {ExplainPlanVisualizer} from '@app-dev-panel/sdk/Component/ExplainPlanVisualizer';
 import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
 import {DataTable} from '@app-dev-panel/sdk/Component/Grid';
-import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
+import {PageToolbar} from '@app-dev-panel/sdk/Component/PageToolbar';
 import {SqlHighlight} from '@app-dev-panel/sdk/Component/SqlHighlight';
 import {formatMillisecondsAsDuration} from '@app-dev-panel/sdk/Helper/formatDate';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
@@ -132,9 +132,10 @@ const QueriesView = ({queries, duplicates}: {queries: Query[]; duplicates: Dupli
 
     return (
         <Box>
-            <SectionTitle
-                action={
-                    <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
+            <PageToolbar
+                sticky
+                actions={
+                    <>
                         {hasDuplicates && (
                             <ToggleButtonGroup
                                 value={viewMode}
@@ -162,7 +163,7 @@ const QueriesView = ({queries, duplicates}: {queries: Query[]; duplicates: Dupli
                             </ToggleButtonGroup>
                         )}
                         <FilterInput value={filter} onChange={setFilter} placeholder="Filter SQL..." />
-                    </Box>
+                    </>
                 }
             >
                 {`${filtered.length} queries · ${formatMillisecondsAsDuration(totalTime)} total`}
@@ -174,7 +175,7 @@ const QueriesView = ({queries, duplicates}: {queries: Query[]; duplicates: Dupli
                         sx={{fontSize: '10px', height: 18, borderRadius: 1, ml: 1}}
                     />
                 )}
-            </SectionTitle>
+            </PageToolbar>
 
             {viewMode === 'grouped' && groupedView
                 ? groupedView.map((group) => (

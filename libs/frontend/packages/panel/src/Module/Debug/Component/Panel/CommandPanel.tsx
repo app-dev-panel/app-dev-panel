@@ -1,5 +1,6 @@
 import {ClassName} from '@app-dev-panel/panel/Application/Component/ClassName';
 import {JsonRenderer} from '@app-dev-panel/panel/Module/Debug/Component/JsonRenderer';
+import {PageToolbar} from '@app-dev-panel/sdk/Component/PageToolbar';
 import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
 import {Box, Chip, Collapse, Icon, Tab, Tabs, Typography, type Theme} from '@mui/material';
 import {styled, useTheme} from '@mui/material/styles';
@@ -111,7 +112,7 @@ const OverviewTab = ({data}: {data: Record<string, CommandEvent>}) => {
 
     return (
         <TabPanel>
-            <SectionTitle>Command Info</SectionTitle>
+            <PageToolbar sticky>Command Info</PageToolbar>
             <Box sx={{borderRadius: 1, border: '1px solid', borderColor: 'divider', overflow: 'hidden', mb: 2}}>
                 <InfoTable>
                     <tbody>

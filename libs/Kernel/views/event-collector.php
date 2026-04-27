@@ -63,16 +63,15 @@ foreach ($counts as $name => $count) {
 <?php if ($events === []): ?>
     <?= Slot::emptyState('bolt', 'No dispatched events found') ?>
 <?php else: ?>
-    <div class="adp-ui-stack">
-        <div class="adp-ui-row adp-ui-row--center adp-ui-row--between adp-ui-row--wrap">
-            <span class="adp-ui-text-secondary adp-ui-text-strong">
-                <?= count($events) ?> event<?= count($events) === 1 ? '' : 's' ?>
-            </span>
-            <?= Slot::filter('.adp-ui-event-row', 'Filter events…') ?>
-        </div>
+    <div>
+        <?= Slot::pageToolbar(
+            sprintf('%d event%s', count($events), count($events) === 1 ? '' : 's'),
+            '.adp-ui-event-row',
+            'Filter events…',
+        ) ?>
 
         <?php if (count($chipItems) > 1): ?>
-            <div class="adp-ui-row adp-ui-row--wrap" style="gap: 6px;">
+            <div class="adp-ui-row adp-ui-row--wrap" style="gap: 6px; padding: 12px 12px 0;">
                 <?= Slot::chips('.adp-ui-event-row', 'data-tag', $chipItems) ?>
             </div>
         <?php endif; ?>

@@ -2,7 +2,7 @@ import {ClassName} from '@app-dev-panel/panel/Application/Component/ClassName';
 import {JsonRenderer} from '@app-dev-panel/panel/Module/Debug/Component/JsonRenderer';
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
-import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
+import {PageToolbar} from '@app-dev-panel/sdk/Component/PageToolbar';
 import {Box, Chip, Collapse, Icon, IconButton, Typography} from '@mui/material';
 import {styled} from '@mui/material/styles';
 import {useDeferredValue, useState} from 'react';
@@ -87,9 +87,10 @@ export const AssetBundlePanel = ({data}: AssetBundlePanelProps) => {
 
     return (
         <Box>
-            <SectionTitle
-                action={<FilterInput value={filter} onChange={setFilter} placeholder="Filter bundles..." />}
-            >{`${filtered.length} bundles`}</SectionTitle>
+            <PageToolbar
+                sticky
+                actions={<FilterInput value={filter} onChange={setFilter} placeholder="Filter bundles..." />}
+            >{`${filtered.length} bundles`}</PageToolbar>
 
             {filtered.map(([key, bundle]) => {
                 const expanded = expandedKey === key;

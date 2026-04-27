@@ -99,13 +99,11 @@ $h = static fn(string $s): string => htmlspecialchars($s, ENT_QUOTES, 'UTF-8');
     ]) ?>
 
     <section data-adp-tab-panel="summary">
-        <div class="adp-ui-stack">
-            <span class="adp-ui-text-secondary adp-ui-text-strong">
-                <?= count($summary) ?> unique method<?= count($summary) === 1 ? '' : 's' ?>
-                <?php if ($totalErrors > 0): ?>
-                    · <span data-severity="error" style="color: var(--adp-sev);"><?= $totalErrors ?> failed</span>
-                <?php endif; ?>
-            </span>
+        <div>
+            <?= Slot::pageToolbar(
+                sprintf('%d unique method%s', count($summary), count($summary) === 1 ? '' : 's')
+                . ($totalErrors > 0 ? sprintf(' · %d failed', $totalErrors) : ''),
+            ) ?>
             <div class="adp-ui-card adp-ui-list">
                 <?php foreach ($summary as $row):
                     $count = $row['count'];
@@ -151,16 +149,13 @@ $h = static fn(string $s): string => htmlspecialchars($s, ENT_QUOTES, 'UTF-8');
     </section>
 
     <section data-adp-tab-panel="all">
-        <div class="adp-ui-stack">
-            <div class="adp-ui-row adp-ui-row--center adp-ui-row--between adp-ui-row--wrap">
-                <span class="adp-ui-text-secondary adp-ui-text-strong">
-                    <?= $totalCalls ?> service call<?= $totalCalls === 1 ? '' : 's' ?>
-                    <?php if ($totalErrors > 0): ?>
-                        · <span data-severity="error" style="color: var(--adp-sev);"><?= $totalErrors ?> failed</span>
-                    <?php endif; ?>
-                </span>
-                <?= Slot::filter('.adp-ui-service-row', 'Filter services…') ?>
-            </div>
+        <div>
+            <?= Slot::pageToolbar(
+                sprintf('%d service call%s', $totalCalls, $totalCalls === 1 ? '' : 's')
+                . ($totalErrors > 0 ? sprintf(' · %d failed', $totalErrors) : ''),
+                '.adp-ui-service-row',
+                'Filter services…',
+            ) ?>
             <div class="adp-ui-card adp-ui-list">
                 <?php foreach ($items as $entry):
                     $service = (string) ($entry['service'] ?? '');

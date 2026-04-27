@@ -1,6 +1,7 @@
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
 import {JsonRenderer} from '@app-dev-panel/sdk/Component/JsonRenderer';
+import {PageToolbar} from '@app-dev-panel/sdk/Component/PageToolbar';
 import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
 import {Box, Chip, Collapse, Icon, LinearProgress, Tooltip, Typography} from '@mui/material';
 import {styled, useTheme} from '@mui/material/styles';
@@ -278,9 +279,10 @@ export const CachePanel = ({data}: CachePanelProps) => {
             <PoolBreakdown operations={operations} />
 
             {/* Operations table */}
-            <SectionTitle
-                action={<FilterInput value={filter} onChange={setFilter} placeholder="Filter operations..." />}
-            >{`${filtered.length} operations`}</SectionTitle>
+            <PageToolbar
+                sticky
+                actions={<FilterInput value={filter} onChange={setFilter} placeholder="Filter operations..." />}
+            >{`${filtered.length} operations`}</PageToolbar>
 
             {filtered.map((op, index) => {
                 const isHit = op.operation === 'get' && op.hit;

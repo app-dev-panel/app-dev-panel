@@ -9,7 +9,7 @@ import {LinkProps, MenuPanel} from '@app-dev-panel/sdk/Component/MenuPanel';
 import {PageHeader} from '@app-dev-panel/sdk/Component/PageHeader';
 import InboxIcon from '@mui/icons-material/Inbox';
 import MailIcon from '@mui/icons-material/Mail';
-import {Link, Typography} from '@mui/material';
+import {Box, Link, Typography} from '@mui/material';
 import {useEffect, useMemo, useState} from 'react';
 import {ErrorBoundary} from 'react-error-boundary';
 import {useSearchParams} from 'react-router';
@@ -42,7 +42,7 @@ const Layout = () => {
     }
 
     return (
-        <>
+        <Box sx={{p: {xs: 1.5, sm: 3.5}}}>
             <PageHeader title="Code Generator" icon="build_circle" description="Generate code from templates" />
             {links.length === 0 ? (
                 <InfoBox
@@ -82,7 +82,7 @@ const Layout = () => {
                     )}
                 </MenuPanel>
             )}
-        </>
+        </Box>
     );
 };
 

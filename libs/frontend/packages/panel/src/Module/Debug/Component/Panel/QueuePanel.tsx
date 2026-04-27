@@ -2,6 +2,7 @@ import {ClassName} from '@app-dev-panel/panel/Application/Component/ClassName';
 import {JsonRenderer} from '@app-dev-panel/panel/Module/Debug/Component/JsonRenderer';
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
+import {PageToolbar} from '@app-dev-panel/sdk/Component/PageToolbar';
 import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
 import {formatMillisecondsAsDuration} from '@app-dev-panel/sdk/Helper/formatDate';
 import {TabContext, TabPanel} from '@mui/lab';
@@ -360,8 +361,9 @@ const MessagesView = ({messages, duplicates}: {messages: Message[]; duplicates: 
 
     return (
         <Box>
-            <SectionTitle
-                action={
+            <PageToolbar
+                sticky
+                actions={
                     <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
                         {hasDuplicates && (
                             <ToggleButtonGroup
@@ -402,7 +404,7 @@ const MessagesView = ({messages, duplicates}: {messages: Message[]; duplicates: 
                         sx={{fontSize: '10px', height: 18, borderRadius: 1, ml: 1}}
                     />
                 )}
-            </SectionTitle>
+            </PageToolbar>
             {viewMode === 'grouped' && groupedView
                 ? groupedView.map((group) => (
                       <DuplicateMessageGroup

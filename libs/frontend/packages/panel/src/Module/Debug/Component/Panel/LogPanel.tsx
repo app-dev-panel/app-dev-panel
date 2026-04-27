@@ -2,7 +2,7 @@ import {JsonRenderer} from '@app-dev-panel/panel/Module/Debug/Component/JsonRend
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {FileLink} from '@app-dev-panel/sdk/Component/FileLink';
 import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
-import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
+import {PageToolbar} from '@app-dev-panel/sdk/Component/PageToolbar';
 import {formatMicrotime} from '@app-dev-panel/sdk/Helper/formatDate';
 import {searchVariants} from '@app-dev-panel/sdk/Helper/layoutTranslit';
 import {usePathMapper} from '@app-dev-panel/sdk/Helper/usePathMapper';
@@ -131,12 +131,22 @@ export const LogPanel = ({data}: LogPanelProps) => {
 
     return (
         <Box>
-            <SectionTitle
-                action={<FilterInput value={filter} onChange={setFilter} placeholder="Filter logs..." />}
-            >{`${filtered.length} log entries`}</SectionTitle>
+            <PageToolbar
+                sticky
+                actions={<FilterInput value={filter} onChange={setFilter} placeholder="Filter logs..." />}
+            >{`${filtered.length} log entries`}</PageToolbar>
 
             {presentLevels.length > 1 && (
-                <Box sx={{display: 'flex', flexWrap: 'wrap', gap: 0.75, mb: 2}}>
+                <Box
+                    sx={(t) => ({
+                        display: 'flex',
+                        flexWrap: 'wrap',
+                        gap: 0.75,
+                        padding: t.spacing(1, 1.5),
+                        [t.breakpoints.up('sm')]: {padding: t.spacing(1, 2.5)},
+                        borderBottom: `1px solid ${t.palette.divider}`,
+                    })}
+                >
                     {presentLevels.map((level) => {
                         const color = levelColor(level, theme);
                         const isActive = activeLevels.has(level);

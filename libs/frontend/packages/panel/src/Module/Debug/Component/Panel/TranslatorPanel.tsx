@@ -1,6 +1,6 @@
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
-import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
+import {PageToolbar} from '@app-dev-panel/sdk/Component/PageToolbar';
 import {Box, Chip, Icon, Link as MuiLink, Typography} from '@mui/material';
 import {styled, useTheme} from '@mui/material/styles';
 import {useDeferredValue, useMemo, useState} from 'react';
@@ -183,9 +183,10 @@ export const TranslatorPanel = ({data}: TranslatorPanelProps) => {
             </SummaryGrid>
 
             {/* Translation list */}
-            <SectionTitle
-                action={<FilterInput value={filter} onChange={setFilter} placeholder="Filter translations..." />}
-            >{`${filtered.length} translations`}</SectionTitle>
+            <PageToolbar
+                sticky
+                actions={<FilterInput value={filter} onChange={setFilter} placeholder="Filter translations..." />}
+            >{`${filtered.length} translations`}</PageToolbar>
 
             {filtered.map((t, index) => (
                 <TranslationRow key={index} isMissing={t.missing}>
