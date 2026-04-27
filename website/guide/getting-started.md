@@ -68,6 +68,14 @@ return [
     AppDevPanel\Adapter\Symfony\AppDevPanelBundle::class => ['dev' => true, 'test' => true],
 ];
 ```
+```php
+// config/routes/app_dev_panel.php — mounts /debug, /debug/api/*, /inspect/api/*
+use Symfony\Component\Routing\Loader\Configurator\RoutingConfigurator;
+
+return static function (RoutingConfigurator $routes): void {
+    $routes->import('@AppDevPanelBundle/config/routes/adp.php');
+};
+```
 == Yii 2
 ```php
 // config/web.php

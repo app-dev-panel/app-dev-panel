@@ -30,6 +30,13 @@ export default defineConfig(async () => ({
     build: {
         rollupOptions: {
             output: {
+                // Single self-contained bundle.js — no `assets/*-[hash].js`
+                // chunks. The toolbar is small enough that code-splitting
+                // saves nothing and creates a deploy gotcha: when adapters
+                // emit `<script src="{staticUrl}/toolbar/bundle.js">` and
+                // chunks fail to ship to a particular CDN/asset-publish path,
+                // the toolbar silently fails to bootstrap.
+                inlineDynamicImports: true,
                 assetFileNames: (assetInfo) => {
                     const name = assetInfo.names?.[0] ?? '';
                     if (/\.(woff2?|ttf|eot)$/.test(name)) {

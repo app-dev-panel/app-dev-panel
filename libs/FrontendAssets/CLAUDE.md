@@ -55,7 +55,7 @@ Every framework adapter, plus the CLI module itself, with all four adapters wiri
 | `app-dev-panel/adapter-yii3` — `config/di-api.php` (`PanelConfig` factory) | Symlinks `FrontendAssets::path()` into `@public/app-dev-panel` |
 | `app-dev-panel/adapter-laravel` — `AppDevPanelServiceProvider::resolveAssetSource()` | Publishes `FrontendAssets::path()` to `public/vendor/app-dev-panel` via `vendor:publish` |
 | `app-dev-panel/adapter-spiral` | Pulls `FrontendAssets` transitively via the CLI module |
-| `app-dev-panel/adapter-symfony` — `Controller\AdpAssetsController` + `Command\AssetsInstallCommand` | Runtime streams `FrontendAssets::path()/*` at `/_adp-assets`; opt-in `bin/console app-dev-panel:assets:install` copies/symlinks the same dir into `public/bundles/appdevpanel/` for nginx-served setups |
+| `app-dev-panel/adapter-symfony` — `Command\AssetsInstallCommand` | `bin/console app-dev-panel:assets:install` copies/symlinks `FrontendAssets::path()` into `public/bundles/appdevpanel/` so the web server serves the bundle directly |
 
 Each adapter falls back to its own `resources/dist/` (legacy `make build-panel` target) when `FrontendAssets::exists()` is `false` — useful for monorepo development before a release build.
 

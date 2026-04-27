@@ -11,8 +11,8 @@ use Symfony\Component\Console\Tester\CommandTester;
 
 /**
  * Covers `app-dev-panel:assets:install` — copies (or symlinks) the FrontendAssets
- * dist into `<public-dir>/bundles/appdevpanel/` so users who want nginx to serve
- * the panel statically don't need the runtime `AdpAssetsController`.
+ * dist into `<public-dir>/bundles/appdevpanel/` so the web server (nginx/Apache)
+ * serves the panel + toolbar bundle directly.
  *
  * Each test provides its own fixture source directory via the `$sourceDir`
  * constructor argument, so we don't depend on whether `libs/FrontendAssets/dist/`
