@@ -1,7 +1,9 @@
 import {addFrame, deleteFrame, useFramesEntries} from '@app-dev-panel/panel/Module/Frames/Context/Context';
+import {useGetProjectConfigQuery} from '@app-dev-panel/sdk/API/Project/Project';
 import {Close, Remove} from '@mui/icons-material';
 import CheckIcon from '@mui/icons-material/Check';
 import {
+    Alert,
     IconButton,
     List,
     ListItem,
@@ -25,6 +27,7 @@ export const SettingsDialog = (props: SettingsDialogProps) => {
     const dispatch = useDispatch();
 
     const frames = useFramesEntries();
+    const {data: projectConfig, isError: projectConfigUnreachable} = useGetProjectConfigQuery();
 
     const handleClose = () => {
         props.onClose();
@@ -85,6 +88,17 @@ export const SettingsDialog = (props: SettingsDialogProps) => {
                         <CheckIcon />
                     </IconButton>
                 </Box>
+                {projectConfig?.configDir && (
+                    <Alert severity="info" sx={{mt: 2}}>
+                        Synced to <code>{projectConfig.configDir}/project.json</code>. Commit it to share with your
+                        team.
+                    </Alert>
+                )}
+                {projectConfigUnreachable && (
+                    <Alert severity="warning" sx={{mt: 2}}>
+                        Backend unreachable — frames are saved locally and will sync when the connection is restored.
+                    </Alert>
+                )}
             </DialogContent>
             <DialogActions sx={{px: 3, py: 1.5}}>
                 <Button variant="text" color="inherit" onClick={handleClose} sx={{color: 'text.secondary'}}>

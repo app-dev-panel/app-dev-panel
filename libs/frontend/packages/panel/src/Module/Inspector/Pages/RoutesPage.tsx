@@ -5,8 +5,8 @@ import {FilterChip} from '@app-dev-panel/sdk/Component/FilterChip';
 import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
 import {FullScreenCircularProgress} from '@app-dev-panel/sdk/Component/FullScreenCircularProgress';
 import {PageHeader} from '@app-dev-panel/sdk/Component/PageHeader';
+import {PageToolbar} from '@app-dev-panel/sdk/Component/PageToolbar';
 import {QueryErrorState} from '@app-dev-panel/sdk/Component/QueryErrorState';
-import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
 import {serializeCallable} from '@app-dev-panel/sdk/Helper/callableSerializer';
 import {concatClassMethod} from '@app-dev-panel/sdk/Helper/classMethodConcater';
 import {ContentCopy, OpenInNew} from '@mui/icons-material';
@@ -474,7 +474,7 @@ export const RoutesPage = () => {
 
     if (isError) {
         return (
-            <>
+            <Box sx={{p: {xs: 1.5, sm: 3.5}}}>
                 <PageHeader title="Routes" icon="alt_route" description="View and check application routes" />
                 <QueryErrorState
                     error={error}
@@ -482,28 +482,26 @@ export const RoutesPage = () => {
                     fallback="Failed to load routes."
                     onRetry={refetch}
                 />
-            </>
+            </Box>
         );
     }
 
     return (
         <>
-            <PageHeader title="Routes" icon="alt_route" description="View and check application routes" />
+            <PageToolbar
+                sticky
+                actions={<FilterInput value={filter} onChange={setFilter} placeholder="Filter routes..." />}
+            >{`${filtered.length} routes`}</PageToolbar>
 
             <RouteChecker />
 
-            {/* Routes list */}
             {routes.length === 0 ? (
                 <EmptyState icon="alt_route" title="No routes found" />
             ) : (
                 <Box>
-                    <SectionTitle
-                        action={<FilterInput value={filter} onChange={setFilter} placeholder="Filter routes..." />}
-                    >{`${filtered.length} routes`}</SectionTitle>
-
                     {/* Method filter badges */}
                     {badgeCounts.length > 1 && (
-                        <Box sx={{display: 'flex', flexWrap: 'wrap', gap: 0.75, mb: 2}}>
+                        <Box sx={{display: 'flex', flexWrap: 'wrap', gap: 0.75, mb: 2, px: {xs: 1.5, sm: 2.5}}}>
                             {badgeCounts.map(([method, count]) => (
                                 <FilterChip
                                     key={method}

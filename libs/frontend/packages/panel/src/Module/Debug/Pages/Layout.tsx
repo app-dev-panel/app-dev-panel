@@ -7,7 +7,6 @@ import {CommandPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/Co
 import {DatabasePanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/DatabasePanel';
 import {ElasticsearchPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/ElasticsearchPanel';
 import {EnvironmentPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/EnvironmentPanel';
-import {EventPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/EventPanel';
 import {ExceptionPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/ExceptionPanel';
 import {IOPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/IOPanel';
 import {MailerPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/MailerPanel';
@@ -17,7 +16,7 @@ import {QueuePanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/Queu
 import {RedisPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/RedisPanel';
 import {RequestPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/RequestPanel';
 import {RouterPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/RouterPanel';
-import {ServicesPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/ServicesPanel';
+import {SsrPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/SsrPanel';
 import {TemplatePanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/TemplatePanel';
 import {TimelinePanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/TimelinePanel';
 import {TranslatorPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/TranslatorPanel';
@@ -31,6 +30,8 @@ import {DuckIcon} from '@app-dev-panel/sdk/Component/DuckIcon';
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {ErrorFallback} from '@app-dev-panel/sdk/Component/ErrorFallback';
 import {InfoBox} from '@app-dev-panel/sdk/Component/InfoBox';
+import {PanelBreadcrumbProvider} from '@app-dev-panel/sdk/Component/PanelBreadcrumb';
+import {getCollectorLabel} from '@app-dev-panel/sdk/Helper/collectorMeta';
 import {CollectorsMap} from '@app-dev-panel/sdk/Helper/collectors';
 import {isDebugEntryAboutConsole, isDebugEntryAboutWeb} from '@app-dev-panel/sdk/Helper/debugEntry';
 import {extractErrorMessage} from '@app-dev-panel/sdk/Helper/extractErrorMessage';
@@ -132,7 +133,6 @@ function CollectorData({collectorData, selectedCollector}: CollectorDataProps) {
     const baseUrl = useSelector((state) => state.application.baseUrl) as string;
     const pages: {[name: string]: (data: any) => React.JSX.Element} = {
         [CollectorsMap.MailerCollector]: (data: any) => <MailerPanel data={data} />,
-        [CollectorsMap.ServiceCollector]: (data: any) => <ServicesPanel data={data} />,
         [CollectorsMap.TimelineCollector]: (data: any) => <TimelinePanel data={data} />,
         [CollectorsMap.LogCollector]: (data: any) => <UnifiedLogWrapper logs={data} />,
         [CollectorsMap.DatabaseCollector]: (data: any) => <DatabasePanel data={data} />,
@@ -145,7 +145,6 @@ function CollectorData({collectorData, selectedCollector}: CollectorDataProps) {
         [CollectorsMap.RequestCollector]: (data: any) => <RequestPanel data={data} />,
         [CollectorsMap.CommandCollector]: (data: any) => <CommandPanel data={data} />,
         [CollectorsMap.MiddlewareCollector]: (data: any) => <MiddlewarePanel {...data} />,
-        [CollectorsMap.EventCollector]: (data: any) => <EventPanel events={data} />,
         [CollectorsMap.ExceptionCollector]: (data: any) => <ExceptionPanel exceptions={data} />,
         [CollectorsMap.DeprecationCollector]: (data: any) => (
             <UnifiedLogPanel logs={[]} deprecations={data} dumps={[]} />
@@ -165,6 +164,9 @@ function CollectorData({collectorData, selectedCollector}: CollectorDataProps) {
         [CollectorsMap.RedisCollector]: (data: any) => <RedisPanel data={data} />,
         [CollectorsMap.CodeCoverageCollector]: (data: any) => <CodeCoveragePanel data={data} />,
         default: (data: any) => {
+            if (data && typeof data === 'object' && typeof data.__html === 'string') {
+                return <SsrPanel html={data.__html} />;
+            }
             if (typeof data === 'object' && data.__isPanelRemote__) {
                 return (
                     <React.Suspense fallback={`Loading`}>
@@ -422,7 +424,9 @@ const Layout = () => {
                 )}
                 {collectorQueryInfo.isSuccess && (
                     <ErrorBoundary FallbackComponent={ErrorFallback} resetKeys={[selectedCollector, debugEntry]}>
-                        <CollectorData selectedCollector={selectedCollector} collectorData={collectorData} />
+                        <PanelBreadcrumbProvider label={getCollectorLabel(selectedCollector)}>
+                            <CollectorData selectedCollector={selectedCollector} collectorData={collectorData} />
+                        </PanelBreadcrumbProvider>
                     </ErrorBoundary>
                 )}
             </>

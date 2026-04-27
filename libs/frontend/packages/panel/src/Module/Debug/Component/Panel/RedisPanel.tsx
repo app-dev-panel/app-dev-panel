@@ -1,6 +1,7 @@
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
 import {JsonRenderer} from '@app-dev-panel/sdk/Component/JsonRenderer';
+import {PageToolbar} from '@app-dev-panel/sdk/Component/PageToolbar';
 import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
 import {monoFontFamily} from '@app-dev-panel/sdk/Component/Theme/DefaultTheme';
 import {Box, Chip, Collapse, Icon, Tooltip, Typography} from '@mui/material';
@@ -276,9 +277,10 @@ export const RedisPanel = ({data}: RedisPanelProps) => {
             <ConnectionBreakdown commands={commands} />
 
             {/* Commands table */}
-            <SectionTitle
-                action={<FilterInput value={filter} onChange={setFilter} placeholder="Filter commands..." />}
-            >{`${filtered.length} commands`}</SectionTitle>
+            <PageToolbar
+                sticky
+                actions={<FilterInput value={filter} onChange={setFilter} placeholder="Filter commands..." />}
+            >{`${filtered.length} commands`}</PageToolbar>
 
             {filtered.map((cmd, index) => {
                 const expanded = expandedIndex === index;

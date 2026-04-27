@@ -1,7 +1,7 @@
 import {VarDumpValue} from '@app-dev-panel/panel/Module/Debug/Component/VarDumpValue';
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {FileLink} from '@app-dev-panel/sdk/Component/FileLink';
-import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
+import {PageToolbar} from '@app-dev-panel/sdk/Component/PageToolbar';
 import {Box, Icon, Typography} from '@mui/material';
 import {styled} from '@mui/material/styles';
 
@@ -49,9 +49,7 @@ export const VarDumperPanel = ({data}: VarDumperPanelProps) => {
 
     return (
         <Box>
-            <Box sx={{display: 'flex', alignItems: 'center', gap: 2, mb: 2}}>
-                <SectionTitle>{`${data.length} dump${data.length !== 1 ? 's' : ''}`}</SectionTitle>
-            </Box>
+            <PageToolbar sticky>{`${data.length} dump${data.length !== 1 ? 's' : ''}`}</PageToolbar>
 
             {data.map((entry, index) => (
                 <DumpCard key={index}>

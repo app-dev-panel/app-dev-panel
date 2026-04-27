@@ -95,10 +95,14 @@ final class WebAppInfoCollectorTest extends AbstractCollectorTestCase
     public function testMarkApplicationStartedWhenInactive(): void
     {
         $collector = new WebAppInfoCollector(new TimelineCollector());
-        // Not started — should be no-op
+        // Not started — mark*() must be a no-op. We can't compare full
+        // getCollected() because memoryPeakUsage / memoryUsage drift between
+        // calls; assert only the timing fields the mark*() methods mutate.
         $collector->markApplicationStarted();
         $collector->markApplicationFinished();
 
-        $this->assertSame([], $collector->getCollected());
+        $data = $collector->getCollected();
+        $this->assertSame(0.0, $data['applicationProcessingTime']);
+        $this->assertSame(0.0, $data['requestProcessingTime']);
     }
 }

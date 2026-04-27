@@ -1,3 +1,4 @@
+import {PanelBreadcrumbInline, usePanelBreadcrumb} from '@app-dev-panel/sdk/Component/PanelBreadcrumb';
 import {Box} from '@mui/material';
 import {styled} from '@mui/material/styles';
 import React from 'react';
@@ -42,9 +43,15 @@ const Actions = styled(Box)(({theme}) => ({
     flexShrink: 0,
 }));
 
-export const PageToolbar = ({children, actions, sticky}: PageToolbarProps) => (
-    <Root sticky={sticky}>
-        <Label>{children}</Label>
-        {actions && <Actions>{actions}</Actions>}
-    </Root>
-);
+export const PageToolbar = ({children, actions, sticky}: PageToolbarProps) => {
+    const breadcrumb = usePanelBreadcrumb();
+    return (
+        <Root sticky={sticky}>
+            <Label>
+                {sticky && breadcrumb && <PanelBreadcrumbInline label={breadcrumb} />}
+                {children}
+            </Label>
+            {actions && <Actions>{actions}</Actions>}
+        </Root>
+    );
+};

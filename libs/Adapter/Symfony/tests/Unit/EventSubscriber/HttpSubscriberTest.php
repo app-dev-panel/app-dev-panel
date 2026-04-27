@@ -83,8 +83,9 @@ final class HttpSubscriberTest extends TestCase
 
         $subscriber->onKernelRequest($event);
 
-        // Sub-request should not trigger collection
-        $this->assertSame([], $requestCollector->getCollected());
+        // Sub-request should not trigger collection — no request was captured.
+        $this->assertSame('', $requestCollector->getCollected()['requestPath']);
+        $this->assertSame('', $requestCollector->getCollected()['requestMethod']);
     }
 
     public function testOnKernelRequestCollectsRequestData(): void
@@ -265,8 +266,9 @@ final class HttpSubscriberTest extends TestCase
 
         $subscriber->onKernelRequest($event);
 
-        // RequestCollector should NOT have any data for ADP API paths
-        $this->assertSame([], $requestCollector->getCollected());
+        // RequestCollector must not have captured the ADP path — fields stay null.
+        $this->assertSame('', $requestCollector->getCollected()['requestPath']);
+        $this->assertSame('', $requestCollector->getCollected()['requestMethod']);
     }
 
     public function testOnKernelRequestSkipsInspectApiPath(): void
@@ -285,7 +287,8 @@ final class HttpSubscriberTest extends TestCase
 
         $subscriber->onKernelRequest($event);
 
-        $this->assertSame([], $requestCollector->getCollected());
+        $this->assertSame('', $requestCollector->getCollected()['requestPath']);
+        $this->assertSame('', $requestCollector->getCollected()['requestMethod']);
     }
 
     public function testOnKernelResponseSkipsDebugApiPath(): void

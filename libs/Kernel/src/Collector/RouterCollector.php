@@ -61,10 +61,6 @@ final class RouterCollector implements SummaryCollectorInterface
 
     public function getCollected(): array
     {
-        if (!$this->isActive()) {
-            return [];
-        }
-
         $result = [
             'currentRoute' => $this->currentRoute,
         ];
@@ -80,10 +76,6 @@ final class RouterCollector implements SummaryCollectorInterface
 
     public function getSummary(): array
     {
-        if (!$this->isActive()) {
-            return [];
-        }
-
         if ($this->currentRoute === null) {
             return [];
         }

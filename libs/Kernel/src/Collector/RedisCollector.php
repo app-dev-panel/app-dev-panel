@@ -44,10 +44,6 @@ final class RedisCollector implements SummaryCollectorInterface
 
     public function getCollected(): array
     {
-        if (!$this->isActive()) {
-            return [];
-        }
-
         return [
             'commands' => $this->commands,
             'totalTime' => $this->totalTime,
@@ -59,10 +55,6 @@ final class RedisCollector implements SummaryCollectorInterface
 
     public function getSummary(): array
     {
-        if (!$this->isActive()) {
-            return [];
-        }
-
         return [
             'redis' => [
                 'commandCount' => count($this->commands),

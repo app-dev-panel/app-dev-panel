@@ -60,6 +60,7 @@ ADP includes an MCP (Model Context Protocol) server that exposes debug data to A
 | Yii 2 | Stable |
 | Yii 3 | Stable |
 | Laravel 12 | Stable |
+| Spiral 3 | Beta (PSR-15 native, MVP) |
 
 ## Philosophy
 

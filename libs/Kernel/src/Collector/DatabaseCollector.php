@@ -157,10 +157,6 @@ final class DatabaseCollector implements SummaryCollectorInterface
 
     public function getCollected(): array
     {
-        if (!$this->isActive()) {
-            return [];
-        }
-
         $queries = array_values($this->queries);
 
         return [
@@ -174,10 +170,6 @@ final class DatabaseCollector implements SummaryCollectorInterface
 
     public function getSummary(): array
     {
-        if (!$this->isActive()) {
-            return [];
-        }
-
         $queries = array_values($this->queries);
         $duplicates = $this->detectDuplicates($queries, static fn(array $query) => $query['rawSql'] !== ''
             ? $query['rawSql']

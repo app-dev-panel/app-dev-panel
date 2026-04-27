@@ -21,14 +21,12 @@ final class HttpStreamCollector implements SummaryCollectorInterface
 
     public function getCollected(): array
     {
-        if (!$this->isActive()) {
-            return [];
-        }
         return $this->requests;
     }
 
     public function startup(): void
     {
+        $this->reset();
         $this->isActive = true;
         HttpStreamProxy::register();
         HttpStreamProxy::$ignoredPathPatterns = $this->ignoredPathPatterns;
@@ -47,10 +45,12 @@ final class HttpStreamCollector implements SummaryCollectorInterface
 
     public function shutdown(): void
     {
+        // Detach the stream wrapper before flush so the storage backend's own
+        // network calls (if any) don't appear in this entry. Buffer preserved
+        // for the post-shutdown getCollected()/getSummary() reads.
         HttpStreamProxy::unregister();
         HttpStreamProxy::$collector = null;
 
-        $this->reset();
         $this->isActive = false;
     }
 
@@ -68,9 +68,6 @@ final class HttpStreamCollector implements SummaryCollectorInterface
 
     public function getSummary(): array
     {
-        if (!$this->isActive()) {
-            return [];
-        }
         return [
             'http_stream' => array_merge(...array_map(fn(string $operation) => [
                 $operation => is_countable($this->requests[$operation]) ? count($this->requests[$operation]) : 0,

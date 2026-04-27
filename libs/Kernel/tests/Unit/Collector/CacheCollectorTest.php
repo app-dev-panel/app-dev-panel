@@ -75,18 +75,17 @@ final class CacheCollectorTest extends AbstractCollectorTestCase
         $this->assertSame(3, $data['cache']['totalOperations']);
     }
 
-    public function testShutdownResetsState(): void
+    public function testStartupResetsStateAfterPreviousCycle(): void
     {
         $collector = new CacheCollector(new TimelineCollector());
         $collector->startup();
         $collector->logCacheOperation(new CacheOperationRecord('pool', 'get', 'key1', hit: true, duration: 0.001));
         $collector->shutdown();
 
-        // After shutdown, collector is inactive — returns empty
-        $this->assertSame([], $collector->getCollected());
-        $this->assertSame([], $collector->getSummary());
+        // After shutdown the buffer is preserved (storage flush reads it post-shutdown).
+        $this->assertSame(1, $collector->getCollected()['totalOperations']);
 
-        // Re-startup should be clean
+        // The next startup() wipes state from the previous cycle (long-running process semantics).
         $collector->startup();
         $this->assertSame(0, $collector->getCollected()['totalOperations']);
         $this->assertSame(0, $collector->getCollected()['hits']);

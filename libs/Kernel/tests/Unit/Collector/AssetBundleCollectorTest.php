@@ -57,6 +57,8 @@ final class AssetBundleCollectorTest extends AbstractCollectorTestCase
     public function testCollectBundlesIgnoredWhenInactive(): void
     {
         $collector = new AssetBundleCollector(new TimelineCollector());
+        $baselineCollected = $collector->getCollected();
+        $baselineSummary = method_exists($collector, 'getSummary') ? $collector->getSummary() : null;
 
         $collector->collectBundles([
             'test' => [
@@ -71,7 +73,7 @@ final class AssetBundleCollectorTest extends AbstractCollectorTestCase
             ],
         ]);
 
-        $this->assertSame([], $collector->getCollected());
+        $this->assertSame($baselineCollected, $collector->getCollected());
     }
 
     public function testCollectSingleBundle(): void
@@ -123,6 +125,8 @@ final class AssetBundleCollectorTest extends AbstractCollectorTestCase
     public function testCollectBundleIgnoredWhenInactive(): void
     {
         $collector = new AssetBundleCollector(new TimelineCollector());
+        $baselineCollected = $collector->getCollected();
+        $baselineSummary = method_exists($collector, 'getSummary') ? $collector->getSummary() : null;
         // Not started
         $collector->collectBundle('test', [
             'class' => 'Test\\Asset',
@@ -135,7 +139,7 @@ final class AssetBundleCollectorTest extends AbstractCollectorTestCase
             'options' => [],
         ]);
 
-        $this->assertSame([], $collector->getCollected());
+        $this->assertSame($baselineCollected, $collector->getCollected());
     }
 
     public function testMultipleBundles(): void

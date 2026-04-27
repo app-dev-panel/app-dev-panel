@@ -6,6 +6,7 @@ import {InspectorModule} from '@app-dev-panel/panel/Module/Inspector';
 import {LlmModule} from '@app-dev-panel/panel/Module/Llm';
 import {McpModule} from '@app-dev-panel/panel/Module/Mcp';
 import {OpenApiModule} from '@app-dev-panel/panel/Module/OpenApi';
+import {ProjectModule} from '@app-dev-panel/panel/Module/Project';
 
 export const modules = [
     ApplicationModule,
@@ -16,4 +17,5 @@ export const modules = [
     GenCodeModule,
     OpenApiModule,
     FramesModule,
+    ProjectModule,
 ];
