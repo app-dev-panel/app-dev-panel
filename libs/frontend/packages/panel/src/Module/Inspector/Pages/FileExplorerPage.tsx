@@ -272,7 +272,7 @@ export const FileExplorerPage = () => {
     };
 
     return (
-        <>
+        <Box sx={{p: {xs: 1.5, sm: 3.5}}}>
             <PageHeader
                 title="File Explorer"
                 icon="folder_open"
@@ -337,6 +337,6 @@ export const FileExplorerPage = () => {
                     </Paper>
                 </Box>
             )}
-        </>
+        </Box>
     );
 };

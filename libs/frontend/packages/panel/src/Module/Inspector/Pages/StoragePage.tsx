@@ -30,7 +30,7 @@ export const StoragePage = () => {
     );
 
     return (
-        <>
+        <Box sx={{p: {xs: 1.5, sm: 3.5}}}>
             <PageHeader title="Storage" icon="storage" description="Database, cache, and data store management" />
             <Box sx={{borderBottom: 1, borderColor: 'divider', mb: 2}}>
                 <Tabs value={tabIndex} onChange={handleTabChange}>
@@ -43,6 +43,6 @@ export const StoragePage = () => {
             {activeTab === 'cache' && <CachePage showHeader={false} />}
             {activeTab === 'redis' && <RedisPage showHeader={false} />}
             {activeTab === 'elasticsearch' && <ElasticsearchPage showHeader={false} />}
-        </>
+        </Box>
     );
 };

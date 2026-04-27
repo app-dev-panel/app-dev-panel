@@ -89,7 +89,7 @@ export const McpPage = () => {
     }, [config]);
 
     return (
-        <Box sx={{display: 'flex', flexDirection: 'column', gap: 3}}>
+        <Box sx={{display: 'flex', flexDirection: 'column', gap: 3, p: {xs: 1.5, sm: 3.5}}}>
             <Paper variant="outlined" sx={{p: 2, display: 'flex', flexDirection: 'column', gap: 2}}>
                 <Box>
                     <Typography variant="body2" color="text.secondary" sx={{mb: 0.5}}>
