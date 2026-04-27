@@ -650,14 +650,74 @@ count = 1
 
 [[issues]]
 file = "libs/Adapter/Spiral/src/Bootloader/AppDevPanelBootloader.php"
+code = "kan-defect"
+message = "Class has a high kan defect score (2.1300000000000003)."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Spiral/src/Bootloader/AppDevPanelBootloader.php"
 code = "too-many-methods"
 message = "Class has too many methods."
 count = 1
 
 [[issues]]
+file = "libs/Adapter/Spiral/src/Inspector/SpiralAuthorizationConfigProvider.php"
+code = "no-empty-catch-clause"
+message = "Do not use empty `catch` blocks."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Spiral/src/Inspector/SpiralConfigProvider.php"
+code = "cyclomatic-complexity"
+message = "Class has high complexity."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Spiral/src/Inspector/SpiralConfigProvider.php"
+code = "kan-defect"
+message = "Class has a high kan defect score (2.29)."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Spiral/src/Inspector/SpiralConfigProvider.php"
+code = "no-empty-catch-clause"
+message = "Do not use empty `catch` blocks."
+count = 2
+
+[[issues]]
+file = "libs/Adapter/Spiral/src/Inspector/SpiralConfigProvider.php"
+code = "prefer-early-continue"
+message = "Consider using early continue pattern to reduce nesting."
+count = 4
+
+[[issues]]
+file = "libs/Adapter/Spiral/src/Inspector/SpiralEventListenerProvider.php"
+code = "cyclomatic-complexity"
+message = "Class has high complexity."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Spiral/src/Inspector/SpiralRouteAdapter.php"
+code = "no-empty-catch-clause"
+message = "Do not use empty `catch` blocks."
+count = 3
+
+[[issues]]
 file = "libs/Adapter/Spiral/src/Middleware/DebugMiddleware.php"
 code = "cyclomatic-complexity"
 message = "Class has high complexity."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Spiral/tests/Unit/Inspector/SpiralAuthorizationConfigProviderTest.php"
+code = "sensitive-parameter"
+message = "Parameters that may contain sensitive information should be marked with the `#[SensitiveParameter]` attribute."
+count = 1
+
+[[issues]]
+file = "libs/Adapter/Spiral/tests/Unit/Inspector/spiral-stubs.php"
+code = "sensitive-parameter"
+message = "Parameters that may contain sensitive information should be marked with the `#[SensitiveParameter]` attribute."
 count = 1
 
 [[issues]]

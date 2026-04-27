@@ -8,6 +8,11 @@ use AppDevPanel\Adapter\Spiral\Container\EventDispatcherProxyInjector;
 use AppDevPanel\Adapter\Spiral\Container\HttpClientProxyInjector;
 use AppDevPanel\Adapter\Spiral\Container\LoggerProxyInjector;
 use AppDevPanel\Adapter\Spiral\Controller\AdpApiController;
+use AppDevPanel\Adapter\Spiral\Inspector\SpiralAuthorizationConfigProvider;
+use AppDevPanel\Adapter\Spiral\Inspector\SpiralConfigProvider;
+use AppDevPanel\Adapter\Spiral\Inspector\SpiralEventListenerProvider;
+use AppDevPanel\Adapter\Spiral\Inspector\SpiralRouteCollectionAdapter;
+use AppDevPanel\Adapter\Spiral\Inspector\SpiralUrlMatcherAdapter;
 use AppDevPanel\Adapter\Spiral\Middleware\AdpApiMiddleware;
 use AppDevPanel\Adapter\Spiral\Middleware\DebugMiddleware;
 use AppDevPanel\Api\ApiApplication;
@@ -17,7 +22,6 @@ use AppDevPanel\Api\Debug\Repository\CollectorRepositoryInterface;
 use AppDevPanel\Api\Http\JsonResponseFactory;
 use AppDevPanel\Api\Http\JsonResponseFactoryInterface;
 use AppDevPanel\Api\Inspector\Authorization\AuthorizationConfigProviderInterface;
-use AppDevPanel\Api\Inspector\Authorization\NullAuthorizationConfigProvider;
 use AppDevPanel\Api\Inspector\Database\NullSchemaProvider;
 use AppDevPanel\Api\Inspector\Database\SchemaProviderInterface;
 use AppDevPanel\Api\Inspector\Elasticsearch\ElasticsearchProviderInterface;
@@ -126,7 +130,11 @@ final class AppDevPanelBootloader extends Bootloader
         PathMapperInterface::class => NullPathMapper::class,
         PathResolverInterface::class => [self::class, 'initPathResolver'],
         SchemaProviderInterface::class => NullSchemaProvider::class,
-        AuthorizationConfigProviderInterface::class => NullAuthorizationConfigProvider::class,
+        AuthorizationConfigProviderInterface::class => SpiralAuthorizationConfigProvider::class,
+        SpiralAuthorizationConfigProvider::class => SpiralAuthorizationConfigProvider::class,
+        SpiralEventListenerProvider::class => SpiralEventListenerProvider::class,
+        SpiralConfigProvider::class => [self::class, 'initConfigProvider'],
+        'config' => SpiralConfigProvider::class,
         ElasticsearchProviderInterface::class => NullElasticsearchProvider::class,
         HttpMockProviderInterface::class => NullHttpMockProvider::class,
         PanelConfig::class => [self::class, 'initPanelConfig'],
@@ -254,6 +262,55 @@ final class AppDevPanelBootloader extends Bootloader
     }
 
     /**
+     * Build the inspector `'config'` provider with whatever Spiral introspection sources
+     * the application happens to expose. Each constructor argument is optional — apps that
+     * don't bind `EnvironmentInterface` / `DirectoriesInterface` / `InitializerInterface`
+     * (the playground does not run the full `AbstractKernel`, for example) still get a
+     * provider that returns useful data for the groups it can serve.
+     */
+    public function initConfigProvider(ContainerInterface $container): SpiralConfigProvider
+    {
+        if (!$container instanceof \Spiral\Core\Container) {
+            // No-op provider on a non-Spiral container — every group resolves to [].
+            return new SpiralConfigProvider(new \Spiral\Core\Container());
+        }
+
+        $env = null;
+        if ($container->has(\Spiral\Boot\EnvironmentInterface::class)) {
+            $candidate = $container->get(\Spiral\Boot\EnvironmentInterface::class);
+            if ($candidate instanceof \Spiral\Boot\EnvironmentInterface) {
+                $env = $candidate;
+            }
+        }
+
+        $dirs = null;
+        if ($container->has(\Spiral\Boot\DirectoriesInterface::class)) {
+            $candidate = $container->get(\Spiral\Boot\DirectoriesInterface::class);
+            if ($candidate instanceof \Spiral\Boot\DirectoriesInterface) {
+                $dirs = $candidate;
+            }
+        }
+
+        $initializer = null;
+        if ($container->has(\Spiral\Boot\BootloadManager\InitializerInterface::class)) {
+            $candidate = $container->get(\Spiral\Boot\BootloadManager\InitializerInterface::class);
+            if ($candidate instanceof \Spiral\Boot\BootloadManager\InitializerInterface) {
+                $initializer = $candidate;
+            }
+        }
+
+        $events = null;
+        if ($container->has(SpiralEventListenerProvider::class)) {
+            $candidate = $container->get(SpiralEventListenerProvider::class);
+            if ($candidate instanceof SpiralEventListenerProvider) {
+                $events = $candidate;
+            }
+        }
+
+        return new SpiralConfigProvider($container, $env, $dirs, $initializer, $events);
+    }
+
+    /**
      * Wires PSR services through the Spiral container's `bindInjector` mechanism so
      * every resolution of `LoggerInterface` / `EventDispatcherInterface` / `ClientInterface`
      * yields a collector-aware proxy.
@@ -284,6 +341,38 @@ final class AppDevPanelBootloader extends Bootloader
             EventDispatcherProxyInjector::class,
         );
         $this->installInjector($container, $binder, ClientInterface::class, HttpClientProxyInjector::class);
+
+        $this->installRouterAdapters($container);
+    }
+
+    /**
+     * Wire the inspector's `'router'` / `'urlMatcher'` aliases when `spiral/router`
+     * is installed and the application has bound a {@see \Spiral\Router\RouterInterface}.
+     *
+     * The aliases are duck-typed by {@see \AppDevPanel\Api\Inspector\Controller\RoutingController}:
+     *   - `'router'`     → `getRoutes(): list<object>` where each route exposes `__debugInfo()`
+     *   - `'urlMatcher'` → `match(ServerRequestInterface): SpiralMatchResult`
+     *
+     * Both are conditional — without `spiral/router`, the inspector controller falls back
+     * to its built-in 501 "requires framework integration" response, which is the contract
+     * for apps using a custom router (e.g. the ADP playground's `PathRouter`).
+     */
+    private function installRouterAdapters(\Spiral\Core\Container $container): void
+    {
+        if (!interface_exists(\Spiral\Router\RouterInterface::class)) {
+            return;
+        }
+        if (!$container->has(\Spiral\Router\RouterInterface::class)) {
+            return;
+        }
+
+        $router = $container->get(\Spiral\Router\RouterInterface::class);
+        if (!$router instanceof \Spiral\Router\RouterInterface) {
+            return;
+        }
+
+        $container->bindSingleton('router', new SpiralRouteCollectionAdapter($router));
+        $container->bindSingleton('urlMatcher', new SpiralUrlMatcherAdapter($router));
     }
 
     /**
