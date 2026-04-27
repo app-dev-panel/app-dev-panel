@@ -1,0 +1,25 @@
+app_dev_panel:
+    enabled: true
+    storage:
+        path: '%kernel.project_dir%/var/debug'
+        history_size: 50
+    collectors:
+        request: true
+        exception: true
+        log: true
+        event: true
+        doctrine: true         # requires doctrine/dbal
+        twig: true             # requires twig/twig
+        security: true         # requires symfony/security-bundle
+        cache: true
+        mailer: true           # requires symfony/mailer
+        queue: true            # requires symfony/messenger
+        assets: true           # requires symfony/asset-mapper
+        code_coverage: false   # opt-in; requires pcov or xdebug
+    ignored_requests:
+        - '/_wdt/*'
+        - '/_profiler/*'
+        - '/debug/api/**'
+    api:
+        enabled: true
+        allowed_ips: ['127.0.0.1', '::1']

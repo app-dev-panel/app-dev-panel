@@ -23,6 +23,24 @@ return [
 ];
 ```
 
+## Маршруты
+
+Создайте `config/routes/app_dev_panel.php`, чтобы подключить `/debug`, `/debug/api/*` и `/inspect/api/*`:
+
+```php
+<?php
+
+declare(strict_types=1);
+
+use Symfony\Component\Routing\Loader\Configurator\RoutingConfigurator;
+
+return static function (RoutingConfigurator $routes): void {
+    $routes->import('@AppDevPanelBundle/config/routes/adp.php');
+};
+```
+
+Без этого файла маршруты панели не зарегистрируются, и `/debug` будет возвращать 404. (Когда появится Flex-рецепт, этот файл будет создаваться автоматически по `composer require`.)
+
 ## Конфигурация
 
 Создайте `config/packages/app_dev_panel.yaml`:
@@ -43,7 +61,7 @@ app_dev_panel:
         security: true         # требуется symfony/security-bundle
         cache: true
         mailer: true           # требуется symfony/mailer
-        messenger: true        # требуется symfony/messenger
+        queue: true            # требуется symfony/messenger
         assets: true           # требуется symfony/asset-mapper
         code_coverage: false   # opt-in; требуется pcov или xdebug
     ignored_requests:

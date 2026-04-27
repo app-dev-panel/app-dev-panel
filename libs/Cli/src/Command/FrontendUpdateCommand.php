@@ -19,7 +19,14 @@ final class FrontendUpdateCommand extends Command
 {
     private const string GITHUB_API = 'https://api.github.com';
     private const string REPO = 'app-dev-panel/app-dev-panel';
-    private const string ASSET_NAME = 'frontend-dist.zip';
+
+    /**
+     * Asset names tried in order. v0.3+ ships `frontend-dist.zip` (panel +
+     * toolbar combined). Older releases (≤ v0.2) only had per-package archives;
+     * `panel-dist.tar.gz` is the panel half — install it as a fallback so the
+     * command works against any tag, not just the new bundle.
+     */
+    private const array ASSET_NAMES = ['frontend-dist.zip', 'panel-dist.tar.gz'];
 
     public function __construct(
         private readonly ?Client $httpClient = null,
@@ -89,7 +96,7 @@ final class FrontendUpdateCommand extends Command
         $currentVersion = $this->getCurrentVersion($input);
         $latestVersion = $release['tag_name'] ?? 'unknown';
         $publishedAt = $release['published_at'] ?? 'unknown';
-        $hasAsset = $this->findAssetUrl($release) !== null;
+        $hasAsset = $this->findAsset($release) !== null;
 
         $data = [
             'current_version' => $currentVersion,
@@ -137,26 +144,26 @@ final class FrontendUpdateCommand extends Command
             return Command::FAILURE;
         }
 
-        $assetUrl = $this->findAssetUrl($release);
-        if ($assetUrl === null) {
+        $asset = $this->findAsset($release);
+        if ($asset === null) {
             $io->error(sprintf(
-                'No "%s" asset found in latest release "%s".',
-                self::ASSET_NAME,
+                'No matching asset found in latest release "%s". Tried: %s.',
                 (string) ($release['tag_name'] ?? 'unknown'),
+                implode(', ', self::ASSET_NAMES),
             ));
             $io->text('Available assets:');
-            foreach ($release['assets'] ?? [] as $asset) {
-                if (is_array($asset) && isset($asset['name'])) {
-                    $io->text(sprintf('  - %s', (string) $asset['name']));
+            foreach ($release['assets'] ?? [] as $candidate) {
+                if (is_array($candidate) && isset($candidate['name'])) {
+                    $io->text(sprintf('  - %s', (string) $candidate['name']));
                 }
             }
             return Command::FAILURE;
         }
 
-        $io->text(sprintf('Downloading %s...', (string) ($release['tag_name'] ?? 'latest')));
+        $io->text(sprintf('Downloading %s (%s)...', $asset['name'], (string) ($release['tag_name'] ?? 'latest')));
 
         try {
-            $this->downloadAndExtract($assetUrl, $path, $io);
+            $this->downloadAndExtract($asset['url'], $asset['name'], $path, $io);
         } catch (\Throwable $e) {
             $io->error(sprintf('Download failed: %s', $e->getMessage()));
             return Command::FAILURE;
@@ -212,20 +219,32 @@ final class FrontendUpdateCommand extends Command
         return null;
     }
 
-    private function findAssetUrl(array $release): ?string
+    /**
+     * @return array{name: string, url: string}|null
+     */
+    private function findAsset(array $release): ?array
     {
-        foreach ($release['assets'] ?? [] as $asset) {
-            if (is_array($asset) && ($asset['name'] ?? '') === self::ASSET_NAME) {
-                return $asset['browser_download_url'] ?? null;
+        $assets = $release['assets'] ?? [];
+        foreach (self::ASSET_NAMES as $wantedName) {
+            foreach ($assets as $asset) {
+                if (!is_array($asset) || ($asset['name'] ?? '') !== $wantedName) {
+                    continue;
+                }
+                $url = $asset['browser_download_url'] ?? null;
+                if (!is_string($url) || $url === '') {
+                    continue;
+                }
+                return ['name' => $wantedName, 'url' => $url];
             }
         }
         return null;
     }
 
-    private function downloadAndExtract(string $url, string $path, SymfonyStyle $io): void
+    private function downloadAndExtract(string $url, string $assetName, string $path, SymfonyStyle $io): void
     {
         $client = $this->httpClient ?? new Client();
-        $tempFile = tempnam(sys_get_temp_dir(), 'adp-frontend-') . '.zip';
+        $extension = str_ends_with($assetName, '.tar.gz') ? '.tar.gz' : '.zip';
+        $tempFile = tempnam(sys_get_temp_dir(), 'adp-frontend-') . $extension;
 
         try {
             $client->get($url, [
@@ -242,20 +261,45 @@ final class FrontendUpdateCommand extends Command
                 mkdir($path, 0o777, true);
             }
 
-            $zip = new \ZipArchive();
-            $result = $zip->open($tempFile);
-
-            if ($result !== true) {
-                throw new \RuntimeException(sprintf('Failed to open zip archive (error code: %d)', $result));
+            if ($extension === '.tar.gz') {
+                $this->extractTarGz($tempFile, $path);
+            } else {
+                $this->extractZip($tempFile, $path);
             }
-
-            $zip->extractTo($path);
-            $zip->close();
 
             $io->text(sprintf('Extracted to %s', $path));
         } finally {
             if (file_exists($tempFile)) {
                 unlink($tempFile);
+            }
+        }
+    }
+
+    private function extractZip(string $archive, string $path): void
+    {
+        $zip = new \ZipArchive();
+        $result = $zip->open($archive);
+        if ($result !== true) {
+            throw new \RuntimeException(sprintf('Failed to open zip archive (error code: %d)', $result));
+        }
+        $zip->extractTo($path);
+        $zip->close();
+    }
+
+    private function extractTarGz(string $archive, string $path): void
+    {
+        // PharData::decompress writes a sibling .tar; extract that and clean up.
+        $phar = new \PharData($archive);
+        $tarPath = $archive . '.tar';
+        try {
+            $phar->decompress();
+            $tarPhar = new \PharData($tarPath);
+            $tarPhar->extractTo($path, null, true);
+        } finally {
+            // Force PharData destructors to release the files before unlink on Windows.
+            unset($phar, $tarPhar);
+            if (file_exists($tarPath)) {
+                @unlink($tarPath);
             }
         }
     }

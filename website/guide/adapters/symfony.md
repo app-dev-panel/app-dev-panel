@@ -27,6 +27,24 @@ return [
 ];
 ```
 
+## Routes
+
+Create `config/routes/app_dev_panel.php` to mount `/debug`, `/debug/api/*`, and `/inspect/api/*`:
+
+```php
+<?php
+
+declare(strict_types=1);
+
+use Symfony\Component\Routing\Loader\Configurator\RoutingConfigurator;
+
+return static function (RoutingConfigurator $routes): void {
+    $routes->import('@AppDevPanelBundle/config/routes/adp.php');
+};
+```
+
+Without this file the panel routes are not registered and `/debug` returns 404. (Once a Flex recipe lands, this file will be created automatically by `composer require`.)
+
 ## Configuration
 
 Create `config/packages/app_dev_panel.yaml`:
@@ -47,7 +65,7 @@ app_dev_panel:
         security: true         # requires symfony/security-bundle
         cache: true
         mailer: true           # requires symfony/mailer
-        messenger: true        # requires symfony/messenger
+        queue: true            # requires symfony/messenger
         assets: true           # requires symfony/asset-mapper
         code_coverage: false   # opt-in; requires pcov or xdebug
     ignored_requests:

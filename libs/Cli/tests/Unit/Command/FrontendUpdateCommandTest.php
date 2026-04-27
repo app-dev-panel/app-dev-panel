@@ -188,7 +188,7 @@ final class FrontendUpdateCommandTest extends TestCase
 
         $this->assertSame(1, $tester->getStatusCode());
         $display = $tester->getDisplay();
-        $this->assertStringContainsString('No "frontend-dist.zip" asset found', $display);
+        $this->assertStringContainsString('No matching asset found', $display);
         $this->assertStringContainsString('other-file.tar.gz', $display);
     }
 
@@ -204,7 +204,7 @@ final class FrontendUpdateCommandTest extends TestCase
         $tester->execute(['action' => 'download', '--path' => '/tmp/test']);
 
         $this->assertSame(1, $tester->getStatusCode());
-        $this->assertStringContainsString('No "frontend-dist.zip" asset found', $tester->getDisplay());
+        $this->assertStringContainsString('No matching asset found', $tester->getDisplay());
     }
 
     public function testDownloadSuccess(): void
@@ -351,6 +351,44 @@ final class FrontendUpdateCommandTest extends TestCase
         }
 
         $this->assertSame('', $history[0]['request']->getHeaderLine('Authorization'));
+    }
+
+    public function testCheckSucceedsWithLegacyPanelDistTarGzAsset(): void
+    {
+        $release = [
+            'tag_name' => 'v0.2',
+            'published_at' => '2026-04-23T10:00:00Z',
+            'assets' => [
+                ['name' => 'panel-dist.tar.gz', 'browser_download_url' => 'https://example.com/panel-dist.tar.gz'],
+                ['name' => 'toolbar-dist.tar.gz', 'browser_download_url' => 'https://example.com/toolbar-dist.tar.gz'],
+            ],
+        ];
+        $client = $this->createMockClient([new Response(200, [], json_encode($release))]);
+
+        $tester = new CommandTester(new FrontendUpdateCommand($client));
+        $tester->execute(['action' => 'check']);
+
+        $this->assertSame(0, $tester->getStatusCode());
+        $this->assertStringContainsString('Yes', $tester->getDisplay());
+    }
+
+    public function testCheckPrefersFrontendDistZipOverPanelDistTarGz(): void
+    {
+        $release = [
+            'tag_name' => 'v0.3',
+            'published_at' => '2026-04-25T10:00:00Z',
+            'assets' => [
+                ['name' => 'panel-dist.tar.gz', 'browser_download_url' => 'https://example.com/legacy.tar.gz'],
+                ['name' => 'frontend-dist.zip', 'browser_download_url' => 'https://example.com/new.zip'],
+            ],
+        ];
+        $client = $this->createMockClient([new Response(200, [], json_encode($release))]);
+
+        $tester = new CommandTester(new FrontendUpdateCommand($client));
+        $tester->execute(['action' => 'check']);
+
+        $this->assertSame(0, $tester->getStatusCode());
+        $this->assertStringContainsString('Yes', $tester->getDisplay());
     }
 
     /**
