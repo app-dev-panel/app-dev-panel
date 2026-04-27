@@ -12,13 +12,14 @@
         "irc": "ircs://irc.libera.chat:6697/yii",
         "source": "https://github.com/yiisoft/yii2"
     },
-    "minimum-stability": "stable",
+    "minimum-stability": "dev",
+    "prefer-stable": true,
     "require": {
         "php": ">=7.4.0",
         "yiisoft/yii2": "~2.0.45",
         "yiisoft/yii2-bootstrap5": "~2.0.2",
         "yiisoft/yii2-symfonymailer": "~2.0.3",
-        "app-dev-panel/adapter-yii2": "^0.2.0"
+        "app-dev-panel/adapter-yii2": "@dev"
     },
     "require-dev": {
         "yiisoft/yii2-debug": "~2.1.0",
@@ -66,9 +67,12 @@
         }
     },
     "repositories": [
-        {
-            "type": "composer",
-            "url": "https://asset-packagist.org"
-        }
+        { "type": "composer", "url": "https://asset-packagist.org" },
+        { "type": "path", "url": "../../libs/Adapter/Yii2",  "options": { "symlink": false, "versions": { "app-dev-panel/adapter-yii2": "0.3.0-dev" } } },
+        { "type": "path", "url": "../../libs/API",           "options": { "symlink": false, "versions": { "app-dev-panel/api": "0.3.0-dev" } } },
+        { "type": "path", "url": "../../libs/Cli",           "options": { "symlink": false, "versions": { "app-dev-panel/cli": "0.3.0-dev" } } },
+        { "type": "path", "url": "../../libs/FrontendAssets","options": { "symlink": false, "versions": { "app-dev-panel/frontend-assets": "0.3.0-dev" } } },
+        { "type": "path", "url": "../../libs/Kernel",        "options": { "symlink": false, "versions": { "app-dev-panel/kernel": "0.3.0-dev" } } },
+        { "type": "path", "url": "../../libs/McpServer",     "options": { "symlink": false, "versions": { "app-dev-panel/mcp-server": "0.3.0-dev" } } }
     ]
 }

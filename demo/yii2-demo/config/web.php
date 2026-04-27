@@ -6,7 +6,12 @@ $db = require __DIR__ . '/db.php';
 $config = [
     'id' => 'basic',
     'basePath' => dirname(__DIR__),
-    'bootstrap' => ['log'],
+    'bootstrap' => ['log', 'app-dev-panel'],
+    'modules' => [
+        'app-dev-panel' => [
+            'class' => \AppDevPanel\Adapter\Yii2\Module::class,
+        ],
+    ],
     'aliases' => [
         '@bower' => '@vendor/bower-asset',
         '@npm'   => '@vendor/npm-asset',
@@ -14,7 +19,7 @@ $config = [
     'components' => [
         'request' => [
             // !!! insert a secret key in the following (if it is empty) - this is required by cookie validation
-            'cookieValidationKey' => 'J1jZKhtTinkQ8oXCt0MZ7XnFC3p77IQh',
+            'cookieValidationKey' => 'YUSuSaH8gyfObGhZfzG3dU1_bYT1d6Rc',
         ],
         'cache' => [
             'class' => 'yii\caching\FileCache',
@@ -42,28 +47,22 @@ $config = [
             ],
         ],
         'db' => $db,
+        // REQUIRED by ADP — its panel routes use UrlManager, so pretty URLs must be on.
         'urlManager' => [
             'enablePrettyUrl' => true,
-            'showScriptName' => false,
-            'rules' => [
-            ],
+            'showScriptName'  => false,
+            'rules'           => [],
         ],
     ],
     'params' => $params,
 ];
 
 if (YII_ENV_DEV) {
-    // NOTE: yii2-debug disabled — conflicts with ADP's routes at /debug.
-    // $config['bootstrap'][] = 'debug';
-    // $config['modules']['debug'] = [
-    //     'class' => 'yii\debug\Module',
-    // ];
-
+    // yii2-debug intentionally NOT registered here — it claims the same /debug/*
+    // routes as ADP and would intercept the panel. See ADP's getting-started guide.
     $config['bootstrap'][] = 'gii';
     $config['modules']['gii'] = [
         'class' => 'yii\gii\Module',
-        // uncomment the following to add your IP if you are not connecting from localhost.
-        //'allowedIPs' => ['127.0.0.1', '::1'],
     ];
 }
 

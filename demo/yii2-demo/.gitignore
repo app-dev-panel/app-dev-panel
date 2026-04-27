@@ -35,7 +35,7 @@ tests/_support/_generated
 #vagrant folder
 /.vagrant
 
-# runtime and published assets
+# Yii 2 / ADP runtime artefacts
 /runtime
 /web/assets
 /web/app-dev-panel
