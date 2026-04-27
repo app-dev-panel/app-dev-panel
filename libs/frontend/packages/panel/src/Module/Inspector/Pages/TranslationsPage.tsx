@@ -3,7 +3,7 @@ import {
     TranslationUpdaterContext,
     TranslationUpdaterContextProvider,
 } from '@app-dev-panel/panel/Module/Inspector/Context/TranslationUpdaterContext';
-import {FilterInput} from '@app-dev-panel/sdk/Component/Form/FilterInput';
+import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
 import {FullScreenCircularProgress} from '@app-dev-panel/sdk/Component/FullScreenCircularProgress';
 import {DataTable} from '@app-dev-panel/sdk/Component/Grid';
 import {JsonRenderer} from '@app-dev-panel/sdk/Component/JsonRenderer';

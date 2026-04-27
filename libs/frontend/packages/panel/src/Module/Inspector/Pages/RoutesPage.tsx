@@ -488,7 +488,7 @@ export const RoutesPage = () => {
 
     return (
         <>
-            <Box sx={{px: {xs: 1.5, sm: 3.5}, pt: {xs: 1.5, sm: 3.5}}}>
+            <Box sx={{px: {xs: 1.5, sm: 3.5}, pt: {xs: 1.5, sm: 3.5}, '& > div': {mb: 0}}}>
                 <PageHeader title="Routes" icon="alt_route" description="View and check application routes" />
             </Box>
 
