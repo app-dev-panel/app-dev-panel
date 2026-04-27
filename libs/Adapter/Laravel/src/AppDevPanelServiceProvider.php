@@ -83,6 +83,8 @@ use AppDevPanel\Api\PathMapper;
 use AppDevPanel\Api\PathMapperInterface;
 use AppDevPanel\Api\PathResolver;
 use AppDevPanel\Api\PathResolverInterface;
+use AppDevPanel\Api\Project\Controller\ProjectController;
+use AppDevPanel\Api\Project\Controller\SecretsController;
 use AppDevPanel\Api\Toolbar\ToolbarConfig;
 use AppDevPanel\Api\Toolbar\ToolbarInjector;
 use AppDevPanel\Cli\Command\DebugDumpCommand;
@@ -134,6 +136,10 @@ use AppDevPanel\Kernel\DebuggerIgnoreConfig;
 use AppDevPanel\Kernel\DebugServer\Broadcaster;
 use AppDevPanel\Kernel\DebugServer\Connection;
 use AppDevPanel\Kernel\DebugServer\LoggerDecorator;
+use AppDevPanel\Kernel\Project\FileProjectConfigStorage;
+use AppDevPanel\Kernel\Project\FileSecretsStorage;
+use AppDevPanel\Kernel\Project\ProjectConfigStorageInterface;
+use AppDevPanel\Kernel\Project\SecretsStorageInterface;
 use AppDevPanel\Kernel\Service\FileServiceRegistry;
 use AppDevPanel\Kernel\Service\ServiceRegistryInterface;
 use AppDevPanel\Kernel\Storage\BroadcastingStorage;
@@ -708,9 +714,46 @@ final class AppDevPanelServiceProvider extends ServiceProvider
             ),
         );
 
+        // Project config (frames, OpenAPI specs) — committed to repo at config/adp/project.json
+        $this->app->singleton(
+            ProjectConfigStorageInterface::class,
+            fn() => new FileProjectConfigStorage(
+                $this->app->make('config')->get('app-dev-panel.project_config_path') ?? base_path('config/adp'),
+            ),
+        );
+
+        // Secrets file — gitignored sibling of project.json holding API keys / OAuth tokens / ACP env.
+        $this->app->singleton(
+            SecretsStorageInterface::class,
+            fn() => new FileSecretsStorage(
+                $this->app->make('config')->get('app-dev-panel.project_config_path') ?? base_path('config/adp'),
+            ),
+        );
+
+        $this->app->singleton(
+            ProjectController::class,
+            fn() => new ProjectController(
+                $this->app->make(JsonResponseFactoryInterface::class),
+                $this->app->make(ProjectConfigStorageInterface::class),
+                $this->app->make(ResponseFactoryInterface::class),
+            ),
+        );
+
+        $this->app->singleton(
+            SecretsController::class,
+            fn() => new SecretsController(
+                $this->app->make(JsonResponseFactoryInterface::class),
+                $this->app->make(SecretsStorageInterface::class),
+            ),
+        );
+
+        // LLM settings — backed by SecretsStorage; legacy `runtime/.llm-settings.json` is auto-migrated.
         $this->app->singleton(
             LlmSettingsInterface::class,
-            fn() => new FileLlmSettings($this->app->make('config')->get('app-dev-panel.storage.path')),
+            fn() => new FileLlmSettings(
+                $this->app->make('config')->get('app-dev-panel.storage.path'),
+                $this->app->make(SecretsStorageInterface::class),
+            ),
         );
 
         $this->app->singleton(

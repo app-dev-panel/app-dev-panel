@@ -35,14 +35,15 @@ final class AdpConfig extends InjectableConfig
     public const CONFIG = 'app-dev-panel';
 
     /**
-     * @var array{
-     *     enabled: bool,
-     *     storage: array{path: string|null, history_size: int},
-     *     panel: array{static_url: string|null, base_path: string},
-     *     ignored_requests: list<string>,
-     *     ignored_commands: list<string>,
-     *     collectors: array<string, bool>,
-     * }
+     * Default configuration values, shape (parent declares `array<array-key, mixed>`):
+     *
+     *   enabled              bool
+     *   storage              array{path: string|null, history_size: int}
+     *   project_config_path  string|null
+     *   panel                array{static_url: string|null, base_path: string}
+     *   ignored_requests     list<string>
+     *   ignored_commands     list<string>
+     *   collectors           array<string, bool>
      */
     protected array $config = [
         'enabled' => true,
@@ -50,6 +51,10 @@ final class AdpConfig extends InjectableConfig
             'path' => null,
             'history_size' => 50,
         ],
+        // Directory holding the committable project config (frames, OpenAPI specs).
+        // Default `null` falls back to APP_DEV_PANEL_PROJECT_CONFIG_PATH or
+        // `<cwd>/app/config/adp`, matching Spiral's `app/config/` convention.
+        'project_config_path' => null,
         'panel' => [
             'static_url' => null,
             'base_path' => '/debug',
@@ -100,6 +105,42 @@ final class AdpConfig extends InjectableConfig
     public function historySize(): int
     {
         return (int) ($this->config['storage']['history_size'] ?? 50);
+    }
+
+    /**
+     * Directory holding the committable project config (frames, OpenAPI specs).
+     *
+     * Resolution order:
+     *   1. Explicit `project_config_path` in `app/config/app-dev-panel.php`.
+     *   2. `APP_DEV_PANEL_PROJECT_CONFIG_PATH` env var (lets the playground
+     *      and integration tests pin the path without writing a config file).
+     *   3. `APP_DEV_PANEL_ROOT_PATH . '/app/config/adp'` — same root the
+     *      `PathResolver` already uses; matches Spiral's `app/config/` convention
+     *      and keeps the file out of the publicly served docroot under `php -S`.
+     *   4. `<cwd>/app/config/adp` as a last resort (CLI usage outside Spiral).
+     *
+     * The bootloader passes this string to {@see FileProjectConfigStorage},
+     * which auto-creates the directory and writes a `.gitignore` next to
+     * `project.json` excluding the future `secrets.json`.
+     */
+    public function projectConfigPath(): string
+    {
+        $explicit = $this->config['project_config_path'] ?? null;
+        if (is_string($explicit) && $explicit !== '') {
+            return $explicit;
+        }
+
+        $env = getenv('APP_DEV_PANEL_PROJECT_CONFIG_PATH');
+        if (is_string($env) && $env !== '') {
+            return $env;
+        }
+
+        $rootPath = getenv('APP_DEV_PANEL_ROOT_PATH');
+        if (is_string($rootPath) && $rootPath !== '') {
+            return rtrim($rootPath, '/\\') . '/app/config/adp';
+        }
+
+        return (string) getcwd() . '/app/config/adp';
     }
 
     public function staticUrl(): ?string

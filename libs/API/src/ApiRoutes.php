@@ -29,6 +29,8 @@ use AppDevPanel\Api\Llm\Controller\LlmController;
 use AppDevPanel\Api\Mcp\Controller\McpController;
 use AppDevPanel\Api\Mcp\Controller\McpSettingsController;
 use AppDevPanel\Api\Panel\PanelController;
+use AppDevPanel\Api\Project\Controller\ProjectController;
+use AppDevPanel\Api\Project\Controller\SecretsController;
 use AppDevPanel\Api\Router\Route;
 use AppDevPanel\Api\Router\Router;
 
@@ -392,6 +394,45 @@ final class ApiRoutes
     /**
      * @return Route[]
      */
+    public static function projectRoutes(): array
+    {
+        return [
+            new Route(
+                'GET',
+                '/debug/api/project/config',
+                [ProjectController::class, 'index'],
+                'debug/api/project/config',
+            ),
+            new Route(
+                'PUT',
+                '/debug/api/project/config',
+                [ProjectController::class, 'update'],
+                'debug/api/project/config/update',
+            ),
+            new Route(
+                'GET',
+                '/debug/api/project/secrets',
+                [SecretsController::class, 'index'],
+                'debug/api/project/secrets',
+            ),
+            new Route(
+                'PATCH',
+                '/debug/api/project/secrets',
+                [SecretsController::class, 'patch'],
+                'debug/api/project/secrets/patch',
+            ),
+            new Route(
+                'GET',
+                '/debug/api/project/event-stream',
+                [ProjectController::class, 'eventStream'],
+                'debug/api/project/event-stream',
+            ),
+        ];
+    }
+
+    /**
+     * @return Route[]
+     */
     public static function panelRoutes(): array
     {
         return [
@@ -413,6 +454,7 @@ final class ApiRoutes
         $router->addRoutes(self::serviceRoutes());
         $router->addRoutes(self::inspectorRoutes());
         $router->addRoutes(self::llmRoutes());
+        $router->addRoutes(self::projectRoutes());
         $router->addRoutes(self::panelRoutes());
     }
 }
