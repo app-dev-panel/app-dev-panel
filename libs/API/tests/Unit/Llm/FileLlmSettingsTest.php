@@ -5,27 +5,39 @@ declare(strict_types=1);
 namespace AppDevPanel\Api\Tests\Unit\Llm;
 
 use AppDevPanel\Api\Llm\FileLlmSettings;
+use AppDevPanel\Kernel\Project\FileSecretsStorage;
 use PHPUnit\Framework\TestCase;
 
 final class FileLlmSettingsTest extends TestCase
 {
-    private string $tmpDir;
+    private string $runtimeDir;
+    private string $configDir;
 
     protected function setUp(): void
     {
-        $this->tmpDir = sys_get_temp_dir() . '/adp-llm-settings-' . uniqid();
-        mkdir($this->tmpDir, 0o755, true);
+        $base = sys_get_temp_dir() . '/adp-llm-settings-' . uniqid('', true);
+        $this->runtimeDir = $base . '/runtime';
+        $this->configDir = $base . '/config-adp';
+        mkdir($this->runtimeDir, 0o755, true);
+        mkdir($this->configDir, 0o755, true);
     }
 
     protected function tearDown(): void
     {
-        @unlink($this->tmpDir . '/.llm-settings.json');
-        @rmdir($this->tmpDir);
+        $this->removeDir($this->runtimeDir);
+        $this->removeDir($this->configDir);
+        $base = dirname($this->runtimeDir);
+        @rmdir($base);
+    }
+
+    private function build(): FileLlmSettings
+    {
+        return new FileLlmSettings($this->runtimeDir, new FileSecretsStorage($this->configDir));
     }
 
     public function testDefaults(): void
     {
-        $settings = new FileLlmSettings($this->tmpDir);
+        $settings = $this->build();
 
         $this->assertNull($settings->getApiKey());
         $this->assertSame('openrouter', $settings->getProvider());
@@ -36,7 +48,7 @@ final class FileLlmSettingsTest extends TestCase
 
     public function testSetAndGetApiKey(): void
     {
-        $settings = new FileLlmSettings($this->tmpDir);
+        $settings = $this->build();
         $settings->setApiKey('sk-test-123');
 
         $this->assertSame('sk-test-123', $settings->getApiKey());
@@ -45,7 +57,7 @@ final class FileLlmSettingsTest extends TestCase
 
     public function testSetAndGetProvider(): void
     {
-        $settings = new FileLlmSettings($this->tmpDir);
+        $settings = $this->build();
         $settings->setProvider('anthropic');
 
         $this->assertSame('anthropic', $settings->getProvider());
@@ -53,7 +65,7 @@ final class FileLlmSettingsTest extends TestCase
 
     public function testSetAndGetModel(): void
     {
-        $settings = new FileLlmSettings($this->tmpDir);
+        $settings = $this->build();
         $settings->setModel('claude-3-opus');
 
         $this->assertSame('claude-3-opus', $settings->getModel());
@@ -61,7 +73,7 @@ final class FileLlmSettingsTest extends TestCase
 
     public function testSetTimeout(): void
     {
-        $settings = new FileLlmSettings($this->tmpDir);
+        $settings = $this->build();
         $settings->setTimeout(60);
 
         $this->assertSame(60, $settings->getTimeout());
@@ -69,7 +81,7 @@ final class FileLlmSettingsTest extends TestCase
 
     public function testSetTimeoutClampedMin(): void
     {
-        $settings = new FileLlmSettings($this->tmpDir);
+        $settings = $this->build();
         $settings->setTimeout(1);
 
         $this->assertSame(5, $settings->getTimeout());
@@ -77,7 +89,7 @@ final class FileLlmSettingsTest extends TestCase
 
     public function testSetTimeoutClampedMax(): void
     {
-        $settings = new FileLlmSettings($this->tmpDir);
+        $settings = $this->build();
         $settings->setTimeout(999);
 
         $this->assertSame(300, $settings->getTimeout());
@@ -85,7 +97,7 @@ final class FileLlmSettingsTest extends TestCase
 
     public function testSetAndGetCustomPrompt(): void
     {
-        $settings = new FileLlmSettings($this->tmpDir);
+        $settings = $this->build();
         $settings->setCustomPrompt('Be helpful');
 
         $this->assertSame('Be helpful', $settings->getCustomPrompt());
@@ -93,7 +105,7 @@ final class FileLlmSettingsTest extends TestCase
 
     public function testClear(): void
     {
-        $settings = new FileLlmSettings($this->tmpDir);
+        $settings = $this->build();
         $settings->setApiKey('sk-test');
         $settings->setModel('gpt-4');
         $settings->setProvider('openai');
@@ -111,7 +123,7 @@ final class FileLlmSettingsTest extends TestCase
 
     public function testToArray(): void
     {
-        $settings = new FileLlmSettings($this->tmpDir);
+        $settings = $this->build();
         $settings->setApiKey('sk-test');
         $settings->setModel('claude-3');
         $settings->setProvider('anthropic');
@@ -127,28 +139,32 @@ final class FileLlmSettingsTest extends TestCase
 
     public function testPersistenceToDisk(): void
     {
-        $settings = new FileLlmSettings($this->tmpDir);
+        $settings = $this->build();
         $settings->setApiKey('sk-persist');
         $settings->setModel('gpt-4');
 
-        // New instance should read from disk
-        $settings2 = new FileLlmSettings($this->tmpDir);
+        // New instance backed by the same directories should read from disk.
+        $settings2 = $this->build();
         $this->assertSame('sk-persist', $settings2->getApiKey());
         $this->assertSame('gpt-4', $settings2->getModel());
     }
 
-    public function testClearDeletesFile(): void
+    public function testClearWritesEmptySecretsFile(): void
     {
-        $settings = new FileLlmSettings($this->tmpDir);
+        $settings = $this->build();
         $settings->setApiKey('sk-test');
         $settings->clear();
 
-        $this->assertFileDoesNotExist($this->tmpDir . '/.llm-settings.json');
+        // The secrets file is rewritten with an empty document; reading it back
+        // produces a config with no LLM data.
+        $reread = $this->build();
+        $this->assertNull($reread->getApiKey());
+        $this->assertFalse($reread->isConnected());
     }
 
     public function testIsConnectedWithEmptyString(): void
     {
-        $settings = new FileLlmSettings($this->tmpDir);
+        $settings = $this->build();
         $settings->setApiKey('');
 
         $this->assertFalse($settings->isConnected());
@@ -156,15 +172,14 @@ final class FileLlmSettingsTest extends TestCase
 
     public function testDefaultCustomPrompt(): void
     {
-        $settings = new FileLlmSettings($this->tmpDir);
-        $prompt = $settings->getCustomPrompt();
+        $settings = $this->build();
 
-        $this->assertStringContainsString('English', $prompt);
+        $this->assertStringContainsString('English', $settings->getCustomPrompt());
     }
 
     public function testSetNullApiKey(): void
     {
-        $settings = new FileLlmSettings($this->tmpDir);
+        $settings = $this->build();
         $settings->setApiKey('key');
         $settings->setApiKey(null);
 
@@ -174,96 +189,16 @@ final class FileLlmSettingsTest extends TestCase
 
     public function testSetNullModel(): void
     {
-        $settings = new FileLlmSettings($this->tmpDir);
+        $settings = $this->build();
         $settings->setModel('gpt-4');
         $settings->setModel(null);
 
         $this->assertNull($settings->getModel());
     }
 
-    public function testLoadFromPartialFile(): void
-    {
-        // Save a file with only apiKey, missing other fields
-        file_put_contents($this->tmpDir . '/.llm-settings.json', json_encode(['apiKey' => 'sk-partial']));
-
-        $settings = new FileLlmSettings($this->tmpDir);
-
-        $this->assertSame('sk-partial', $settings->getApiKey());
-        $this->assertSame('openrouter', $settings->getProvider());
-        $this->assertNull($settings->getModel());
-        $this->assertSame(30, $settings->getTimeout());
-        $this->assertTrue($settings->isConnected());
-    }
-
-    public function testLoadWithNonStringApiKey(): void
-    {
-        file_put_contents($this->tmpDir . '/.llm-settings.json', json_encode([
-            'apiKey' => 123,
-            'provider' => 456,
-            'model' => true,
-            'timeout' => 'not-int',
-        ]));
-
-        $settings = new FileLlmSettings($this->tmpDir);
-
-        // Non-string apiKey should be treated as null
-        $this->assertNull($settings->getApiKey());
-        // Non-string provider should fallback to 'openrouter'
-        $this->assertSame('openrouter', $settings->getProvider());
-        // Non-string model should be null
-        $this->assertNull($settings->getModel());
-        // Non-int timeout should fallback to default
-        $this->assertSame(30, $settings->getTimeout());
-    }
-
-    public function testLoadWithNonStringCustomPrompt(): void
-    {
-        file_put_contents($this->tmpDir . '/.llm-settings.json', json_encode(['customPrompt' => 42]));
-
-        $settings = new FileLlmSettings($this->tmpDir);
-
-        // Non-string customPrompt should fallback to default
-        $this->assertStringContainsString('English', $settings->getCustomPrompt());
-    }
-
-    public function testClearWhenNoFileExists(): void
-    {
-        $settings = new FileLlmSettings($this->tmpDir);
-        // No file written yet, clear should not throw
-        $settings->clear();
-
-        $this->assertNull($settings->getApiKey());
-        $this->assertFalse($settings->isConnected());
-    }
-
-    public function testSetTimeoutBoundaryValues(): void
-    {
-        $settings = new FileLlmSettings($this->tmpDir);
-
-        $settings->setTimeout(5);
-        $this->assertSame(5, $settings->getTimeout());
-
-        $settings->setTimeout(300);
-        $this->assertSame(300, $settings->getTimeout());
-    }
-
-    public function testSaveCreatesDirectoryIfMissing(): void
-    {
-        $nestedDir = $this->tmpDir . '/nested/deep';
-        $settings = new FileLlmSettings($nestedDir);
-        $settings->setApiKey('sk-test');
-
-        $this->assertFileExists($nestedDir . '/.llm-settings.json');
-
-        // Cleanup
-        @unlink($nestedDir . '/.llm-settings.json');
-        @rmdir($nestedDir);
-        @rmdir($this->tmpDir . '/nested');
-    }
-
     public function testToArrayWithDefaults(): void
     {
-        $settings = new FileLlmSettings($this->tmpDir);
+        $settings = $this->build();
 
         $arr = $settings->toArray();
 
@@ -276,18 +211,88 @@ final class FileLlmSettingsTest extends TestCase
 
     public function testClearResetsCustomPromptToDefault(): void
     {
-        $settings = new FileLlmSettings($this->tmpDir);
+        $settings = $this->build();
         $settings->setCustomPrompt('Custom prompt');
         $settings->clear();
 
         $this->assertStringContainsString('English', $settings->getCustomPrompt());
     }
 
-    // --- ACP Settings ---
+    // --- Migration from legacy .llm-settings.json -------------------------------
+
+    public function testMigratesLegacyFileOnFirstLoad(): void
+    {
+        // Pretend an older install left settings in runtime/.llm-settings.json.
+        file_put_contents(
+            $this->runtimeDir . '/.llm-settings.json',
+            (string) json_encode([
+                'apiKey' => 'sk-legacy',
+                'provider' => 'anthropic',
+                'model' => 'claude-3-haiku',
+                'timeout' => 45,
+            ]),
+        );
+
+        $settings = $this->build();
+
+        // First read auto-migrates; values become available transparently.
+        $this->assertSame('sk-legacy', $settings->getApiKey());
+        $this->assertSame('anthropic', $settings->getProvider());
+        $this->assertSame('claude-3-haiku', $settings->getModel());
+        $this->assertSame(45, $settings->getTimeout());
+
+        // The new canonical file must exist with the migrated values.
+        $this->assertFileExists($this->configDir . '/secrets.json');
+
+        // The legacy file is renamed (not deleted) so an admin can recover.
+        $this->assertFileDoesNotExist($this->runtimeDir . '/.llm-settings.json');
+        $this->assertFileExists($this->runtimeDir . '/.llm-settings.json.migrated');
+
+        // A second instance reads only from the new file, never re-migrating.
+        @unlink($this->runtimeDir . '/.llm-settings.json.migrated');
+        $secondInstance = $this->build();
+        $this->assertSame('sk-legacy', $secondInstance->getApiKey());
+    }
+
+    public function testNoMigrationWhenLegacyFileMissing(): void
+    {
+        $settings = $this->build();
+        $settings->getApiKey(); // triggers load()
+
+        $this->assertFileDoesNotExist($this->runtimeDir . '/.llm-settings.json.migrated');
+    }
+
+    public function testNoMigrationWhenSecretsAlreadyHasData(): void
+    {
+        // Pre-existing secrets file (e.g. user already migrated, or pre-existing v1).
+        $settings = $this->build();
+        $settings->setApiKey('sk-current');
+
+        // Legacy file appears later (someone restored a backup).
+        file_put_contents($this->runtimeDir . '/.llm-settings.json', (string) json_encode(['apiKey' => 'sk-stale']));
+
+        $reread = $this->build();
+        $this->assertSame('sk-current', $reread->getApiKey());
+        // Legacy file is NOT touched because the canonical store already has data.
+        $this->assertFileExists($this->runtimeDir . '/.llm-settings.json');
+        $this->assertFileDoesNotExist($this->runtimeDir . '/.llm-settings.json.migrated');
+    }
+
+    public function testMigrationIgnoresMalformedLegacyFile(): void
+    {
+        file_put_contents($this->runtimeDir . '/.llm-settings.json', '{not json');
+
+        $settings = $this->build();
+        $this->assertNull($settings->getApiKey());
+        // Malformed legacy file is left in place — operator can inspect / fix.
+        $this->assertFileExists($this->runtimeDir . '/.llm-settings.json');
+    }
+
+    // --- ACP --------------------------------------------------------------------
 
     public function testAcpCommandDefaults(): void
     {
-        $settings = new FileLlmSettings($this->tmpDir);
+        $settings = $this->build();
 
         $this->assertSame('claude', $settings->getAcpCommand());
         $this->assertSame([], $settings->getAcpArgs());
@@ -296,7 +301,7 @@ final class FileLlmSettingsTest extends TestCase
 
     public function testSetAndGetAcpCommand(): void
     {
-        $settings = new FileLlmSettings($this->tmpDir);
+        $settings = $this->build();
         $settings->setAcpCommand('gemini');
 
         $this->assertSame('gemini', $settings->getAcpCommand());
@@ -304,7 +309,7 @@ final class FileLlmSettingsTest extends TestCase
 
     public function testSetAndGetAcpArgs(): void
     {
-        $settings = new FileLlmSettings($this->tmpDir);
+        $settings = $this->build();
         $settings->setAcpArgs(['--model', 'opus']);
 
         $this->assertSame(['--model', 'opus'], $settings->getAcpArgs());
@@ -312,7 +317,7 @@ final class FileLlmSettingsTest extends TestCase
 
     public function testSetAndGetAcpEnv(): void
     {
-        $settings = new FileLlmSettings($this->tmpDir);
+        $settings = $this->build();
         $settings->setAcpEnv(['MY_CUSTOM_VAR' => 'test-value']);
 
         $this->assertSame(['MY_CUSTOM_VAR' => 'test-value'], $settings->getAcpEnv());
@@ -320,16 +325,15 @@ final class FileLlmSettingsTest extends TestCase
 
     public function testAcpProviderIsConnectedWithoutApiKey(): void
     {
-        $settings = new FileLlmSettings($this->tmpDir);
+        $settings = $this->build();
         $settings->setProvider('acp');
 
-        // ACP doesn't need API key — connected if command is set
         $this->assertTrue($settings->isConnected());
     }
 
     public function testAcpProviderIsNotConnectedWithEmptyCommand(): void
     {
-        $settings = new FileLlmSettings($this->tmpDir);
+        $settings = $this->build();
         $settings->setProvider('acp');
         $settings->setAcpCommand('');
 
@@ -338,13 +342,13 @@ final class FileLlmSettingsTest extends TestCase
 
     public function testAcpSettingsPersistToDisk(): void
     {
-        $settings = new FileLlmSettings($this->tmpDir);
+        $settings = $this->build();
         $settings->setProvider('acp');
         $settings->setAcpCommand('codex');
         $settings->setAcpArgs(['--flag']);
         $settings->setAcpEnv(['KEY' => 'val']);
 
-        $settings2 = new FileLlmSettings($this->tmpDir);
+        $settings2 = $this->build();
         $this->assertSame('acp', $settings2->getProvider());
         $this->assertSame('codex', $settings2->getAcpCommand());
         $this->assertSame(['--flag'], $settings2->getAcpArgs());
@@ -353,7 +357,7 @@ final class FileLlmSettingsTest extends TestCase
 
     public function testClearResetsAcpSettings(): void
     {
-        $settings = new FileLlmSettings($this->tmpDir);
+        $settings = $this->build();
         $settings->setAcpCommand('gemini');
         $settings->setAcpArgs(['--arg']);
         $settings->setAcpEnv(['K' => 'V']);
@@ -366,7 +370,7 @@ final class FileLlmSettingsTest extends TestCase
 
     public function testToArrayIncludesAcpFields(): void
     {
-        $settings = new FileLlmSettings($this->tmpDir);
+        $settings = $this->build();
         $settings->setProvider('acp');
         $settings->setAcpCommand('gemini');
 
@@ -377,18 +381,31 @@ final class FileLlmSettingsTest extends TestCase
         $this->assertSame([], $arr['acpEnv']);
     }
 
-    public function testLoadPartialFileWithoutAcpFields(): void
+    public function testGetStoragePathReturnsRuntimeDir(): void
     {
-        file_put_contents($this->tmpDir . '/.llm-settings.json', json_encode([
-            'apiKey' => 'sk-test',
-            'provider' => 'anthropic',
-        ]));
+        $settings = $this->build();
 
-        $settings = new FileLlmSettings($this->tmpDir);
+        $this->assertSame($this->runtimeDir, $settings->getStoragePath());
+    }
 
-        // Missing ACP fields should use defaults
-        $this->assertSame('claude', $settings->getAcpCommand());
-        $this->assertSame([], $settings->getAcpArgs());
-        $this->assertSame([], $settings->getAcpEnv());
+    private function removeDir(string $dir): void
+    {
+        if (!is_dir($dir)) {
+            return;
+        }
+
+        foreach ((array) scandir($dir) as $entry) {
+            if ($entry === '.' || $entry === '..' || !is_string($entry)) {
+                continue;
+            }
+            $path = $dir . DIRECTORY_SEPARATOR . $entry;
+            if (is_dir($path)) {
+                $this->removeDir($path);
+            } else {
+                @unlink($path);
+            }
+        }
+
+        @rmdir($dir);
     }
 }

@@ -11,6 +11,8 @@ final class AdpConfigTest extends TestCase
 {
     private string $previousStoragePath = '';
     private string $previousStaticUrl = '';
+    private string $previousProjectConfigPath = '';
+    private string $previousRootPath = '';
 
     protected function setUp(): void
     {
@@ -19,10 +21,16 @@ final class AdpConfigTest extends TestCase
         $this->previousStoragePath = is_string($storage) ? $storage : '';
         $static = getenv('APP_DEV_PANEL_STATIC_URL');
         $this->previousStaticUrl = is_string($static) ? $static : '';
+        $project = getenv('APP_DEV_PANEL_PROJECT_CONFIG_PATH');
+        $this->previousProjectConfigPath = is_string($project) ? $project : '';
+        $root = getenv('APP_DEV_PANEL_ROOT_PATH');
+        $this->previousRootPath = is_string($root) ? $root : '';
 
         // Tests must start with a clean env so config defaults are observable.
         putenv('APP_DEV_PANEL_STORAGE_PATH');
         putenv('APP_DEV_PANEL_STATIC_URL');
+        putenv('APP_DEV_PANEL_PROJECT_CONFIG_PATH');
+        putenv('APP_DEV_PANEL_ROOT_PATH');
     }
 
     protected function tearDown(): void
@@ -36,6 +44,16 @@ final class AdpConfigTest extends TestCase
             putenv('APP_DEV_PANEL_STATIC_URL=' . $this->previousStaticUrl);
         } else {
             putenv('APP_DEV_PANEL_STATIC_URL');
+        }
+        if ($this->previousProjectConfigPath !== '') {
+            putenv('APP_DEV_PANEL_PROJECT_CONFIG_PATH=' . $this->previousProjectConfigPath);
+        } else {
+            putenv('APP_DEV_PANEL_PROJECT_CONFIG_PATH');
+        }
+        if ($this->previousRootPath !== '') {
+            putenv('APP_DEV_PANEL_ROOT_PATH=' . $this->previousRootPath);
+        } else {
+            putenv('APP_DEV_PANEL_ROOT_PATH');
         }
     }
 
@@ -155,6 +173,47 @@ final class AdpConfigTest extends TestCase
         $config = new AdpConfig();
 
         self::assertNull($config->staticUrl());
+    }
+
+    public function testProjectConfigPathDefaultsToAppConfigAdpUnderCwd(): void
+    {
+        $config = new AdpConfig();
+
+        self::assertSame((string) getcwd() . '/app/config/adp', $config->projectConfigPath());
+    }
+
+    public function testProjectConfigPathFallsBackToEnvVar(): void
+    {
+        putenv('APP_DEV_PANEL_PROJECT_CONFIG_PATH=/tmp/from-env/adp');
+
+        $config = new AdpConfig();
+        self::assertSame('/tmp/from-env/adp', $config->projectConfigPath());
+    }
+
+    public function testProjectConfigPathFallsBackToRootPathEnv(): void
+    {
+        putenv('APP_DEV_PANEL_ROOT_PATH=/srv/app');
+
+        $config = new AdpConfig();
+        self::assertSame('/srv/app/app/config/adp', $config->projectConfigPath());
+    }
+
+    public function testProjectConfigPathPrefersExplicitEnvOverRootPath(): void
+    {
+        putenv('APP_DEV_PANEL_ROOT_PATH=/srv/app');
+        putenv('APP_DEV_PANEL_PROJECT_CONFIG_PATH=/tmp/from-env/adp');
+
+        $config = new AdpConfig();
+        self::assertSame('/tmp/from-env/adp', $config->projectConfigPath());
+    }
+
+    public function testExplicitProjectConfigPathBeatsEverything(): void
+    {
+        putenv('APP_DEV_PANEL_PROJECT_CONFIG_PATH=/tmp/from-env/adp');
+        putenv('APP_DEV_PANEL_ROOT_PATH=/srv/app');
+
+        $config = new AdpConfig(['project_config_path' => '/tmp/explicit/adp']);
+        self::assertSame('/tmp/explicit/adp', $config->projectConfigPath());
     }
 
     public function testIgnoredRequestsRejectsNonStringEntries(): void

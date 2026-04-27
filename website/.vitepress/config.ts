@@ -293,6 +293,7 @@ export default defineConfig({
                 },
                 { text: "Toolbar", link: "/guide/toolbar" },
                 { text: "OpenAPI Viewer", link: "/guide/openapi" },
+                { text: "Project Config", link: "/guide/project-config" },
                 { text: "Frontend Packages", link: "/guide/frontend-packages" },
               ],
             },
@@ -516,6 +517,10 @@ export default defineConfig({
                 { text: "ИИ чат", link: "/ru/guide/ai-chat" },
                 { text: "Тулбар", link: "/ru/guide/toolbar" },
                 { text: "OpenAPI Viewer", link: "/guide/openapi" },
+                {
+                  text: "Конфигурация проекта",
+                  link: "/ru/guide/project-config",
+                },
                 {
                   text: "Фронтенд-пакеты",
                   link: "/ru/guide/frontend-packages",
