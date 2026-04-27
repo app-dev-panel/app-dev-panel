@@ -3,11 +3,7 @@ import {Box} from '@mui/material';
 import {styled} from '@mui/material/styles';
 import React from 'react';
 
-type PageToolbarProps = {
-    children: React.ReactNode;
-    actions?: React.ReactNode;
-    sticky?: boolean;
-};
+type PageToolbarProps = {children: React.ReactNode; actions?: React.ReactNode; sticky?: boolean};
 
 const Root = styled(Box, {shouldForwardProp: (p) => p !== 'sticky'})<{sticky?: boolean}>(({theme, sticky}) => ({
     display: 'flex',

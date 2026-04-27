@@ -153,7 +153,10 @@ export const CoverageFileList = ({files}: {files: Record<string, FileInfo>}) => 
 
     return (
         <>
-            <PageToolbar sticky actions={<FilterInput value={filter} onChange={setFilter} placeholder="Filter files..." />}>
+            <PageToolbar
+                sticky
+                actions={<FilterInput value={filter} onChange={setFilter} placeholder="Filter files..." />}
+            >
                 {`${filtered.length} files`}
             </PageToolbar>
 

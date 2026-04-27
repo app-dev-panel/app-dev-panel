@@ -3,10 +3,7 @@ import {createContext, ReactNode, useContext} from 'react';
 
 const PanelBreadcrumbContext = createContext<ReactNode | null>(null);
 
-type ProviderProps = {
-    label: ReactNode;
-    children: ReactNode;
-};
+type ProviderProps = {label: ReactNode; children: ReactNode};
 
 export const PanelBreadcrumbProvider = ({label, children}: ProviderProps) => (
     <PanelBreadcrumbContext value={label}>{children}</PanelBreadcrumbContext>
@@ -24,19 +21,12 @@ const Crumb = styled('span')(({theme}) => ({
     textTransform: 'none',
     letterSpacing: 'normal',
     flexShrink: 0,
-    '&::after': {
-        content: '"›"',
-        marginLeft: theme.spacing(0.5),
-        opacity: 0.7,
-    },
+    '&::after': {content: '"›"', marginLeft: theme.spacing(0.5), opacity: 0.7},
 }));
 
 const Section = styled('span')({opacity: 0.85});
 
-type InlineProps = {
-    label: ReactNode;
-    section?: ReactNode;
-};
+type InlineProps = {label: ReactNode; section?: ReactNode};
 
 export const PanelBreadcrumbInline = ({label, section = 'Debug'}: InlineProps) => (
     <Crumb aria-label="Section breadcrumb">
