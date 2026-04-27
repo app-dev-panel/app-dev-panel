@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Adapter\Spiral\Bootloader;
 
+use AppDevPanel\Adapter\Spiral\Container\EventDispatcherProxyInjector;
+use AppDevPanel\Adapter\Spiral\Container\HttpClientProxyInjector;
+use AppDevPanel\Adapter\Spiral\Container\LoggerProxyInjector;
 use AppDevPanel\Adapter\Spiral\Controller\AdpApiController;
 use AppDevPanel\Adapter\Spiral\Middleware\AdpApiMiddleware;
 use AppDevPanel\Adapter\Spiral\Middleware\DebugMiddleware;
@@ -33,12 +36,9 @@ use AppDevPanel\Kernel\Collector\CacheCollector;
 use AppDevPanel\Kernel\Collector\CollectorInterface;
 use AppDevPanel\Kernel\Collector\DatabaseCollector;
 use AppDevPanel\Kernel\Collector\EventCollector;
-use AppDevPanel\Kernel\Collector\EventDispatcherInterfaceProxy;
 use AppDevPanel\Kernel\Collector\ExceptionCollector;
 use AppDevPanel\Kernel\Collector\HttpClientCollector;
-use AppDevPanel\Kernel\Collector\HttpClientInterfaceProxy;
 use AppDevPanel\Kernel\Collector\LogCollector;
-use AppDevPanel\Kernel\Collector\LoggerInterfaceProxy;
 use AppDevPanel\Kernel\Collector\MailerCollector;
 use AppDevPanel\Kernel\Collector\QueueCollector;
 use AppDevPanel\Kernel\Collector\RouterCollector;
@@ -67,6 +67,7 @@ use Psr\Http\Message\UriFactoryInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use Spiral\Boot\Bootloader\Bootloader;
+use Spiral\Core\BinderInterface;
 
 /**
  * Spiral Bootloader that wires all ADP services into the Spiral container.
@@ -142,6 +143,13 @@ final class AppDevPanelBootloader extends Bootloader
 
         // PSR-3 logger — fall back to NullLogger if the app hasn't bound one.
         LoggerInterface::class => [self::class, 'initLogger'],
+
+        // Container injectors that wrap PSR services with collector-aware proxies.
+        // Registered as singletons so the bootloader can capture the original
+        // application binding via `setUnderlying()` before swapping in the injector.
+        LoggerProxyInjector::class => LoggerProxyInjector::class,
+        EventDispatcherProxyInjector::class => EventDispatcherProxyInjector::class,
+        HttpClientProxyInjector::class => HttpClientProxyInjector::class,
     ];
 
     public function initPsr17Factory(): Psr17Factory
@@ -246,15 +254,74 @@ final class AppDevPanelBootloader extends Bootloader
     }
 
     /**
-     * Decorates PSR services with ADP proxies so collectors receive their events.
+     * Wires PSR services through the Spiral container's `bindInjector` mechanism so
+     * every resolution of `LoggerInterface` / `EventDispatcherInterface` / `ClientInterface`
+     * yields a collector-aware proxy.
+     *
+     * For each interface this method:
+     *   1. Captures the application's currently bound instance (Monolog, Symfony's
+     *      EventDispatcher, Guzzle, …) — the upcoming `bindInjector` call will overwrite
+     *      that binding, so the original must be stashed on the injector first.
+     *   2. Registers the injector class name with the binder. Spiral resolves and invokes
+     *      `createInjection()` on every subsequent `$container->get($iface)` call,
+     *      returning a fresh proxy wrapping the captured underlying.
      *
      * Called by the Spiral Kernel after all bootloaders have been initialized.
      */
     public function boot(ContainerInterface $container): void
     {
-        $this->decorateLogger($container);
-        $this->decorateEventDispatcher($container);
-        $this->decorateHttpClient($container);
+        if (!$container instanceof \Spiral\Core\Container) {
+            return;
+        }
+
+        $binder = $container->getBinder();
+
+        $this->installInjector($container, $binder, LoggerInterface::class, LoggerProxyInjector::class);
+        $this->installInjector(
+            $container,
+            $binder,
+            EventDispatcherInterface::class,
+            EventDispatcherProxyInjector::class,
+        );
+        $this->installInjector($container, $binder, ClientInterface::class, HttpClientProxyInjector::class);
+    }
+
+    /**
+     * @param class-string $interface
+     * @param class-string $injectorClass
+     */
+    private function installInjector(
+        ContainerInterface $container,
+        BinderInterface $binder,
+        string $interface,
+        string $injectorClass,
+    ): void {
+        if (!$container->has($injectorClass)) {
+            return;
+        }
+
+        $injector = $container->get($injectorClass);
+        if (!is_object($injector) || !method_exists($injector, 'setUnderlying')) {
+            return;
+        }
+
+        // Capture the application's currently-bound instance BEFORE we overwrite the
+        // binding via `bindInjector`. Spiral has no notion of "previous binding" — the
+        // injector's `Injectable` config replaces whatever `Shared`/`Factory` config
+        // was there, so the original reference would otherwise be lost.
+        if ($container->has($interface)) {
+            $underlying = $container->get($interface);
+            if (is_object($underlying)) {
+                $injector->setUnderlying($underlying);
+            }
+
+            // Resolving the singleton above caches it in the binder's state.
+            // `bindInjector` ultimately calls `setBinding`, which refuses to overwrite
+            // a constructed singleton — so we must drop the cached binding first.
+            $binder->removeBinding($interface);
+        }
+
+        $binder->bindInjector($interface, $injectorClass);
     }
 
     /**
@@ -281,54 +348,6 @@ final class AppDevPanelBootloader extends Bootloader
             QueueCollector::class,
             DatabaseCollector::class,
         ];
-    }
-
-    private function decorateLogger(ContainerInterface $container): void
-    {
-        if (!$container->has(LoggerInterface::class) || !$container->has(LogCollector::class)) {
-            return;
-        }
-
-        if (!$container instanceof \Spiral\Core\Container) {
-            return;
-        }
-
-        $original = $container->get(LoggerInterface::class);
-        $collector = $container->get(LogCollector::class);
-        $container->bindSingleton(LoggerInterface::class, new LoggerInterfaceProxy($original, $collector));
-    }
-
-    private function decorateEventDispatcher(ContainerInterface $container): void
-    {
-        if (
-            !$container->has(EventDispatcherInterface::class)
-            || !$container->has(EventCollector::class)
-            || !$container instanceof \Spiral\Core\Container
-        ) {
-            return;
-        }
-
-        $original = $container->get(EventDispatcherInterface::class);
-        $collector = $container->get(EventCollector::class);
-        $container->bindSingleton(
-            EventDispatcherInterface::class,
-            new EventDispatcherInterfaceProxy($original, $collector),
-        );
-    }
-
-    private function decorateHttpClient(ContainerInterface $container): void
-    {
-        if (
-            !$container->has(ClientInterface::class)
-            || !$container->has(HttpClientCollector::class)
-            || !$container instanceof \Spiral\Core\Container
-        ) {
-            return;
-        }
-
-        $original = $container->get(ClientInterface::class);
-        $collector = $container->get(HttpClientCollector::class);
-        $container->bindSingleton(ClientInterface::class, new HttpClientInterfaceProxy($original, $collector));
     }
 
     private function resolveStoragePath(): string

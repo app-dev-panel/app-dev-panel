@@ -182,7 +182,8 @@
       "AppDevPanel\\Adapter\\Laravel\\": "libs/Adapter/Laravel/src",
       "AppDevPanel\\Adapter\\Yii2\\": "libs/Adapter/Yii2/src",
       "AppDevPanel\\Adapter\\Cycle\\": "libs/Adapter/Cycle/src",
-      "AppDevPanel\\Adapter\\Yii3\\": "libs/Adapter/Yii3/src"
+      "AppDevPanel\\Adapter\\Yii3\\": "libs/Adapter/Yii3/src",
+      "AppDevPanel\\Adapter\\Spiral\\": "libs/Adapter/Spiral/src"
     }
   },
   "autoload-dev": {
@@ -195,6 +196,7 @@
       "AppDevPanel\\Adapter\\Laravel\\Tests\\": "libs/Adapter/Laravel/tests",
       "AppDevPanel\\Adapter\\Yii3\\Tests\\": "libs/Adapter/Yii3/tests",
       "AppDevPanel\\Adapter\\Yii2\\Tests\\": "libs/Adapter/Yii2/tests",
+      "AppDevPanel\\Adapter\\Spiral\\Tests\\": "libs/Adapter/Spiral/tests",
       "AppDevPanel\\Testing\\Tests\\": "libs/Testing/tests",
       "AppDevPanel\\Tests\\": "tests"
     }
@@ -210,7 +212,8 @@
     "app-dev-panel/adapter-laravel": "self.version",
     "app-dev-panel/adapter-yii2": "self.version",
     "app-dev-panel/adapter-cycle": "self.version",
-    "app-dev-panel/adapter-yii3": "self.version"
+    "app-dev-panel/adapter-yii3": "self.version",
+    "app-dev-panel/adapter-spiral": "self.version"
   },
   "bin": [
     "libs/Cli/bin/adp",
