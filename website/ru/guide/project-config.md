@@ -25,7 +25,7 @@ Frames (встроенные iframe) и OpenAPI-спеки, добавленны
 |------|------------|------------|
 | `project.json` | **Да** | `{version, frames, openapi}` — карты «отображаемое имя → URL» |
 | `.gitignore` | **Да** | Автогенерируется с `secrets.json` |
-| `secrets.json` | **Нет** (gitignored) | Зарезервирован для будущих API-ключей и локальных переопределений |
+| `secrets.json` | **Нет** (gitignored) | API-ключи, OAuth-токены, ACP-окружение. Только локально, права `0600` |
 
 Пример `project.json`:
 
@@ -214,16 +214,102 @@ done
 
 (У Yii 2 путь оказывается под `src/`, потому что в плейграунде `@app` указывает на эту директорию — в реальном приложении alias резолвится по-другому.)
 
-## Что будет дальше
+## Файл секретов (`secrets.json`)
 
-`secrets.json` будет хранить значения, специфичные для машины и **никогда не коммитимые**: API-ключи Anthropic / OpenRouter, OAuth-токены и любые будущие переопределения окружения для ACP. Правило в `.gitignore` уже на месте; класс хранения и эндпоинт API подъедут отдельным релизом.
+Локальный сосед `project.json` для значений, которые ни в коем случае не должны попасть в VCS: API-ключи, OAuth-токены, ACP-окружение. Правило в `.gitignore` создаётся автоматически при первой записи `project.json`, поэтому свежий чекаут безопасен по умолчанию.
+
+**Структура (v1):**
+
+```json
+{
+    "version": 1,
+    "llm": {
+        "apiKey": "sk-ant-...",
+        "provider": "openrouter",
+        "model": "anthropic/claude-opus-4-7",
+        "timeout": 30,
+        "customPrompt": "...",
+        "acpCommand": "claude",
+        "acpArgs": [],
+        "acpEnv": {}
+    }
+}
+```
+
+`llm`-namespace в точности повторяет историчный `runtime/.llm-settings.json` — это позволяет в будущем дописывать другие категории секретов (DB credentials, OAuth-токены других провайдеров, …) без миграции схемы. Права файла — `0600` (чтение/запись только владельцу).
+
+### Миграция со старого `runtime/.llm-settings.json`
+
+При первом чтении LLM-настроек после апгрейда панель автоматически мигрирует старый файл: содержимое уезжает в `secrets.json`, оригинал переименовывается в `.llm-settings.json.migrated` (остаётся как бэкап, **не** удаляется), в `stderr` выводится одна строка-уведомление. Идемпотентно — второй запуск ничего не делает.
+
+### API-эндпоинты
+
+| Метод | Путь | Назначение |
+|-------|------|------------|
+| `GET` | `/debug/api/project/secrets` | **Маскированный** снимок. `apiKey` показывает только последние 4 символа (`"...wxyz"`); значения `acpEnv` и элементы `acpArgs` тоже маскируются. Булевы `hasApiKey` / `hasAcpArgs` позволяют UI рендерить «настроено / не настроено», ни разу не загрузив реальный секрет в SPA. |
+| `PATCH` | `/debug/api/project/secrets` | **Merge**-обновление. Тело: `{llm: {<поле>: <значение-или-null>}}`. `null` удаляет ключ, отсутствующие ключи остаются нетронутыми. `PUT` нет — маскированный GET-ответ намеренно нероундтриппабелен. |
+
+Быстрая проверка из терминала:
+
+```bash
+# Сохранить ключ.
+curl -X PATCH \
+  -H 'Content-Type: application/json' \
+  -d '{"llm":{"apiKey":"sk-ant-XXXXXXXX","provider":"anthropic"}}' \
+  http://127.0.0.1:8101/debug/api/project/secrets
+
+# Прочитать обратно — маскированный.
+curl http://127.0.0.1:8101/debug/api/project/secrets | jq '.data.secrets'
+# {
+#   "apiKey": "...XXXX",
+#   "hasApiKey": true,
+#   "provider": "anthropic",
+#   ...
+# }
+
+# Удалить ключ явно.
+curl -X PATCH \
+  -H 'Content-Type: application/json' \
+  -d '{"llm":{"apiKey":null}}' \
+  http://127.0.0.1:8101/debug/api/project/secrets
+```
+
+Существующие LLM-эндпоинты (`/debug/api/llm/connect`, `/debug/api/llm/oauth/exchange`, `/debug/api/llm/disconnect`, `/debug/api/llm/model`, …) не изменились — внутри они теперь пишут через `secrets.json`, а не `runtime/.llm-settings.json`.
+
+## Real-time синхронизация (SSE)
+
+Панель слушает `GET /debug/api/project/event-stream` для push-уведомлений при изменении `project.json` или `secrets.json`. Эндпоинт делает `stat()` обоих файлов раз в секунду и эмитит:
+
+```
+data: {"type":"project-config-stream-ready"}    # отправляется при подключении
+
+data: {"type":"project-config-changed"}         # отправляется на каждое изменение
+```
+
+Это ловит **три** разных источника:
+
+1. Сама панель сохранила что-то через `PUT`/`PATCH`.
+2. Другой таб браузера редактирует тот же бэкенд.
+3. `git pull` переписал файл извне процесса.
+
+`projectSyncMiddleware` на фронте реагирует force-refetch'ем `getProjectConfig` и `getSecrets`. Существующий обработчик `getProjectConfig.fulfilled` ре-гидрирует OpenAPI/Frames slices — тот же путь, что и при начальном бутстрапе.
+
+Соединение автоматически закрывается через 30 секунд; браузерный `EventSource` сам переподключается. Это не даёт PHP-built-in-server-воркеру висеть вечно и переживает кратковременные сбои сети.
+
+::: warning Однопоточные dev-серверы
+По умолчанию `php -S` — однопоточный, и одно открытое SSE-соединение блокирует все остальные запросы на том же порту. Плейграунды решают это через `PHP_CLI_SERVER_WORKERS=3`, который ставит `bin/serve.sh`. В своём dev-окружении используйте многопроцессный SAPI (PHP-FPM, FrankenPHP, RoadRunner) или выставьте `PHP_CLI_SERVER_WORKERS` перед `php -S`.
+:::
 
 ## Технические детали
 
-- **Backend storage**: <class>AppDevPanel\Kernel\Project\FileProjectConfigStorage</class> — атомарная запись (временный файл + rename), права `0644`, авто-создание директории и `.gitignore`.
-- **Backend interface**: <class>AppDevPanel\Kernel\Project\ProjectConfigStorageInterface</class>.
-- **Backend value object**: <class>AppDevPanel\Kernel\Project\ProjectConfig</class> — иммутабельный, отбрасывает битые записи в `fromArray()`.
-- **HTTP-контроллер**: <class>AppDevPanel\Api\Project\Controller\ProjectController</class>.
+- **Project storage**: <class>AppDevPanel\Kernel\Project\FileProjectConfigStorage</class> — атомарная запись (временный файл + rename), права `0644`, авто-создание директории и `.gitignore`.
+- **Project interface**: <class>AppDevPanel\Kernel\Project\ProjectConfigStorageInterface</class>.
+- **Project VO**: <class>AppDevPanel\Kernel\Project\ProjectConfig</class> — иммутабельный, отбрасывает битые записи в `fromArray()`.
+- **Secrets storage**: <class>AppDevPanel\Kernel\Project\FileSecretsStorage</class> — атомарная запись с правами `0600`.
+- **Secrets interface**: <class>AppDevPanel\Kernel\Project\SecretsStorageInterface</class>.
+- **Secrets VO**: <class>AppDevPanel\Kernel\Project\SecretsConfig</class> — иммутабельный, поддерживает `withLlm()` (заменить) и `withLlmPatch()` (merge с `null` = удалить).
+- **HTTP-контроллеры**: <class>AppDevPanel\Api\Project\Controller\ProjectController</class> (`/config` + `/event-stream`), <class>AppDevPanel\Api\Project\Controller\SecretsController</class> (`/secrets`).
+- **LLM-фасад**: <class>AppDevPanel\Api\Llm\FileLlmSettings</class> — читает/пишет через `SecretsStorage`, автоматически мигрирует legacy `runtime/.llm-settings.json` при первом чтении.
 - **Frontend-модуль**: `libs/frontend/packages/panel/src/Module/Project/`.
-- **Sync-middleware**: `Module/Project/projectSyncMiddleware.ts` — bootstrap, debounce, миграция, подавление feedback-loops.
-- **RTK Query API**: `libs/frontend/packages/sdk/src/API/Project/Project.ts`.
+- **Sync-middleware**: `Module/Project/projectSyncMiddleware.ts` — bootstrap, debounce, миграция, SSE-переподключение, подавление feedback-loops.
+- **RTK Query API**: `libs/frontend/packages/sdk/src/API/Project/Project.ts` (`getProjectConfig`, `updateProjectConfig`, `getSecrets`, `patchSecrets`).

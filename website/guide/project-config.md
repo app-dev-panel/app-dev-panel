@@ -25,7 +25,7 @@ The panel writes two files into a framework-specific config directory:
 |------|---------|----------|
 | `project.json` | **Yes** | `{version, frames, openapi}` — display name → URL maps |
 | `.gitignore` | **Yes** | Auto-generated with `secrets.json` pre-listed |
-| `secrets.json` | **No** (gitignored) | Reserved for future API-keys / per-machine overrides |
+| `secrets.json` | **No** (gitignored) | API keys, OAuth tokens, ACP env. Local-only, `0600` permissions |
 
 Example `project.json`:
 
@@ -214,16 +214,102 @@ done
 
 (The Yii 2 path lands under `src/` because the playground sets `@app` to that directory — your real app may resolve it elsewhere.)
 
-## What's Coming Next
+## Secrets file (`secrets.json`)
 
-`secrets.json` will hold per-machine values that **must not** be committed: the Anthropic / OpenRouter API keys, OAuth tokens, and any future ACP environment overrides. The `.gitignore` rule is already in place; the storage class and API endpoint will land in a follow-up release.
+Local-only siblings of `project.json` for values that must never travel via VCS: API keys, OAuth tokens, ACP environment overrides. The `.gitignore` rule is generated automatically when the project file is first written, so a fresh checkout is safe by default.
+
+**Shape (v1):**
+
+```json
+{
+    "version": 1,
+    "llm": {
+        "apiKey": "sk-ant-...",
+        "provider": "openrouter",
+        "model": "anthropic/claude-opus-4-7",
+        "timeout": 30,
+        "customPrompt": "...",
+        "acpCommand": "claude",
+        "acpArgs": [],
+        "acpEnv": {}
+    }
+}
+```
+
+The `llm` namespace mirrors the historic `runtime/.llm-settings.json` exactly so we can grow the file with future secret categories (database creds, OAuth tokens for other providers, …) without a schema migration. File mode is `0600` (owner read/write only).
+
+### Migration from `runtime/.llm-settings.json`
+
+The first time the panel reads LLM settings on an upgraded install, it auto-migrates the legacy file: contents move into `secrets.json`, the old file is renamed to `.llm-settings.json.migrated` (kept as a backup, _not_ deleted), and a one-line note is written to `stderr`. Idempotent: a second startup is a no-op.
+
+### API endpoints
+
+| Method | Path | Purpose |
+|--------|------|---------|
+| `GET` | `/debug/api/project/secrets` | **Masked** snapshot. `apiKey` shows only the last 4 chars (`"...wxyz"`); `acpEnv` values and `acpArgs` entries are masked too. Booleans `hasApiKey` / `hasAcpArgs` let the UI render "configured / empty" without ever loading the real secret. |
+| `PATCH` | `/debug/api/project/secrets` | **Merge** update. Body shape: `{llm: {<field>: <value-or-null>}}`. `null` deletes a key, missing keys are left alone. There is no `PUT` — the masked GET document is intentionally non-roundtrippable. |
+
+Quick check from a terminal:
+
+```bash
+# Set the API key.
+curl -X PATCH \
+  -H 'Content-Type: application/json' \
+  -d '{"llm":{"apiKey":"sk-ant-XXXXXXXX","provider":"anthropic"}}' \
+  http://127.0.0.1:8101/debug/api/project/secrets
+
+# Read it back — masked.
+curl http://127.0.0.1:8101/debug/api/project/secrets | jq '.data.secrets'
+# {
+#   "apiKey": "...XXXX",
+#   "hasApiKey": true,
+#   "provider": "anthropic",
+#   ...
+# }
+
+# Clear the key explicitly.
+curl -X PATCH \
+  -H 'Content-Type: application/json' \
+  -d '{"llm":{"apiKey":null}}' \
+  http://127.0.0.1:8101/debug/api/project/secrets
+```
+
+The existing LLM endpoints (`/debug/api/llm/connect`, `/debug/api/llm/oauth/exchange`, `/debug/api/llm/disconnect`, `/debug/api/llm/model`, …) are unchanged — internally they now write through `secrets.json` instead of `runtime/.llm-settings.json`.
+
+## Real-time sync (SSE)
+
+The panel listens to `GET /debug/api/project/event-stream` for push notifications when either `project.json` or `secrets.json` changes on disk. The endpoint `stat()`s both files every second and emits:
+
+```
+data: {"type":"project-config-stream-ready"}    # fires on connection
+
+data: {"type":"project-config-changed"}         # fires on every change
+```
+
+This catches **three** distinct sources:
+
+1. The same panel saving via `PUT`/`PATCH`.
+2. Another browser tab editing the same backend.
+3. `git pull` rewriting the file from outside the process.
+
+The frontend's `projectSyncMiddleware` reacts by force-refetching `getProjectConfig` and `getSecrets`. The existing `getProjectConfig.fulfilled` handler then re-hydrates the OpenAPI/Frames slices — same code path as the initial bootstrap.
+
+The connection auto-closes after 30 seconds; the browser's `EventSource` reconnects on its own. This keeps PHP-built-in-server workers from being held forever and tolerates transient network blips.
+
+::: warning Single-worker dev servers
+PHP's `php -S` is single-threaded by default — one open SSE connection blocks all other requests on the same port. The playgrounds work around this with `PHP_CLI_SERVER_WORKERS=3` set inside `bin/serve.sh`. For your own dev environment use a multi-worker SAPI (PHP-FPM, FrankenPHP, RoadRunner) or set `PHP_CLI_SERVER_WORKERS` before running `php -S`.
+:::
 
 ## Technical Details
 
-- **Backend storage**: <class>AppDevPanel\Kernel\Project\FileProjectConfigStorage</class> — atomic save (temp + rename), `0644` mode, auto-creates the directory and `.gitignore`.
-- **Backend interface**: <class>AppDevPanel\Kernel\Project\ProjectConfigStorageInterface</class>.
-- **Backend value object**: <class>AppDevPanel\Kernel\Project\ProjectConfig</class> — immutable, drops malformed entries on `fromArray()`.
-- **HTTP controller**: <class>AppDevPanel\Api\Project\Controller\ProjectController</class>.
+- **Project storage**: <class>AppDevPanel\Kernel\Project\FileProjectConfigStorage</class> — atomic save (temp + rename), `0644` mode, auto-creates the directory and `.gitignore`.
+- **Project interface**: <class>AppDevPanel\Kernel\Project\ProjectConfigStorageInterface</class>.
+- **Project VO**: <class>AppDevPanel\Kernel\Project\ProjectConfig</class> — immutable, drops malformed entries on `fromArray()`.
+- **Secrets storage**: <class>AppDevPanel\Kernel\Project\FileSecretsStorage</class> — atomic save with `0600` mode.
+- **Secrets interface**: <class>AppDevPanel\Kernel\Project\SecretsStorageInterface</class>.
+- **Secrets VO**: <class>AppDevPanel\Kernel\Project\SecretsConfig</class> — immutable, supports `withLlm()` (replace) and `withLlmPatch()` (merge with `null` = delete) semantics.
+- **HTTP controllers**: <class>AppDevPanel\Api\Project\Controller\ProjectController</class> (`/config` + `/event-stream`), <class>AppDevPanel\Api\Project\Controller\SecretsController</class> (`/secrets`).
+- **LLM facade**: <class>AppDevPanel\Api\Llm\FileLlmSettings</class> — reads/writes through `SecretsStorage`, auto-migrates legacy `runtime/.llm-settings.json` on first read.
 - **Frontend module**: `libs/frontend/packages/panel/src/Module/Project/`.
-- **Sync middleware**: `Module/Project/projectSyncMiddleware.ts` — handles bootstrap, debounce, migration, suppression of feedback loops.
-- **RTK Query API**: `libs/frontend/packages/sdk/src/API/Project/Project.ts`.
+- **Sync middleware**: `Module/Project/projectSyncMiddleware.ts` — handles bootstrap, debounce, migration, SSE reconnect, suppression of feedback loops.
+- **RTK Query API**: `libs/frontend/packages/sdk/src/API/Project/Project.ts` (`getProjectConfig`, `updateProjectConfig`, `getSecrets`, `patchSecrets`).

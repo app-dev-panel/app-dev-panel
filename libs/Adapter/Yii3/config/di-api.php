@@ -69,11 +69,14 @@ use AppDevPanel\Api\PathMapper;
 use AppDevPanel\Api\PathMapperInterface;
 use AppDevPanel\Api\PathResolverInterface;
 use AppDevPanel\Api\Project\Controller\ProjectController;
+use AppDevPanel\Api\Project\Controller\SecretsController;
 use AppDevPanel\Api\Toolbar\ToolbarConfig;
 use AppDevPanel\Api\Toolbar\ToolbarInjector;
 use AppDevPanel\Kernel\DebuggerIdGenerator;
 use AppDevPanel\Kernel\Project\FileProjectConfigStorage;
+use AppDevPanel\Kernel\Project\FileSecretsStorage;
 use AppDevPanel\Kernel\Project\ProjectConfigStorageInterface;
+use AppDevPanel\Kernel\Project\SecretsStorageInterface;
 use AppDevPanel\Kernel\Service\FileServiceRegistry;
 use AppDevPanel\Kernel\Service\ServiceRegistryInterface;
 use AppDevPanel\Kernel\Storage\StorageInterface;
@@ -384,16 +387,31 @@ return [
             $params['app-dev-panel/yii3']['projectConfigPath'] ?? '@root/config/adp',
         )),
 
+    // Secrets file (API keys, OAuth tokens, ACP env) — gitignored sibling of project.json
+    SecretsStorageInterface::class =>
+        static fn(ContainerInterface $container) => new FileSecretsStorage($container->get(Aliases::class)->get(
+            $params['app-dev-panel/yii3']['projectConfigPath'] ?? '@root/config/adp',
+        )),
+
     ProjectController::class => static fn(
         JsonResponseFactoryInterface $jsonResponseFactory,
         ProjectConfigStorageInterface $projectConfigStorage,
-    ) => new ProjectController($jsonResponseFactory, $projectConfigStorage),
+        ResponseFactoryInterface $psrResponseFactory,
+    ) => new ProjectController($jsonResponseFactory, $projectConfigStorage, $psrResponseFactory),
 
-    // LLM settings
-    LlmSettingsInterface::class =>
-        static fn(ContainerInterface $container) => new FileLlmSettings($container->get(Aliases::class)->get(
-            $params['app-dev-panel/yii3']['path'] ?? '@runtime/debug',
-        )),
+    SecretsController::class => static fn(
+        JsonResponseFactoryInterface $jsonResponseFactory,
+        SecretsStorageInterface $secretsStorage,
+    ) => new SecretsController($jsonResponseFactory, $secretsStorage),
+
+    // LLM settings — backed by SecretsStorage; legacy `runtime/.llm-settings.json` is auto-migrated.
+    LlmSettingsInterface::class => static fn(
+        ContainerInterface $container,
+        SecretsStorageInterface $secrets,
+    ) => new FileLlmSettings(
+        $container->get(Aliases::class)->get($params['app-dev-panel/yii3']['path'] ?? '@runtime/debug'),
+        $secrets,
+    ),
 
     // LLM history storage
     LlmHistoryStorageInterface::class =>

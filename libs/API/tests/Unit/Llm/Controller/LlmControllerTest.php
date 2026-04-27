@@ -44,7 +44,10 @@ final class LlmControllerTest extends TestCase
         ?AcpCommandVerifierInterface $commandVerifier = null,
         ?AcpDaemonManagerInterface $acpDaemonManager = null,
     ): LlmController {
-        $settings = new FileLlmSettings($this->tmpDir);
+        $settings = new FileLlmSettings(
+            $this->tmpDir,
+            new \AppDevPanel\Kernel\Project\FileSecretsStorage($this->tmpDir),
+        );
         if ($apiKey !== null) {
             $settings->setApiKey($apiKey);
         }
@@ -324,7 +327,10 @@ final class LlmControllerTest extends TestCase
 
     public function testChatWithCustomPromptSystemRole(): void
     {
-        $settings = new FileLlmSettings($this->tmpDir);
+        $settings = new FileLlmSettings(
+            $this->tmpDir,
+            new \AppDevPanel\Kernel\Project\FileSecretsStorage($this->tmpDir),
+        );
         $settings->setApiKey('sk-ant-test');
         $settings->setProvider('anthropic');
         $settings->setCustomPrompt('Be brief');
@@ -426,7 +432,10 @@ final class LlmControllerTest extends TestCase
 
     public function testChatWithCustomPromptMergedIntoUser(): void
     {
-        $settings = new FileLlmSettings($this->tmpDir);
+        $settings = new FileLlmSettings(
+            $this->tmpDir,
+            new \AppDevPanel\Kernel\Project\FileSecretsStorage($this->tmpDir),
+        );
         $settings->setApiKey('sk-test');
         $settings->setProvider('openrouter');
         $settings->setCustomPrompt('Be helpful');
@@ -515,7 +524,10 @@ final class LlmControllerTest extends TestCase
 
     public function testAnalyzeWithCustomPrompt(): void
     {
-        $settings = new FileLlmSettings($this->tmpDir);
+        $settings = new FileLlmSettings(
+            $this->tmpDir,
+            new \AppDevPanel\Kernel\Project\FileSecretsStorage($this->tmpDir),
+        );
         $settings->setApiKey('sk-test');
         $settings->setProvider('openrouter');
         $settings->setCustomPrompt('Focus on security issues');

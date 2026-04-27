@@ -6,19 +6,31 @@ import {isAnyOf} from '@reduxjs/toolkit';
 
 /**
  * Bridges the offline-first OpenAPI/Frames slices to the backend project
- * config (`config/adp/project.json`).
+ * config (`config/adp/project.json`) and listens for real-time changes via
+ * a Server-Sent Events stream.
  *
- * - On startup the middleware fires `getProjectConfig` once. On success the
- *   server document overwrites the local Redux state, except when the server
- *   is empty and `localStorage` already has data — in that case we treat the
- *   local copy as a one-shot migration and `PUT` it back to the backend.
- * - Any user mutation to the OpenAPI/Frames slices schedules a debounced
- *   `PUT` so multiple rapid edits coalesce into a single round-trip.
- * - The middleware ignores its own dispatches (the slice updates triggered
- *   from a server response) to avoid feedback loops.
+ * Lifecycle:
+ *
+ * 1. **Bootstrap** — on the first plain action the middleware sees, it
+ *    dispatches `getProjectConfig`. On success the server document
+ *    overwrites the local Redux state, except when the server is empty
+ *    and `localStorage` already has data — in that case we treat the
+ *    local copy as a one-shot migration and `PUT` it back.
+ * 2. **User edits** — any mutation to the OpenAPI/Frames slices schedules a
+ *    debounced PUT so multiple rapid edits coalesce into a single round-trip.
+ * 3. **External changes** — an `EventSource` listens to
+ *    `/debug/api/project/event-stream`. When a `project-config-changed`
+ *    event arrives (from `git pull`, the API saving a PUT/PATCH, or
+ *    another browser tab editing the same backend), the middleware fires
+ *    a forced refetch. The existing `getProjectConfig.fulfilled` handler
+ *    then applies the new state — same code path as the initial bootstrap.
+ *
+ * The middleware ignores its own dispatches (slice updates triggered by a
+ * server response) to avoid feedback loops.
  */
 
 const SYNC_DEBOUNCE_MS = 500;
+const SSE_RECONNECT_MS = 3_000;
 
 const SLICE_MUTATION_TYPES = new Set<string>([
     'store.openApi/addApiEntry',
@@ -30,6 +42,7 @@ const SLICE_MUTATION_TYPES = new Set<string>([
 ]);
 
 type StateWithSlices = {
+    application?: {baseUrl?: string};
     [openApiSlice.name]: {entries: Record<string, string>};
     [framesSlice.name]: {frames: Record<string, string>};
 };
@@ -43,6 +56,8 @@ export const projectSyncMiddleware: Middleware = (api: MiddlewareAPI) => {
     let bootstrapped = false;
     let suppressNextSync = false;
     let pushTimer: ReturnType<typeof setTimeout> | null = null;
+    let eventSource: EventSource | null = null;
+    let sseReconnectTimer: ReturnType<typeof setTimeout> | null = null;
 
     const schedulePush = () => {
         if (pushTimer !== null) clearTimeout(pushTimer);
@@ -56,6 +71,57 @@ export const projectSyncMiddleware: Middleware = (api: MiddlewareAPI) => {
                 }),
             );
         }, SYNC_DEBOUNCE_MS);
+    };
+
+    /**
+     * Force a refetch of every project-related query. The existing
+     * `getProjectConfig.fulfilled` handler then routes the new state into
+     * the OpenAPI/Frames slices; secrets are routed via RTK Query's tag
+     * invalidation, which any subscribed component picks up automatically.
+     */
+    const forceRefetchAll = () => {
+        api.dispatch(projectApi.endpoints.getProjectConfig.initiate(undefined, {forceRefetch: true}));
+        api.dispatch(projectApi.endpoints.getSecrets.initiate(undefined, {forceRefetch: true}));
+    };
+
+    const connectEventStream = () => {
+        if (typeof EventSource === 'undefined') return; // Non-browser env (SSR, tests).
+        if (eventSource !== null) return;
+
+        const baseUrl = ((api.getState() as StateWithSlices).application?.baseUrl ?? '').replace(/\/$/, '');
+        const url = `${baseUrl}/debug/api/project/event-stream`;
+
+        let source: EventSource;
+        try {
+            source = new EventSource(url, {withCredentials: false});
+        } catch {
+            return;
+        }
+        eventSource = source;
+
+        source.onmessage = (event: MessageEvent) => {
+            try {
+                const payload = JSON.parse(event.data) as {type?: string};
+                if (payload.type === 'project-config-changed') {
+                    forceRefetchAll();
+                }
+            } catch {
+                // Ignore non-JSON payloads / heartbeats.
+            }
+        };
+
+        source.onerror = () => {
+            // Browser already auto-reconnects on transient errors. We close
+            // explicitly and re-create the EventSource on a longer delay so
+            // we don't hammer the backend if the SSE endpoint is permanently
+            // down (no PHP backend, missing route, …).
+            source.close();
+            if (eventSource === source) {
+                eventSource = null;
+            }
+            if (sseReconnectTimer !== null) clearTimeout(sseReconnectTimer);
+            sseReconnectTimer = setTimeout(connectEventStream, SSE_RECONNECT_MS);
+        };
     };
 
     return (next) => (action) => {
@@ -77,6 +143,7 @@ export const projectSyncMiddleware: Middleware = (api: MiddlewareAPI) => {
             bootstrapped = true;
             queueMicrotask(() => {
                 api.dispatch(projectApi.endpoints.getProjectConfig.initiate());
+                connectEventStream();
             });
         }
 

@@ -41,6 +41,7 @@ use AppDevPanel\Api\PathMapperInterface;
 use AppDevPanel\Api\PathResolver;
 use AppDevPanel\Api\PathResolverInterface;
 use AppDevPanel\Api\Project\Controller\ProjectController;
+use AppDevPanel\Api\Project\Controller\SecretsController;
 use AppDevPanel\Api\Toolbar\ToolbarConfig;
 use AppDevPanel\Api\Toolbar\ToolbarInjector;
 use AppDevPanel\Kernel\Collector\CacheCollector;
@@ -65,7 +66,9 @@ use AppDevPanel\Kernel\Debugger;
 use AppDevPanel\Kernel\DebuggerIdGenerator;
 use AppDevPanel\Kernel\DebuggerIgnoreConfig;
 use AppDevPanel\Kernel\Project\FileProjectConfigStorage;
+use AppDevPanel\Kernel\Project\FileSecretsStorage;
 use AppDevPanel\Kernel\Project\ProjectConfigStorageInterface;
+use AppDevPanel\Kernel\Project\SecretsStorageInterface;
 use AppDevPanel\Kernel\Storage\FileStorage;
 use AppDevPanel\Kernel\Storage\StorageInterface;
 use Nyholm\Psr7\Factory\Psr17Factory;
@@ -162,7 +165,9 @@ final class AppDevPanelBootloader extends Bootloader
 
         // Project config (frames, OpenAPI specs) — committed to repo at app/config/adp/project.json
         ProjectConfigStorageInterface::class => [self::class, 'initProjectConfigStorage'],
+        SecretsStorageInterface::class => [self::class, 'initSecretsStorage'],
         ProjectController::class => ProjectController::class,
+        SecretsController::class => SecretsController::class,
 
         // Adapter glue
         AdpApiController::class => AdpApiController::class,
@@ -274,6 +279,16 @@ final class AppDevPanelBootloader extends Bootloader
     public function initProjectConfigStorage(AdpConfig $config): ProjectConfigStorageInterface
     {
         return new FileProjectConfigStorage($config->projectConfigPath());
+    }
+
+    /**
+     * Build the secrets-file storage. Lives next to `project.json`; the
+     * project-config storage's `.gitignore` already lists `secrets.json` so
+     * the file never travels via VCS without explicit user override.
+     */
+    public function initSecretsStorage(AdpConfig $config): SecretsStorageInterface
+    {
+        return new FileSecretsStorage($config->projectConfigPath());
     }
 
     /**
