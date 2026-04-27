@@ -99,13 +99,15 @@ $h = static fn(string $s): string => htmlspecialchars($s, ENT_QUOTES, 'UTF-8');
     ]) ?>
 
     <section data-adp-tab-panel="summary">
-        <div class="adp-ui-stack">
-            <span class="adp-ui-text-secondary adp-ui-text-strong">
-                <?= count($summary) ?> unique method<?= count($summary) === 1 ? '' : 's' ?>
-                <?php if ($totalErrors > 0): ?>
-                    · <span data-severity="error" style="color: var(--adp-sev);"><?= $totalErrors ?> failed</span>
-                <?php endif; ?>
-            </span>
+        <div>
+            <div class="adp-ui-toolbar">
+                <span class="adp-ui-toolbar__label">
+                    <?= count($summary) ?> unique method<?= count($summary) === 1 ? '' : 's' ?>
+                    <?php if ($totalErrors > 0): ?>
+                        · <span data-severity="error" style="color: var(--adp-sev);"><?= $totalErrors ?> failed</span>
+                    <?php endif; ?>
+                </span>
+            </div>
             <div class="adp-ui-card adp-ui-list">
                 <?php foreach ($summary as $row):
                     $count = $row['count'];
@@ -151,15 +153,17 @@ $h = static fn(string $s): string => htmlspecialchars($s, ENT_QUOTES, 'UTF-8');
     </section>
 
     <section data-adp-tab-panel="all">
-        <div class="adp-ui-stack">
-            <div class="adp-ui-row adp-ui-row--center adp-ui-row--between adp-ui-row--wrap">
-                <span class="adp-ui-text-secondary adp-ui-text-strong">
+        <div>
+            <div class="adp-ui-toolbar">
+                <span class="adp-ui-toolbar__label">
                     <?= $totalCalls ?> service call<?= $totalCalls === 1 ? '' : 's' ?>
                     <?php if ($totalErrors > 0): ?>
                         · <span data-severity="error" style="color: var(--adp-sev);"><?= $totalErrors ?> failed</span>
                     <?php endif; ?>
                 </span>
-                <?= Slot::filter('.adp-ui-service-row', 'Filter services…') ?>
+                <span class="adp-ui-toolbar__actions">
+                    <?= Slot::filter('.adp-ui-service-row', 'Filter services…') ?>
+                </span>
             </div>
             <div class="adp-ui-card adp-ui-list">
                 <?php foreach ($items as $entry):
