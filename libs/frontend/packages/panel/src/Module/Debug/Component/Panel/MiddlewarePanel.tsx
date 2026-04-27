@@ -2,7 +2,7 @@ import {ClassName} from '@app-dev-panel/panel/Application/Component/ClassName';
 import {JsonRenderer} from '@app-dev-panel/panel/Module/Debug/Component/JsonRenderer';
 import {useDebugEntry} from '@app-dev-panel/sdk/API/Debug/Context';
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
-import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
+import {PageToolbar} from '@app-dev-panel/sdk/Component/PageToolbar';
 import {formatMicrotime} from '@app-dev-panel/sdk/Helper/formatDate';
 import {parseObjectId} from '@app-dev-panel/sdk/Helper/objectString';
 import {Box, Chip, Collapse, Icon, IconButton, Tooltip, Typography} from '@mui/material';
@@ -97,7 +97,7 @@ export const MiddlewarePanel = (props: MiddlewarePanelProps) => {
 
     return (
         <Box>
-            <SectionTitle>{`${rows.length} middleware steps`}</SectionTitle>
+            <PageToolbar sticky>{`${rows.length} middleware steps`}</PageToolbar>
 
             {rows.map((row, index) => {
                 const expanded = expandedIndex === index;

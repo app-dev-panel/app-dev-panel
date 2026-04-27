@@ -311,12 +311,15 @@ export const ElasticsearchPanel = ({data}: ElasticsearchPanelProps) => {
 
     return (
         <Box>
-            <SectionTitle action={<FilterInput value={filter} onChange={setFilter} placeholder="Filter requests..." />}>
+            <PageToolbar
+                sticky
+                actions={<FilterInput value={filter} onChange={setFilter} placeholder="Filter requests..." />}
+            >
                 {[`${filtered.length} elasticsearch requests`, `${formatDuration(totalTime)} total`]}
-            </SectionTitle>
+            </PageToolbar>
 
             {(methodBadgeCounts.length > 1 || statusBadgeCounts.length > 1) && (
-                <Box sx={{display: 'flex', flexWrap: 'wrap', gap: 0.75, mb: 2}}>
+                <Box sx={{display: 'flex', flexWrap: 'wrap', gap: 0.75, mb: 2, px: {xs: 1.5, sm: 2.5}, pt: 1.5}}>
                     {statusBadgeCounts.map(([label, count]) => {
                         const color = label === 'error' ? theme.palette.error.main : theme.palette.success.main;
                         return (

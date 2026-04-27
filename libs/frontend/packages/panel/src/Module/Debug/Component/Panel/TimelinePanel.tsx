@@ -9,7 +9,7 @@ import {useTimelineEnrichment} from '@app-dev-panel/panel/Module/Debug/Component
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {FilterChip} from '@app-dev-panel/sdk/Component/FilterChip';
 import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
-import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
+import {PageToolbar} from '@app-dev-panel/sdk/Component/PageToolbar';
 import {getCollectorLabel} from '@app-dev-panel/sdk/Helper/collectorMeta';
 import {Box, Collapse, IconButton, Tooltip, Typography} from '@mui/material';
 import {styled, useTheme} from '@mui/material/styles';
@@ -229,16 +229,17 @@ export const TimelinePanel = ({data}: TimelinePanelProps) => {
 
     return (
         <Box>
-            <SectionTitle
-                action={
+            <PageToolbar
+                sticky
+                actions={
                     <Box sx={{display: 'flex', alignItems: 'center', gap: 1.5}}>
                         <ViewToggle mode={viewMode} onChange={setViewMode} />
                         <FilterInput value={filter} onChange={setFilter} placeholder="Filter timeline..." />
                     </Box>
                 }
-            >{`${filtered.length} timeline events`}</SectionTitle>
+            >{`${filtered.length} timeline events`}</PageToolbar>
 
-            <Box sx={{display: 'flex', flexWrap: 'wrap', gap: 0.75, mb: 2}}>
+            <Box sx={{display: 'flex', flexWrap: 'wrap', gap: 0.75, mb: 2, px: {xs: 1.5, sm: 2.5}, pt: 1.5}}>
                 {uniqueCollectors.map((col) => {
                     const isActive = activeFilters.has(col.shortName);
                     const color = getCollectorColor(col.fqcn);

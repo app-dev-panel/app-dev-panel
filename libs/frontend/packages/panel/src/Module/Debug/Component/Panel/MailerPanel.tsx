@@ -1,6 +1,6 @@
 import {CodeHighlight} from '@app-dev-panel/sdk/Component/CodeHighlight';
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
-import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
+import {PageToolbar} from '@app-dev-panel/sdk/Component/PageToolbar';
 import {formatBytes} from '@app-dev-panel/sdk/Helper/formatBytes';
 import {
     attachmentDataUrl,
@@ -163,9 +163,7 @@ const MessageListThumbnail = ({message}: {message: MailMessage}) => {
 
 const ListView = ({messages, onSelect}: {messages: MailMessage[]; onSelect: (index: number) => void}) => (
     <Box>
-        <Box sx={{display: 'flex', alignItems: 'center', gap: 2, mb: 2}}>
-            <SectionTitle>{`${messages.length} message${messages.length !== 1 ? 's' : ''}`}</SectionTitle>
-        </Box>
+        <PageToolbar sticky>{`${messages.length} message${messages.length !== 1 ? 's' : ''}`}</PageToolbar>
         {messages.map((message, index) => {
             const attachments = (message.attachments ?? []).filter((a) => !a.inline);
             return (

@@ -1,7 +1,7 @@
 import {JsonRenderer} from '@app-dev-panel/panel/Module/Debug/Component/JsonRenderer';
 import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
-import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
+import {PageToolbar} from '@app-dev-panel/sdk/Component/PageToolbar';
 import {Box, Chip, Collapse, Icon, IconButton, Typography} from '@mui/material';
 import {styled, useTheme} from '@mui/material/styles';
 import {useMemo, useState} from 'react';
@@ -132,8 +132,9 @@ export const ValidatorPanel = ({data}: ValidatorPanelProps) => {
 
     return (
         <Box>
-            <SectionTitle
-                action={
+            <PageToolbar
+                sticky
+                actions={
                     <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
                         <Chip
                             label={`${validCount} valid`}
@@ -163,7 +164,7 @@ export const ValidatorPanel = ({data}: ValidatorPanelProps) => {
                         <FilterInput value={filter} onChange={setFilter} placeholder="Filter validations..." />
                     </Box>
                 }
-            >{`${filtered.length} validations`}</SectionTitle>
+            >{`${filtered.length} validations`}</PageToolbar>
 
             {filtered.map((validation, _index) => {
                 const originalIndex = data.indexOf(validation);
