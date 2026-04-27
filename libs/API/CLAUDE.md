@@ -37,8 +37,7 @@ src/
 │   └── ModuleFederationProviderInterface.php
 ├── Panel/
 │   ├── PanelConfig.php                      # Panel display configuration
-│   ├── PanelController.php                  # Serves embedded debug panel SPA
-│   └── AssetsController.php                 # Serves panel/toolbar dist from app-dev-panel/frontend-assets
+│   └── PanelController.php                  # Serves embedded debug panel SPA
 ├── Inspector/
 │   ├── Controller/                      # Inspector mode — live app state
 │   │   ├── InspectController.php        # config, params, classes, object, phpinfo, events
@@ -137,18 +136,14 @@ src/
 | Method | Path | Description |
 |--------|------|-------------|
 | GET | `/debug` | Serve debug panel SPA (`PanelController::index`) |
-| GET | `/debug/static/{path+}` | Serve panel + toolbar bundles from `app-dev-panel/frontend-assets` (`AssetsController::serve`) |
-| GET | `/debug/{path+}` | SPA catch-all for client-side routing, excludes `/debug/api/*` and `/debug/static/*` |
+| GET | `/debug/{path+}` | SPA catch-all for client-side routing, excludes `/debug/api/*` |
 
-`AssetsController` discovers the bundle root via `AppDevPanel\FrontendAssets\FrontendAssets::path()`
-through a `class_exists` + string FQCN lookup (no `use` statement — keeps `api` independent of
-`frontend-assets` per modulite). Returns 404 when the package is missing. Serves files with
-`Cache-Control: public, max-age=31536000, immutable` and a MIME map (js/css/png/svg/ico/woff2/...).
-Rejects path traversal via `realpath` + prefix check. Adapters can pass an explicit `$assetsRoot`
-to the constructor to override discovery (used by tests and by installs that host a custom bundle).
-
-`PanelConfig::DEFAULT_STATIC_URL` is `/debug/static` (relative, served by `AssetsController`).
-`PanelConfig::CDN_STATIC_URL` points at GitHub Pages for users who want the hosted build instead.
+`PanelController` only renders the bootstrap HTML and resolves `bundle.js`/`bundle.css` via
+`PanelConfig::$staticUrl`. Each adapter is responsible for **publishing** the
+`app-dev-panel/frontend-assets` bundle into a public directory the web server can serve directly:
+Symfony copies into `public/bundles/appdevpanel/`, Laravel into `public/vendor/app-dev-panel`,
+Yii 2/3 symlink into `@webroot/app-dev-panel`. The API module never streams static files itself —
+that work belongs to the web server.
 
 ### Debug API (`/debug/api`)
 

@@ -57,7 +57,7 @@ ToolbarMiddleware → ErrorCatcher → YiiApiMiddleware → SessionMiddleware �
 | Middleware | Purpose |
 |-----------|---------|
 | <class>AppDevPanel\Adapter\Yii3\Api\ToolbarMiddleware</class> | Injects the ADP debug toolbar into HTML responses, just before `</body>`. Must be outermost so it can rewrite the body produced by any downstream middleware (including error pages). |
-| <class>AppDevPanel\Adapter\Yii3\Api\YiiApiMiddleware</class> | Intercepts `/debug/*` (panel SPA + `/debug/static/*` assets + `/debug/api/*`) and `/inspect/api/*` and delegates them to the ADP API application. Must be before `Router` so the user's routes don't shadow ADP's, and after `ErrorCatcher` so exceptions bubble up through Yii's error pipeline. |
+| <class>AppDevPanel\Adapter\Yii3\Api\YiiApiMiddleware</class> | Intercepts `/debug/*` (panel SPA + `/debug/api/*`) and `/inspect/api/*` and delegates them to the ADP API application. Must be before `Router` so the user's routes don't shadow ADP's, and after `ErrorCatcher` so exceptions bubble up through Yii's error pipeline. Static panel assets are served by the web server directly from the public directory the adapter symlinks into (`@public/app-dev-panel`), not by this middleware. |
 
 Copy-paste-ready `config/web/di/application.php` for the stock `yiisoft/app` template:
 

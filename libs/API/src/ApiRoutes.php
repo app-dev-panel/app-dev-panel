@@ -28,7 +28,6 @@ use AppDevPanel\Api\Inspector\Controller\TranslationController;
 use AppDevPanel\Api\Llm\Controller\LlmController;
 use AppDevPanel\Api\Mcp\Controller\McpController;
 use AppDevPanel\Api\Mcp\Controller\McpSettingsController;
-use AppDevPanel\Api\Panel\AssetsController;
 use AppDevPanel\Api\Panel\PanelController;
 use AppDevPanel\Api\Project\Controller\ProjectController;
 use AppDevPanel\Api\Project\Controller\SecretsController;
@@ -437,20 +436,11 @@ final class ApiRoutes
     public static function panelRoutes(): array
     {
         return [
-            // Prebuilt SPA assets shipped with `app-dev-panel/frontend-assets`. Served under
-            // `/debug/static/*` from the package's `dist/` directory (bundle.js, bundle.css,
-            // hashed chunks, favicons, and toolbar bundles under `toolbar/`).
-            new Route(
-                'GET',
-                '/debug/static/{path+}',
-                [AssetsController::class, 'serve'],
-                'debug/panel/assets',
-            ),
             new Route('GET', '/debug', [PanelController::class, 'index'], 'debug/panel'),
-            // Catch-all for SPA client-side routing. Excludes /debug/api/* and /debug/static/* paths.
+            // Catch-all for SPA client-side routing. Excludes /debug/api/* paths.
             new Route(
                 'GET',
-                '/debug/{path+:(?!api(/|$)|static(/|$)).+}',
+                '/debug/{path+:(?!api(/|$)).+}',
                 [PanelController::class, 'index'],
                 'debug/panel/catchall',
             ),
