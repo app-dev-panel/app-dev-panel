@@ -9,6 +9,7 @@ import {DataTable} from '@app-dev-panel/sdk/Component/Grid';
 import {JsonRenderer} from '@app-dev-panel/sdk/Component/JsonRenderer';
 import {PageHeader} from '@app-dev-panel/sdk/Component/PageHeader';
 import {QueryErrorState} from '@app-dev-panel/sdk/Component/QueryErrorState';
+import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
 import {searchVariants} from '@app-dev-panel/sdk/Helper/layoutTranslit';
 import {regexpQuote} from '@app-dev-panel/sdk/Helper/regexpQuote';
 import {GridColDef, GridRenderCellParams, GridValidRowModel} from '@mui/x-data-grid';
@@ -91,7 +92,11 @@ export const TranslationsPage = () => {
     return (
         <>
             <PageHeader title="Translations" icon="translate" description="Application translations and messages" />
-            <FilterInput value={searchString} onChange={onChangeHandler} />
+            <SectionTitle
+                action={
+                    <FilterInput value={searchString} onChange={onChangeHandler} placeholder="Filter translations..." />
+                }
+            >{`${filteredRows.length} translations`}</SectionTitle>
             <TranslationUpdaterContextProvider updater={updateTranslationHandler}>
                 <DataTable rows={filteredRows as GridValidRowModel[]} getRowId={(row) => row[0]} columns={columns} />
             </TranslationUpdaterContextProvider>
