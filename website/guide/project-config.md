@@ -118,6 +118,28 @@ You can also drive it from `.env`:
 ```
 
 The path is resolved through `Yii::getAlias()`, so any registered alias (or an absolute path) works.
+
+== Spiral
+
+**Default path:** `<root>/app/config/adp` — the resolver consults `APP_DEV_PANEL_ROOT_PATH` (set by the application entry point alongside the `PathResolver`) before falling back to `getcwd()`. This keeps the file out of `public/` even when `php -S` flips the working directory to docroot.
+
+**Override** in `app/config/app-dev-panel.php`:
+
+```php
+return [
+    // ...
+    'project_config_path' => directory('app') . 'config/adp',  // default
+    // 'project_config_path' => directory('root') . '.adp',    // example
+];
+```
+
+You can also drive it from the environment without writing a config file:
+
+```dotenv
+APP_DEV_PANEL_PROJECT_CONFIG_PATH=/srv/app/app/config/adp
+```
+
+`AdpConfig::projectConfigPath()` checks them in priority order: explicit config → `APP_DEV_PANEL_PROJECT_CONFIG_PATH` → `APP_DEV_PANEL_ROOT_PATH/app/config/adp` → `getcwd()/app/config/adp`.
 :::
 
 ## API Endpoint
@@ -188,6 +210,7 @@ done
 | Symfony | 8102 | `playground/symfony-app/config/adp` |
 | Yii 2 | 8103 | `playground/yii2-basic-app/src/config/adp` |
 | Laravel | 8104 | `playground/laravel-app/config/adp` |
+| Spiral | 8105 | `playground/spiral-app/app/config/adp` |
 
 (The Yii 2 path lands under `src/` because the playground sets `@app` to that directory — your real app may resolve it elsewhere.)
 

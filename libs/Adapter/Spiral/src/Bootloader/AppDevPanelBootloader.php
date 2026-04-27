@@ -40,6 +40,7 @@ use AppDevPanel\Api\Panel\PanelController;
 use AppDevPanel\Api\PathMapperInterface;
 use AppDevPanel\Api\PathResolver;
 use AppDevPanel\Api\PathResolverInterface;
+use AppDevPanel\Api\Project\Controller\ProjectController;
 use AppDevPanel\Api\Toolbar\ToolbarConfig;
 use AppDevPanel\Api\Toolbar\ToolbarInjector;
 use AppDevPanel\Kernel\Collector\CacheCollector;
@@ -63,6 +64,8 @@ use AppDevPanel\Kernel\Collector\Web\WebAppInfoCollector;
 use AppDevPanel\Kernel\Debugger;
 use AppDevPanel\Kernel\DebuggerIdGenerator;
 use AppDevPanel\Kernel\DebuggerIgnoreConfig;
+use AppDevPanel\Kernel\Project\FileProjectConfigStorage;
+use AppDevPanel\Kernel\Project\ProjectConfigStorageInterface;
 use AppDevPanel\Kernel\Storage\FileStorage;
 use AppDevPanel\Kernel\Storage\StorageInterface;
 use Nyholm\Psr7\Factory\Psr17Factory;
@@ -156,6 +159,10 @@ final class AppDevPanelBootloader extends Bootloader
         ToolbarInjector::class => ToolbarInjector::class,
         ResponseDataWrapper::class => ResponseDataWrapper::class,
         ApiApplication::class => [self::class, 'initApiApplication'],
+
+        // Project config (frames, OpenAPI specs) — committed to repo at app/config/adp/project.json
+        ProjectConfigStorageInterface::class => [self::class, 'initProjectConfigStorage'],
+        ProjectController::class => ProjectController::class,
 
         // Adapter glue
         AdpApiController::class => AdpApiController::class,
@@ -252,6 +259,21 @@ final class AppDevPanelBootloader extends Bootloader
         }
 
         return new FileStorage($path, $idGenerator);
+    }
+
+    /**
+     * Build the project-config storage. The directory comes from
+     * {@see AdpConfig::projectConfigPath()} so apps configure it via
+     * `app/config/app-dev-panel.php` (`project_config_path`) or the
+     * `APP_DEV_PANEL_PROJECT_CONFIG_PATH` env var; default is
+     * `<cwd>/app/config/adp` to match Spiral's `app/config/` convention.
+     *
+     * The storage class auto-creates the directory and writes a `.gitignore`
+     * next to `project.json` excluding the future `secrets.json`.
+     */
+    public function initProjectConfigStorage(AdpConfig $config): ProjectConfigStorageInterface
+    {
+        return new FileProjectConfigStorage($config->projectConfigPath());
     }
 
     /**

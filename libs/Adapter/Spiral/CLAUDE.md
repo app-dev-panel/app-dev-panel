@@ -116,8 +116,21 @@ left at the default `null`, so apps without an `app/config/app-dev-panel.php` ke
 |---|---|---|
 | `APP_DEV_PANEL_STORAGE_PATH` | `storage.path`     | `sys_get_temp_dir()/app-dev-panel` |
 | `APP_DEV_PANEL_STATIC_URL`   | `panel.static_url` | `PanelConfig::DEFAULT_STATIC_URL` |
+| `APP_DEV_PANEL_PROJECT_CONFIG_PATH` | `project_config_path` | `APP_DEV_PANEL_ROOT_PATH/app/config/adp` or `<cwd>/app/config/adp` |
 | `APP_DEV_PANEL_ROOT_PATH`    | path resolver root | playground entry point sets this |
 | `APP_DEV_PANEL_RUNTIME_PATH` | runtime dir hint   | derived from root + `runtime/` |
+
+`AppDevPanelBootloader` registers `ProjectConfigStorageInterface` (Kernel) backed by
+{@see FileProjectConfigStorage} and `ProjectController` (API). The endpoint
+`GET/PUT /debug/api/project/config` persists the panel's Frames + OpenAPI spec lists into
+`app/config/adp/project.json` so the file commits with the application source. A sibling
+`.gitignore` is auto-created listing `secrets.json` for a future companion file.
+
+The default lands under `app/config/` (Spiral's idiomatic config location) **and not**
+under `public/` — the resolver consults `APP_DEV_PANEL_ROOT_PATH` (already set by the
+playground entry point for the `PathResolver`) before falling back to `getcwd()`, so
+`php -S` flipping the CWD to docroot does not place the file in a publicly served
+directory.
 
 ## How It Works
 

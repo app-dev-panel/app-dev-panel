@@ -118,6 +118,28 @@ return [
 ```
 
 Путь резолвится через `Yii::getAlias()`, поэтому подходит любой зарегистрированный alias или абсолютный путь.
+
+== Spiral
+
+**По умолчанию:** `<корень>/app/config/adp`. Резолвер сначала смотрит `APP_DEV_PANEL_ROOT_PATH` (его выставляет точка входа приложения вместе с `PathResolver`), и только потом откатывается на `getcwd()`. Это держит файл вне `public/`, даже если `php -S` подменил рабочую директорию на docroot.
+
+**Переопределение** в `app/config/app-dev-panel.php`:
+
+```php
+return [
+    // ...
+    'project_config_path' => directory('app') . 'config/adp',  // по умолчанию
+    // 'project_config_path' => directory('root') . '.adp',    // пример
+];
+```
+
+Либо без файла конфига — через окружение:
+
+```dotenv
+APP_DEV_PANEL_PROJECT_CONFIG_PATH=/srv/app/app/config/adp
+```
+
+`AdpConfig::projectConfigPath()` проверяет источники по приоритету: явный config → `APP_DEV_PANEL_PROJECT_CONFIG_PATH` → `APP_DEV_PANEL_ROOT_PATH/app/config/adp` → `getcwd()/app/config/adp`.
 :::
 
 ## API-эндпоинт
@@ -188,6 +210,7 @@ done
 | Symfony | 8102 | `playground/symfony-app/config/adp` |
 | Yii 2 | 8103 | `playground/yii2-basic-app/src/config/adp` |
 | Laravel | 8104 | `playground/laravel-app/config/adp` |
+| Spiral | 8105 | `playground/spiral-app/app/config/adp` |
 
 (У Yii 2 путь оказывается под `src/`, потому что в плейграунде `@app` указывает на эту директорию — в реальном приложении alias резолвится по-другому.)
 
