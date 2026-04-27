@@ -20,5 +20,10 @@
         "psr-4": {
             "AppDevPanel\\FrontendAssets\\": "src"
         }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "AppDevPanel\\FrontendAssets\\Tests\\": "tests"
+        }
     }
 }

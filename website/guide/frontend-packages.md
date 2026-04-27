@@ -86,7 +86,7 @@ Each [GitHub Release](https://github.com/app-dev-panel/app-dev-panel/releases) i
 |-------|----------|
 | `panel-dist.tar.gz` | Production build of the panel SPA |
 | `toolbar-dist.tar.gz` | Production build of the toolbar widget |
-| `frontend-dist.zip` | Same panel build, zip-packaged for the `frontend:update` CLI |
+| `frontend-dist.zip` | Panel + toolbar build (`bundle.{js,css}` at root, toolbar under `toolbar/`), for the `frontend:update` CLI |
 
 These can be served directly by a web server or embedded into PHP adapter packages.
 

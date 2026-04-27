@@ -16,7 +16,17 @@ composer require app-dev-panel/adapter-yii2
 <pkg>app-dev-panel/adapter-yii2</pkg>
 :::
 
-The package auto-registers via `extra.bootstrap` in composer.json. The <class>AppDevPanel\Adapter\Yii2\Bootstrap</class> class registers the `app-dev-panel` module automatically when `YII_DEBUG` is enabled.
+The package auto-registers via `extra.bootstrap` in composer.json (handled by `yiisoft/yii2-composer`, already present in every official Yii 2 template). The <class>AppDevPanel\Adapter\Yii2\Bootstrap</class> class registers the `app-dev-panel` module automatically when `YII_DEBUG` is enabled.
+
+### Install-time requirements
+
+The adapter's bootstrap surfaces install-time problems through `Yii::warning(...)` under the `app-dev-panel` log category. If the panel is not reachable after `composer require`, check your log for these entries first:
+
+| Requirement | Why | Fix |
+|-------------|-----|-----|
+| `UrlManager::$enablePrettyUrl = true` | ADP adds URL rules for `/debug/*`. Without pretty URLs Yii parses the path through the `r` query param and falls through to `site/index`. | Enable pretty URLs in `components.urlManager`. The stock `yii2-app-basic` template ships this block commented out. |
+| No `debug` module registered by `yiisoft/yii2-debug` | yii2-debug claims the same `/debug/*` routes and wins the rule race — you get its toolbar instead of the ADP panel. | Remove `debug` from `bootstrap` and `modules`, or rename ADP's prefix (see `$routePrefix` below). |
+| `yiisoft/yii2-composer` is present | Executes the `extra.bootstrap` entry that wires <class>AppDevPanel\Adapter\Yii2\Bootstrap</class>. Shipped with every official Yii 2 template. | Add it to `require` if you stripped it from a customised template. |
 
 ## Configuration
 
@@ -26,6 +36,8 @@ Configure the module in your application config:
 'modules' => [
     'app-dev-panel' => [
         'class' => \AppDevPanel\Adapter\Yii2\Module::class,
+        'routePrefix' => 'debug',          // URL prefix for panel + API (default 'debug')
+        'inspectorRoutePrefix' => 'inspect',
         'storagePath' => '@runtime/debug',
         'historySize' => 50,
         'collectors' => [

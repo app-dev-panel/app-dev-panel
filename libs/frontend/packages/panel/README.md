@@ -26,7 +26,7 @@ Build the app and serve it with any web server (nginx, Apache, Node, PHP built-i
 
 ### As a PWA
 
-Open [https://app-dev-panel.github.io/app-dev-panel](https://app-dev-panel.github.io/app-dev-panel)
+Open [https://app-dev-panel.github.io/app-dev-panel/demo/](https://app-dev-panel.github.io/app-dev-panel/demo/)
 
 1. **Online mode** — set the backend URL and use directly in the browser
 2. **Installed app** — click "Install" in the address bar, run from Applications

@@ -78,8 +78,32 @@ return [
             'class' => \AppDevPanel\Adapter\Yii2\Module::class,
         ],
     ],
+    'components' => [
+        // REQUIRED: ADP mounts the panel at /debug via urlManager rules.
+        'urlManager' => [
+            'enablePrettyUrl' => true,
+            'showScriptName'  => false,
+        ],
+    ],
 ];
 ```
+
+::: warning yii2-app-basic / yii2-app-advanced
+These templates register `yiisoft/yii2-debug` at module id `debug`, which
+claims the same `/debug/*` routes as ADP and will intercept the panel. Either
+remove it from `bootstrap` and `modules` in your config, or mount ADP under
+a different prefix:
+
+```php
+'modules' => [
+    'app-dev-panel' => [
+        'class' => \AppDevPanel\Adapter\Yii2\Module::class,
+        'routePrefix' => 'adp',         // panel at /adp
+        'inspectorRoutePrefix' => 'adp-inspect',
+    ],
+],
+```
+:::
 == Yii 3
 ```php
 // No configuration needed — auto-registered via yiisoft/config plugin
@@ -139,6 +163,8 @@ cd playground/symfony-app && PHP_CLI_SERVER_WORKERS=3 php -S 127.0.0.1:8102 -t p
 ```bash
 cd playground/yii2-basic-app && PHP_CLI_SERVER_WORKERS=3 php -S 127.0.0.1:8103 -t public
 ```
+`PHP_CLI_SERVER_WORKERS>=3` is required — ADP makes concurrent requests
+(SSE + data fetching) that deadlock a single-worker server.
 == Yii 3
 ```bash
 cd playground/yii3-app && ./yii serve --port=8101
