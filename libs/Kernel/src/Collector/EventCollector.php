@@ -18,9 +18,6 @@ final class EventCollector implements SummaryCollectorInterface
 
     public function getCollected(): array
     {
-        if (!$this->isActive()) {
-            return [];
-        }
         return $this->events;
     }
 
@@ -42,9 +39,6 @@ final class EventCollector implements SummaryCollectorInterface
 
     public function getSummary(): array
     {
-        if (!$this->isActive()) {
-            return [];
-        }
         return [
             'event' => [
                 'total' => count($this->events),

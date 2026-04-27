@@ -1,0 +1,86 @@
+{
+    "name": "app-dev-panel/adapter-spiral",
+    "type": "library",
+    "description": "Spiral framework adapter for ADP — wires debug collectors, proxies, and inspector into Spiral applications",
+    "keywords": [
+        "debug",
+        "debug-panel",
+        "debugger",
+        "debugbar",
+        "profiler",
+        "spiral",
+        "spiral-framework",
+        "spiral-bootloader",
+        "inspector",
+        "monitoring",
+        "observability",
+        "tracing",
+        "logging",
+        "performance",
+        "apm",
+        "ai",
+        "llm",
+        "ai-debugging",
+        "developer-tools",
+        "devtools",
+        "app-dev-panel",
+        "adp",
+        "application-development-panel"
+    ],
+    "license": "MIT",
+    "require": {
+        "php": "^8.4",
+        "app-dev-panel/api": "*",
+        "app-dev-panel/kernel": "*",
+        "app-dev-panel/cli": "*",
+        "app-dev-panel/frontend-assets": "*",
+        "guzzlehttp/psr7": "^2.4",
+        "nyholm/psr7": "^1.8",
+        "psr/container": "^1.0|^2.0",
+        "psr/event-dispatcher": "^1.0",
+        "psr/http-client": "^1.0",
+        "psr/http-factory": "^1.0",
+        "psr/http-message": "^1.0|^2.0",
+        "psr/http-server-handler": "^1.0",
+        "psr/http-server-middleware": "^1.0",
+        "psr/log": "^3.0",
+        "spiral/boot": "^3.14",
+        "spiral/core": "^3.14",
+        "spiral/http": "^3.14",
+        "spiral/router": "^3.14"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^11.0"
+    },
+    "repositories": [
+        {
+            "type": "path",
+            "url": "../../Kernel"
+        },
+        {
+            "type": "path",
+            "url": "../../API"
+        },
+        {
+            "type": "path",
+            "url": "../../Cli"
+        },
+        {
+            "type": "path",
+            "url": "../../FrontendAssets"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "AppDevPanel\\Adapter\\Spiral\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "AppDevPanel\\Adapter\\Spiral\\Tests\\": "tests"
+        }
+    },
+    "config": {
+        "sort-packages": true
+    }
+}

@@ -29,10 +29,6 @@ final class EnvironmentCollector implements SummaryCollectorInterface
 
     public function getCollected(): array
     {
-        if (!$this->isActive()) {
-            return [];
-        }
-
         return [
             'php' => $this->collectPhpInfo(),
             'os' => $this->collectOsInfo(),
@@ -72,10 +68,6 @@ final class EnvironmentCollector implements SummaryCollectorInterface
 
     public function getSummary(): array
     {
-        if (!$this->isActive()) {
-            return [];
-        }
-
         $gitInfo = $this->collectGitInfo();
 
         return [

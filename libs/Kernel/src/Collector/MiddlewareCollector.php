@@ -62,10 +62,6 @@ final class MiddlewareCollector implements SummaryCollectorInterface
 
     public function getCollected(): array
     {
-        if (!$this->isActive()) {
-            return [];
-        }
-
         $beforeStack = $this->beforeStack;
         $afterStack = $this->afterStack;
         $beforeAction = array_pop($beforeStack);
@@ -92,10 +88,6 @@ final class MiddlewareCollector implements SummaryCollectorInterface
 
     public function getSummary(): array
     {
-        if (!$this->isActive()) {
-            return [];
-        }
-
         return [
             'middleware' => [
                 'total' => ($total = count($this->beforeStack)) > 0 ? $total - 1 : 0,

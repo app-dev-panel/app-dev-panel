@@ -25,19 +25,11 @@ final class VarDumperCollector implements SummaryCollectorInterface
 
     public function getCollected(): array
     {
-        if (!$this->isActive()) {
-            return [];
-        }
-
         return $this->vars;
     }
 
     public function getSummary(): array
     {
-        if (!$this->isActive()) {
-            return [];
-        }
-
         return [
             'var-dumper' => [
                 'total' => count($this->vars),

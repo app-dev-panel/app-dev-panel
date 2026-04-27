@@ -195,10 +195,6 @@ final class AuthorizationCollector implements SummaryCollectorInterface
 
     public function getCollected(): array
     {
-        if (!$this->isActive()) {
-            return [];
-        }
-
         return [
             'username' => $this->identity['username'],
             'roles' => $this->identity['roles'],
@@ -216,10 +212,6 @@ final class AuthorizationCollector implements SummaryCollectorInterface
 
     public function getSummary(): array
     {
-        if (!$this->isActive()) {
-            return [];
-        }
-
         $granted = 0;
         $denied = 0;
         foreach ($this->accessDecisions as $decision) {

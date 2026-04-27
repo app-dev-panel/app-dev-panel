@@ -237,6 +237,7 @@ jobs:
           - { name: "Symfony", path: "playground/symfony-app" }
           - { name: "Yii2",    path: "playground/yii2-basic-app" }
           - { name: "Laravel", path: "playground/laravel-app" }
+          - { name: "Spiral",  path: "playground/spiral-app" }
         check: [format, lint, analyze]
     steps:
       - name: Checkout

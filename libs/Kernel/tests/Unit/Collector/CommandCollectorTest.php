@@ -35,6 +35,8 @@ final class CommandCollectorTest extends AbstractCollectorTestCase
     public function testCollectWithInactiveCollector(): void
     {
         $collector = $this->getCollector();
+        $baselineCollected = $collector->getCollected();
+        $baselineSummary = method_exists($collector, 'getSummary') ? $collector->getSummary() : null;
         $this->collectTestData($collector);
 
         $collected = $collector->getCollected();

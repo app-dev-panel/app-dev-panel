@@ -18,9 +18,6 @@ final class ExceptionCollector implements SummaryCollectorInterface
 
     public function getCollected(): array
     {
-        if (!$this->isActive()) {
-            return [];
-        }
         if ($this->exception === null) {
             return [];
         }
@@ -47,9 +44,6 @@ final class ExceptionCollector implements SummaryCollectorInterface
 
     public function getSummary(): array
     {
-        if (!$this->isActive()) {
-            return [];
-        }
         if ($this->exception === null) {
             return [];
         }

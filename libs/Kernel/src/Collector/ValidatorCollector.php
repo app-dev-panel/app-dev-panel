@@ -33,19 +33,11 @@ final class ValidatorCollector implements SummaryCollectorInterface
 
     public function getCollected(): array
     {
-        if (!$this->isActive()) {
-            return [];
-        }
-
         return $this->validations;
     }
 
     public function getSummary(): array
     {
-        if (!$this->isActive()) {
-            return [];
-        }
-
         $count = count($this->validations);
         $countValid = count(array_filter($this->validations, static fn(array $data): bool => $data['result']));
 
