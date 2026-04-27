@@ -116,10 +116,6 @@ final class TemplateCollector implements SummaryCollectorInterface
 
     public function getCollected(): array
     {
-        if (!$this->isActive()) {
-            return [];
-        }
-
         return [
             'renders' => $this->renders,
             'totalTime' => $this->totalTime,
@@ -130,10 +126,6 @@ final class TemplateCollector implements SummaryCollectorInterface
 
     public function getSummary(): array
     {
-        if (!$this->isActive()) {
-            return [];
-        }
-
         $duplicates = $this->detectDuplicates($this->renders, static fn(array $render) => $render['template']);
 
         return [

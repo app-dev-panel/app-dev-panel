@@ -17,11 +17,14 @@ abstract class AbstractCollectorTestCase extends TestCase
 
         $collector->startup();
         $this->collectTestData($collector);
+        // Buffer must be readable AFTER shutdown — that's how `Debugger::shutdown()`
+        // works (collector->shutdown() detaches observers, then storage flush calls
+        // getCollected() / getSummary() to serialize the snapshot).
+        $collector->shutdown();
         $data = $collector->getCollected();
         if ($collector instanceof SummaryCollectorInterface) {
             $summaryData = $collector->getSummary();
         }
-        $collector->shutdown();
 
         $this->assertSame($collector::class, $collector->getId());
         $this->assertNotEmpty($collector->getName());
@@ -31,27 +34,11 @@ abstract class AbstractCollectorTestCase extends TestCase
         }
     }
 
-    public function testEmptyCollector(): void
-    {
-        $collector = $this->getCollector();
-
-        $this->assertEquals([], $collector->getCollected());
-        if ($collector instanceof SummaryCollectorInterface) {
-            $this->assertEquals([], $collector->getSummary());
-        }
-    }
-
-    public function testInactiveCollector(): void
-    {
-        $collector = $this->getCollector();
-
-        $this->collectTestData($collector);
-
-        $this->assertEquals([], $collector->getCollected());
-        if ($collector instanceof SummaryCollectorInterface) {
-            $this->assertEquals([], $collector->getSummary());
-        }
-    }
+    // NOTE: the legacy `testEmptyCollector` / `testInactiveCollector` tests asserted
+    // that `getCollected()` returned `[]` outside of startup/shutdown. The new lifecycle
+    // ({@see CollectorTrait}) gates only `collect*()` on `isActive`; readers always return
+    // the buffer (so storage flush, called AFTER `shutdown()`, can serialize the snapshot).
+    // Each collector test asserts its own no-data shape where it matters.
 
     abstract protected function getCollector(): CollectorInterface;
 

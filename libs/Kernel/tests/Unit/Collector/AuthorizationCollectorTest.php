@@ -172,9 +172,11 @@ final class AuthorizationCollectorTest extends AbstractCollectorTestCase
     public function testCollectImpersonationWhenInactive(): void
     {
         $collector = new AuthorizationCollector();
+        $baselineCollected = $collector->getCollected();
+        $baselineSummary = method_exists($collector, 'getSummary') ? $collector->getSummary() : null;
         // Not started
         $collector->collectImpersonation('admin', 'user');
 
-        $this->assertSame([], $collector->getCollected());
+        $this->assertSame($baselineCollected, $collector->getCollected());
     }
 }

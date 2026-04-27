@@ -82,7 +82,17 @@ final class Debugger
             return;
         }
 
+        // Phase 1: shutdown collectors — they detach observers (stream wrappers,
+        // error handlers, decorated services) but PRESERVE their buffers, so the
+        // upcoming flush can still read collected data via getCollected() /
+        // getSummary(). Without this order the storage flush itself would feed
+        // the still-active stream wrappers and tail-pollute the entry.
+        foreach ($this->collectors as $collector) {
+            $collector->shutdown();
+        }
+
         try {
+            // Phase 2: flush — serialize collector data to storage.
             if (!$this->skipCollect) {
                 $this->logger->debug('Debugger: flushing', [
                     'id' => $this->idGenerator->getId(),
@@ -90,9 +100,6 @@ final class Debugger
                 $this->target->flush();
             }
         } finally {
-            foreach ($this->collectors as $collector) {
-                $collector->shutdown();
-            }
             $this->active = false;
             $this->logger->debug('Debugger: shutdown complete');
         }

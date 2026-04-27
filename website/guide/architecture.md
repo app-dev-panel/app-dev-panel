@@ -152,6 +152,7 @@ When creating an adapter for a new framework:
 | Yii2 | Yii 2 | Module + BootstrapInterface |
 | Yii 3 | Yii 3 | Config plugin + ServiceProvider |
 | Laravel | Laravel 11.x–13.x | ServiceProvider (register + boot) |
+| Spiral | Spiral 3.14+ | Bootloader + PSR-15 middleware |
 
 ### Minimal Checklist
 

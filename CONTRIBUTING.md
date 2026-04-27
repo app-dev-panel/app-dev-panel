@@ -108,6 +108,7 @@ libs/
 │   ├── Symfony/        # Symfony adapter
 │   ├── Laravel/        # Laravel adapter
 │   ├── Yii2/           # Yii 2 adapter
+│   ├── Spiral/         # Spiral Framework adapter
 │   └── Cycle/          # Cycle ORM adapter
 └── frontend/
     └── packages/
@@ -161,7 +162,7 @@ Look for issues labeled `good first issue` on GitHub.
 
 ### High-Impact Areas
 
-- **New framework adapters** — Wire ADP into frameworks beyond Yii/Symfony/Laravel
+- **New framework adapters** — Wire ADP into frameworks beyond Yii/Symfony/Laravel/Spiral
 - **New collectors** — Add data collection for cache, queue, mail, filesystem, etc.
 - **Frontend improvements** — Better visualizations, UX enhancements, accessibility
 - **Documentation** — Usage guides, examples, API docs

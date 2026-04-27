@@ -163,7 +163,7 @@ Content-Type: application/json
 ```
 
 Replace `localhost:8080` with your application's actual address and port.
-For playground servers: Yii3 `:8101`, Symfony `:8102`, Yii2 `:8103`, Laravel `:8104`.
+For playground servers: Yii3 `:8101`, Symfony `:8102`, Yii2 `:8103`, Laravel `:8104`, Spiral `:8105`.
 
 The HTTP endpoint:
 - Bypasses `ResponseDataWrapper` (JSON-RPC has its own envelope)
@@ -335,7 +335,7 @@ Filter applies case-insensitive search on table names (list mode only).
 | **Cli** | `McpServeCommand` (`mcp:serve`) for stdio standalone, `--inspector-url` option |
 | **Cli** | `server-router.php` registers `McpController` + `McpSettingsController` with `InspectorClient` |
 | **Kernel** | Debug tools read from `StorageInterface` (FileStorage in production) |
-| **Adapters** | Yii3, Symfony, Laravel, Yii2 — wire `InspectorClient` with app's own base URL |
+| **Adapters** | Yii3, Symfony, Laravel, Yii2, Spiral — wire `InspectorClient` with app's own base URL |
 | **Frontend** | MCP Server toggle in Settings dialog, RTK Query for `getMcpSettings`/`updateMcpSettings` |
 
 ## Test Summary

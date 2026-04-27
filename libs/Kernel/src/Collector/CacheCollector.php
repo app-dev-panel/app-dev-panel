@@ -44,10 +44,6 @@ final class CacheCollector implements SummaryCollectorInterface
 
     public function getCollected(): array
     {
-        if (!$this->isActive()) {
-            return [];
-        }
-
         return [
             'operations' => $this->operations,
             'hits' => $this->hits,
@@ -58,10 +54,6 @@ final class CacheCollector implements SummaryCollectorInterface
 
     public function getSummary(): array
     {
-        if (!$this->isActive()) {
-            return [];
-        }
-
         return [
             'cache' => [
                 'hits' => $this->hits,

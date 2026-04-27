@@ -4,7 +4,7 @@
 
 ### The Universal PHP Debug Panel
 
-**One panel for Symfony, Laravel, Yii — and beyond.**
+**One panel for Symfony, Laravel, Yii, Spiral — and beyond.**
 
 <a href="https://github.com/app-dev-panel/app-dev-panel/actions/workflows/ci.yml"><img src="https://github.com/app-dev-panel/app-dev-panel/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
 <a href="https://packagist.org/packages/app-dev-panel/kernel"><img src="https://img.shields.io/packagist/dt/app-dev-panel/kernel.svg" alt="Packagist Downloads"></a>
@@ -62,6 +62,20 @@ composer require app-dev-panel/adapter-yii2 --dev
 ```
 
 Auto-registered via bootstrap. Auto-enables when `YII_DEBUG` is true.
+
+### Spiral
+
+```bash
+composer require app-dev-panel/adapter-spiral --dev
+```
+
+Register the bootloader in your `Kernel`:
+
+```php
+\AppDevPanel\Adapter\Spiral\Bootloader\AppDevPanelBootloader::class,
+```
+
+Then add `AdpApiMiddleware` and `DebugMiddleware` to the HTTP pipeline (outermost).
 
 ### Standalone Server
 
@@ -171,7 +185,7 @@ Any PHP App → Adapter → Kernel (30 collectors) → API (40+ endpoints) → R
 | **Kernel** | `app-dev-panel/kernel` | Core engine: debugger lifecycle, collectors, storage, PSR proxies |
 | **API** | `app-dev-panel/api` | REST + SSE endpoints for debug data and live inspection |
 | **CLI** | `app-dev-panel/cli` | Console commands: debug server, query, reset, serve |
-| **Adapters** | `app-dev-panel/adapter-*` | Framework bridges (Laravel, Symfony, Yii 3, Yii 2, Cycle) |
+| **Adapters** | `app-dev-panel/adapter-*` | Framework bridges (Laravel, Symfony, Yii 3, Yii 2, Spiral, Cycle) |
 | **Frontend** | `@app-dev-panel/*` | React 19 SPA + embeddable toolbar + shared SDK |
 
 ## Repository Structure
@@ -187,6 +201,7 @@ libs/
 │   ├── Symfony/         # Symfony adapter
 │   ├── Yii3/            # Yii 3 adapter
 │   ├── Yii2/            # Yii 2 adapter
+│   ├── Spiral/          # Spiral Framework adapter
 │   └── Cycle/           # Cycle ORM (DB schema only)
 └── frontend/            # React/TypeScript frontend
     └── packages/
