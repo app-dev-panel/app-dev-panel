@@ -23,7 +23,6 @@ return [
             ->action(Web\VarDumperPage\Action::class)
             ->name('var-dumper'),
         Route::get('/authorization')->action(Web\AuthorizationPage\Action::class)->name('authorization'),
-        Route::get('/ssr-log-panel')->action(Web\SsrLogPanelPage\Action::class)->name('ssr-log-panel'),
     ),
     Group::create('/api')
         ->routes(

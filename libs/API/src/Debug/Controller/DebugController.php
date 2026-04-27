@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AppDevPanel\Api\Debug\Controller;
 
 use AppDevPanel\Api\Debug\Exception\NotFoundException;
+use AppDevPanel\Api\Debug\HtmlViewProviderInterface;
 use AppDevPanel\Api\Debug\LiveEventStreamFactory;
 use AppDevPanel\Api\Debug\Repository\CollectorRepositoryInterface;
 use AppDevPanel\Api\Http\JsonResponseFactoryInterface;
@@ -46,6 +47,11 @@ final class DebugController
 
     /**
      * Detail information about a processed request identified by ID.
+     *
+     * If the requested collector implements {@see HtmlViewProviderInterface}, this endpoint
+     * renders the collector's PHP view template on the server with the collector's data
+     * exposed as `$data` and responds with `{"__html": "..."}` so the panel can embed the
+     * rendered fragment as-is.
      */
     public function view(ServerRequestInterface $request): ResponseInterface
     {
@@ -58,9 +64,36 @@ final class DebugController
                 "Requested collector doesn't exist: %s.",
                 $collectorClass,
             ));
+
+            if (is_string($collectorClass) && is_subclass_of($collectorClass, HtmlViewProviderInterface::class)) {
+                $html = $this->renderCollectorView($collectorClass::getViewPath(), is_array($data) ? $data : []);
+                return $this->responseFactory->createJsonResponse(['__html' => $html]);
+            }
         }
 
         return $this->responseFactory->createJsonResponse($data);
+    }
+
+    /**
+     * Render an SSR collector view file with `$data` exposed inside the template.
+     * The closure binding hides the controller's `$this` from the template scope.
+     *
+     * @param array<string, mixed>|list<mixed> $data
+     */
+    private function renderCollectorView(string $viewPath, array $data): string
+    {
+        $render = static function (string $__viewPath__, array $data): void {
+            require $__viewPath__;
+        };
+
+        ob_start();
+        try {
+            $render($viewPath, $data);
+            return (string) ob_get_clean();
+        } catch (\Throwable $e) {
+            ob_end_clean();
+            throw $e;
+        }
     }
 
     /**

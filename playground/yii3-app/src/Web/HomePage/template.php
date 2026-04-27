@@ -67,13 +67,6 @@ $this->setTitle('ADP Yii 3 Playground');
         </div>
     </a>
 
-    <a href="<?= $urlGenerator->generate('ssr-log-panel') ?>" class="feature-card">
-        <div>
-            <h3>SSR Log Panel</h3>
-            <p>Server-rendered HTML view of LogCollector data — same panel without React.</p>
-        </div>
-    </a>
-
     <a href="/debug/" class="feature-card">
         <div>
             <h3>Debug Panel</h3>

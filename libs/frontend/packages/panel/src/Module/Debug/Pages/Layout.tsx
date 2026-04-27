@@ -18,6 +18,7 @@ import {RedisPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/Redi
 import {RequestPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/RequestPanel';
 import {RouterPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/RouterPanel';
 import {ServicesPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/ServicesPanel';
+import {SsrPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/SsrPanel';
 import {TemplatePanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/TemplatePanel';
 import {TimelinePanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/TimelinePanel';
 import {TranslatorPanel} from '@app-dev-panel/panel/Module/Debug/Component/Panel/TranslatorPanel';
@@ -165,6 +166,9 @@ function CollectorData({collectorData, selectedCollector}: CollectorDataProps) {
         [CollectorsMap.RedisCollector]: (data: any) => <RedisPanel data={data} />,
         [CollectorsMap.CodeCoverageCollector]: (data: any) => <CodeCoveragePanel data={data} />,
         default: (data: any) => {
+            if (data && typeof data === 'object' && typeof data.__html === 'string') {
+                return <SsrPanel html={data.__html} />;
+            }
             if (typeof data === 'object' && data.__isPanelRemote__) {
                 return (
                     <React.Suspense fallback={`Loading`}>
