@@ -90,14 +90,37 @@ export const RouterPanel = ({data}: RouterPanelProps) => {
     const [filter, setFilter] = useState('');
     const deferredFilter = useDeferredValue(filter);
 
-    if (!data) {
-        return <EmptyState icon="route" title="No router data found" />;
+    const isEmptyData =
+        !data ||
+        (Array.isArray(data) && data.length === 0) ||
+        (typeof data === 'object' && Object.keys(data).length === 0);
+
+    if (isEmptyData) {
+        return (
+            <EmptyState
+                icon="route"
+                title="No router data found"
+                description="The RouterCollector did not capture any data for this request. Make sure the collector is enabled and that the framework's router ran before the request finished."
+            />
+        );
     }
 
     const {currentRoute, routes, routeTime} = data;
+    const hasCurrentRoute = Boolean(
+        currentRoute &&
+        typeof currentRoute === 'object' &&
+        (currentRoute.pattern || currentRoute.uri || currentRoute.name),
+    );
+    const hasRoutes = Array.isArray(routes) && routes.length > 0;
 
-    if (!currentRoute && (!routes || routes.length === 0)) {
-        return <EmptyState icon="route" title="No route matched" />;
+    if (!hasCurrentRoute && !hasRoutes) {
+        return (
+            <EmptyState
+                icon="route"
+                title="No route matched"
+                description="No route was matched for this request and no registered routes were collected. This usually means the request was handled outside the router (e.g. an error before routing) or the route collection is not exposed to the adapter."
+            />
+        );
     }
 
     const filteredRoutes = routes
@@ -114,7 +137,7 @@ export const RouterPanel = ({data}: RouterPanelProps) => {
 
     return (
         <Box>
-            {currentRoute && (
+            {hasCurrentRoute && (
                 <InfoCard>
                     <Typography sx={{fontSize: '14px', fontWeight: 600, mb: 1.5}}>Current Route</Typography>
                     {currentRoute.name && (

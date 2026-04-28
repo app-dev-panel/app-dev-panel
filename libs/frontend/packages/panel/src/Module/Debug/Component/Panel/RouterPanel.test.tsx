@@ -38,10 +38,29 @@ describe('RouterPanel', () => {
     it('shows empty message when no data', () => {
         renderWithProviders(<RouterPanel data={null as any} />);
         expect(screen.getByText(/No router data found/)).toBeInTheDocument();
+        expect(screen.getByText(/RouterCollector did not capture any data/)).toBeInTheDocument();
+    });
+
+    it('shows empty message when data is an empty object', () => {
+        renderWithProviders(<RouterPanel data={{} as any} />);
+        expect(screen.getByText(/No router data found/)).toBeInTheDocument();
+    });
+
+    it('shows empty message when data is an empty array (PHP `[]`)', () => {
+        renderWithProviders(<RouterPanel data={[] as any} />);
+        expect(screen.getByText(/No router data found/)).toBeInTheDocument();
     });
 
     it('shows empty message when no route matched', () => {
         renderWithProviders(<RouterPanel data={{currentRoute: null, routes: []}} />);
+        expect(screen.getByText(/No route matched/)).toBeInTheDocument();
+        expect(screen.getByText(/No route was matched for this request/)).toBeInTheDocument();
+    });
+
+    it('shows "no route matched" when currentRoute is an object with no usable fields', () => {
+        renderWithProviders(
+            <RouterPanel data={{currentRoute: {pattern: '', uri: '', name: null} as any, routes: []}} />,
+        );
         expect(screen.getByText(/No route matched/)).toBeInTheDocument();
     });
 
