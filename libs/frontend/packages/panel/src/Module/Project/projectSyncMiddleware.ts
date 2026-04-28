@@ -1,7 +1,7 @@
 import {framesSlice, updateFrame} from '@app-dev-panel/panel/Module/Frames/Context/Context';
 import {openApiSlice, updateApiEntry} from '@app-dev-panel/panel/Module/OpenApi/Context/Context';
 import {projectApi} from '@app-dev-panel/sdk/API/Project/Project';
-import type {Action, Middleware, MiddlewareAPI} from '@reduxjs/toolkit';
+import type {Action, Middleware, ThunkAction, ThunkDispatch, UnknownAction} from '@reduxjs/toolkit';
 import {isAnyOf} from '@reduxjs/toolkit';
 
 /**
@@ -47,12 +47,35 @@ type StateWithSlices = {
     [framesSlice.name]: {frames: Record<string, string>};
 };
 
+/**
+ * Local typed dispatch. We can't import `AppDispatch` from `store.ts` because
+ * the store's type is inferred from `createStore`, which transitively pulls
+ * in this middleware — TypeScript would see the resulting cycle even with
+ * `import type`. `ThunkDispatch` here mirrors the dispatch the real store
+ * exposes (the store uses `configureStore`, which always installs
+ * `redux-thunk`), so dispatching RTK Query `.initiate(...)` thunks below
+ * type-checks without any casts.
+ */
+type ProjectDispatch = ThunkDispatch<StateWithSlices, unknown, UnknownAction>;
+
+// Type predicate: narrows `unknown` (the type Redux gives us for `action`)
+// straight to `Action`, removing the need for an intermediate
+// `typedAction = action as Action` cast further down.
+const isPlainAction = (action: unknown): action is Action =>
+    typeof action === 'object' && action !== null && typeof (action as {type?: unknown}).type === 'string';
+
 const isProjectMutation = (action: Action): boolean =>
     typeof action.type === 'string' && SLICE_MUTATION_TYPES.has(action.type);
 
 const isGetFulfilled = isAnyOf(projectApi.endpoints.getProjectConfig.matchFulfilled);
 
-export const projectSyncMiddleware: Middleware = (api: MiddlewareAPI) => {
+// `Middleware<DispatchExt, State, Dispatch>` parameterizes the API the
+// middleware sees. The first generic is the dispatch *extension* — extra
+// overloads this middleware would inject into the store's dispatch type.
+// We don't add any (we only consume thunks), so `unknown` is correct.
+// With a `ThunkDispatch`-compatible `Dispatch`, `api.dispatch(thunk)` type-checks
+// for the RTK Query `.initiate(...)` thunks dispatched below — no `as never` casts.
+export const projectSyncMiddleware: Middleware<unknown, StateWithSlices, ProjectDispatch> = (api) => {
     let bootstrapped = false;
     let suppressNextSync = false;
     let pushTimer: ReturnType<typeof setTimeout> | null = null;
@@ -63,12 +86,12 @@ export const projectSyncMiddleware: Middleware = (api: MiddlewareAPI) => {
         if (pushTimer !== null) clearTimeout(pushTimer);
         pushTimer = setTimeout(() => {
             pushTimer = null;
-            const state = api.getState() as StateWithSlices;
+            const state = api.getState();
             api.dispatch(
                 projectApi.endpoints.updateProjectConfig.initiate({
                     frames: state[framesSlice.name].frames,
                     openapi: state[openApiSlice.name].entries,
-                }) as never,
+                }),
             );
         }, SYNC_DEBOUNCE_MS);
     };
@@ -80,15 +103,15 @@ export const projectSyncMiddleware: Middleware = (api: MiddlewareAPI) => {
      * invalidation, which any subscribed component picks up automatically.
      */
     const forceRefetchAll = () => {
-        api.dispatch(projectApi.endpoints.getProjectConfig.initiate(undefined, {forceRefetch: true}) as never);
-        api.dispatch(projectApi.endpoints.getSecrets.initiate(undefined, {forceRefetch: true}) as never);
+        api.dispatch(projectApi.endpoints.getProjectConfig.initiate(undefined, {forceRefetch: true}));
+        api.dispatch(projectApi.endpoints.getSecrets.initiate(undefined, {forceRefetch: true}));
     };
 
     const connectEventStream = () => {
         if (typeof EventSource === 'undefined') return; // Non-browser env (SSR, tests).
         if (eventSource !== null) return;
 
-        const baseUrl = ((api.getState() as StateWithSlices).application?.baseUrl ?? '').replace(/\/$/, '');
+        const baseUrl = (api.getState().application?.baseUrl ?? '').replace(/\/$/, '');
         const url = `${baseUrl}/debug/api/project/event-stream`;
 
         let source: EventSource;
@@ -130,12 +153,15 @@ export const projectSyncMiddleware: Middleware = (api: MiddlewareAPI) => {
             // dispatched it via an internal RTK Query path. Forwarding it to
             // `next` would tank `createStore`'s plain-action check, so we
             // re-enter the chain via the store's `dispatch` instead.
-            return api.dispatch(action as never);
+            // The `typeof === 'function'` check narrows `action` to the bare
+            // `Function` type, which doesn't structurally match `ThunkAction`'s
+            // call signature; the cast restores the convention (any function
+            // dispatched into a thunk-enabled store is a thunk).
+            return api.dispatch(action as ThunkAction<unknown, StateWithSlices, unknown, UnknownAction>);
         }
-        if (typeof action !== 'object' || action === null || typeof (action as Action).type !== 'string') {
+        if (!isPlainAction(action)) {
             return next(action);
         }
-        const typedAction = action as Action;
 
         // Trigger the initial fetch lazily on the first plain action hitting
         // the store. Defer to a microtask so the dispatch happens cleanly on
@@ -143,16 +169,16 @@ export const projectSyncMiddleware: Middleware = (api: MiddlewareAPI) => {
         if (!bootstrapped) {
             bootstrapped = true;
             queueMicrotask(() => {
-                api.dispatch(projectApi.endpoints.getProjectConfig.initiate() as never);
+                api.dispatch(projectApi.endpoints.getProjectConfig.initiate());
                 connectEventStream();
             });
         }
 
         const result = next(action);
 
-        if (isGetFulfilled(typedAction)) {
-            const {config} = typedAction.payload;
-            const localState = api.getState() as StateWithSlices;
+        if (isGetFulfilled(action)) {
+            const {config} = action.payload;
+            const localState = api.getState();
             const localOpenApi = localState[openApiSlice.name].entries;
             const localFrames = localState[framesSlice.name].frames;
 
@@ -171,7 +197,7 @@ export const projectSyncMiddleware: Middleware = (api: MiddlewareAPI) => {
             return result;
         }
 
-        if (isProjectMutation(typedAction) && !suppressNextSync) {
+        if (isProjectMutation(action) && !suppressNextSync) {
             schedulePush();
         }
 
