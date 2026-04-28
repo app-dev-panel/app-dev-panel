@@ -68,7 +68,7 @@ export const projectSyncMiddleware: Middleware = (api: MiddlewareAPI) => {
                 projectApi.endpoints.updateProjectConfig.initiate({
                     frames: state[framesSlice.name].frames,
                     openapi: state[openApiSlice.name].entries,
-                }),
+                }) as never,
             );
         }, SYNC_DEBOUNCE_MS);
     };
@@ -80,8 +80,8 @@ export const projectSyncMiddleware: Middleware = (api: MiddlewareAPI) => {
      * invalidation, which any subscribed component picks up automatically.
      */
     const forceRefetchAll = () => {
-        api.dispatch(projectApi.endpoints.getProjectConfig.initiate(undefined, {forceRefetch: true}));
-        api.dispatch(projectApi.endpoints.getSecrets.initiate(undefined, {forceRefetch: true}));
+        api.dispatch(projectApi.endpoints.getProjectConfig.initiate(undefined, {forceRefetch: true}) as never);
+        api.dispatch(projectApi.endpoints.getSecrets.initiate(undefined, {forceRefetch: true}) as never);
     };
 
     const connectEventStream = () => {
@@ -135,6 +135,7 @@ export const projectSyncMiddleware: Middleware = (api: MiddlewareAPI) => {
         if (typeof action !== 'object' || action === null || typeof (action as Action).type !== 'string') {
             return next(action);
         }
+        const typedAction = action as Action;
 
         // Trigger the initial fetch lazily on the first plain action hitting
         // the store. Defer to a microtask so the dispatch happens cleanly on
@@ -142,15 +143,15 @@ export const projectSyncMiddleware: Middleware = (api: MiddlewareAPI) => {
         if (!bootstrapped) {
             bootstrapped = true;
             queueMicrotask(() => {
-                api.dispatch(projectApi.endpoints.getProjectConfig.initiate());
+                api.dispatch(projectApi.endpoints.getProjectConfig.initiate() as never);
                 connectEventStream();
             });
         }
 
         const result = next(action);
 
-        if (isGetFulfilled(action)) {
-            const {config} = action.payload;
+        if (isGetFulfilled(typedAction)) {
+            const {config} = typedAction.payload;
             const localState = api.getState() as StateWithSlices;
             const localOpenApi = localState[openApiSlice.name].entries;
             const localFrames = localState[framesSlice.name].frames;
@@ -170,7 +171,7 @@ export const projectSyncMiddleware: Middleware = (api: MiddlewareAPI) => {
             return result;
         }
 
-        if (isProjectMutation(action) && !suppressNextSync) {
+        if (isProjectMutation(typedAction) && !suppressNextSync) {
             schedulePush();
         }
 
