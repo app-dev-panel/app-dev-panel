@@ -5,11 +5,24 @@ End-to-end ревью репозитория ADP. Идти сверху вниз
 фронтенд, документация и инфраструктура. Каждый пункт — независимая проверка
 с понятным критерием «прошло / не прошло».
 
+Часть инвариантов автоматизирована — см. `make help` секция
+"Project Review". Эти таргеты намеренно НЕ включены в `make check`
+по умолчанию: на момент создания они находят пред-существующие
+нарушения, которые нужно сначала отриажить.
+
+| Make-таргет          | Что проверяет                                              |
+|----------------------|------------------------------------------------------------|
+| `make doctor`        | §0 — PHP/Node/PCOV/ChromeDriver на машине                  |
+| `make check-timeouts`| §1 — Таймауты в Makefile/phpunit/vitest ≤ потолка CLAUDE.md|
+| `make check-strict`  | §1 — `failOn*` атрибуты + запрет `markTestSkipped`         |
+| `make check-docs-tree`| §11 — Ссылки sidebar и EN/RU симметрия                    |
+| `make smoke-playgrounds`| §10 — `curl /_adp` для каждого плейграунда              |
+| `make review-checks` | Все проверки выше скопом                                   |
+
 ## 0. Предусловия
 
 - [ ] `make install` завершился без ошибок (PHP + frontend + playgrounds).
-- [ ] `php -m | grep pcov` — драйвер покрытия установлен.
-- [ ] Chrome + ChromeDriver одной мажорной версии (для frontend e2e).
+- [ ] `make doctor` зелёный (PCOV, Node 20+, ChromeDriver совпадает с Chrome).
 - [ ] Текущая ветка чистая (`git status`), синхронизирована с `master`.
 
 ## 1. Глобальное здоровье репозитория
@@ -20,12 +33,12 @@ End-to-end ревью репозитория ADP. Идти сверху вниз
       `modulite.php` нет без обоснования.
 - [ ] `make mago` — pass с актуальным baseline. Записать число подавлений
       в `mago-lint-baseline.php` и сравнить с предыдущим ревью.
-- [ ] Пройтись по таймаутам в `Makefile`/`phpunit.xml.dist`/`vitest.config.ts`
-      — соответствуют таблице в CLAUDE.md, никто не поднимал лимиты.
+- [ ] `make check-timeouts` — таймауты в `Makefile`/`phpunit.xml.dist`/
+      `vitest.config.ts` соответствуют таблице CLAUDE.md.
+- [ ] `make check-strict` — `failOn*` атрибуты во всех phpunit-конфигах,
+      нет `markTestSkipped`/`expectDeprecation` вне allowlist.
 - [ ] `composer.lock` и `libs/frontend/package-lock.json` закоммичены и
       соответствуют `composer.json` / `package.json`.
-- [ ] `git grep -nE "markTestSkipped|markTestIncomplete|expectDeprecation"`
-      — вне разрешённых мест ничего не появилось.
 - [ ] `git grep -nE "TODO|FIXME|XXX|HACK"` — короткий список, у каждого есть
       контекст или issue.
 
@@ -114,7 +127,8 @@ End-to-end ревью репозитория ADP. Идти сверху вниз
 ## 10. Плейграунды (`playground/*`)
 
 - [ ] Каждый плейграунд стартует через `make serve-*` без ошибок.
-- [ ] `/_adp` отдаёт SPA, `/_adp/api/...` отвечает JSON.
+- [ ] `make smoke-playgrounds` — каждый плейграунд отвечает 2xx/3xx
+      на `/` и `/_adp`.
 - [ ] В каждом плейграунде вызывается полный набор коллекторов (logger,
       events, http, db) — проверить через `make fixtures-*`.
 - [ ] Установка из чистого состояния воспроизводима: README плейграунда
@@ -125,8 +139,9 @@ End-to-end ревью репозитория ADP. Идти сверху вниз
 ### `website/` (VitePress, источник правды)
 
 - [ ] `npm run build` без warnings, `dist/llms.txt` и `llms-full.txt` сгенерировались.
-- [ ] Sidebar/nav в `.vitepress/config.ts` соответствуют файлам в `guide/` и `api/`.
-- [ ] EN и RU локали синхронизированы по структуре (страницы, заголовки, anchors).
+- [ ] `make check-docs-tree` — sidebar-ссылки разрешаются, EN/RU дерево
+      синхронно (минимум на уровне файлов).
+- [ ] Заголовки и anchors в EN и RU совпадают (визуально, скрипт не ловит).
 - [ ] Скриншоты в `guide/*` соответствуют текущему UI.
 - [ ] Блог: даты, авторы, теги — корректны.
 - [ ] `website/guide/feature-matrix.md` — отражает реальный статус каждого адаптера.
