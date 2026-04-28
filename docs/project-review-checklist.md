@@ -21,7 +21,10 @@ End-to-end ревью репозитория ADP. Идти сверху вниз
 
 ## 0. Предусловия
 
-- [ ] `make install` завершился без ошибок (PHP + frontend + playgrounds).
+- [ ] `setup-env.sh` отработал (для Claude Code на вебе — автоматически
+      через `SessionStart` hook в `.claude/settings.json`; локально — вручную).
+- [ ] `make install` завершился без ошибок (PHP + frontend + playgrounds) —
+      `setup-env.sh` уже это делает, дополнительно не требуется.
 - [ ] `make doctor` зелёный (PCOV, Node 20+, ChromeDriver совпадает с Chrome).
 - [ ] Текущая ветка чистая (`git status`), синхронизирована с `master`.
 
