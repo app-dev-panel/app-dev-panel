@@ -1,6 +1,6 @@
 {
   "name": "@app-dev-panel/panel",
-  "version": "0.0.2",
+  "version": "0.4.0",
   "main": "src/index.tsx",
   "homepage": ".",
   "keywords": [
@@ -33,8 +33,8 @@
     "build-storybook": "storybook build"
   },
   "dependencies": {
-    "@app-dev-panel/sdk": "^0.0.2",
-    "@app-dev-panel/toolbar": "^0.0.2",
+    "@app-dev-panel/sdk": "^0.4.0",
+    "@app-dev-panel/toolbar": "^0.4.0",
     "@hookform/resolvers": "^5.2.2",
     "@originjs/vite-plugin-federation": "^1.3.5",
     "react-markdown": "^10.1.0",
