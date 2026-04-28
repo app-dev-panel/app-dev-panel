@@ -115,7 +115,7 @@ jobs:
           path: libs/frontend/
 
       - name: Set package versions from git tag
-        run: npx lerna version "$GITHUB_REF_NAME" --no-git-tag-version --no-push --yes
+        run: npx lerna version "${GITHUB_REF_NAME#v}" --no-git-tag-version --no-push --yes
 
       - name: Clean up build artifacts from working tree
         run: rm -f panel-dist.tar.gz toolbar-dist.tar.gz frontend-dist.zip
