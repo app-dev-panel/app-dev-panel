@@ -23,7 +23,7 @@ The package is auto-discovered via `extra.laravel.providers` in composer.json �
 Publish the configuration file:
 
 ```bash
-php artisan vendor:publish --provider="AppDevPanel\Adapter\Laravel\AppDevPanelServiceProvider"
+php artisan vendor:publish --tag=app-dev-panel-config
 ```
 
 This creates `config/app-dev-panel.php`:
@@ -77,3 +77,50 @@ The adapter automatically decorates Laravel's `Translator` service with <class>A
 ## Database Inspector
 
 <class>AppDevPanel\Adapter\Laravel\Inspector\LaravelSchemaProvider</class> provides database schema inspection via `Illuminate\Database\Connection`. Falls back to <class>AppDevPanel\Adapter\Laravel\Inspector\NullSchemaProvider</class> when no database is configured.
+
+## Frontend Assets
+
+`composer require app-dev-panel/adapter-laravel` transitively pulls <pkg>app-dev-panel/frontend-assets</pkg>, which ships the prebuilt panel SPA and toolbar widget. <class>AppDevPanel\Adapter\Laravel\AppDevPanelServiceProvider</class> resolves `panel.static_url` in this order:
+
+1. **Published copy** — `public/vendor/app-dev-panel/bundle.js` exists (after `php artisan vendor:publish --tag=app-dev-panel-assets`). Web server serves it directly.
+2. **Composer-installed bundle** — `vendor/app-dev-panel/frontend-assets/dist/` exists. Adapter resolves the URL to `/vendor/app-dev-panel`.
+3. **CDN fallback** — `https://app-dev-panel.github.io/app-dev-panel`. Used when neither of the above is present.
+
+Override via `config/app-dev-panel.php`:
+
+```php
+'panel' => [
+    'static_url' => '',                        // '' = auto-detect (recommended)
+    // 'static_url' => 'http://localhost:3000', // Vite dev server with HMR
+    // 'static_url' => 'https://my-cdn/adp',    // your own CDN
+],
+'toolbar' => [
+    'enabled' => true,
+    'static_url' => '',                        // '' = derive from panel.static_url + '/toolbar'
+],
+```
+
+The toolbar bundle lives at `{panel.static_url}/toolbar/bundle.js` — keep both URLs co-located unless you mirror them separately.
+
+### Updating the bundle
+
+```bash
+composer update app-dev-panel/frontend-assets
+```
+
+For PHAR / non-Composer installs, the `frontend:update` artisan command fetches the latest release tarballs from GitHub:
+
+```bash
+php artisan frontend:update download --path=public/vendor/app-dev-panel
+```
+
+## Manual API exploration
+
+The debug API root is at `/debug/api`, **not** `/debug/api/debug`:
+
+```bash
+curl http://127.0.0.1:8000/debug/api                 # list recent debug entries
+curl http://127.0.0.1:8000/debug/api/summary/{id}    # single entry summary
+curl http://127.0.0.1:8000/debug/api/view/{id}       # full entry data
+curl http://127.0.0.1:8000/debug/api/event-stream    # SSE stream of new entries
+```

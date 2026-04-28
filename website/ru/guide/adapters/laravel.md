@@ -19,7 +19,7 @@ composer require app-dev-panel/adapter-laravel
 Опубликуйте файл конфигурации:
 
 ```bash
-php artisan vendor:publish --provider="AppDevPanel\Adapter\Laravel\AppDevPanelServiceProvider"
+php artisan vendor:publish --tag=app-dev-panel-config
 ```
 
 Будет создан `config/app-dev-panel.php`:
@@ -73,3 +73,50 @@ return [
 ## Инспектор базы данных
 
 <class>AppDevPanel\Adapter\Laravel\Inspector\LaravelSchemaProvider</class> предоставляет инспекцию схемы БД через `Illuminate\Database\Connection`. Без настроенной БД используется <class>AppDevPanel\Adapter\Laravel\Inspector\NullSchemaProvider</class>.
+
+## Фронтенд-ассеты
+
+`composer require app-dev-panel/adapter-laravel` транзитивно подтягивает <pkg>app-dev-panel/frontend-assets</pkg> — пакет с предсобранной SPA панели и виджетом тулбара. <class>AppDevPanel\Adapter\Laravel\AppDevPanelServiceProvider</class> резолвит `panel.static_url` в таком порядке:
+
+1. **Опубликованная копия** — `public/vendor/app-dev-panel/bundle.js` существует (после `php artisan vendor:publish --tag=app-dev-panel-assets`). Веб-сервер отдаёт файлы напрямую.
+2. **Composer-инсталляция** — `vendor/app-dev-panel/frontend-assets/dist/` существует. Адаптер выставляет URL `/vendor/app-dev-panel`.
+3. **CDN-fallback** — `https://app-dev-panel.github.io/app-dev-panel`. Используется если ни одно из выше не доступно.
+
+Поведение переопределяется через `config/app-dev-panel.php`:
+
+```php
+'panel' => [
+    'static_url' => '',                        // '' = автодетект (рекомендуется)
+    // 'static_url' => 'http://localhost:3000', // Vite dev-сервер с HMR
+    // 'static_url' => 'https://my-cdn/adp',    // ваш собственный CDN
+],
+'toolbar' => [
+    'enabled' => true,
+    'static_url' => '',                        // '' = derive от panel.static_url + '/toolbar'
+],
+```
+
+Тулбар грузится из `{panel.static_url}/toolbar/bundle.js` — держите оба URL рядом, если только не зеркалите их раздельно.
+
+### Обновление сборки
+
+```bash
+composer update app-dev-panel/frontend-assets
+```
+
+Для PHAR / non-Composer-установок artisan-команда `frontend:update` качает релизные тарболлы с GitHub:
+
+```bash
+php artisan frontend:update download --path=public/vendor/app-dev-panel
+```
+
+## Ручная работа с API
+
+Корень debug-API расположен на `/debug/api`, **не** `/debug/api/debug`:
+
+```bash
+curl http://127.0.0.1:8000/debug/api                 # список последних debug-записей
+curl http://127.0.0.1:8000/debug/api/summary/{id}    # краткое описание записи
+curl http://127.0.0.1:8000/debug/api/view/{id}       # полные данные записи
+curl http://127.0.0.1:8000/debug/api/event-stream    # SSE-поток обновлений
+```
