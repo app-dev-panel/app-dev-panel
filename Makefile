@@ -7,7 +7,8 @@
         mago mago-format mago-lint mago-analyze mago-fix \
         mago-playgrounds mago-playground-yii3 mago-playground-symfony mago-playground-yii2 mago-playground-laravel mago-playground-spiral \
         mago-playgrounds-fix mago-playground-yii3-fix mago-playground-symfony-fix mago-playground-yii2-fix mago-playground-laravel-fix mago-playground-spiral-fix \
-        modulite \
+        modulite modulite-ci \
+        doctor check-timeouts check-strict check-docs-tree smoke-playgrounds review-checks \
         check check-ci fix \
         install install-php install-frontend install-playgrounds \
         spiral-panel-sync \
@@ -96,6 +97,14 @@ help: ## Show this help
 	@echo ""
 	@echo "$(YELLOW)Modulite (Module Boundaries):$(RESET)"
 	@echo "  make modulite              Check module boundary violations"
+	@echo ""
+	@echo "$(YELLOW)Project Review (CLAUDE.md invariants):$(RESET)"
+	@echo "  make doctor                Verify local environment (PHP, Node, PCOV, ChromeDriver)"
+	@echo "  make check-timeouts        Verify timeouts match CLAUDE.md ceiling"
+	@echo "  make check-strict          Verify phpunit failOn* attrs; ban markTestSkipped"
+	@echo "  make check-docs-tree       Verify VitePress sidebar links + EN/RU symmetry"
+	@echo "  make smoke-playgrounds     Smoke-test running playground servers"
+	@echo "  make review-checks         Run all project-review checks"
 	@echo ""
 	@echo "$(YELLOW)Combined:$(RESET)"
 	@echo "  make check                 Run ALL code quality checks (core + playgrounds + modulite)"
@@ -354,6 +363,40 @@ modulite: ## Check module boundary violations (inspired by VK Modulite)
 modulite-ci: ## Check module boundaries with GitHub Actions annotations
 	@echo "$(CYAN)Checking module boundaries (Modulite, GitHub format)...$(RESET)"
 	php tools/modulite-check.php --format=github
+
+# ============================================================================
+# Project Review Checks (CLAUDE.md invariants)
+# ============================================================================
+#
+# Each target validates one section of docs/project-review-checklist.md and
+# exits non-zero on regressions. They are deliberately NOT wired into
+# `make check` by default — pre-existing violations need to be triaged first.
+# Run them on-demand or as part of a periodic review pass.
+
+doctor: ## §0 — Check local environment (PHP, Node, PCOV, ChromeDriver)
+	@bash scripts/doctor.sh
+
+check-timeouts: ## §1 — Verify timeouts in Makefile / phpunit / vitest match CLAUDE.md
+	@echo "$(CYAN)Checking timeout invariants...$(RESET)"
+	@php tools/check-timeouts.php
+
+check-strict: ## §1 — Verify phpunit failOn* attrs and ban markTestSkipped
+	@echo "$(CYAN)Checking test-strictness invariants...$(RESET)"
+	@php tools/check-test-strictness.php
+
+check-docs-tree: ## §11 — Verify VitePress sidebar links + EN/RU symmetry
+	@echo "$(CYAN)Checking VitePress doc tree...$(RESET)"
+	@php tools/check-docs-tree.php
+
+smoke-playgrounds: ## §10 — Smoke-test running playgrounds (curl /_adp on each port)
+	@bash scripts/smoke-playgrounds.sh
+
+review-checks: ## Run all project-review checks (timeouts + strict + docs-tree)
+	@echo "$(CYAN)Running project-review checks...$(RESET)"
+	@$(MAKE) check-timeouts
+	@$(MAKE) check-strict
+	@$(MAKE) check-docs-tree
+	@echo "$(GREEN)Project-review checks complete.$(RESET)"
 
 # ============================================================================
 # Code Quality — Frontend
