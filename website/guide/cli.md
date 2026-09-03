@@ -61,11 +61,23 @@ debug:query view <id> -c <CollectorFQCN>  # Specific collector data
 Starts a standalone HTTP server using PHP's built-in server, serving the ADP API directly. No framework required.
 
 ```bash
-serve                                              # Default: 127.0.0.1:8888
-serve --host=0.0.0.0 --port=9000                   # Custom host/port
+serve                                              # Default: 127.0.0.1:8888, loopback clients only
+serve --host=0.0.0.0 --port=9000 --auth-token=s3cret   # Non-loopback bind requires a token
+serve --allowed-ips=10.0.0.5,10.0.0.6              # Restrict API clients (comma separated, "*" = everyone)
 serve --storage-path=/path/to/debug/data           # Custom storage directory
 serve --frontend-path=/path/to/built/assets        # Serve frontend assets
 ```
+
+::: warning Breaking change — secure defaults
+The API served by `serve` can read files, run commands, install Composer packages and execute raw SQL. It is therefore **deny-by-default**:
+
+| Option | Env var | Default | Behaviour |
+|--------|---------|---------|-----------|
+| `--allowed-ips` | `ADP_ALLOWED_IPS` | `127.0.0.1,::1` | Comma-separated client IPs allowed to call the API. Pass `*` to allow every client. Empty/blank falls back to loopback |
+| `--auth-token` | `ADP_AUTH_TOKEN` | *(none)* | Token clients must send as the `X-Debug-Token` header. **Mandatory** when `--host` is not loopback (`127.*`, `localhost`, `::1`) |
+
+CLI options take precedence over the environment variables. When `--host` is non-loopback and no token is configured, the command refuses to start and exits with a non-zero code — nothing listens on the port. Previously `serve --host=0.0.0.0` exposed the API to the whole network without authentication; that combination now needs `--auth-token` (or `ADP_AUTH_TOKEN`) and, to accept remote clients, `--allowed-ips` (or `ADP_ALLOWED_IPS`).
+:::
 
 ### `mcp:serve` -- MCP Server (stdio)
 

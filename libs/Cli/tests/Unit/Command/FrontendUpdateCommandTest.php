@@ -391,6 +391,105 @@ final class FrontendUpdateCommandTest extends TestCase
         $this->assertStringContainsString('Yes', $tester->getDisplay());
     }
 
+    public function testDownloadRefusesZipSlipArchive(): void
+    {
+        $base = sys_get_temp_dir() . '/adp-test-zipslip-' . uniqid();
+        mkdir($base, 0o777, true);
+        $target = $base . '/dist';
+
+        $zipPath = $base . '/evil.zip';
+        $zip = new \ZipArchive();
+        $zip->open($zipPath, \ZipArchive::CREATE);
+        $zip->addFromString('index.html', '<html>ok</html>');
+        $zip->addFromString('../evil.txt', 'pwned');
+        $zip->close();
+        $zipContent = (string) file_get_contents($zipPath);
+        unlink($zipPath);
+
+        $release = [
+            'tag_name' => 'v9.9.9',
+            'assets' => [
+                ['name' => 'frontend-dist.zip', 'browser_download_url' => 'https://example.com/evil.zip'],
+            ],
+        ];
+        $client = $this->createMockClient([
+            new Response(200, [], json_encode($release)),
+            new Response(200, [], $zipContent),
+        ]);
+
+        try {
+            $tester = new CommandTester(new FrontendUpdateCommand($client));
+            $tester->execute(['action' => 'download', '--path' => $target]);
+
+            $this->assertSame(1, $tester->getStatusCode());
+            $display = $tester->getDisplay();
+            $this->assertStringContainsString('Download failed', $display);
+            // SymfonyStyle wraps long error lines; assert on the un-wrapped head of the message.
+            $this->assertStringContainsString('Archive entry "../evil.txt" escapes the target', $display);
+            // Nothing escaped and nothing was half-installed.
+            $this->assertFileDoesNotExist($base . '/evil.txt');
+            $this->assertFileDoesNotExist($target . '/index.html');
+            $this->assertFileDoesNotExist($target . '/.adp-version');
+        } finally {
+            self::removeIfExists(
+                $base . '/evil.txt',
+                $target . '/index.html',
+                $target . '/.adp-version',
+                $target,
+                $base,
+            );
+        }
+    }
+
+    public function testDownloadLeavesNoTemporaryFilesBehind(): void
+    {
+        $tempDir = sys_get_temp_dir() . '/adp-test-tmpclean-' . uniqid();
+
+        $zipPath = tempnam(sys_get_temp_dir(), 'adp-test-zip-') . '.zip';
+        $zip = new \ZipArchive();
+        $zip->open($zipPath, \ZipArchive::CREATE);
+        $zip->addFromString('index.html', '<html>test</html>');
+        $zip->close();
+        $zipContent = (string) file_get_contents($zipPath);
+        unlink($zipPath);
+        unlink(substr($zipPath, 0, -4));
+
+        $release = [
+            'tag_name' => 'v3.0.1',
+            'assets' => [
+                ['name' => 'frontend-dist.zip', 'browser_download_url' => 'https://example.com/dl.zip'],
+            ],
+        ];
+        $client = $this->createMockClient([
+            new Response(200, [], json_encode($release)),
+            new Response(200, [], $zipContent),
+        ]);
+
+        $before = glob(sys_get_temp_dir() . '/adp-frontend-*') ?: [];
+
+        try {
+            $tester = new CommandTester(new FrontendUpdateCommand($client));
+            $tester->execute(['action' => 'download', '--path' => $tempDir]);
+
+            $this->assertSame(0, $tester->getStatusCode());
+            // Both the tempnam() placeholder and the downloaded archive are gone.
+            $this->assertSame($before, glob(sys_get_temp_dir() . '/adp-frontend-*') ?: []);
+        } finally {
+            self::removeIfExists($tempDir . '/index.html', $tempDir . '/.adp-version', $tempDir);
+        }
+    }
+
+    private static function removeIfExists(string ...$paths): void
+    {
+        foreach ($paths as $path) {
+            if (is_dir($path)) {
+                rmdir($path);
+            } elseif (file_exists($path)) {
+                unlink($path);
+            }
+        }
+    }
+
     /**
      * @param list<Response> $responses
      * @param list<array{request: \Psr\Http\Message\RequestInterface, response: Response}> $history

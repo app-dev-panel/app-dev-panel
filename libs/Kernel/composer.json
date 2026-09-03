@@ -2,6 +2,7 @@
     "name": "app-dev-panel/kernel",
     "type": "library",
     "description": "ADP Kernel — core engine for the Application Development Panel: debugger lifecycle, collectors, storage, and PSR proxy system",
+    "license": "MIT",
     "keywords": [
         "debug",
         "debug-panel",

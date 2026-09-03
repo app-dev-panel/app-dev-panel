@@ -38,15 +38,29 @@ const simulateDrag = (element: HTMLElement, startX: number, startY: number, endX
     fireEvent.mouseUp(document, {clientX: endX, clientY: endY});
 };
 
+/** The docked bottom bar: the Paper that hosts the "Collapse toolbar" button. */
+const getBottomBar = () => {
+    const bar = screen.getByLabelText('Collapse toolbar').closest('.MuiPaper-root') as HTMLElement | null;
+    expect(bar).not.toBeNull();
+    return bar!;
+};
+
+/**
+ * The floating card. Undocking swaps the whole widget tree (the bottom bar
+ * unmounts, a float `Paper` mounts), so the bar element captured before the
+ * drag is detached afterwards and reports a zero rect — always re-query.
+ * `queryBy*` so it can be polled inside `waitFor`.
+ */
+const queryFloatWidget = () =>
+    screen.queryByLabelText('Dock to bottom')?.closest('.MuiPaper-root') as HTMLElement | null | undefined;
+
 describe('Toolbar Drag & Drop', () => {
     it('bottom bar can be dragged to undock into float mode', async () => {
         renderToolbar();
         await expandToolbar();
 
-        // Find the toolbar Paper (bottom bar)
-        const collapseBtn = screen.getByLabelText('Collapse toolbar');
-        const toolbar = collapseBtn.closest('[class*="MuiPaper"]') as HTMLElement;
-        expect(toolbar).not.toBeNull();
+        const toolbar = getBottomBar();
+        expect(toolbar.getBoundingClientRect().width).toBeGreaterThan(window.innerWidth * 0.8);
 
         // Drag from center of bar upward — should undock
         const rect = toolbar.getBoundingClientRect();
@@ -58,33 +72,40 @@ describe('Toolbar Drag & Drop', () => {
         // After drag, toolbar should be in float mode — no longer full-width
         await waitFor(
             () => {
-                const newRect = toolbar.getBoundingClientRect();
+                const widget = queryFloatWidget();
+                expect(widget).toBeTruthy();
+                const newRect = widget!.getBoundingClientRect();
+                expect(newRect.width).toBeGreaterThan(0);
                 expect(newRect.width).toBeLessThan(window.innerWidth * 0.8);
             },
             {timeout: 3000},
         );
+        expect(screen.queryByLabelText('Collapse toolbar')).toBeNull();
     });
 
-    // Skipped: the fireEvent-based drag simulation undocks the toolbar (width
-    // shrinks — covered by the previous test) but does not drive the CSS
-    // transform/position that positions the widget under the cursor. A real
-    // pointer drag via Playwright's actionability API would be needed; that
-    // requires a rework of the drag harness.
-    it.skip('undocked widget is positioned under the cursor, not at left edge', async () => {
+    it('undocked widget is positioned under the cursor, not at left edge', async () => {
         renderToolbar();
         await expandToolbar();
 
-        const collapseBtn = screen.getByLabelText('Collapse toolbar');
-        const toolbar = collapseBtn.closest('[class*="MuiPaper"]') as HTMLElement;
-        expect(toolbar).not.toBeNull();
-
+        const toolbar = getBottomBar();
         const rect = toolbar.getBoundingClientRect();
-        simulateDrag(toolbar, rect.left + rect.width / 2, rect.top + rect.height / 2, 600, 400);
+        const endX = 600;
+        const endY = 400;
+        simulateDrag(toolbar, rect.left + rect.width / 2, rect.top + rect.height / 2, endX, endY);
 
         await waitFor(
             () => {
-                const newRect = toolbar.getBoundingClientRect();
+                const widget = queryFloatWidget();
+                expect(widget).toBeTruthy();
+                const newRect = widget!.getBoundingClientRect();
+                expect(newRect.width).toBeGreaterThan(0);
+                // useDrag undocks a full-width bar by centering the float card
+                // horizontally under the cursor and grabbing it 20px below its
+                // top edge — so the card must land near the drop point, not at
+                // the left edge where the bar used to start.
                 expect(newRect.left).toBeGreaterThan(200);
+                expect(Math.abs(newRect.left + newRect.width / 2 - endX)).toBeLessThanOrEqual(1);
+                expect(Math.abs(newRect.top + 20 - endY)).toBeLessThanOrEqual(1);
             },
             {timeout: 3000},
         );

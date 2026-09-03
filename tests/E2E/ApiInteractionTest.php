@@ -21,7 +21,8 @@ final class ApiInteractionTest extends BrowserTestCase
         $body = $this->getRenderedBodyText();
 
         // Look for settings-related elements (gear icon, settings link, etc.)
-        $hasSettings = str_contains($body, 'Settings')
+        $hasSettings =
+            str_contains($body, 'Settings')
             || str_contains($body, 'settings')
             || $this->elementExists('[href*="settings"], [aria-label*="settings"]');
 
@@ -47,7 +48,8 @@ final class ApiInteractionTest extends BrowserTestCase
 
         // The page loaded and React rendered — API call was attempted
         $body = $this->getRenderedBodyText();
-        $apiCalled = str_contains($body, 'debug')
+        $apiCalled =
+            str_contains($body, 'debug')
             || str_contains($body, 'Debug')
             || str_contains($body, 'No debug entries')
             || str_contains($body, 'error');
@@ -55,51 +57,35 @@ final class ApiInteractionTest extends BrowserTestCase
         $this->assertTrue($apiCalled, 'Debug API should have been called on page load');
     }
 
-    public function testRefreshButtonTriggersApiCall(): void
+    public function testRefreshButtonReloadsEntryList(): void
     {
-        $this->navigate('/debug');
+        ['path' => $firstPath] = self::seedWebRequestEntry();
+
+        $this->navigate('/debug/list');
         $this->waitForAppLoad();
+        $this->waitForText($firstPath);
 
+        // Seed a second entry after the page loaded; it must appear only after Refresh
+        ['path' => $secondPath] = self::seedWebRequestEntry();
+
+        $refresh = self::$driver->findElement(WebDriverBy::cssSelector('button[aria-label="Refresh entries"]'));
+        $refresh->click();
+
+        $this->waitForText($secondPath);
         $body = $this->getRenderedBodyText();
-        if (str_contains($body, 'No debug entries')) {
-            $this->markTestSkipped('No debug entries available.');
-        }
-
-        // Find and click Refresh
-        $buttons = self::$driver->findElements(WebDriverBy::tagName('button'));
-        $refreshClicked = false;
-        foreach ($buttons as $button) {
-            if (str_contains($button->getText(), 'Refresh') || str_contains($button->getText(), 'REFRESH')) {
-                $button->click();
-                $refreshClicked = true;
-                break;
-            }
-        }
-
-        if ($refreshClicked) {
-            usleep(1_000_000); // Wait for API call
-            // Page should still be functional after refresh
-            $body = $this->getRenderedBodyText();
-            $this->assertNotEmpty($body);
-        }
-
-        $this->assertTrue(true);
+        $this->assertStringContainsString($firstPath, $body);
+        $this->assertStringContainsString($secondPath, $body);
     }
 
-    public function testCopyCurlButtonExists(): void
+    public function testCopyCurlButtonExistsForWebRequestEntry(): void
     {
-        $this->navigate('/debug');
-        $this->waitForAppLoad();
+        ['id' => $id] = self::seedWebRequestEntry();
 
-        $body = $this->getRenderedBodyText();
-        if (str_contains($body, 'No debug entries')) {
-            $this->markTestSkipped('No debug entries available.');
-        }
+        $this->navigateToEntry($id, self::REQUEST_COLLECTOR);
 
-        // Copy cURL button should exist when a web request entry is selected
-        $hasCurlButton = str_contains($body, 'Copy cURL') || str_contains($body, 'COPY CURL');
-        // It's only shown for web requests, so it might not always be visible
-        $this->assertTrue($hasCurlButton || true, 'Copy cURL button presence depends on entry type');
+        // Copy-as-cURL is rendered on the request panel of a web entry (MUI Tooltip -> aria-label)
+        $this->waitForElement('button[aria-label="Copy as cURL"]');
+        $this->assertTrue($this->elementExists('button[aria-label="Copy as cURL"]'));
     }
 
     public function testInspectorApiCallsOnPageLoad(): void
@@ -116,7 +102,7 @@ final class ApiInteractionTest extends BrowserTestCase
 
             $body = $this->getRenderedBodyText();
             // Page should show data or error (meaning API was called)
-            $apiResponded = !empty($body);
+            $apiResponded = $body !== '';
             $this->assertTrue($apiResponded, "API should respond for {$path}");
         }
     }
@@ -129,7 +115,8 @@ final class ApiInteractionTest extends BrowserTestCase
         $body = $this->getRenderedBodyText();
 
         // When backend is unavailable, app should show an error or "no entries" — not crash
-        $handledGracefully = str_contains($body, 'No debug entries')
+        $handledGracefully =
+            str_contains($body, 'No debug entries')
             || str_contains($body, 'error')
             || str_contains($body, 'Error')
             || str_contains($body, 'Debug')

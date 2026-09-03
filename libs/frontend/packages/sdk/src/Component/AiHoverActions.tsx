@@ -1,3 +1,4 @@
+import {copyText} from '@app-dev-panel/sdk/Helper/clipboard';
 import {ContentCopy} from '@mui/icons-material';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import {IconButton, Tooltip} from '@mui/material';
@@ -69,7 +70,9 @@ const defaultActions: AiAction[] = [
     {
         label: 'Copy',
         icon: <ContentCopy sx={{fontSize: 14}} />,
-        onClick: (content) => navigator.clipboard.writeText(content),
+        onClick: (content) => {
+            void copyText(content);
+        },
     },
     {label: 'Explain', icon: <AutoAwesomeIcon sx={{fontSize: 14}} />, onClick: () => {}},
 ];

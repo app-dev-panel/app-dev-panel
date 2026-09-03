@@ -25,6 +25,8 @@ use const JSON_THROW_ON_ERROR;
 
 class PHPUnitCommand implements CommandInterface
 {
+    use ProcessCommandTrait;
+
     public const COMMAND_NAME = 'test/phpunit';
 
     public function __construct(
@@ -62,11 +64,11 @@ class PHPUnitCommand implements CommandInterface
             '--no-progress',
         ]);
 
-        $process
-            ->setEnv([PHPUnitJSONReporter::ENVIRONMENT_VARIABLE_DIRECTORY_NAME => $debugDirectory])
-            ->setWorkingDirectory($projectDirectory)
-            ->setTimeout(null)
-            ->run();
+        $process->setEnv([PHPUnitJSONReporter::ENVIRONMENT_VARIABLE_DIRECTORY_NAME => $debugDirectory]);
+
+        if (!$this->runProcess($process, $projectDirectory)) {
+            return $this->timedOutResponse();
+        }
 
         $reportPath = rtrim($debugDirectory, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . PHPUnitJSONReporter::FILENAME;
         $processOutput = rtrim($process->getOutput());

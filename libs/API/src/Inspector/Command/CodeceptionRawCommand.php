@@ -20,6 +20,8 @@ use function trim;
  */
 class CodeceptionRawCommand implements CommandInterface
 {
+    use ProcessCommandTrait;
+
     public const COMMAND_NAME = 'test/codeception-raw';
 
     public function __construct(
@@ -45,7 +47,9 @@ class CodeceptionRawCommand implements CommandInterface
     {
         $process = new Process(['vendor/bin/codecept', 'run', '--no-colors']);
 
-        $process->setWorkingDirectory($this->pathResolver->getRootPath())->setTimeout(null)->run();
+        if (!$this->runProcess($process, $this->pathResolver->getRootPath())) {
+            return $this->timedOutResponse();
+        }
 
         $processOutput = rtrim($process->getOutput());
         $processErrors = rtrim($process->getErrorOutput());

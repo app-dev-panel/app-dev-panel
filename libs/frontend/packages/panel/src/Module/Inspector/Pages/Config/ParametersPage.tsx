@@ -3,11 +3,11 @@ import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {FullScreenCircularProgress} from '@app-dev-panel/sdk/Component/FullScreenCircularProgress';
 import {JsonRenderer} from '@app-dev-panel/sdk/Component/JsonRenderer';
 import {QueryErrorState} from '@app-dev-panel/sdk/Component/QueryErrorState';
+import {copyText} from '@app-dev-panel/sdk/Helper/clipboard';
 import {searchVariants} from '@app-dev-panel/sdk/Helper/layoutTranslit';
 import {regexpQuote} from '@app-dev-panel/sdk/Helper/regexpQuote';
 import {Box, Chip, Collapse, Icon, IconButton, Tooltip, Typography} from '@mui/material';
 import {styled} from '@mui/material/styles';
-import clipboardCopy from 'clipboard-copy';
 import {useMemo, useState} from 'react';
 import {useSearchParams} from 'react-router';
 
@@ -176,7 +176,7 @@ const ParamCard = ({
                                 sx={{mt: 0.25, flexShrink: 0}}
                                 onClick={(e) => {
                                     e.stopPropagation();
-                                    clipboardCopy(
+                                    void copyText(
                                         typeof param.value === 'string'
                                             ? param.value
                                             : JSON.stringify(param.value, null, 2),

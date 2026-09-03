@@ -62,8 +62,10 @@ use AppDevPanel\Api\Mcp\Controller\McpController;
 use AppDevPanel\Api\Mcp\Controller\McpSettingsController;
 use AppDevPanel\Api\Mcp\McpSettings;
 use AppDevPanel\Api\Middleware\IpFilterMiddleware;
+use AppDevPanel\Api\Panel\PanelHtml;
 use AppDevPanel\Api\PathResolver;
 use AppDevPanel\Api\PathResolverInterface;
+use AppDevPanel\Cli\Server\ServerSecurityConfig;
 use AppDevPanel\Kernel\DebuggerIdGenerator;
 use AppDevPanel\Kernel\Service\FileServiceRegistry;
 use AppDevPanel\Kernel\Service\ServiceRegistryInterface;
@@ -96,18 +98,18 @@ if (
     && !str_starts_with($requestPath, '/debug/api')
     && !str_starts_with($requestPath, '/inspect/api')
 ) {
-    $filePath = $frontendPath . $requestPath;
-    if ($requestPath === '/' || $requestPath === '') {
-        $filePath = $frontendPath . '/index.html';
-    }
-    if (is_file($filePath)) {
+    $indexPath = $frontendPath . '/index.html';
+    $isIndexRequest = $requestPath === '/' || $requestPath === '' || $requestPath === '/index.html';
+    if (!$isIndexRequest && is_file($frontendPath . $requestPath)) {
         return false; // Let PHP built-in server handle static files
     }
-    // SPA fallback: serve index.html for non-file paths
-    $indexPath = $frontendPath . '/index.html';
+    // Issue #113: the panel is mounted at `/` here, but the SPA fallback answers
+    // any depth (`/debug/logs`, `/inspector/routes`). The bundle uses relative
+    // asset URLs, so the prebuilt index.html must carry `<base href="/">` or a
+    // deep link would request `/debug/bundle.js` instead of `/bundle.js`.
     if (is_file($indexPath)) {
-        header('Content-Type: text/html');
-        readfile($indexPath);
+        header('Content-Type: text/html; charset=utf-8');
+        echo PanelHtml::injectBaseHref((string) file_get_contents($indexPath), '/');
         return;
     }
 }
@@ -117,6 +119,18 @@ if (!str_starts_with($requestPath, '/debug/api') && !str_starts_with($requestPat
     http_response_code(404);
     header('Content-Type: application/json');
     echo json_encode(['error' => 'Not found. API is available at /debug/api and /inspect/api.']);
+    return;
+}
+
+// --- Resolve network security (deny-by-default, see ServerSecurityConfig) ---
+
+$bindHost = getenv(ServerSecurityConfig::ENV_BIND_HOST) ?: $_SERVER['SERVER_NAME'] ?? '127.0.0.1';
+$security = ServerSecurityConfig::fromEnvironment(getenv());
+$unsafeReason = $security->unsafeBindReason($bindHost);
+if ($unsafeReason !== null) {
+    http_response_code(500);
+    header('Content-Type: application/json');
+    echo json_encode(['error' => $unsafeReason]);
     return;
 }
 
@@ -145,8 +159,14 @@ $services = [
     DebuggerIdGenerator::class => $idGenerator,
 
     // Middleware
-    IpFilterMiddleware::class => new IpFilterMiddleware($httpFactory, $httpFactory, []),
-    TokenAuthMiddleware::class => new TokenAuthMiddleware($httpFactory, $httpFactory, ''),
+    IpFilterMiddleware::class => new IpFilterMiddleware(
+        $httpFactory,
+        $httpFactory,
+        $security->allowedIps,
+        [],
+        $security->isStrict(),
+    ),
+    TokenAuthMiddleware::class => new TokenAuthMiddleware($httpFactory, $httpFactory, $security->authToken),
     ResponseDataWrapper::class => new ResponseDataWrapper($jsonResponseFactory),
     InspectorProxyMiddleware::class => new InspectorProxyMiddleware(
         $serviceRegistry,

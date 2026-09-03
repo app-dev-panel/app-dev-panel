@@ -11,6 +11,8 @@ use Symfony\Component\Process\Process;
 
 final class BashCommand implements CommandInterface
 {
+    use ProcessCommandTrait;
+
     public function __construct(
         private readonly PathResolverInterface $pathResolver,
         private readonly array $command,
@@ -37,7 +39,9 @@ final class BashCommand implements CommandInterface
 
         $process = new Process($this->command);
 
-        $process->setWorkingDirectory($projectDirectory)->setTimeout(null)->run();
+        if (!$this->runProcess($process, $projectDirectory)) {
+            return $this->timedOutResponse();
+        }
 
         $processOutput = rtrim($process->getOutput());
 

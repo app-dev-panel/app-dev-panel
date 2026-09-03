@@ -606,24 +606,25 @@ final class AppDevPanelExtension extends Extension
         $panelStaticUrl = $config['panel']['static_url'] ?? '';
         if ($panelStaticUrl === '') {
             // Resolution order:
-            // 1. Prebaked `public/bundles/appdevpanel/` — produced by
+            // 1. Published `public/bundles/appdevpanel/bundle.js` — produced by
             //    `bin/console app-dev-panel:assets:install` (or the legacy
             //    `make build-panel` + Symfony `assets:install` flow). Web
             //    server (nginx/Apache) serves these directly.
             // 2. CDN default.
+            // Only the *published* file may select the public URL. A bundle
+            // that merely exists in the adapter's `Resources/public/` is not
+            // reachable by the web server until it has been published, so
+            // pointing at `/bundles/appdevpanel` would 404 (issue #113).
             $projectDir = $container->hasParameter('kernel.project_dir')
                 ? (string) $container->getParameter('kernel.project_dir')
                 : null;
             $publicBundle = $projectDir !== null
                 ? $projectDir . '/public/' . AssetsInstallCommand::PUBLIC_SUBPATH . '/bundle.js'
                 : null;
-            $resourcesBundle = \dirname(__DIR__, 2) . '/Resources/public/bundle.js';
 
-            if ($publicBundle !== null && file_exists($publicBundle) || file_exists($resourcesBundle)) {
-                $panelStaticUrl = '/' . AssetsInstallCommand::PUBLIC_SUBPATH;
-            } else {
-                $panelStaticUrl = PanelConfig::DEFAULT_STATIC_URL;
-            }
+            $panelStaticUrl = $publicBundle !== null && file_exists($publicBundle)
+                ? '/' . AssetsInstallCommand::PUBLIC_SUBPATH
+                : PanelConfig::DEFAULT_STATIC_URL;
         }
         $container->register(PanelConfig::class, PanelConfig::class)->setArguments([$panelStaticUrl])->setPublic(false);
 

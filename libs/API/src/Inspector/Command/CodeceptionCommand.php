@@ -25,6 +25,8 @@ use const JSON_THROW_ON_ERROR;
 
 class CodeceptionCommand implements CommandInterface
 {
+    use ProcessCommandTrait;
+
     public const COMMAND_NAME = 'test/codeception';
 
     public function __construct(
@@ -68,7 +70,9 @@ class CodeceptionCommand implements CommandInterface
             "extensions: config: {$extension}: output-path: {$debugDirectory}",
         ]);
 
-        $process->setWorkingDirectory($projectDirectory)->setTimeout(null)->run();
+        if (!$this->runProcess($process, $projectDirectory)) {
+            return $this->timedOutResponse();
+        }
 
         $reportPath =
             rtrim($debugDirectory, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . CodeceptionJSONReporter::FILENAME;

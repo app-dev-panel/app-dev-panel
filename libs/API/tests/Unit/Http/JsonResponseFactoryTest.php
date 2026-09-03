@@ -52,4 +52,17 @@ final class JsonResponseFactoryTest extends TestCase
         $this->assertStringContainsString('https://example.com/path', $body);
         $this->assertStringNotContainsString('\\/', $body);
     }
+
+    public function testInvalidUtf8IsSubstitutedInsteadOfFailing(): void
+    {
+        $factory = new JsonResponseFactory(new HttpFactory(), new HttpFactory());
+
+        $response = $factory->createJsonResponse(['body' => "caf\xE9 \xFF", 'ok' => 'plain']);
+
+        $this->assertSame(200, $response->getStatusCode());
+        $decoded = json_decode((string) $response->getBody(), true, 512, JSON_THROW_ON_ERROR);
+        $this->assertSame('plain', $decoded['ok']);
+        $this->assertStringContainsString("\u{FFFD}", $decoded['body']);
+        $this->assertStringStartsWith('caf', $decoded['body']);
+    }
 }

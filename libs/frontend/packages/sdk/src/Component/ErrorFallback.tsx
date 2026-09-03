@@ -1,7 +1,7 @@
+import {copyText} from '@app-dev-panel/sdk/Helper/clipboard';
 import {ContentCopy} from '@mui/icons-material';
 import {Accordion, AccordionDetails, Alert, AlertTitle, Button, IconButton, Tooltip} from '@mui/material';
 import Box from '@mui/material/Box';
-import clipboardCopy from 'clipboard-copy';
 import {useCallback, useState} from 'react';
 import {FallbackProps} from 'react-error-boundary';
 
@@ -10,7 +10,8 @@ export const ErrorFallback = ({error, resetErrorBoundary}: FallbackProps) => {
     const [copied, setCopied] = useState(false);
     const handleCopy = useCallback(() => {
         const text = [err.message, err.stack].filter(Boolean).join('\n\n');
-        clipboardCopy(text).then(() => {
+        void copyText(text).then((ok) => {
+            if (!ok) return;
             setCopied(true);
             setTimeout(() => setCopied(false), 2000);
         });

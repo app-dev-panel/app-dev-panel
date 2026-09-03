@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Api\Inspector\Middleware;
 
+use AppDevPanel\Api\Security\UrlPolicy;
 use AppDevPanel\Kernel\Service\ServiceRegistryInterface;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
@@ -43,12 +44,20 @@ final class InspectorProxyMiddleware implements MiddlewareInterface
         '/authorization' => 'authorization',
     ];
 
+    /**
+     * @param UrlPolicy $urlPolicy Re-validated right before every proxied request so a
+     *                             descriptor that was registered earlier (or whose host
+     *                             now resolves elsewhere) cannot be used for SSRF; build it
+     *                             from `ApiSecurityConfig::$restrictInspectorUrlsToPublicHosts`.
+     */
+    // @mago-expect lint:excessive-parameter-list
     public function __construct(
         private readonly ServiceRegistryInterface $registry,
         private readonly ClientInterface $httpClient,
         private readonly ResponseFactoryInterface $responseFactory,
         private readonly StreamFactoryInterface $streamFactory,
         private readonly UriFactoryInterface $uriFactory,
+        private readonly UrlPolicy $urlPolicy = new UrlPolicy(),
     ) {}
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
@@ -101,6 +110,12 @@ final class InspectorProxyMiddleware implements MiddlewareInterface
             return $this->errorResponse(502, 'Service has no inspector URL configured.');
         }
 
+        try {
+            $this->urlPolicy->assertAllowed($inspectorUrl);
+        } catch (\InvalidArgumentException $e) {
+            return $this->errorResponse(502, sprintf('Service inspector URL is rejected: %s', $e->getMessage()));
+        }
+
         $targetUrl = rtrim($inspectorUrl, '/') . '/inspect/api' . $path;
 
         $queryParams = $request->getQueryParams();
@@ -129,13 +144,18 @@ final class InspectorProxyMiddleware implements MiddlewareInterface
             'Timeout' => [504, 'Service request timed out'],
         ];
 
-        foreach ($patternMap as $pattern => [$status, $prefix]) {
-            if (str_contains($message, $pattern)) {
-                return $this->errorResponse($status, sprintf('%s: %s', $prefix, $message));
-            }
+        $matched = array_find_key($patternMap, static fn(array $_, string $pattern): bool => str_contains(
+            $message,
+            $pattern,
+        ));
+
+        if ($matched === null) {
+            return $this->errorResponse(502, sprintf('Proxy error: %s', $message));
         }
 
-        return $this->errorResponse(502, sprintf('Proxy error: %s', $message));
+        [$status, $prefix] = $patternMap[$matched];
+
+        return $this->errorResponse($status, sprintf('%s: %s', $prefix, $message));
     }
 
     private function errorResponse(int $status, string $message): ResponseInterface

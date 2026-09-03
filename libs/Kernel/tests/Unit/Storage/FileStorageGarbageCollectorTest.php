@@ -68,14 +68,48 @@ final class FileStorageGarbageCollectorTest extends TestCase
         $this->assertDirectoryExists($this->storagePath . '/bb');
     }
 
-    public function testRunCleansUpLockFile(): void
+    /**
+     * The lock file must survive `run()`: unlinking it while another process is
+     * about to open it would give that process a different inode, so two GC runs
+     * could hold "exclusive" locks simultaneously. Releasing the flock is enough.
+     */
+    public function testRunKeepsLockFileButReleasesLock(): void
     {
         $this->createEntry('aa', '01');
 
         $gc = new FileStorageGarbageCollector($this->storagePath, 50);
         $gc->run();
 
-        $this->assertFileDoesNotExist($this->storagePath . '/.gc.lock');
+        $lockFile = $this->storagePath . '/' . FileStorageGarbageCollector::LOCK_FILE;
+        $this->assertFileExists($lockFile);
+
+        $handle = fopen($lockFile, 'c');
+        $this->assertNotFalse($handle);
+        try {
+            $this->assertTrue(flock($handle, LOCK_EX | LOCK_NB), 'Lock must be released after run()');
+        } finally {
+            flock($handle, LOCK_UN);
+            fclose($handle);
+        }
+    }
+
+    public function testRunTwiceReusesLockFile(): void
+    {
+        $this->createEntry('aa', '01', time() - 100);
+        $this->createEntry('bb', '02', time());
+
+        $gc = new FileStorageGarbageCollector($this->storagePath, 1);
+        $gc->run();
+        $inodeAfterFirst = fileinode($this->storagePath . '/' . FileStorageGarbageCollector::LOCK_FILE);
+
+        $this->createEntry('cc', '03', time() + 10);
+        $gc->run();
+        clearstatcache();
+        $inodeAfterSecond = fileinode($this->storagePath . '/' . FileStorageGarbageCollector::LOCK_FILE);
+
+        $this->assertSame($inodeAfterFirst, $inodeAfterSecond);
+        $this->assertFileExists($this->storagePath . '/cc/03/summary.json');
+        $this->assertFileDoesNotExist($this->storagePath . '/bb/02/summary.json');
     }
 
     public function testRunWithGzipSummaries(): void

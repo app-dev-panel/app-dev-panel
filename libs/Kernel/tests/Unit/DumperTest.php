@@ -885,6 +885,36 @@ final class DumperTest extends TestCase
         $this->assertStringNotContainsString("\n", $result);
     }
 
+    public function testAsJsonSurvivesArrayDeeperThanJsonEncodeLimit(): void
+    {
+        $deep = 'leaf';
+        for ($i = 0; $i < 600; $i++) {
+            $deep = [$deep];
+        }
+
+        // Dumper depth is capped at 50 for asJson, but asJsonObjectsMap walks the
+        // full structure; neither call may throw or return an invalid document.
+        $json = Dumper::create($deep)->asJson(1000);
+        $this->assertJson($json);
+        $this->assertStringContainsString('max depth reached', $json);
+
+        $map = Dumper::create($deep)->asJsonObjectsMap(1000);
+        $this->assertJson($map);
+    }
+
+    public function testAsJsonObjectsMapTerminatesOnArrayReferenceCycle(): void
+    {
+        $object = new stdClass();
+        $object->name = 'cycle';
+        $cycle = ['object' => $object];
+        $cycle['self'] = &$cycle;
+
+        $map = Dumper::create($cycle)->asJsonObjectsMap(5);
+
+        $this->assertJson($map);
+        $this->assertStringContainsString('stdClass#' . spl_object_id($object), $map);
+    }
+
     /**
      * Asserting two strings equality ignoring line endings.
      */

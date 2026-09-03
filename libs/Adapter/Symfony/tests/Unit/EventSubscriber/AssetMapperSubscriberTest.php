@@ -12,13 +12,6 @@ use Symfony\Component\HttpKernel\KernelEvents;
 
 final class AssetMapperSubscriberTest extends TestCase
 {
-    protected function setUp(): void
-    {
-        if (!interface_exists(\Symfony\Component\AssetMapper\AssetMapperInterface::class, true)) {
-            $this->markTestSkipped('symfony/asset-mapper is not installed.');
-        }
-    }
-
     public function testSubscribesToKernelResponse(): void
     {
         $events = AssetMapperSubscriber::getSubscribedEvents();

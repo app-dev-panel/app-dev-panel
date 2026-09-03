@@ -288,6 +288,15 @@ class Module extends \yii\base\Module implements BootstrapInterface
     private ?TimelineCollector $timelineCollector = null;
     private ?RouterMatchRecorder $matchRecorder = null;
 
+    /**
+     * Idempotence guard. Yii 2 calls `bootstrap()` once per entry in the
+     * application `bootstrap` array AND once more via composer `extra.bootstrap`
+     * ({@see Bootstrap}). Running the wiring twice creates a second collector set
+     * and a second `Debugger`, while the already-registered `WebListener` keeps
+     * feeding the first set — the stored entries come out empty (issue #108).
+     */
+    private bool $bootstrapped = false;
+
     /** @var CollectorInterface[] */
     private array $collectorInstances = [];
 
@@ -303,9 +312,10 @@ class Module extends \yii\base\Module implements BootstrapInterface
 
     public function bootstrap($app): void
     {
-        if (!$this->enabled) {
+        if (!$this->enabled || $this->bootstrapped) {
             return;
         }
+        $this->bootstrapped = true;
 
         $this->registerServices($app);
         $this->registerCollectors();
@@ -314,6 +324,11 @@ class Module extends \yii\base\Module implements BootstrapInterface
         $this->wrapUrlRules($app);
         $this->registerEventListeners($app);
         $this->registerConsoleCommands($app);
+    }
+
+    public function isBootstrapped(): bool
+    {
+        return $this->bootstrapped;
     }
 
     public function getDebugger(): Debugger
@@ -364,12 +379,11 @@ class Module extends \yii\base\Module implements BootstrapInterface
     private function registerCoreServices(string $storagePath): void
     {
         $idGenerator = new DebuggerIdGenerator();
-        $storage = new BroadcastingStorage(StorageFactory::create(
-            $this->storageDriver,
-            $storagePath,
+        $storage = new BroadcastingStorage(
+            StorageFactory::create($this->storageDriver, $storagePath, $idGenerator, $this->excludedClasses),
+            null,
             $idGenerator,
-            $this->excludedClasses,
-        ));
+        );
 
         $httpFactory = new HttpFactory();
 
@@ -883,8 +897,16 @@ class Module extends \yii\base\Module implements BootstrapInterface
 
     private function registerCollectors(): void
     {
+        // Replace, never append: a repeated call must not yield duplicate instances.
+        $this->collectorInstances = [];
+
+        // The timeline collector is a constructor dependency of most collectors, so
+        // it always exists — but it is only *registered* (started, stored) when the
+        // `timeline` toggle is on. Unregistered, it stays inactive and drops events.
         $timeline = $this->getTimelineCollector();
-        $this->collectorInstances[] = $timeline;
+        if ($this->collectors['timeline'] ?? true) {
+            $this->collectorInstances[] = $timeline;
+        }
 
         $collectorMap = $this->buildCollectorMap($timeline);
 
@@ -983,6 +1005,8 @@ class Module extends \yii\base\Module implements BootstrapInterface
             $this->getCollector(RouterCollector::class),
             $this->matchRecorder,
             $this->createToolbarInjector(),
+            $this->routePrefix,
+            $this->inspectorRoutePrefix,
         );
 
         Event::on(WebApplication::class, WebApplication::EVENT_BEFORE_REQUEST, [$listener, 'onBeforeRequest']);
@@ -1474,12 +1498,13 @@ class Module extends \yii\base\Module implements BootstrapInterface
             return;
         }
 
-        $this->matchRecorder = new RouterMatchRecorder();
+        $this->matchRecorder ??= new RouterMatchRecorder();
         $urlManager = $app->getUrlManager();
 
         $wrappedRules = [];
         foreach ($urlManager->rules as $rule) {
-            $wrappedRules[] = new UrlRuleProxy($rule, $this->matchRecorder);
+            // Never wrap a proxy in a proxy (belt and braces for repeated bootstrap).
+            $wrappedRules[] = $rule instanceof UrlRuleProxy ? $rule : new UrlRuleProxy($rule, $this->matchRecorder);
         }
         $urlManager->rules = $wrappedRules;
     }

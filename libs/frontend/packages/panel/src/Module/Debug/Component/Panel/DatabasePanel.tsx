@@ -7,6 +7,7 @@ import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
 import {DataTable} from '@app-dev-panel/sdk/Component/Grid';
 import {PageToolbar} from '@app-dev-panel/sdk/Component/PageToolbar';
 import {SqlHighlight} from '@app-dev-panel/sdk/Component/SqlHighlight';
+import {copyText} from '@app-dev-panel/sdk/Helper/clipboard';
 import {formatMillisecondsAsDuration} from '@app-dev-panel/sdk/Helper/formatDate';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import {
@@ -671,7 +672,8 @@ const CopyButton = ({text}: {text: string}) => {
 
     const handleCopy = (e: React.MouseEvent) => {
         e.stopPropagation();
-        navigator.clipboard.writeText(text).then(() => {
+        void copyText(text).then((ok) => {
+            if (!ok) return;
             setCopied(true);
             setTimeout(() => setCopied(false), 1500);
         });

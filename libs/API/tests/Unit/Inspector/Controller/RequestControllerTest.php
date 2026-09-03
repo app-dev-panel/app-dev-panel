@@ -367,4 +367,53 @@ final class RequestControllerTest extends ControllerTestCase
             $this->addToAssertionCount(1);
         }
     }
+
+    public function testMissingDebugEntryIdIsBadRequest(): void
+    {
+        $repository = $this->createMock(CollectorRepositoryInterface::class);
+        $repository->expects($this->never())->method('getDetail');
+
+        $controller = new RequestController($this->createResponseFactory(), $repository);
+
+        $this->expectException(\AppDevPanel\Api\Debug\Exception\BadRequestException::class);
+        $this->expectExceptionMessage('debugEntryId');
+        $controller->buildCurl($this->get());
+    }
+
+    public function testUnsafeDebugEntryIdIsBadRequest(): void
+    {
+        $repository = $this->createMock(CollectorRepositoryInterface::class);
+        $repository->expects($this->never())->method('getDetail');
+
+        $controller = new RequestController($this->createResponseFactory(), $repository);
+
+        $this->expectException(\AppDevPanel\Api\Debug\Exception\BadRequestException::class);
+        $controller->request($this->get(['debugEntryId' => '../../etc']));
+    }
+
+    public function testEntryWithoutRawRequestIsNotFound(): void
+    {
+        $repository = $this->createMock(CollectorRepositoryInterface::class);
+        $repository
+            ->method('getDetail')
+            ->with('entry-1')
+            ->willReturn(['AppDevPanel\\Kernel\\Collector\\LogCollector' => ['logs' => []]]);
+
+        $controller = new RequestController($this->createResponseFactory(), $repository);
+
+        $this->expectException(\AppDevPanel\Api\Debug\Exception\NotFoundException::class);
+        $this->expectExceptionMessage('entry-1');
+        $controller->buildCurl($this->get(['debugEntryId' => 'entry-1']));
+    }
+
+    public function testEntryWithEmptyRawRequestIsNotFoundOnReplay(): void
+    {
+        $repository = $this->createMock(CollectorRepositoryInterface::class);
+        $repository->method('getDetail')->willReturn([self::REQUEST_COLLECTOR => ['requestRaw' => '']]);
+
+        $controller = new RequestController($this->createResponseFactory(), $repository);
+
+        $this->expectException(\AppDevPanel\Api\Debug\Exception\NotFoundException::class);
+        $controller->request($this->get(['debugEntryId' => 'entry-1']));
+    }
 }

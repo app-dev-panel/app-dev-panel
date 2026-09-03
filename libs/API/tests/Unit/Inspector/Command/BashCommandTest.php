@@ -47,6 +47,21 @@ final class BashCommandTest extends TestCase
         $this->assertNotEmpty($response->getErrors());
     }
 
+    public function testTimedOutProcessIsReportedAsFailureNotException(): void
+    {
+        $pathResolver = $this->createPathResolver(sys_get_temp_dir());
+        $command = new BashCommand($pathResolver, ['sleep', '5'])->withTimeout(1);
+
+        $start = microtime(true);
+        $response = $command->run();
+        $elapsed = microtime(true) - $start;
+
+        $this->assertLessThan(4.0, $elapsed, 'process must be killed at the timeout');
+        $this->assertSame(CommandResponse::STATUS_FAIL, $response->getStatus());
+        $this->assertNull($response->getResult());
+        $this->assertSame(['Command timed out after 1 seconds.'], $response->getErrors());
+    }
+
     public function testGetTitle(): void
     {
         $this->assertSame('Bash', BashCommand::getTitle());

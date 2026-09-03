@@ -1,3 +1,4 @@
+import {copyText} from '@app-dev-panel/sdk/Helper/clipboard';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import DoneIcon from '@mui/icons-material/Done';
 import {IconButton, Tooltip} from '@mui/material';
@@ -10,7 +11,8 @@ export const MessageCopyButton = memo(({text, variant = 'light'}: MessageCopyBut
     const handleCopy = useCallback(
         (e: React.MouseEvent) => {
             e.stopPropagation();
-            navigator.clipboard.writeText(text).then(() => {
+            void copyText(text).then((ok) => {
+                if (!ok) return;
                 setCopied(true);
                 setTimeout(() => setCopied(false), 1500);
             });

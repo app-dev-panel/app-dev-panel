@@ -48,24 +48,18 @@ final class DebugPageTest extends BrowserTestCase
         );
     }
 
-    public function testDebugPageListButton(): void
+    public function testDebugListShowsSeededEntry(): void
     {
-        $this->navigate('/debug');
+        ['path' => $path] = self::seedWebRequestEntry();
+
+        $this->navigate('/debug/list');
         $this->waitForAppLoad();
+        $this->waitForText($path);
 
         $body = $this->getRenderedBodyText();
-        if (str_contains($body, 'No debug entries')) {
-            $this->markTestSkipped('No debug entries available for testing List button.');
-        }
-
-        // Click List button if present
-        if (str_contains($body, 'List')) {
-            $this->clickButton('List');
-            usleep(500_000);
-            $this->assertStringContainsString('/debug', self::$driver->getCurrentURL());
-        }
-
-        $this->assertTrue(true);
+        $this->assertStringNotContainsString('No debug entries', $body);
+        $this->assertStringContainsString('GET', $body);
+        $this->assertStringContainsString($path, $body);
     }
 
     public function testDebugListPage(): void
@@ -93,48 +87,39 @@ final class DebugPageTest extends BrowserTestCase
         }
     }
 
-    public function testDebugPageAutoLatestToggle(): void
+    public function testDebugPageSelectsSeededEntry(): void
     {
-        $this->navigate('/debug');
-        $this->waitForAppLoad();
+        ['id' => $id, 'path' => $path] = self::seedWebRequestEntry();
 
-        $body = $this->getRenderedBodyText();
-        if (str_contains($body, 'No debug entries')) {
-            $this->markTestSkipped('No debug entries.');
-        }
+        $this->navigateToEntry($id);
+        $this->waitForText($path);
 
-        $this->assertStringContainsString('Latest auto', $body);
+        // The selected entry is reflected in the URL and in the top bar entry pill
+        $this->assertStringContainsString('debugEntry=' . $id, self::$driver->getCurrentURL());
+        $this->assertStringContainsString($path, $this->getRenderedBodyText());
     }
 
     public function testDebugPageCollectorSidebar(): void
     {
-        $this->navigate('/debug');
-        $this->waitForAppLoad();
+        ['id' => $id, 'path' => $path] = self::seedWebRequestEntry();
 
-        $body = $this->getRenderedBodyText();
-        if (str_contains($body, 'No debug entries')) {
-            $this->markTestSkipped('No debug entries to show collector sidebar.');
-        }
+        $this->navigateToEntry($id);
+        $this->waitForText($path);
 
-        // If entries exist, either the sidebar or "No one collector is chosen" should appear
-        $hasCollectors = str_contains($body, 'collector') || str_contains($body, 'Collector');
-        $hasSidebar = $this->elementExists('[class*="MuiDrawer"], [class*="MuiList"]');
-
-        $this->assertTrue($hasCollectors || $hasSidebar, 'Collector sidebar or message should be visible');
+        // Sidebar Debug section lists the entry's collectors as links carrying `collector=`
+        $this->waitForElement('a[href*="collector="]');
+        $this->assertGreaterThan(0, $this->countElements('a[href*="collector="]'));
     }
 
     public function testDebugPageRepeatRequestButton(): void
     {
-        $this->navigate('/debug');
-        $this->waitForAppLoad();
+        ['id' => $id] = self::seedWebRequestEntry();
 
-        $body = $this->getRenderedBodyText();
-        if (str_contains($body, 'No debug entries')) {
-            $this->markTestSkipped('No debug entries.');
-        }
+        $this->navigateToEntry($id, self::REQUEST_COLLECTOR);
 
-        $hasRepeatRequest = str_contains($body, 'Repeat Request') || str_contains($body, 'REPEAT REQUEST');
-        $this->assertTrue($hasRepeatRequest, 'Repeat Request button should be visible');
+        // MUI Tooltip exposes its title as aria-label on the icon button
+        $this->waitForElement('button[aria-label="Repeat Request"]');
+        $this->assertTrue($this->elementExists('button[aria-label="Repeat Request"]'));
     }
 
     public function testDebugObjectPage(): void
@@ -156,10 +141,12 @@ final class DebugPageTest extends BrowserTestCase
         // Filter out expected errors (like network failures when backend is not running)
         $criticalErrors = array_filter(
             $errors,
-            static fn(string $error) => !str_contains($error, 'net::ERR_')
+            static fn(string $error) => (
+                !str_contains($error, 'net::ERR_')
                 && !str_contains($error, 'Failed to fetch')
                 && !str_contains($error, 'NetworkError')
-                && !str_contains($error, '404'),
+                && !str_contains($error, '404')
+            ),
         );
 
         $this->assertEmpty($criticalErrors, 'No critical JS errors: ' . implode("\n", $criticalErrors));

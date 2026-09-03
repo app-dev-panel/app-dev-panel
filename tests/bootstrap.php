@@ -20,6 +20,15 @@ if (!class_exists('NullFilter', false)) {
     }
 }
 
+// phpredis stand-ins: RedisController tests mock `\Redis`, so the class must resolve
+// even when ext-redis is not loaded. The real extension always wins when present.
+if (!class_exists('RedisException', false)) {
+    require_once __DIR__ . '/Stubs/RedisException.php';
+}
+if (!class_exists('Redis', false)) {
+    require_once __DIR__ . '/Stubs/Redis.php';
+}
+
 // Bootstrap Yii 2 framework class if available (needed for Yii2 adapter tests)
 $yii2Path = __DIR__ . '/../vendor/yiisoft/yii2/Yii.php';
 if (file_exists($yii2Path) && !class_exists('Yii', false)) {

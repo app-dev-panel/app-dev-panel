@@ -290,6 +290,42 @@ final class FileControllerTest extends ControllerTestCase
         $this->assertTrue($data['insideRoot']);
     }
 
+    public function testSiblingDirectoryWithSharedPrefixIsOutsideRoot(): void
+    {
+        // root = <base>/srv/app ; secret = <base>/srv/app-backup/.env
+        $base = sys_get_temp_dir() . '/adp-file-prefix-' . uniqid();
+        mkdir($base . '/srv/app', 0o755, true);
+        mkdir($base . '/srv/app-backup', 0o755, true);
+        file_put_contents($base . '/srv/app-backup/.env', 'SECRET=1');
+        // A symlink inside the root pointing at the sibling directory.
+        symlink($base . '/srv/app-backup', $base . '/srv/app/link');
+
+        try {
+            $controller = $this->createController($base . '/srv/app');
+
+            $response = $controller->files($this->get(['path' => '/link/.env']));
+            $this->assertSame(403, $response->getStatusCode());
+            $this->assertStringNotContainsString('SECRET', (string) $response->getBody());
+
+            // The symlink itself is hidden from the listing as well.
+            $listing = $this->responseData($controller->files($this->get(['path' => '/'])));
+            $this->assertNotContains('link', array_column($listing, 'baseName'));
+        } finally {
+            unlink($base . '/srv/app/link');
+            $this->removeDir($base);
+        }
+    }
+
+    public function testMalformedClassNameNeverReachesAutoloader(): void
+    {
+        $controller = $this->createController();
+        // Not a PHP identifier — falls through to the (empty) path lookup instead of class_exists().
+        $response = $controller->files($this->get(['class' => '../../etc/passwd', 'path' => '/test.txt']));
+
+        $this->assertSame(200, $response->getStatusCode());
+        $this->assertSame('hello world', $this->responseData($response)['content']);
+    }
+
     private function removeDir(string $dir): void
     {
         if (!is_dir($dir)) {

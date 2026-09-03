@@ -9,7 +9,7 @@ use Yiisoft\VarDumper\VarDumper;
 
 final class VarDumperHandler implements HandlerInterface
 {
-    public Broadcaster $broadcaster;
+    public BroadcasterInterface $broadcaster;
 
     public function __construct()
     {

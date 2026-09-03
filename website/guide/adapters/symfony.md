@@ -105,9 +105,10 @@ The bundle auto-detects the published copy and points the panel at `/bundles/app
 
 | `static_url` resolution order | When it kicks in |
 |-------------------------------|------------------|
-| 1. `<projectDir>/public/bundles/appdevpanel/bundle.js` exists → `/bundles/appdevpanel` | After `bin/console app-dev-panel:assets:install` |
-| 2. `Resources/public/bundle.js` exists → `/bundles/appdevpanel` | Legacy `make build-panel` flow before Symfony's `assets:install` |
-| 3. `PanelConfig::DEFAULT_STATIC_URL` (GitHub Pages) | Default — works right after `composer require`, no commands required |
+| 1. `<projectDir>/public/bundles/appdevpanel/bundle.js` exists → `/bundles/appdevpanel` | After `bin/console app-dev-panel:assets:install` (or Symfony's `assets:install`) |
+| 2. `PanelConfig::DEFAULT_STATIC_URL` (GitHub Pages) | Default — works right after `composer require`, no commands required |
+
+Only the file **published into `public/`** selects `/bundles/appdevpanel`. A `bundle.js` sitting in the adapter's own `Resources/public/` (legacy `make build-panel` output) is not reachable by the web server until it has been published, so it no longer switches the panel away from the CDN — that used to produce 404s for `bundle.js`.
 
 ## Translator Integration
 

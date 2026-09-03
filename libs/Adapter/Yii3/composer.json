@@ -2,6 +2,7 @@
     "name": "app-dev-panel/adapter-yii3",
     "type": "library",
     "description": "Yii 3 framework adapter for ADP — auto-wires debug collectors, proxies, and inspector into Yii 3 applications",
+    "license": "MIT",
     "keywords": [
         "debug",
         "debug-panel",

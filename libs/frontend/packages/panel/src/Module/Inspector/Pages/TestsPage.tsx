@@ -14,12 +14,12 @@ import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {FileLink} from '@app-dev-panel/sdk/Component/FileLink';
 import {DataTable} from '@app-dev-panel/sdk/Component/Grid';
 import {PageHeader} from '@app-dev-panel/sdk/Component/PageHeader';
+import {copyText} from '@app-dev-panel/sdk/Helper/clipboard';
 import {ContentCopy} from '@mui/icons-material';
 import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
 import {Box, IconButton, styled, Tooltip} from '@mui/material';
 import {GridColDef, GridRenderCellParams, GridValidRowModel} from '@mui/x-data-grid';
-import clipboardCopy from 'clipboard-copy';
 import {useCallback, useEffect, useState} from 'react';
 
 const CenteredBox = styled(Box)({
@@ -38,7 +38,7 @@ const columns: GridColDef[] = [
         renderCell: (params: GridRenderCellParams) => (
             <span key={params.id} style={{wordBreak: 'break-all'}}>
                 <Tooltip title="Copy">
-                    <IconButton size="small" onClick={() => clipboardCopy(params.row.path)}>
+                    <IconButton size="small" onClick={() => void copyText(params.row.path)}>
                         <ContentCopy fontSize="small" />
                     </IconButton>
                 </Tooltip>

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AppDevPanel\Kernel\Tests\Unit\DebugServer;
 
 use AppDevPanel\Kernel\DebugServer\Broadcaster;
+use AppDevPanel\Kernel\DebugServer\BroadcasterInterface;
 use AppDevPanel\Kernel\DebugServer\Connection;
 use AppDevPanel\Kernel\DebugServer\SocketReader;
 use PHPUnit\Framework\Attributes\RequiresPhpExtension;
@@ -138,6 +139,56 @@ final class BroadcasterTest extends TestCase
         } finally {
             $conn1->close();
             $conn2->close();
+        }
+    }
+
+    public function testImplementsBroadcasterInterface(): void
+    {
+        $this->assertInstanceOf(BroadcasterInterface::class, new Broadcaster());
+    }
+
+    public function testTimeoutIsClampedToDefaultCeiling(): void
+    {
+        $property = new \ReflectionProperty(Broadcaster::class, 'timeout');
+
+        $this->assertSame(Broadcaster::DEFAULT_TIMEOUT, $property->getValue(new Broadcaster(60.0)));
+        $this->assertSame(0.05, $property->getValue(new Broadcaster(0.05)));
+        $this->assertSame(0.001, $property->getValue(new Broadcaster(0.0)));
+    }
+
+    /**
+     * A bound receiver that never reads eventually fills its buffer. The send
+     * must then fail fast — within the explicit timeout — without emitting a
+     * PHP notice (PHPUnit would turn a notice into a failure).
+     */
+    public function testSendToUnreadReceiverIsBoundedAndSilent(): void
+    {
+        $connection = Connection::create();
+        $connection->bind();
+
+        try {
+            $broadcaster = new Broadcaster(0.1);
+            $payload = str_repeat('z', 4096);
+            $errors = [];
+
+            for ($i = 0; $i < 4000; $i++) {
+                $start = microtime(true);
+                $errors = $broadcaster->broadcast(Connection::MESSAGE_TYPE_LOGGER, $payload);
+                $elapsed = microtime(true) - $start;
+
+                $this->assertLessThan(1.0, $elapsed, 'broadcast must never block near default_socket_timeout');
+                if ($errors !== []) {
+                    break;
+                }
+            }
+
+            // On Unix datagram sockets the sender sees back-pressure; UDP on Windows silently drops.
+            if (!Connection::isWindows()) {
+                $this->assertCount(1, $errors);
+                $this->assertStringContainsString('Send timed out after 0.100s', (string) reset($errors));
+            }
+        } finally {
+            $connection->close();
         }
     }
 

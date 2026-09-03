@@ -7,7 +7,9 @@ namespace AppDevPanel\Api\Inspector\Controller;
 use AppDevPanel\Api\Http\JsonResponseFactoryInterface;
 use AppDevPanel\Api\NullPathMapper;
 use AppDevPanel\Api\PathMapperInterface;
+use AppDevPanel\Api\PathResolver;
 use AppDevPanel\Api\PathResolverInterface;
+use AppDevPanel\Api\Security\ClassNameValidator;
 use FilesystemIterator;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -17,6 +19,8 @@ use SplFileInfo;
 
 final class FileController
 {
+    private const string ACCESS_DENIED = 'Access denied: path is outside the project root.';
+
     public function __construct(
         private readonly JsonResponseFactoryInterface $responseFactory,
         private readonly PathResolverInterface $pathResolver,
@@ -27,11 +31,12 @@ final class FileController
     {
         $params = $request->getQueryParams() + ['class' => '', 'method' => '', 'path' => ''];
 
-        if ($params['class'] !== '' && class_exists($params['class'])) {
-            return $this->resolveClassFile($params['class'], $params['method']);
+        // Only a syntactically valid FQCN may trigger the autoloader (see ClassNameValidator).
+        if ($params['class'] !== '' && ClassNameValidator::classExists($params['class'])) {
+            return $this->resolveClassFile($params['class'], (string) $params['method']);
         }
 
-        return $this->resolvePathFile($params['path']);
+        return $this->resolvePathFile((string) $params['path']);
     }
 
     private function resolveClassFile(string $class, string $method): ResponseInterface
@@ -59,10 +64,10 @@ final class FileController
 
     private function resolvePathFile(string $path): ResponseInterface
     {
-        $rootPath = realpath($this->pathResolver->getRootPath());
+        $rootPath = PathResolver::canonical($this->pathResolver->getRootPath());
         $mappedPath = $this->pathMapper->mapToRemote($path);
         $relative = preg_replace('/^' . preg_quote($rootPath, '/') . '/', '', $mappedPath, 1);
-        $relative = '/' . ltrim($relative, '/');
+        $relative = '/' . ltrim((string) $relative, '/');
         $destination = realpath($rootPath . $relative);
 
         if ($destination === false) {
@@ -71,10 +76,8 @@ final class FileController
             ], 404);
         }
 
-        if (!str_starts_with($destination, $rootPath)) {
-            return $this->responseFactory->createJsonResponse([
-                'message' => 'Access denied: path is outside the project root.',
-            ], 403);
+        if (!PathResolver::isInside($rootPath, $destination)) {
+            return $this->responseFactory->createJsonResponse(['message' => self::ACCESS_DENIED], 403);
         }
 
         return is_dir($destination) ? $this->listDirectory($destination, $rootPath) : $this->readFile($destination);
@@ -89,28 +92,27 @@ final class FileController
             | FilesystemIterator::SKIP_DOTS,
         );
 
-        $parentPath = realpath($destination . '/..') . '/';
-        $parentEntry = str_starts_with($parentPath, $rootPath)
+        $parentDirectory = dirname($destination);
+        $parentEntry = PathResolver::isInside($rootPath, $parentDirectory)
             ? [array_merge(
-                ['path' => preg_replace('/^' . preg_quote($rootPath, '/') . '/', '', $parentPath, 1)],
-                $this->serializeFileInfo(new SplFileInfo(dirname($destination))),
+                ['path' => PathResolver::stripPrefix($rootPath, $parentDirectory . '/')],
+                $this->serializeFileInfo(new SplFileInfo($parentDirectory)),
                 ['baseName' => '..'],
             )]
             : [];
 
         $files = [];
         foreach ($directoryIterator as $file) {
-            $filePath = $file->isDir() ? $file->getPathName() . '/' : $file->getPathName();
-
-            if (!str_starts_with($filePath, $rootPath)) {
+            // Symlinks pointing outside the root are hidden from the listing.
+            if (!PathResolver::isInside($rootPath, $file->getPathname())) {
                 continue;
             }
 
-            $files[] = array_merge(['path' => preg_replace(
-                '/^' . preg_quote($rootPath, '/') . '/',
-                '',
+            $filePath = $file->isDir() ? $file->getPathname() . '/' : $file->getPathname();
+
+            $files[] = array_merge(['path' => PathResolver::stripPrefix(
+                $rootPath,
                 $filePath,
-                1,
             )], $this->serializeFileInfo($file));
         }
 
@@ -144,22 +146,19 @@ final class FileController
 
     private function readFile(string $destination, array $extra = []): ResponseInterface
     {
-        $rootPath = $this->pathResolver->getRootPath();
+        $rootPath = PathResolver::canonical($this->pathResolver->getRootPath());
 
-        if (!str_starts_with($destination, $rootPath)) {
-            return $this->responseFactory->createJsonResponse([
-                'message' => 'Access denied: path is outside the project root.',
-            ], 403);
+        if (!PathResolver::isInside($rootPath, $destination)) {
+            return $this->responseFactory->createJsonResponse(['message' => self::ACCESS_DENIED], 403);
         }
 
-        $pattern = '/^' . preg_quote($rootPath, '/') . '/';
         $file = new SplFileInfo($destination);
         return $this->responseFactory->createJsonResponse(array_merge(
             $extra,
             [
-                'directory' => preg_replace($pattern, '', dirname($destination), 1),
+                'directory' => PathResolver::stripPrefix($rootPath, dirname($destination)),
                 'content' => file_get_contents($destination),
-                'path' => preg_replace($pattern, '', $destination, 1),
+                'path' => PathResolver::stripPrefix($rootPath, $destination),
                 'absolutePath' => $this->pathMapper->mapToLocal($destination),
             ],
             $this->serializeFileInfo($file),
@@ -172,19 +171,18 @@ final class FileController
      */
     private function readClassFile(string $destination, array $extra = []): ResponseInterface
     {
-        $rootPath = $this->pathResolver->getRootPath();
-        $insideRoot = str_starts_with($destination, $rootPath);
-        $pattern = '/^' . preg_quote($rootPath, '/') . '/';
+        $rootPath = PathResolver::canonical($this->pathResolver->getRootPath());
+        $insideRoot = PathResolver::isInside($rootPath, $destination);
 
         $file = new SplFileInfo($destination);
         return $this->responseFactory->createJsonResponse(array_merge(
             $extra,
             [
                 'directory' => $insideRoot
-                    ? preg_replace($pattern, '', dirname($destination), 1)
+                    ? PathResolver::stripPrefix($rootPath, dirname($destination))
                     : dirname($destination),
                 'content' => file_get_contents($destination),
-                'path' => $insideRoot ? preg_replace($pattern, '', $destination, 1) : $destination,
+                'path' => $insideRoot ? PathResolver::stripPrefix($rootPath, $destination) : $destination,
                 'insideRoot' => $insideRoot,
                 'absolutePath' => $this->pathMapper->mapToLocal($destination),
             ],

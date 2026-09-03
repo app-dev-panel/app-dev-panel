@@ -2,11 +2,13 @@ import '@app-dev-panel/panel/App.css';
 import {modules} from '@app-dev-panel/panel/modules';
 import {createRouter} from '@app-dev-panel/panel/router';
 import {createStore} from '@app-dev-panel/panel/store';
+import {preloadedApplicationState} from '@app-dev-panel/sdk/API/Application/api';
 import {changeBaseUrl} from '@app-dev-panel/sdk/API/Application/ApplicationContext';
 import {ErrorFallback} from '@app-dev-panel/sdk/Component/ErrorFallback';
 import {RouterOptionsContextProvider} from '@app-dev-panel/sdk/Component/RouterOptions';
 import {DefaultThemeProvider} from '@app-dev-panel/sdk/Component/Theme/DefaultTheme';
 import {CrossWindowEventType, dispatchWindowEvent} from '@app-dev-panel/sdk/Helper/dispatchWindowEvent';
+import {stripBasename} from '@app-dev-panel/sdk/Helper/panelBase';
 import {useEffect, useMemo, useRef} from 'react';
 import {ErrorBoundary} from 'react-error-boundary';
 import {Provider} from 'react-redux';
@@ -25,7 +27,10 @@ export default function App({config}: AppProps) {
     const {store, persistor} = useMemo(
         () =>
             createStore({
-                application: {baseUrl: config.backend.baseUrl, favoriteUrls: config.backend.favoriteUrls ?? []} as any,
+                application: preloadedApplicationState({
+                    baseUrl: config.backend.baseUrl,
+                    favoriteUrls: config.backend.favoriteUrls ?? [],
+                }),
             }),
         [config.backend.baseUrl, config.backend.favoriteUrls],
     );
@@ -39,6 +44,7 @@ export default function App({config}: AppProps) {
         }
     }, [config.backend.usePreferredUrl, config.backend.baseUrl]);
 
+    const basename = config.router.basename;
     useEffect(() => {
         dispatchWindowEvent(window.parent, 'panel.loaded', true);
 
@@ -51,7 +57,10 @@ export default function App({config}: AppProps) {
             if (data && typeof data === 'object' && 'event' in data) {
                 switch (data.event as CrossWindowEventType) {
                     case 'router.navigate':
-                        router.navigate(data.value);
+                        // The toolbar posts mount-prefixed URLs (`/debug/debug?…`);
+                        // the router already applies `basename`, so strip it once
+                        // (issue #111: `/debug/debug/debug`).
+                        router.navigate(stripBasename(String(data.value), basename));
                         break;
                 }
             }
@@ -62,7 +71,7 @@ export default function App({config}: AppProps) {
         return () => {
             window.removeEventListener('message', listener);
         };
-    }, [router]);
+    }, [router, basename]);
 
     return (
         <RouterOptionsContextProvider baseUrl="" openLinksInNewWindow={false}>

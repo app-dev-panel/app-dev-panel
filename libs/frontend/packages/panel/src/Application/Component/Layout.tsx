@@ -3,6 +3,7 @@ import {NotificationCenter} from '@app-dev-panel/panel/Application/Component/Not
 import {AiChatPopup} from '@app-dev-panel/toolbar/Module/Toolbar/Component/Toolbar/AiChatPopup';
 
 import {DuckIcon} from '@app-dev-panel/panel/Application/Component/DuckIcon';
+import {createSseUpdatesHandler} from '@app-dev-panel/panel/Application/Component/sseUpdatesHandler';
 import {useFramesEntries} from '@app-dev-panel/panel/Module/Frames/Context/Context';
 import {
     useGetMcpSettingsQuery,
@@ -19,7 +20,7 @@ import {
 } from '@app-dev-panel/sdk/API/Application/ApplicationContext';
 import {changeEntryAction, useDebugEntry} from '@app-dev-panel/sdk/API/Debug/Context';
 import {DebugEntry, debugApi, useLazyGetDebugQuery} from '@app-dev-panel/sdk/API/Debug/Debug';
-import {addLiveDump, addLiveLog, useLiveCount} from '@app-dev-panel/sdk/API/Debug/LiveContext';
+import {useLiveCount} from '@app-dev-panel/sdk/API/Debug/LiveContext';
 import {setFloatingOpen} from '@app-dev-panel/sdk/API/Llm/AiChatSlice';
 import {ErrorFallback} from '@app-dev-panel/sdk/Component/ErrorFallback';
 import {CommandPalette} from '@app-dev-panel/sdk/Component/Layout/CommandPalette';
@@ -30,7 +31,7 @@ import {addNotification, selectUnreadCount} from '@app-dev-panel/sdk/Component/N
 import {ScrollTopButton} from '@app-dev-panel/sdk/Component/ScrollTop';
 import {componentTokens} from '@app-dev-panel/sdk/Component/Theme/tokens';
 import {useCopyAsImage} from '@app-dev-panel/sdk/Component/useCopyAsImage';
-import {EventTypesEnum, useServerSentEvents} from '@app-dev-panel/sdk/Component/useServerSentEvents';
+import {useServerSentEvents} from '@app-dev-panel/sdk/Component/useServerSentEvents';
 import {
     compareCollectorWeight,
     getCollectorIcon,
@@ -316,47 +317,18 @@ export const Layout = React.memo(({children}: React.PropsWithChildren) => {
         [dispatch],
     );
 
-    const onUpdatesHandler = useCallback(
-        async (event: MessageEvent) => {
-            let data;
-            try {
-                data = JSON.parse(event.data);
-            } catch {
-                return;
-            }
-            if (!data.type) return;
-
-            if (data.type === EventTypesEnum.DebugUpdated || data.type === EventTypesEnum.EntryCreated) {
-                const result = await getDebugQuery();
-                if ('data' in result && result.data.length > 0) {
-                    changeEntry(result.data[0]);
-                }
-            } else if (data.type === EventTypesEnum.LiveLog) {
-                try {
-                    const payload = typeof data.payload === 'string' ? JSON.parse(data.payload) : data.payload;
-                    if (payload && typeof payload === 'object') {
-                        dispatch(
-                            addLiveLog({
-                                level: String(payload.level ?? 'debug'),
-                                message: String(payload.message ?? ''),
-                                context: payload.context,
-                            }),
-                        );
-                    }
-                } catch {
-                    /* ignore malformed payloads */
-                }
-            } else if (data.type === EventTypesEnum.LiveDump) {
-                try {
-                    const payload = typeof data.payload === 'string' ? JSON.parse(data.payload) : data.payload;
-                    if (payload && typeof payload === 'object') {
-                        dispatch(addLiveDump({variable: payload, line: payload.$__line__$ ?? undefined}));
-                    }
-                } catch {
-                    /* ignore malformed payloads */
-                }
-            }
-        },
+    // The SSE subscription is created once; read the toggle through a ref so a
+    // later flip is honoured without resubscribing (and without stale closures).
+    const autoLatestRef = useRef(autoLatest);
+    autoLatestRef.current = autoLatest;
+    const onUpdatesHandler = useMemo(
+        () =>
+            createSseUpdatesHandler({
+                getDebugQuery: () => getDebugQuery(),
+                changeEntry,
+                dispatch,
+                isAutoLatest: () => autoLatestRef.current,
+            }),
         [getDebugQuery, changeEntry, dispatch],
     );
     // Always subscribe so the Live Feed receives logs/dumps independently of autoLatest.

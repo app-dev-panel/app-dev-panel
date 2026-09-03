@@ -29,6 +29,15 @@ final class WebListener
 {
     private ?Psr17Factory $psr17Factory = null;
 
+    /**
+     * Matches `/<routePrefix>/api` and `/<inspectorRoutePrefix>/api` (plus sub-paths).
+     */
+    private readonly string $ownApiPattern;
+
+    /**
+     * @param string $routePrefix Panel/API mount point (`Module::$routePrefix`), e.g. `debug`.
+     * @param string $inspectorRoutePrefix Inspector API mount point (`Module::$inspectorRoutePrefix`).
+     */
     public function __construct(
         private readonly Debugger $debugger,
         private readonly ?RequestCollector $requestCollector = null,
@@ -37,7 +46,15 @@ final class WebListener
         private readonly ?RouterCollector $routerCollector = null,
         private readonly ?RouterMatchRecorder $matchRecorder = null,
         private readonly ?ToolbarInjector $toolbarInjector = null,
-    ) {}
+        private readonly string $routePrefix = 'debug',
+        private readonly string $inspectorRoutePrefix = 'inspect',
+    ) {
+        $prefixes = array_map(static fn(string $prefix): string => preg_quote(trim($prefix, '/'), '~'), [
+            $this->routePrefix,
+            $this->inspectorRoutePrefix,
+        ]);
+        $this->ownApiPattern = '~^/(?:' . implode('|', $prefixes) . ')/api(?:/|$)~';
+    }
 
     public function onBeforeRequest(\yii\base\Event $event): void
     {
@@ -47,10 +64,9 @@ final class WebListener
         }
 
         $request = $app->getRequest();
-        $path = $request->getUrl();
 
         // Don't debug ADP's own API requests
-        if (str_starts_with($path, '/debug/api') || str_starts_with($path, '/inspect/api')) {
+        if ($this->isOwnApiRequest($request)) {
             return;
         }
 
@@ -70,10 +86,7 @@ final class WebListener
             return;
         }
 
-        $request = $app->getRequest();
-        $path = $request->getUrl();
-
-        if (str_starts_with($path, '/debug/api') || str_starts_with($path, '/inspect/api')) {
+        if ($this->isOwnApiRequest($app->getRequest())) {
             return;
         }
 
@@ -154,6 +167,19 @@ final class WebListener
         if ($errorHandler->exception !== null) {
             $this->exceptionCollector?->collect($errorHandler->exception);
         }
+    }
+
+    /**
+     * Whether the request targets ADP's own API (`/<routePrefix>/api…` or
+     * `/<inspectorRoutePrefix>/api…`), honouring a non-root base URL.
+     */
+    private function isOwnApiRequest(\yii\web\Request $request): bool
+    {
+        $path = (string) parse_url($request->getUrl(), PHP_URL_PATH);
+        // Strip a non-root base URL (`/sub/app/debug/api` → `/debug/api`); a no-op when it is empty.
+        $path = (string) preg_replace('~^' . preg_quote($request->getBaseUrl(), '~') . '~', '', $path);
+
+        return preg_match($this->ownApiPattern, '/' . ltrim($path, '/')) === 1;
     }
 
     private function injectToolbar(\yii\web\Application $app): void

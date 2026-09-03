@@ -26,8 +26,12 @@ final class PanelController
 
     public function index(ServerRequestInterface $request): ResponseInterface
     {
-        $staticUrl = rtrim($this->panelConfig->staticUrl, '/');
         $basePath = rtrim($this->panelConfig->viewerBasePath, '/');
+        // Issue #113: a relative static URL (`.`, `./`, `assets`) must be
+        // anchored at the panel mount, otherwise the browser resolves it
+        // against the *page* URL and `/debug` loads `/bundle.js` while
+        // `/debug/` loads `/debug/bundle.js`.
+        $staticUrl = PanelHtml::resolveStaticUrl($this->panelConfig->staticUrl, $basePath);
 
         // Derive the backend URL from the current request
         $uri = $request->getUri();
@@ -48,12 +52,19 @@ final class PanelController
         $escapedStaticUrl = htmlspecialchars($staticUrl, ENT_QUOTES, 'UTF-8');
         $jsBackendUrl = addslashes($backendUrl);
         $jsBasePath = addslashes($basePath);
+        // Issue #113: `<base href="<mount>/">` makes every relative URL in the
+        // SPA (service worker registration, lazy chunks, manifest, icons)
+        // resolve from the mount directory regardless of whether the page was
+        // opened at `/debug`, `/debug/` or a deep link such as
+        // `/debug/inspector/routes`.
+        $baseTag = PanelHtml::baseTag($basePath);
 
         return <<<HTML
             <!doctype html>
             <html lang="en">
             <head>
                 <meta charset="utf-8" />
+                {$baseTag}
                 <meta name="viewport" content="width=device-width, initial-scale=1" />
                 <meta name="description" content="Application Development Panel" />
                 <meta http-equiv="Permissions-Policy" content="interest-cohort=()" />
@@ -73,6 +84,7 @@ final class PanelController
                 <noscript>You need to enable JavaScript to run this app.</noscript>
                 <div id="root" style="flex: 1"></div>
                 <script>
+                    window['__adp_panel_url'] = '{$jsBasePath}';
                     window['AppDevPanelWidget'] = {
                         config: {
                             containerId: 'root',

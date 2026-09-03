@@ -11,6 +11,8 @@ use Symfony\Component\Process\Process;
 
 class PsalmCommand implements CommandInterface
 {
+    use ProcessCommandTrait;
+
     public const COMMAND_NAME = 'analyse/psalm';
 
     public function __construct(
@@ -46,7 +48,9 @@ class PsalmCommand implements CommandInterface
 
         $process = new Process($params);
 
-        $process->setWorkingDirectory($projectDirectory)->setTimeout(null)->run();
+        if (!$this->runProcess($process, $projectDirectory)) {
+            return $this->timedOutResponse();
+        }
 
         $processOutput = json_decode(file_get_contents($outputFilePath), true, 512, JSON_THROW_ON_ERROR);
 

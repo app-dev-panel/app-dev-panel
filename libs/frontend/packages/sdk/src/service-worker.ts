@@ -94,8 +94,12 @@ registerRoute(
         // Return true to signal that we want to use the handler.
         return true;
     },
-    // createHandlerBoundToURL(import.meta.env.BASE_URL === '/' ? 'index.html' : import.meta.env.BASE_URL + 'index.html'),
-    createHandlerBoundToURL(import.meta.env.BASE_URL + 'index.html'),
+    // Issue #113: the bundle is built with a relative base ("./"), so
+    // `import.meta.env.BASE_URL + 'index.html'` is "./index.html" — a path that
+    // depends on the page URL, not on where the SPA is mounted. The service
+    // worker scope always equals the mount directory (`/debug/`, `/`, …), so
+    // resolve the app shell against it to hit the precached entry.
+    createHandlerBoundToURL(new URL('index.html', self.registration.scope).href),
 );
 
 registerRoute(

@@ -14,6 +14,14 @@ use function is_object;
 
 final class DumpContext
 {
+    /**
+     * Hard recursion ceiling for the objects-cache walk when no depth is given.
+     * Objects are cycle-safe via {@see self::$objects}; arrays are not (PHP
+     * reference cycles), so the walk must stop somewhere. Kept well under the
+     * `json_encode()` default depth of 512.
+     */
+    public const int MAX_CACHE_DEPTH = 256;
+
     public function __construct(
         public array $objects,
         private readonly array $excludedClasses,
@@ -47,7 +55,7 @@ final class DumpContext
         }
 
         $nextLevel = $level + 1;
-        if ($depth !== null && $depth <= $nextLevel) {
+        if ($depth !== null && $depth <= $nextLevel || $nextLevel >= self::MAX_CACHE_DEPTH) {
             return;
         }
 
@@ -177,6 +185,14 @@ final class DumpContext
         return 'public $' . $property;
     }
 
+    /**
+     * Describes a resource using JSON-safe scalars only.
+     *
+     * `stream_get_meta_data()` is returned verbatim for plain streams, but for
+     * user-space stream wrappers its `wrapper_data` key holds the wrapper object
+     * (which in turn may own further resources). Those nested values are
+     * reduced to descriptions so `json_encode()` never sees an unsupported type.
+     */
     private function getResourceDescription(mixed $resource): array|string
     {
         if (!is_resource($resource)) {
@@ -185,12 +201,43 @@ final class DumpContext
 
         $type = get_resource_type($resource);
         if ($type === 'stream') {
-            return stream_get_meta_data($resource);
+            return $this->toJsonSafe(stream_get_meta_data($resource));
         }
         if ($type !== '') {
             return sprintf('{%s resource}', $type);
         }
 
         return '{resource}';
+    }
+
+    /**
+     * Reduces a value to scalars, arrays of scalars, and description strings.
+     */
+    private function toJsonSafe(mixed $value, int $level = 0): mixed
+    {
+        if ($value === null || is_scalar($value)) {
+            return $value;
+        }
+
+        if (is_array($value)) {
+            if ($level >= 8) {
+                return sprintf('array (%d items) [...]', count($value));
+            }
+            $output = [];
+            foreach ($value as $key => $item) {
+                $output[$key] = $this->toJsonSafe($item, $level + 1);
+            }
+            return $output;
+        }
+
+        if ($value instanceof Closure) {
+            return ClosureDescriptor::describe($value);
+        }
+
+        if (is_object($value)) {
+            return $this->getObjectDescription($value) . ' (...)';
+        }
+
+        return $this->getResourceDescription($value);
     }
 }

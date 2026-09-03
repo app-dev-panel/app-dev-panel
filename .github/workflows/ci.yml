@@ -29,29 +29,33 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # `redis` is installed through setup-php (prebuilt on 8.4 and 8.5). The verify
+      # step below catches a silent fallback to a failed PECL build.
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php }}
-          extensions: mbstring, sockets, zip, pcov
+          extensions: mbstring, sockets, zip, pcov, redis
           coverage: pcov
           tools: composer:v2
         env:
           COMPOSER_ALLOW_SUPERUSER: 1
-          fail-fast: 'true'
-
-      # phpredis isn't installed via setup-php's extension shortcut because the
-      # prebuilt cache lags behind new PHP majors (PHP 8.5 silently fell back to
-      # PECL build, which then failed without failing the workflow). Install it
-      # from the sury PPA — already present after setup-php on Ubuntu — so both
-      # 8.4 and 8.5 cells get a binary build.
-      - name: Install phpredis from sury PPA
-        run: sudo apt-get install -y --no-install-recommends php${{ matrix.php }}-redis
 
       - name: Verify required PHP extensions
         run: |
           for ext in redis pcov mbstring sockets zip; do
             php -r "exit(extension_loaded('$ext') ? 0 : 1);" || { echo "::error::Missing PHP extension: $ext"; exit 1; }
+          done
+
+      # Root manifest: `require` + `replace` of the same internal packages is reported as a
+      # strict warning, so the root is validated non-strictly (schema + errors only).
+      # Per-lib manifests are validated strictly; `--no-check-all` skips the "unbound
+      # version constraint" warning that the internal `*` path-repository requires produce.
+      - name: Validate Composer manifests
+        run: |
+          composer validate --no-check-publish composer.json
+          for manifest in libs/*/composer.json libs/Adapter/*/composer.json; do
+            composer validate --strict --no-check-all --no-check-lock --no-check-publish "$manifest"
           done
 
       - name: Get Composer cache directory
@@ -89,6 +93,32 @@ jobs:
           name: coverage-report
           path: coverage.xml
           retention-days: 7
+
+  # ---------------------------------------------------------------------------
+  # Project review checks (CLAUDE.md invariants: timeouts, test strictness, docs tree)
+  # ---------------------------------------------------------------------------
+  review-checks:
+    name: "Review: Invariants"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: mbstring
+          coverage: none
+
+      - name: Check timeouts
+        run: php tools/check-timeouts.php --format=github
+
+      - name: Check test strictness
+        run: php tools/check-test-strictness.php --format=github
+
+      - name: Check docs tree
+        run: php tools/check-docs-tree.php --format=github
 
   # ---------------------------------------------------------------------------
   # Frontend Install (shared dependency installation)
@@ -134,10 +164,16 @@ jobs:
           node-version: '22'
 
       - name: Restore node_modules
+        id: node-modules
         uses: actions/cache/restore@v4
         with:
           path: libs/frontend/node_modules
           key: frontend-node-modules-${{ hashFiles('libs/frontend/package-lock.json') }}
+
+      - name: Install dependencies (cache miss)
+        if: steps.node-modules.outputs.cache-hit != 'true'
+        working-directory: libs/frontend
+        run: npm ci
 
       - name: Run unit tests
         working-directory: libs/frontend
@@ -160,10 +196,16 @@ jobs:
           node-version: '22'
 
       - name: Restore node_modules
+        id: node-modules
         uses: actions/cache/restore@v4
         with:
           path: libs/frontend/node_modules
           key: frontend-node-modules-${{ hashFiles('libs/frontend/package-lock.json') }}
+
+      - name: Install dependencies (cache miss)
+        if: steps.node-modules.outputs.cache-hit != 'true'
+        working-directory: libs/frontend
+        run: npm ci
 
       - name: Install Playwright browsers
         working-directory: libs/frontend
@@ -172,6 +214,99 @@ jobs:
       - name: Run E2E tests
         working-directory: libs/frontend
         run: npm run test:e2e
+
+  # ---------------------------------------------------------------------------
+  # Frontend Build (tsc --build + vite build for sdk, toolbar, panel)
+  # ---------------------------------------------------------------------------
+  frontend-build:
+    name: "Frontend: Build"
+    needs: frontend-install
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Restore node_modules
+        id: node-modules
+        uses: actions/cache/restore@v4
+        with:
+          path: libs/frontend/node_modules
+          key: frontend-node-modules-${{ hashFiles('libs/frontend/package-lock.json') }}
+
+      - name: Install dependencies (cache miss)
+        if: steps.node-modules.outputs.cache-hit != 'true'
+        working-directory: libs/frontend
+        run: npm ci
+
+      - name: Build all packages
+        working-directory: libs/frontend
+        run: npm run build
+
+  # ---------------------------------------------------------------------------
+  # Frontend Code Quality (Prettier + ESLint)
+  # ---------------------------------------------------------------------------
+  frontend-quality:
+    name: "Frontend: Quality"
+    needs: frontend-install
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Restore node_modules
+        id: node-modules
+        uses: actions/cache/restore@v4
+        with:
+          path: libs/frontend/node_modules
+          key: frontend-node-modules-${{ hashFiles('libs/frontend/package-lock.json') }}
+
+      - name: Install dependencies (cache miss)
+        if: steps.node-modules.outputs.cache-hit != 'true'
+        working-directory: libs/frontend
+        run: npm ci
+
+      - name: Check formatting (Prettier)
+        working-directory: libs/frontend
+        run: npm run format:check
+
+      - name: Lint (ESLint)
+        working-directory: libs/frontend
+        run: npm run lint
+
+  # ---------------------------------------------------------------------------
+  # Website (VitePress build + llms.txt generation)
+  # ---------------------------------------------------------------------------
+  website:
+    name: "Website: Build"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: website/package-lock.json
+
+      - name: Install dependencies
+        working-directory: website
+        run: npm ci
+
+      - name: Build VitePress
+        working-directory: website
+        run: npm run build
 
   # ---------------------------------------------------------------------------
   # Mago — Core libs (format, lint, analyze)
@@ -243,6 +378,34 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: mbstring, sockets, zip, redis
+          coverage: none
+          tools: composer:v2
+        env:
+          COMPOSER_ALLOW_SUPERUSER: 1
+
+      - name: Get Composer cache directory
+        id: composer-cache
+        shell: bash
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-php-8.4-playground-${{ matrix.playground.name }}-composer-${{ hashFiles(format('{0}/composer.json', matrix.playground.path), '**/composer.json') }}
+          restore-keys: ${{ runner.os }}-php-8.4-playground-${{ matrix.playground.name }}-composer-
+
+      # Only yii3-app ships a composer.lock; the others resolve on install. Vendor is
+      # needed so `mago analyze` can resolve framework symbols.
+      - name: Install playground dependencies
+        working-directory: ${{ matrix.playground.path }}
+        run: composer install --prefer-dist --no-progress --no-interaction
+
       - name: Setup Mago
         uses: nhedger/setup-mago@v1
 
@@ -292,31 +455,35 @@ jobs:
         run: php tools/modulite-check.php --format=github
 
   # ---------------------------------------------------------------------------
-  # Frontend Code Quality (Prettier + ESLint)
+  # Aggregate gate — single required status check for branch protection.
+  # Fails if any upstream job did not succeed (including skipped/cancelled).
   # ---------------------------------------------------------------------------
-  frontend-quality:
-    name: "Frontend: Quality"
-    needs: frontend-install
+  ci-ok:
+    name: CI OK
+    if: always()
+    needs:
+      - tests
+      - review-checks
+      - frontend-install
+      - frontend-tests
+      - frontend-e2e
+      - frontend-build
+      - frontend-quality
+      - website
+      - mago
+      - mago-playgrounds
+      - modulite
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-
-      - name: Restore node_modules
-        uses: actions/cache/restore@v4
-        with:
-          path: libs/frontend/node_modules
-          key: frontend-node-modules-${{ hashFiles('libs/frontend/package-lock.json') }}
-
-      - name: Check formatting (Prettier)
-        working-directory: libs/frontend
-        run: npm run format:check
-
-      - name: Lint (ESLint)
-        working-directory: libs/frontend
-        run: npm run lint
+      - name: Check upstream job results
+        env:
+          RESULTS: ${{ toJSON(needs) }}
+        run: |
+          echo "$RESULTS"
+          failed=$(echo "$RESULTS" | jq -r 'to_entries[] | select(.value.result != "success") | "\(.key)=\(.value.result)"')
+          if [ -n "$failed" ]; then
+            echo "::error::Upstream jobs did not succeed:"
+            echo "$failed"
+            exit 1
+          fi
+          echo "All upstream jobs succeeded."

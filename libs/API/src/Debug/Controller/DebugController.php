@@ -8,6 +8,7 @@ use AppDevPanel\Api\Debug\Exception\NotFoundException;
 use AppDevPanel\Api\Debug\LiveEventStreamFactory;
 use AppDevPanel\Api\Debug\Repository\CollectorRepositoryInterface;
 use AppDevPanel\Api\Http\JsonResponseFactoryInterface;
+use AppDevPanel\Api\Security\ClassNameValidator;
 use AppDevPanel\Api\ServerSentEventsStream;
 use AppDevPanel\Kernel\Collector\HtmlViewProviderInterface;
 use AppDevPanel\Kernel\Storage\StorageInterface;
@@ -65,7 +66,7 @@ final class DebugController
                 $collectorClass,
             ));
 
-            if (is_string($collectorClass) && is_subclass_of($collectorClass, HtmlViewProviderInterface::class)) {
+            if (ClassNameValidator::isSubclassOf($collectorClass, HtmlViewProviderInterface::class)) {
                 $html = $this->renderCollectorView($collectorClass::getViewPath(), is_array($data) ? $data : []);
                 return $this->responseFactory->createJsonResponse(['__html' => $html]);
             }

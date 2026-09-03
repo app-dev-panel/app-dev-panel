@@ -33,7 +33,16 @@ const rootReducer = combineReducers({
     // ...ToolbarApiReducers,
 });
 
-export const createStore = (preloadedState: Partial<ReturnType<typeof rootReducer>> = {}) => {
+type RootReducerState = ReturnType<typeof rootReducer>;
+
+/**
+ * Preloaded state without redux-persist's `_persist` bookkeeping: providing
+ * it would make `persistReducer` skip rehydration entirely, so callers only
+ * ever supply the plain slice state.
+ */
+export type PreloadedState = {[K in keyof RootReducerState]?: Omit<RootReducerState[K], '_persist'>};
+
+export const createStore = (preloadedState: PreloadedState = {}) => {
     const store = configureStore({
         reducer: rootReducer,
         middleware: (getDefaultMiddleware) =>
@@ -54,7 +63,7 @@ export const createStore = (preloadedState: Partial<ReturnType<typeof rootReduce
                     errorNotificationMiddleware,
                 ]),
         devTools: import.meta.env.DEV,
-        preloadedState: preloadedState,
+        preloadedState: preloadedState as Partial<RootReducerState>,
     });
     setupListeners(store.dispatch);
     initMessageListener(store);

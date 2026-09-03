@@ -16,6 +16,7 @@ import {GroupCard} from '@app-dev-panel/sdk/Component/GroupCard';
 import {PageHeader} from '@app-dev-panel/sdk/Component/PageHeader';
 import {QueryErrorState} from '@app-dev-panel/sdk/Component/QueryErrorState';
 import {serializeCallable} from '@app-dev-panel/sdk/Helper/callableSerializer';
+import {copyText} from '@app-dev-panel/sdk/Helper/clipboard';
 import {searchVariants} from '@app-dev-panel/sdk/Helper/layoutTranslit';
 import {regexpQuote} from '@app-dev-panel/sdk/Helper/regexpQuote';
 import {ChevronRight, Code, ContentCopy, Description} from '@mui/icons-material';
@@ -23,7 +24,6 @@ import {TabContext, TabPanel} from '@mui/lab';
 import TabList from '@mui/lab/TabList';
 import {Box, Chip, Collapse, IconButton, Tab, Tooltip, Typography} from '@mui/material';
 import {styled} from '@mui/material/styles';
-import clipboardCopy from 'clipboard-copy';
 import React, {SyntheticEvent, useCallback, useMemo, useState} from 'react';
 import {Link as RouterLink, useSearchParams} from 'react-router';
 
@@ -131,7 +131,7 @@ const ClosureActions = React.memo(({listener}: {listener: ClosureDescriptor}) =>
         sx={{display: 'flex', alignItems: 'center', gap: 0.25, flexShrink: 0, alignSelf: 'flex-start', mt: 0.5}}
     >
         <Tooltip title="Copy code">
-            <IconButton size="small" onClick={() => clipboardCopy(listener.source)} sx={{p: 0.25}}>
+            <IconButton size="small" onClick={() => void copyText(listener.source)} sx={{p: 0.25}}>
                 <ContentCopy sx={{fontSize: 14}} />
             </IconButton>
         </Tooltip>
@@ -259,7 +259,7 @@ const EventRow = React.memo(({entry, displayName}: {entry: EventEntry; displayNa
                     <Tooltip title="Copy event name">
                         <IconButton
                             size="small"
-                            onClick={() => clipboardCopy(entry.name)}
+                            onClick={() => void copyText(entry.name)}
                             aria-label="Copy event name"
                             sx={{p: 0.25}}
                         >

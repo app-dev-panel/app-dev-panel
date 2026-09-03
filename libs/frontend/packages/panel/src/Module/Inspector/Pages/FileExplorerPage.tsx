@@ -7,6 +7,7 @@ import {
 import {TreeView} from '@app-dev-panel/panel/Module/Inspector/Component/TreeView/TreeView';
 import {CodeHighlight} from '@app-dev-panel/sdk/Component/CodeHighlight';
 import {SearchFilter, type SearchMatch} from '@app-dev-panel/sdk/Component/SearchFilter';
+import {copyText} from '@app-dev-panel/sdk/Helper/clipboard';
 import {parseFilePath, parsePathLineAnchor} from '@app-dev-panel/sdk/Helper/filePathParser';
 import {formatBytes} from '@app-dev-panel/sdk/Helper/formatBytes';
 import {scrollToAnchor} from '@app-dev-panel/sdk/Helper/scrollToAnchor';
@@ -82,9 +83,11 @@ const ActionButtons = ({editorUrl, fullPath, showCopy = true}: ActionButtonsProp
     const [copied, setCopied] = useState(false);
 
     const handleCopy = useCallback(() => {
-        navigator.clipboard.writeText(fullPath);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 1500);
+        void copyText(fullPath).then((ok) => {
+            if (!ok) return;
+            setCopied(true);
+            setTimeout(() => setCopied(false), 1500);
+        });
     }, [fullPath]);
 
     return (

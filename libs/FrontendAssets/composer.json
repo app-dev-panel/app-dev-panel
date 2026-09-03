@@ -2,6 +2,7 @@
     "name": "app-dev-panel/frontend-assets",
     "type": "library",
     "description": "ADP Frontend Assets — prebuilt panel SPA shipped as a Composer package and served by the debug panel",
+    "license": "MIT",
     "keywords": [
         "debug",
         "debug-panel",

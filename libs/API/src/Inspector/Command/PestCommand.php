@@ -11,6 +11,8 @@ use Symfony\Component\Process\Process;
 
 class PestCommand implements CommandInterface
 {
+    use ProcessCommandTrait;
+
     public const COMMAND_NAME = 'test/pest';
 
     public function __construct(
@@ -43,7 +45,9 @@ class PestCommand implements CommandInterface
 
         $process = new Process($params);
 
-        $process->setWorkingDirectory($projectDirectory)->setTimeout(null)->run();
+        if (!$this->runProcess($process, $projectDirectory)) {
+            return $this->timedOutResponse();
+        }
 
         $processOutput = rtrim($process->getOutput());
 

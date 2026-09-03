@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace AppDevPanel\Tests\E2E;
 
 use Facebook\WebDriver\Chrome\ChromeDriver;
-use Facebook\WebDriver\Chrome\ChromeDriverService;
 use Facebook\WebDriver\Chrome\ChromeOptions;
 use Facebook\WebDriver\Remote\DesiredCapabilities;
 use Facebook\WebDriver\Remote\RemoteWebDriver;
@@ -18,18 +17,24 @@ use RuntimeException;
 /**
  * Base test case for E2E browser tests using headless Chromium.
  *
- * Requires:
+ * Requires (all hard requirements — a missing piece fails the suite, it never skips):
  * - ChromeDriver binary in PATH or at CHROMEDRIVER_PATH env
  * - Chromium/Chrome binary at CHROME_BINARY env or auto-detected
  * - Frontend dev server running at FRONTEND_URL env (default: http://localhost:3000)
+ * - ADP API server the frontend talks to at API_URL env (default: http://127.0.0.1:8080);
+ *   tests seed debug entries through its ingestion endpoint (`POST /debug/api/ingest`)
  *
  * Run:
- *   FRONTEND_URL=http://localhost:3000 php vendor/bin/phpunit --testsuite E2E
+ *   FRONTEND_URL=http://localhost:3000 API_URL=http://127.0.0.1:8080 php vendor/bin/phpunit --testsuite E2E
  */
 abstract class BrowserTestCase extends TestCase
 {
+    protected const string REQUEST_COLLECTOR = 'AppDevPanel\Kernel\Collector\Web\RequestCollector';
+    protected const string LOG_COLLECTOR = 'AppDevPanel\Kernel\Collector\LogCollector';
+
     protected static ?RemoteWebDriver $driver = null;
     protected static string $baseUrl = '';
+    protected static string $apiUrl = '';
     private static ?int $chromeDriverPid = null;
     private static int $chromeDriverPort = 0;
 
@@ -38,19 +43,23 @@ abstract class BrowserTestCase extends TestCase
         parent::setUpBeforeClass();
 
         self::$baseUrl = rtrim(getenv('FRONTEND_URL') ?: 'http://localhost:3000', '/');
+        self::$apiUrl = rtrim(getenv('API_URL') ?: 'http://127.0.0.1:8080', '/');
         self::$chromeDriverPort = (int) (getenv('CHROMEDRIVER_PORT') ?: 9516);
 
-        // If Chrome or ChromeDriver aren't available on this machine, leave
-        // `self::$driver` null so each test skips cleanly via setUp(). This
-        // lets the E2E suite coexist with CI matrices (and plain `phpunit`
-        // runs) that don't install Chrome.
+        // WebDriver is a hard requirement of the E2E suite (CLAUDE.md "Zero Tolerance"):
+        // a missing browser/driver fails every test of the class instead of skipping it.
         try {
             if (!self::isChromeDriverRunning()) {
                 self::startChromeDriver();
             }
             self::$driver = self::createDriver();
-        } catch (RuntimeException) {
+        } catch (\Throwable $e) {
             self::$driver = null;
+            self::fail(sprintf(
+                'E2E suite requires a working WebDriver (Chrome + ChromeDriver): %s. '
+                . 'Set CHROME_BINARY / CHROMEDRIVER_PATH or install them (see .claude/skills/selenium-e2e).',
+                $e->getMessage(),
+            ));
         }
     }
 
@@ -74,8 +83,108 @@ abstract class BrowserTestCase extends TestCase
         parent::setUp();
 
         if (self::$driver === null) {
-            $this->markTestSkipped('WebDriver not available.');
+            self::fail('WebDriver was not initialised in setUpBeforeClass().');
         }
+    }
+
+    /**
+     * Seed one web-request debug entry through the API ingestion endpoint so that
+     * pages depending on existing entries have deterministic data to assert on.
+     *
+     * @return array{id: string, path: string} The stored debug id and the unique request path
+     */
+    protected static function seedWebRequestEntry(): array
+    {
+        $path = '/e2e/seeded-' . bin2hex(random_bytes(4));
+        $url = 'http://e2e.local' . $path;
+        $now = microtime(true);
+
+        $payload = [
+            'collectors' => [
+                self::REQUEST_COLLECTOR => [
+                    'requestUrl' => $url,
+                    'requestPath' => $path,
+                    'requestQuery' => '',
+                    'requestMethod' => 'GET',
+                    'requestIsAjax' => false,
+                    'userIp' => '127.0.0.1',
+                    'responseStatusCode' => 200,
+                    'request' => null,
+                    'requestRaw' => "GET {$path} HTTP/1.1\r\nHost: e2e.local\r\nAccept: text/plain\r\n\r\n",
+                    'response' => null,
+                    'responseRaw' => "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\nseeded by E2E",
+                ],
+                self::LOG_COLLECTOR => [
+                    [
+                        'time' => $now,
+                        'level' => 'info',
+                        'message' => 'E2E seeded log entry',
+                        'context' => [],
+                        'line' => '',
+                    ],
+                ],
+            ],
+            'context' => ['type' => 'web', 'service' => 'e2e'],
+            'summary' => [
+                'request' => [
+                    'url' => $url,
+                    'path' => $path,
+                    'query' => '',
+                    'method' => 'GET',
+                    'isAjax' => false,
+                    'userIp' => '127.0.0.1',
+                ],
+                'response' => ['statusCode' => 200],
+                'web' => [
+                    'adapter' => 'e2e',
+                    'request' => ['startTime' => $now, 'processingTime' => 0.012],
+                    'memory' => ['peakUsage' => 1_048_576],
+                ],
+                'logger' => ['total' => 1],
+            ],
+        ];
+
+        $ch = curl_init(self::$apiUrl . '/debug/api/ingest');
+        curl_setopt_array($ch, [
+            CURLOPT_POST => true,
+            CURLOPT_POSTFIELDS => json_encode($payload, JSON_THROW_ON_ERROR),
+            CURLOPT_HTTPHEADER => ['Content-Type: application/json'],
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_CONNECTTIMEOUT => 5,
+            CURLOPT_TIMEOUT => 10,
+        ]);
+        $body = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $curlError = curl_error($ch);
+        curl_close($ch);
+
+        if ($body === false || $httpCode !== 201) {
+            self::fail(sprintf(
+                'Failed to seed a debug entry via %s/debug/api/ingest (HTTP %d%s). Is the ADP API server running?',
+                self::$apiUrl,
+                $httpCode,
+                $curlError !== '' ? ', ' . $curlError : '',
+            ));
+        }
+
+        $decoded = json_decode((string) $body, true, 512, JSON_THROW_ON_ERROR);
+        $id = $decoded['data']['id'] ?? $decoded['id'] ?? null;
+        self::assertIsString($id, 'Ingestion response must contain the stored debug id');
+
+        return ['id' => $id, 'path' => $path];
+    }
+
+    /**
+     * Navigate to the collector viewer for a seeded entry.
+     */
+    protected function navigateToEntry(string $debugId, ?string $collector = null): void
+    {
+        $query = ['debugEntry' => $debugId];
+        if ($collector !== null) {
+            $query['collector'] = $collector;
+        }
+        $this->navigate('/debug?' . http_build_query($query));
+        $this->waitForAppLoad();
     }
 
     /**
@@ -185,7 +294,7 @@ abstract class BrowserTestCase extends TestCase
     {
         $dir = __DIR__ . '/../../runtime/screenshots';
         if (!is_dir($dir)) {
-            mkdir($dir, 0755, true);
+            mkdir($dir, 0o755, true);
         }
         self::$driver->takeScreenshot($dir . '/' . $name . '.png');
     }
@@ -361,6 +470,12 @@ abstract class BrowserTestCase extends TestCase
         $capabilities = DesiredCapabilities::chrome();
         $capabilities->setCapability(ChromeOptions::CAPABILITY_W3C, $options);
 
-        return RemoteWebDriver::create("http://localhost:{$port}", $capabilities);
+        // Explicit timeouts: a stuck ChromeDriver/Chrome start must fail, never hang the suite.
+        return RemoteWebDriver::create(
+            "http://localhost:{$port}",
+            $capabilities,
+            connectionTimeoutInMs: 5_000,
+            requestTimeoutInMs: 30_000,
+        );
     }
 }

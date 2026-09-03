@@ -11,13 +11,6 @@ use PHPUnit\Framework\TestCase;
 
 final class QueueDecoratorTest extends TestCase
 {
-    protected function setUp(): void
-    {
-        if (!interface_exists(\Yiisoft\Queue\QueueInterface::class, true)) {
-            $this->markTestSkipped('yiisoft/queue is not installed.');
-        }
-    }
-
     public function testStatusDelegatesToDecoratedAndCollects(): void
     {
         $status = \Yiisoft\Queue\JobStatus::WAITING;

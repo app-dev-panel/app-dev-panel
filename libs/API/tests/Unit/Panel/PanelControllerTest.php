@@ -181,6 +181,63 @@ final class PanelControllerTest extends TestCase
         $this->assertStringContainsString('favicon.ico', $body);
     }
 
+    #[DataProvider('provideBaseHrefMounts')]
+    public function testIndexEmitsBaseHrefForMount(string $viewerBasePath, string $expectedHref): void
+    {
+        $config = new PanelConfig(viewerBasePath: $viewerBasePath);
+        $controller = $this->createController($config);
+        $request = new ServerRequest('GET', 'http://localhost:8080' . $viewerBasePath . '/inspector/routes');
+
+        $body = $this->getBody($controller, $request);
+
+        $this->assertStringContainsString('<base href="' . $expectedHref . '" data-adp-base />', $body);
+        $this->assertSame(1, substr_count($body, '<base '));
+        // The <base> tag must precede every URL-bearing element in <head>.
+        $this->assertLessThan(strpos($body, '<link'), strpos($body, '<base '));
+    }
+
+    public static function provideBaseHrefMounts(): iterable
+    {
+        yield 'default mount' => ['/debug', '/debug/'];
+        yield 'mount with trailing slash' => ['/debug/', '/debug/'];
+        yield 'custom mount' => ['/app-debug', '/app-debug/'];
+        yield 'nested mount' => ['/tools/adp', '/tools/adp/'];
+    }
+
+    public function testIndexExposesPanelMountToFrontend(): void
+    {
+        $config = new PanelConfig(viewerBasePath: '/app-debug/');
+        $controller = $this->createController($config);
+        $request = new ServerRequest('GET', 'http://localhost:8080/app-debug');
+
+        $body = $this->getBody($controller, $request);
+
+        $this->assertStringContainsString("window['__adp_panel_url'] = '/app-debug';", $body);
+    }
+
+    #[DataProvider('provideRelativeStaticUrls')]
+    public function testIndexAnchorsRelativeStaticUrlAtMount(string $staticUrl, string $expectedPrefix): void
+    {
+        $config = new PanelConfig(staticUrl: $staticUrl, viewerBasePath: '/debug');
+        $controller = $this->createController($config);
+        $request = new ServerRequest('GET', 'http://localhost:8080/debug');
+
+        $body = $this->getBody($controller, $request);
+
+        $this->assertStringContainsString('src="' . $expectedPrefix . '/bundle.js"', $body);
+        $this->assertStringContainsString('href="' . $expectedPrefix . '/bundle.css"', $body);
+        $this->assertStringNotContainsString('src="./bundle.js"', $body);
+        $this->assertStringNotContainsString('src=".bundle.js"', $body);
+    }
+
+    public static function provideRelativeStaticUrls(): iterable
+    {
+        yield 'dot' => ['.', '/debug'];
+        yield 'dot slash' => ['./', '/debug'];
+        yield 'relative dir' => ['./assets', '/debug/assets'];
+        yield 'root' => ['/', ''];
+    }
+
     private function createController(?PanelConfig $config = null): PanelController
     {
         $factory = new HttpFactory();

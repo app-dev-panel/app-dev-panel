@@ -40,6 +40,9 @@ final class FileStorage implements StorageInterface
         $this->historySize = $historySize;
     }
 
+    /**
+     * @throws \InvalidArgumentException when `$id` is not a valid entry id (see {@see StorageIdValidator})
+     */
     public function read(string $type, ?string $id = null): array
     {
         clearstatcache();
@@ -51,8 +54,13 @@ final class FileStorage implements StorageInterface
         return $this->readAll($type);
     }
 
+    /**
+     * @throws \InvalidArgumentException when `$id` is not a valid entry id (see {@see StorageIdValidator})
+     */
     public function write(string $id, array $summary, array $data, array $objects): void
     {
+        StorageIdValidator::assertValid($id);
+
         $basePath = $this->path . '/' . date('Y-m-d') . '/' . $id . '/';
 
         FileHelper::ensureDirectory($basePath);
@@ -120,6 +128,8 @@ final class FileStorage implements StorageInterface
      */
     private function readEntry(string $type, string $id): array
     {
+        StorageIdValidator::assertValid($id);
+
         $dirs = glob($this->path . '/*/' . $id, GLOB_ONLYDIR | GLOB_NOSORT);
         if ($dirs === false || $dirs === []) {
             return [];

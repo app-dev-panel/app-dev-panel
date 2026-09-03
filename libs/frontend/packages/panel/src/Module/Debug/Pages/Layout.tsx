@@ -129,7 +129,7 @@ const IOWrapper = ({primaryCollector, primaryData}: {primaryCollector: string; p
 // ---------------------------------------------------------------------------
 
 type CollectorDataProps = {collectorData: any; selectedCollector: string};
-function CollectorData({collectorData, selectedCollector}: CollectorDataProps) {
+export function CollectorData({collectorData, selectedCollector}: CollectorDataProps) {
     const baseUrl = useSelector((state) => state.application.baseUrl) as string;
     const pages: {[name: string]: (data: any) => React.JSX.Element} = {
         [CollectorsMap.MailerCollector]: (data: any) => <MailerPanel data={data} />,
@@ -167,7 +167,7 @@ function CollectorData({collectorData, selectedCollector}: CollectorDataProps) {
             if (data && typeof data === 'object' && typeof data.__html === 'string') {
                 return <SsrPanel html={data.__html} />;
             }
-            if (typeof data === 'object' && data.__isPanelRemote__) {
+            if (data !== null && typeof data === 'object' && data.__isPanelRemote__) {
                 return (
                     <React.Suspense fallback={`Loading`}>
                         <ModuleLoader

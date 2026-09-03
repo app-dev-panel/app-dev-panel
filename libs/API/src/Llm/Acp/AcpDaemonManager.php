@@ -11,6 +11,9 @@ use RuntimeException;
  *
  * The daemon starts "empty" (no agents). Agent subprocesses are spawned
  * per session via startSession(), each identified by a client-generated UUID.
+ *
+ * Socket placement and trust checks live in {@see AcpSocketLocator}
+ * (`<storagePath>/.acp/daemon.sock`, `0700`, owner-verified before every connect).
  */
 final class AcpDaemonManager implements AcpDaemonManagerInterface
 {
@@ -20,9 +23,13 @@ final class AcpDaemonManager implements AcpDaemonManagerInterface
     private const int SESSION_START_TIMEOUT = 30;
     private const int MAX_PROMPT_TIMEOUT = 30;
 
+    private readonly AcpSocketLocator $socketLocator;
+
     public function __construct(
         private readonly string $storagePath,
-    ) {}
+    ) {
+        $this->socketLocator = new AcpSocketLocator($storagePath);
+    }
 
     public function start(): void
     {
@@ -44,15 +51,12 @@ final class AcpDaemonManager implements AcpDaemonManagerInterface
             throw new RuntimeException('ACP daemon script not found: ' . $daemonScript);
         }
 
-        $dir = dirname($socketPath);
-        if (!is_dir($dir)) {
-            mkdir($dir, 0o755, true);
-        }
-
         $storageDir = $this->storagePath;
         if (!is_dir($storageDir)) {
             mkdir($storageDir, 0o755, true);
         }
+
+        $this->ensureSocketDirectory();
 
         $logFile = $this->getLogFilePath();
 
@@ -72,21 +76,15 @@ final class AcpDaemonManager implements AcpDaemonManagerInterface
 
     public function stop(): void
     {
-        $socketPath = $this->getSocketPath();
-
-        if (file_exists($socketPath)) {
-            try {
-                $socket = @stream_socket_client("unix://{$socketPath}", $errno, $errstr, 3.0);
-                if ($socket !== false) {
-                    fwrite($socket, json_encode(['action' => 'shutdown']) . "\n");
-                    stream_set_timeout($socket, 2);
-                    fgets($socket);
-                    fclose($socket);
-                    usleep(500_000);
-                }
-            } catch (\Throwable) {
-                // Fall through to PID-based kill
-            }
+        try {
+            $socket = $this->connect(3.0);
+            fwrite($socket, json_encode(['action' => 'shutdown']) . "\n");
+            stream_set_timeout($socket, 2);
+            fgets($socket);
+            fclose($socket);
+            usleep(500_000);
+        } catch (\Throwable) {
+            // Fall through to PID-based kill
         }
 
         $pidFile = $this->getPidFilePath();
@@ -107,17 +105,8 @@ final class AcpDaemonManager implements AcpDaemonManagerInterface
 
     public function isRunning(): bool
     {
-        $socketPath = $this->getSocketPath();
-
-        if (!file_exists($socketPath)) {
-            return false;
-        }
-
         try {
-            $socket = @stream_socket_client("unix://{$socketPath}", $errno, $errstr, 2.0);
-            if ($socket === false) {
-                return false;
-            }
+            $socket = $this->connect(2.0);
 
             fwrite($socket, json_encode(['action' => 'ping']) . "\n");
             stream_set_timeout($socket, 2);
@@ -138,13 +127,7 @@ final class AcpDaemonManager implements AcpDaemonManagerInterface
 
     public function startSession(string $sessionId, string $command, array $args = [], array $env = []): array
     {
-        $socketPath = $this->getSocketPath();
-
-        $socket = @stream_socket_client("unix://{$socketPath}", $errno, $errstr, 5.0);
-
-        if ($socket === false) {
-            throw new RuntimeException("Cannot connect to ACP daemon: {$errstr}");
-        }
+        $socket = $this->connect(5.0);
 
         $request = json_encode(
             [
@@ -159,7 +142,7 @@ final class AcpDaemonManager implements AcpDaemonManagerInterface
 
         fwrite($socket, $request . "\n");
 
-        // Agent spawn + initialize can take a while, capped at 50s.
+        // Agent spawn + initialize can take a while, capped at SESSION_START_TIMEOUT.
         stream_set_timeout($socket, self::SESSION_START_TIMEOUT);
         $responseLine = fgets($socket);
         fclose($socket);
@@ -186,13 +169,8 @@ final class AcpDaemonManager implements AcpDaemonManagerInterface
 
     public function stopSession(string $sessionId): void
     {
-        $socketPath = $this->getSocketPath();
-
         try {
-            $socket = @stream_socket_client("unix://{$socketPath}", $errno, $errstr, 3.0);
-            if ($socket === false) {
-                return;
-            }
+            $socket = $this->connect(3.0);
 
             fwrite($socket, json_encode([
                 'action' => 'session-stop',
@@ -209,13 +187,8 @@ final class AcpDaemonManager implements AcpDaemonManagerInterface
 
     public function isSessionActive(string $sessionId): bool
     {
-        $socketPath = $this->getSocketPath();
-
         try {
-            $socket = @stream_socket_client("unix://{$socketPath}", $errno, $errstr, 2.0);
-            if ($socket === false) {
-                return false;
-            }
+            $socket = $this->connect(2.0);
 
             fwrite($socket, json_encode([
                 'action' => 'session-status',
@@ -240,13 +213,7 @@ final class AcpDaemonManager implements AcpDaemonManagerInterface
 
     public function sendPrompt(string $sessionId, array $messages, string $customPrompt, float $timeout): array
     {
-        $socketPath = $this->getSocketPath();
-
-        $socket = @stream_socket_client("unix://{$socketPath}", $errno, $errstr, 5.0);
-
-        if ($socket === false) {
-            throw new RuntimeException("Cannot connect to ACP daemon: {$errstr}");
-        }
+        $socket = $this->connect(5.0);
 
         $request = json_encode(
             [
@@ -280,10 +247,20 @@ final class AcpDaemonManager implements AcpDaemonManagerInterface
 
     public function getSocketPath(): string
     {
-        // Unix sockets have a 103-byte path limit. Use /tmp with a hash to keep it short.
-        $hash = substr(md5($this->storagePath), 0, 12);
+        return $this->socketLocator->getSocketPath();
+    }
 
-        return sys_get_temp_dir() . "/adp-acp-{$hash}.sock";
+    public function getSocketDirectory(): string
+    {
+        return $this->socketLocator->getSocketDirectory();
+    }
+
+    /**
+     * @see AcpSocketLocator::ensureSocketDirectory()
+     */
+    public function ensureSocketDirectory(): string
+    {
+        return $this->socketLocator->ensureSocketDirectory();
     }
 
     public function getPidFilePath(): string
@@ -296,15 +273,41 @@ final class AcpDaemonManager implements AcpDaemonManagerInterface
         return $this->storagePath . '/.acp-daemon.log';
     }
 
+    /**
+     * Opens a client connection after the locator verified directory + socket node.
+     *
+     * @return resource
+     *
+     * @throws RuntimeException when the socket is missing, untrusted or unreachable
+     */
+    private function connect(float $timeout)
+    {
+        if (!file_exists($this->getSocketPath())) {
+            throw new RuntimeException('ACP daemon socket does not exist: ' . $this->getSocketPath());
+        }
+
+        $socketPath = $this->socketLocator->assertTrustedSocket();
+
+        $errno = 0;
+        $errstr = '';
+        set_error_handler(static fn(): bool => true);
+        try {
+            $socket = stream_socket_client("unix://{$socketPath}", $errno, $errstr, $timeout);
+        } finally {
+            restore_error_handler();
+        }
+
+        if ($socket === false) {
+            throw new RuntimeException("Cannot connect to ACP daemon: {$errstr}");
+        }
+
+        return $socket;
+    }
+
     private function isDaemonCompatible(): bool
     {
-        $socketPath = $this->getSocketPath();
-
         try {
-            $socket = @stream_socket_client("unix://{$socketPath}", $errno, $errstr, 2.0);
-            if ($socket === false) {
-                return false;
-            }
+            $socket = $this->connect(2.0);
 
             fwrite($socket, json_encode(['action' => 'ping']) . "\n");
             stream_set_timeout($socket, 2);

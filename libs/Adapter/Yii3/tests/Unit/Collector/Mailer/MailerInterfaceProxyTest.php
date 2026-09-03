@@ -11,13 +11,6 @@ use PHPUnit\Framework\TestCase;
 
 final class MailerInterfaceProxyTest extends TestCase
 {
-    protected function setUp(): void
-    {
-        if (!interface_exists(\Yiisoft\Mailer\MailerInterface::class, true)) {
-            $this->markTestSkipped('yiisoft/mailer is not installed.');
-        }
-    }
-
     public function testSendCollectsNormalizedMessageAndDelegates(): void
     {
         $message = $this->createMessageMock(

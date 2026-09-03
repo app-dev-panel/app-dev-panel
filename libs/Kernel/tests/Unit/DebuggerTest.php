@@ -14,6 +14,9 @@ use AppDevPanel\Kernel\Storage\StorageInterface;
 use Nyholm\Psr7\ServerRequest;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
+use Psr\Log\AbstractLogger;
+use Psr\Log\LogLevel;
+use Stringable;
 
 final class DebuggerTest extends TestCase
 {
@@ -225,5 +228,61 @@ final class DebuggerTest extends TestCase
         new Debugger($idGenerator, $storage, [$collector]);
 
         // No assertion needed — mock expectations verify no methods were called
+    }
+
+    public function testShutdownSwallowsFlushFailureAndLogsIt(): void
+    {
+        $idGenerator = new DebuggerIdGenerator();
+        $collector = $this->getMockBuilder(CollectorInterface::class)->getMock();
+        $collector->expects($this->once())->method('shutdown');
+        $storage = $this->getMockBuilder(StorageInterface::class)->getMock();
+        $storage
+            ->expects($this->once())
+            ->method('flush')
+            ->willThrowException(new \JsonException('Type is not supported'));
+
+        $logged = [];
+        $logger = new class($logged) extends AbstractLogger {
+            public function __construct(
+                private array &$records,
+            ) {}
+
+            public function log($level, Stringable|string $message, array $context = []): void
+            {
+                $this->records[] = [$level, (string) $message, $context];
+            }
+        };
+
+        $debugger = new Debugger($idGenerator, $storage, [$collector], null, $logger);
+        $debugger->startup(StartupContext::forRequest(new ServerRequest('GET', '/asset.png')));
+
+        // Must not throw — this runs inside register_shutdown_function.
+        $debugger->shutdown();
+
+        $errors = array_values(array_filter($logged, static fn(array $record) => $record[0] === LogLevel::ERROR));
+        $this->assertCount(1, $errors);
+        $this->assertStringContainsString('flush failed', $errors[0][1]);
+        $this->assertInstanceOf(\JsonException::class, $errors[0][2]['exception']);
+
+        // Debugger is inactive afterwards: a second shutdown is a no-op (flush expected once).
+        $debugger->shutdown();
+    }
+
+    public function testShutdownContinuesWhenCollectorShutdownThrows(): void
+    {
+        $idGenerator = new DebuggerIdGenerator();
+        $broken = $this->getMockBuilder(CollectorInterface::class)->getMock();
+        $broken
+            ->expects($this->once())
+            ->method('shutdown')
+            ->willThrowException(new \RuntimeException('boom'));
+        $healthy = $this->getMockBuilder(CollectorInterface::class)->getMock();
+        $healthy->expects($this->once())->method('shutdown');
+        $storage = $this->getMockBuilder(StorageInterface::class)->getMock();
+        $storage->expects($this->once())->method('flush');
+
+        $debugger = new Debugger($idGenerator, $storage, [$broken, $healthy]);
+        $debugger->startup(StartupContext::generic());
+        $debugger->shutdown();
     }
 }

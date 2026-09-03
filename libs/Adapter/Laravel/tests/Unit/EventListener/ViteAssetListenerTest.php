@@ -12,13 +12,6 @@ use PHPUnit\Framework\TestCase;
 
 final class ViteAssetListenerTest extends TestCase
 {
-    protected function setUp(): void
-    {
-        if (!class_exists(Vite::class, true)) {
-            $this->markTestSkipped('illuminate/foundation is not installed.');
-        }
-    }
-
     public function testCollectsPreloadedViteAssets(): void
     {
         $collector = $this->createCollector();

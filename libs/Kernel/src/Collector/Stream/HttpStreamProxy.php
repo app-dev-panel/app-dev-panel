@@ -81,7 +81,9 @@ final class HttpStreamProxy implements StreamWrapperInterface
 
             self::$collector?->collect(operation: 'read', path: $this->decorated->filename, args: [
                 'method' => $method,
-                'response_headers' => $metadata['wrapper_data'],
+                // Only the built-in http(s) wrapper exposes response headers here; any other
+                // underlying stream (redirected, in-memory, data:) has no `wrapper_data`.
+                'response_headers' => $metadata['wrapper_data'] ?? [],
                 'request_headers' => $headers,
             ]);
         }

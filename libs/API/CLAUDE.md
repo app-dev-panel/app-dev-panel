@@ -30,7 +30,8 @@ src/
 │   │   ├── CollectorRepositoryInterface.php
 │   │   └── CollectorRepository.php      # Reads debug data from storage
 │   ├── Exception/
-│   │   ├── NotFoundException.php            # Debug entry not found
+│   │   ├── NotFoundException.php            # Debug entry not found (-> 404)
+│   │   ├── BadRequestException.php          # Malformed client input (-> 400)
 │   │   └── PackageNotInstalledException.php # Required package missing
 │   ├── HtmlViewProviderInterface.php
 │   ├── ModuleFederationAssetBundle.php  # Remote panel support
@@ -59,7 +60,9 @@ src/
 │   │   ├── HttpMockController.php       # HTTP mock expectations, verify, history, reset (Phiremock)
 │   │   └── ServiceController.php        # Service registration (register, heartbeat, list, deregister)
 │   ├── Middleware/
-│   │   └── InspectorProxyMiddleware.php # Proxies inspector requests to external services
+│   │   └── InspectorProxyMiddleware.php # Proxies inspector requests to external services (UrlPolicy re-check)
+│   ├── Coverage/
+│   │   └── StoredCoverageReader.php     # Reads CodeCoverageCollector payload from stored entries
 │   ├── Authorization/
 │   │   ├── AuthorizationConfigProviderInterface.php  # Interface for live auth config
 │   │   └── NullAuthorizationConfigProvider.php       # Default no-op fallback
@@ -76,6 +79,8 @@ src/
 │   ├── Command/
 │   │   ├── CommandInterface.php
 │   │   ├── CommandResponse.php
+│   │   ├── CommandTimeout.php           # 120s hard ceiling + per-request `?timeout=` clamp
+│   │   ├── ProcessCommandTrait.php      # Shared Process runner (timeout, timed-out response)
 │   │   ├── BashCommand.php
 │   │   ├── PHPUnitCommand.php           # JSON-report variant (uses PHPUnitJSONReporter)
 │   │   ├── PHPUnitRawCommand.php        # raw stdout/stderr variant
@@ -88,6 +93,7 @@ src/
 │   │   └── CodeceptionJSONReporter.php    # Codeception 5+ Extension, writes codeception-report.json
 │   └── ApplicationState.php
 ├── Ingestion/
+│   ├── OpenApiSpecLoader.php            # Locates + parses openapi/ingestion.yaml (ext-yaml or symfony/yaml)
 │   └── Controller/
 │       ├── IngestionController.php      # External data intake (any language)
 │       └── OtlpController.php           # OpenTelemetry trace ingestion (OTLP format)
@@ -101,6 +107,7 @@ src/
 │   │   └── LlmController.php           # LLM integration (connect, chat, analyze, history, OAuth)
 │   ├── Acp/
 │   │   ├── AcpDaemonManager.php          # Daemon lifecycle: start/stop, session management, Unix socket IPC
+│   │   ├── AcpSocketLocator.php          # Socket path (<storage>/.acp/daemon.sock, 0700) + trust checks
 │   │   ├── AcpDaemonManagerInterface.php # Interface for daemon manager (start, startSession, sendPrompt, etc.)
 │   │   ├── acp-daemon-runner.php         # Standalone daemon process (multi-session, Unix socket server)
 │   │   ├── AcpCommandVerifier.php       # Checks if agent command exists on PATH
@@ -114,6 +121,12 @@ src/
 ├── Http/
 │   ├── JsonResponseFactory.php          # JSON response creation
 │   └── JsonResponseFactoryInterface.php
+├── Security/
+│   ├── DebugIdValidator.php             # 400-throwing wrapper over Kernel `Storage\StorageIdValidator` (`[A-Za-z0-9_-]{1,64}`)
+│   ├── ClassNameValidator.php           # FQCN syntax guard before class_exists()/is_subclass_of() on input
+│   ├── UrlPolicy.php                    # SSRF guard for inspectorUrl (scheme, userinfo, forbidden ranges, DNS; strict mode)
+│   ├── NetworkAddressClassifier.php     # forbidden / private / public IP buckets (CIDR), loopback hostname helper
+│   └── SystemDnsResolver.php            # Default A+AAAA resolver for UrlPolicy (tests inject a closure instead)
 ├── Middleware/
 │   ├── IpFilterMiddleware.php           # IP whitelist validation
 │   ├── CorsMiddleware.php               # Permissive CORS headers
@@ -124,7 +137,7 @@ src/
 ├── PathMapper.php                       # IDE file path mapping
 ├── PathMapperInterface.php
 ├── NullPathMapper.php
-├── PathResolver.php                     # Path resolution
+├── PathResolver.php                     # Path resolution + static isInside()/canonical()/stripPrefix() helpers
 ├── PathResolverInterface.php
 └── ServerSentEventsStream.php           # SSE implementation
 ```
@@ -193,7 +206,9 @@ that work belongs to the web server.
 | Method | Path | Description |
 |--------|------|-------------|
 | GET | `/` | List available commands |
-| POST | `/` | Execute a command |
+| POST | `/` | Execute a command. Optional `?timeout=<seconds>` shortens the run limit |
+
+Every subprocess-backed command (`BashCommand`, `MagoCommand`, `PsalmCommand`, `PHPStanCommand`, `PHPUnitCommand`, `PHPUnitRawCommand`, `CodeceptionCommand`, `CodeceptionRawCommand`, `PestCommand`, `TestoCommand`) uses `ProcessCommandTrait`: the Symfony `Process` runs with `CommandTimeout::DEFAULT` (120 s, matches the fixture ceiling in the root CLAUDE.md — never raise). `withTimeout()` / `?timeout=` can only shorten it (`CommandTimeout::clamp()`). A timed-out process is killed and reported as `status: fail` with `errors: ["Command timed out after N seconds."]`. `MagoCommand::isAvailable()` memoises its `command -v mago` lookup (5 s `Process`, no `@shell_exec`).
 
 ### Composer API (`/inspect/api/composer`)
 
@@ -201,7 +216,9 @@ that work belongs to the web server.
 |--------|------|-------------|
 | GET | `/` | composer.json + composer.lock |
 | GET | `/inspect` | Package details |
-| POST | `/require` | Install package |
+| POST | `/require` | Install package (guarded by `allowDestructiveOperations`, 403 otherwise) |
+
+`ComposerController` never spawns `composer` itself: it hands the argv (`['composer', 'show', <pkg>, '--all', '--format=json']` / `['composer', 'require', '<pkg>:<version|*>', '-n'[, '--dev']]`) to an injectable runner — fourth constructor argument `callable(list<string>): CommandResponse`, default `BashCommand` (Symfony `Process` under the 120 s `CommandTimeout` ceiling). Unit tests inject a recording fake, so no process, composer binary or network is involved. `inspect` extracts the first JSON object from the output (composer prints root/su warnings around it); `require` returns the raw text output as `result` unless it is a JSON document.
 
 ### Cache API (`/inspect/api/cache`)
 
@@ -254,8 +271,10 @@ Requires `\Redis` (phpredis extension) in the DI container.
 
 | Method | Path | Description |
 |--------|------|-------------|
-| GET | `/` | Collect and return PHP code coverage data (requires pcov or xdebug) |
-| GET | `/file` | Read a source file (`?path=`) |
+| GET | `/` | Coverage recorded by `CodeCoverageCollector` for a stored entry: `?debugEntryId=<id>` or the newest entry whose summary has `codeCoverage`. 200 with `error` when no driver; 501 when the controller has no `CollectorRepositoryInterface` (adapter must wire it); 404 when no entry carries coverage |
+| GET | `/file` | Read a source file (`?path=`), must resolve inside the project root |
+
+The endpoint never starts/stops the driver itself (that only ever measured the controller and reported 0%).
 
 ### HTTP Mock API (`/inspect/api/http-mock`)
 
@@ -293,7 +312,9 @@ Language-agnostic endpoints for external applications to send debug data. Define
 | POST | `/` | Ingest single debug entry (collectors + optional context/summary) |
 | POST | `/batch` | Ingest multiple entries at once (max 100) |
 | POST | `/log` | Shorthand: ingest a single log entry |
-| GET | `/openapi.json` | Serve the OpenAPI spec |
+| GET | `/openapi.json` | Serve the OpenAPI spec (decoded once via `OpenApiSpecLoader`, ext-yaml or symfony/yaml) |
+
+A client-supplied `debugId` must match `DebugIdValidator::PATTERN` (= Kernel `StorageIdValidator::PATTERN`, `[A-Za-z0-9_-]{1,64}`, compatible with `DebuggerIdGenerator`) — it becomes a storage path segment. Anything else is a `BadRequestException` (400) and nothing is written. `CollectorRepository` applies the same validator on every read, so `/debug/api/{summary,view,dump,object}/{id}` and `?debugEntryId=` (RequestController, CodeCoverageController) reject traversal ids before they reach storage. Defense in depth: `FileStorage` / `SqliteStorage` re-validate every `read($type, $id)` / `write($id, …)` themselves and throw `InvalidArgumentException` (-> 500) for anything the API validator would have rejected, so a bypassed controller still cannot build a path from `../`.
 
 ### OTLP Trace Ingestion (`/debug/api/otlp`)
 
@@ -357,6 +378,8 @@ Manages external application registrations for multi-app inspector proxying.
 
 Service name `local` is reserved for the host PHP application.
 
+`inspectorUrl` is validated by `Security\UrlPolicy` at registration **and** re-checked by `InspectorProxyMiddleware` right before `sendRequest()` (502 `Service inspector URL is rejected: …`). Always enforced: only `http`/`https`, no userinfo, host required, unresolvable hosts fail closed, and neither a literal IP nor any resolved address may be **forbidden** — link-local / cloud metadata (`169.254.0.0/16`, `fe80::/10`), unspecified (`0.0.0.0/8`, `::`), multicast (`224.0.0.0/4`, `ff00::/8`), reserved (`240.0.0.0/4`); IPv4-mapped IPv6 is unwrapped first. **Private** targets — `localhost`/`*.localhost`, loopback, RFC1918, CGNAT `100.64.0.0/10`, ULA `fc00::/7`, site-local `fec0::/10` — are accepted by default (inspected services normally run on localhost / in the same docker network). `ApiSecurityConfig::$restrictInspectorUrlsToPublicHosts = true` (build `new UrlPolicy(restrictToPublicHosts: true)`) is the strict mode that refuses private targets too. The DNS resolver is injectable (`new UrlPolicy(false, $resolver)`) so tests never touch the network; the default is `SystemDnsResolver::resolve()`.
+
 ### Inspector Proxy
 
 `InspectorProxyMiddleware` is wired into the `/inspect/api` route group. When a request includes `?service=<name>`, the middleware proxies the request to the registered service's `inspectorUrl` instead of handling it locally. Requests without `?service` or with `?service=local` are handled by the local PHP controllers.
@@ -373,12 +396,33 @@ All API requests pass through:
 
 1. **IpFilterMiddleware** — Validates request IP against `allowedIPs` (default: `127.0.0.1`, `::1`)
 2. **CorsMiddleware** — Adds permissive CORS headers (`Access-Control-Allow-Origin: *`)
-3. **ResponseDataWrapper** — Wraps all responses in `{id, data, error, success}`
+3. **ResponseDataWrapper** — Wraps all responses in `{id, data, error, success}`; `NotFoundException` -> 404, `BadRequestException` -> 400, any other throwable -> 500 with `data.class`/`data.message` (+ `file`, `line`, `trace` only while `exposeExceptionDetails` is on — constructor flag, default `true`, exposed as `ApiSecurityConfig::$exposeExceptionDetails`)
 4. **TokenAuthMiddleware** — Optional token-based authentication
 
 Inspector route group (`/inspect/api`) additionally includes:
 
 5. **InspectorProxyMiddleware** — Routes requests with `?service=<name>` to external service URLs
+
+## Security Config Flags (`ApiSecurityConfig`)
+
+| Flag | Default | Effect |
+|------|---------|--------|
+| `allowedIps` | `['127.0.0.1', '::1']` | `IpFilterMiddleware` whitelist |
+| `authToken` | `''` | `TokenAuthMiddleware` (off when empty) |
+| `requestReplayAllowedHosts` | `['127.0.0.1', 'localhost']` | Hosts `RequestController::request` may replay to |
+| `allowDestructiveOperations` | `false` | Command execution, composer require, cache clear, raw SQL |
+| `restrictInspectorUrlsToPublicHosts` | `false` | Pass to `UrlPolicy` — strict mode refusing loopback/RFC1918/ULA `inspectorUrl` targets (link-local, metadata, unspecified, multicast, reserved, non-http(s), userinfo are refused in both modes) |
+| `exposeExceptionDetails` | `true` | Pass to `ResponseDataWrapper` — include `file`/`line`/`trace` in 500 responses |
+
+Adapters own the wiring: `ServiceController`, `InspectorProxyMiddleware` (`UrlPolicy`), `ResponseDataWrapper` and `CodeCoverageController` (`CollectorRepositoryInterface`) all default to the secure/legacy-compatible value when the extra constructor argument is omitted.
+
+## Input Guards (`Security/`)
+
+- `DebugIdValidator::assertValid($id, $field)` — throws `BadRequestException`; delegates the format to Kernel `Storage\StorageIdValidator`; used by `IngestionController` (write) and `CollectorRepository::loadData()` (every read).
+- `ClassNameValidator::classExists()` / `isSubclassOf()` — only a syntactically valid FQCN reaches the autoloader (`FileController ?class=`, `DebugController ?collector=`).
+- `PathResolver::isInside($root, $path)` — realpath both sides, compare with trailing `DIRECTORY_SEPARATOR` (`/srv/app-backup/.env` is outside `/srv/app`); used by `FileController` and `CodeCoverageController::file`.
+- `AcpSocketLocator` — ACP daemon socket at `<storagePath>/.acp/daemon.sock` in a `0700` owner-only directory (per-user temp fallback only when the path exceeds the 100-byte `sun_path` limit); directory owner/mode and socket node type/owner are verified before every `stream_socket_client()`.
+- `FileLlmSettings` logs the legacy `.llm-settings.json` migration through an optional PSR-3 logger (third constructor arg) instead of writing to STDERR.
 
 ## Response Format
 

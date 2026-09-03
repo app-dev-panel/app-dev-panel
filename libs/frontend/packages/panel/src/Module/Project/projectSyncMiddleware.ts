@@ -81,6 +81,12 @@ export const projectSyncMiddleware: Middleware<unknown, StateWithSlices, Project
     let pushTimer: ReturnType<typeof setTimeout> | null = null;
     let eventSource: EventSource | null = null;
     let sseReconnectTimer: ReturnType<typeof setTimeout> | null = null;
+    // Backend the open EventSource is pinned to. When the user switches
+    // `application.baseUrl` the stream must be re-opened against the new
+    // backend, otherwise config changes keep arriving from the old one.
+    let connectedBaseUrl: string | null = null;
+
+    const readBaseUrl = () => (api.getState().application?.baseUrl ?? '').replace(/\/$/, '');
 
     const schedulePush = () => {
         if (pushTimer !== null) clearTimeout(pushTimer);
@@ -111,7 +117,7 @@ export const projectSyncMiddleware: Middleware<unknown, StateWithSlices, Project
         if (typeof EventSource === 'undefined') return; // Non-browser env (SSR, tests).
         if (eventSource !== null) return;
 
-        const baseUrl = (api.getState().application?.baseUrl ?? '').replace(/\/$/, '');
+        const baseUrl = readBaseUrl();
         const url = `${baseUrl}/debug/api/project/event-stream`;
 
         let source: EventSource;
@@ -121,6 +127,7 @@ export const projectSyncMiddleware: Middleware<unknown, StateWithSlices, Project
             return;
         }
         eventSource = source;
+        connectedBaseUrl = baseUrl;
 
         source.onmessage = (event: MessageEvent) => {
             try {
@@ -145,6 +152,24 @@ export const projectSyncMiddleware: Middleware<unknown, StateWithSlices, Project
             if (sseReconnectTimer !== null) clearTimeout(sseReconnectTimer);
             sseReconnectTimer = setTimeout(connectEventStream, SSE_RECONNECT_MS);
         };
+    };
+
+    /**
+     * Re-open the stream when the backend URL changed underneath an active
+     * connection. Cheap string compare, so it can run on every action.
+     */
+    const reconnectIfBaseUrlChanged = () => {
+        if (eventSource === null || connectedBaseUrl === null) return;
+        if (readBaseUrl() === connectedBaseUrl) return;
+        eventSource.close();
+        eventSource = null;
+        connectedBaseUrl = null;
+        if (sseReconnectTimer !== null) {
+            clearTimeout(sseReconnectTimer);
+            sseReconnectTimer = null;
+        }
+        connectEventStream();
+        forceRefetchAll();
     };
 
     return (next) => (action) => {
@@ -175,6 +200,8 @@ export const projectSyncMiddleware: Middleware<unknown, StateWithSlices, Project
         }
 
         const result = next(action);
+
+        reconnectIfBaseUrlChanged();
 
         if (isGetFulfilled(action)) {
             const {config} = action.payload;

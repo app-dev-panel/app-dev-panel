@@ -47,7 +47,11 @@ final class InspectorApiTest extends TestCase
         // Verify database inspector is available (requires SchemaProvider)
         $tableResponse = self::$client->get('/inspect/api/table');
         if ($tableResponse->getStatusCode() !== 200) {
-            self::markTestSkipped('Database inspector not available on this playground');
+            self::fail(sprintf(
+                'Database inspector not available on this playground (GET /inspect/api/table returned %d). URL: %s',
+                $tableResponse->getStatusCode(),
+                self::$baseUrl,
+            ));
         }
     }
 

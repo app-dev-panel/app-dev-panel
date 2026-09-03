@@ -43,7 +43,13 @@ only depend on `yiisoft/var-dumper` (core infra).
 | `StorageInterface` | Abstraction for persisting debug data |
 | `FileStorage` | JSON file-based storage with garbage collection |
 | `SqliteStorage` | SQLite-backed storage with WAL journaling and prepared statements |
-| `BroadcastingStorage` | Decorator that broadcasts entry-created UDP notifications via `Broadcaster` |
+| `StorageIdValidator` | `PATTERN = /^[A-Za-z0-9_-]{1,64}$/`, `isValid(mixed)`, `assertValid(string): string` (throws `InvalidArgumentException`). Matches `DebuggerIdGenerator` output; `FileStorage`/`SqliteStorage` apply it to every externally supplied `$id` in `read()`/`write()` before touching the filesystem or database — defense in depth behind the API's `DebugIdValidator` |
+| `BroadcastingStorage` | Decorator that broadcasts entry-created UDP notifications via `BroadcasterInterface`. Pass the `DebuggerIdGenerator` (3rd ctor arg) so `flush()` broadcasts the id just flushed without re-reading storage; without it, falls back to the newest (= last) summary key |
+| `DebugServer\BroadcasterInterface` | `broadcast(int $type, string $data): array` — errors keyed by message. Implemented by `Broadcaster`; inject fakes in tests instead of hitting sockets |
+| `DebugServer\Broadcaster` | Discovers `.sock`/`.port` files and sends one datagram each via `DatagramSocket`. Connect + send are bounded by `Broadcaster::DEFAULT_TIMEOUT` (0.2s hard cap, ctor arg clamps to it); never blocks for `default_socket_timeout`, never emits notices |
+| `DebugServer\DatagramSocket` | Non-blocking datagram send with `stream_select()` deadline; PHP stream notices are captured into the returned error string; `silenced()` helper (scoped error handler, no `@`) |
+| `Helper\BoundedProcess` | `run(string $command, ?string $cwd, float $timeout): ?string` — `proc_open` with hard deadline, drains stdout+stderr concurrently (no pipe deadlock), SIGKILLs on timeout, `null` on failure/non-zero exit |
+| `Collector\Web\HttpMessageRenderer` / `StreamBodyReader` | Raw HTTP text for `RequestCollector` (`requestRaw`/`responseRaw`): binary content types (anything not text/json/xml/form) are never read; bodies > `maxBodySize` (1 MiB default, also enforced while reading unknown-length streams), non-seekable or non-readable streams become `[body omitted: …]` placeholders; stream position restored; throwing streams yield `[body unavailable: …]` — never an exception |
 | `StorageFactory` | Resolves a driver name (`file`, `sqlite`) or class name into a `StorageInterface` instance |
 | `MemoryStorage` | In-memory storage for testing |
 | `CollectorInterface` | Interface all collectors must implement |
@@ -96,7 +102,7 @@ src/
 │   ├── AssetBundleCollector.php         # Asset bundles (fed by adapter hooks)
 │   ├── AuthorizationCollector.php       # Auth: user, token, guards, role hierarchy, access decisions, auth events
 │   ├── DeprecationCollector.php         # PHP deprecation notices
-│   ├── EnvironmentCollector.php         # PHP environment info (extensions, ini settings)
+│   ├── EnvironmentCollector.php         # PHP environment info (extensions, ini settings); redacts secret env/server values; git via BoundedProcess (≤5s)
 │   ├── MiddlewareCollector.php          # HTTP middleware stack execution
 │   ├── OpenTelemetryCollector.php       # OpenTelemetry spans (fed by OTLP ingestion)
 │   ├── OtlpTraceParser.php             # OTLP trace data parser
@@ -111,6 +117,8 @@ src/
 │   ├── ValidatorCollector.php           # Validation results (fed by adapter hooks)
 │   ├── Web/
 │   │   ├── RequestCollector.php
+│   │   ├── HttpMessageRenderer.php      # Safe raw HTTP rendering (binary/oversized/non-seekable bodies → placeholders)
+│   │   ├── StreamBodyReader.php         # Size-capped, position-restoring, exception-safe PSR-7 body read
 │   │   └── WebAppInfoCollector.php
 │   ├── Console/
 │   │   ├── CommandCollector.php
@@ -128,11 +136,11 @@ src/
 ├── Storage/
 │   ├── StorageInterface.php
 │   ├── StorageFactory.php               # Resolves driver name ('file' | 'sqlite') or class name
-│   ├── FileStorage.php                  # JSON file-based (default)
-│   ├── SqliteStorage.php                # SQLite (WAL + prepared statements)
-│   ├── BroadcastingStorage.php          # Decorator: broadcasts ENTRY_CREATED via UDP
-│   ├── FileStorageGarbageCollector.php  # Automatic cleanup of old entries
-│   ├── GarbageCollector.php             # GC interface
+│   ├── FileStorage.php                  # JSON file-based (default); validates ids via StorageIdValidator
+│   ├── SqliteStorage.php                # SQLite (WAL + prepared statements); validates ids via StorageIdValidator
+│   ├── StorageIdValidator.php           # Canonical entry id format `[A-Za-z0-9_-]{1,64}` (shared with API DebugIdValidator)
+│   ├── BroadcastingStorage.php          # Decorator: broadcasts ENTRY_CREATED (id of the flushed entry) via UDP
+│   ├── FileStorageGarbageCollector.php  # Cleanup of old entries; flock on `.gc.lock` (file is never unlinked)
 │   └── MemoryStorage.php
 ├── Event/                        # Debugger lifecycle events
 │   ├── ProxyMethodCallEvent.php
@@ -143,9 +151,12 @@ src/
 │   └── Primitives.php                    # `Primitives::dump()` — VarDumper::asPrimitives + deep closure walk
 ├── Helper/                       # Utilities
 │   ├── BacktraceIgnoreMatcher.php
+│   ├── BoundedProcess.php        # proc_open with hard deadline + concurrent pipe draining
 │   └── StreamWrapper/
 └── DebugServer/                  # UDP socket server for real-time streaming
-    ├── Broadcaster.php
+    ├── Broadcaster.php           # Implements BroadcasterInterface; 0.2s hard cap per connect/send
+    ├── BroadcasterInterface.php
+    ├── DatagramSocket.php        # Non-blocking, notice-free datagram send with stream_select deadline
     ├── Connection.php
     ├── LoggerDecorator.php       # PSR-3 logger decorator that broadcasts via UDP
     ├── SocketReader.php
@@ -162,6 +173,26 @@ startup() → [proxies feed collectors during request] → shutdown() → flush 
 2. Collection: Proxies intercept PSR calls and feed data to collectors transparently
 3. `shutdown()`: Call `shutdown()` on all collectors, serialize data via Dumper
 4. Storage: Write summary, data, and objects as three separate entries
+
+`Debugger::shutdown()` runs as a `register_shutdown_function` callback, so it never lets a
+`Throwable` escape: each collector `shutdown()` and the storage `flush()` are wrapped, failures
+are logged at `error` level through the injected PSR logger (`exception` in context) and the
+debugger is marked inactive regardless. A broken collector or storage costs one debug entry,
+never a post-response fatal error.
+
+### JSON safety (`Dumper` / `DumpContext`)
+
+Storage flush must produce valid JSON for arbitrary collected data (issue #114):
+
+- `DumpContext::getResourceDescription()` returns only JSON-safe values: `stream_get_meta_data()`
+  is walked and non-scalars (e.g. `wrapper_data` holding a user-space stream wrapper object,
+  which in turn owns resources) become description strings.
+- `Dumper::encodeJson()` never throws: values are pre-sanitised (`sanitizeForJson`: resources,
+  NAN/INF, closures, stray objects → placeholders; arrays capped at `Dumper::MAX_JSON_DEPTH` = 500,
+  below `json_encode`'s 512), then `JSON_THROW_ON_ERROR`; on failure it retries with
+  `JSON_PARTIAL_OUTPUT_ON_ERROR`, and as a last resort returns `{"__error": …}`.
+- `DumpContext::buildObjectsCache()` (used by `asJsonObjectsMap` with unbounded depth) stops at
+  `DumpContext::MAX_CACHE_DEPTH` = 256, so array reference cycles cannot recurse forever.
 
 ## Adding a New Collector
 
@@ -271,4 +302,24 @@ Storage receives data from two sources:
 1. **Debugger flush** — PHP collectors write via `StorageInterface` after request/command completion
 2. **Ingestion API** — `IngestionController` writes directly to FileStorage for external (non-PHP) apps
 
+Both `FileStorage` and `SqliteStorage` reject any `$id` that fails `StorageIdValidator` with
+`InvalidArgumentException` before building a path or running a query (`../../etc`, `foo/bar`,
+`a.json`, `*`, empty, > 64 chars). Ids produced by `DebuggerIdGenerator` always pass.
+
 FileStorage uses `LOCK_EX` for atomic writes and `flock` for GC mutual exclusion.
+`FileStorageGarbageCollector` (the only GC class; the former duplicate `GarbageCollector` was
+removed) locks `<path>/.gc.lock` with `LOCK_EX | LOCK_NB` and skips the run when the lock is
+held. The lock file is released (`LOCK_UN` + `fclose`) but **never unlinked** — unlinking while
+another process is about to `fopen()` it would give that process a different inode and two
+"exclusive" GC runs.
+
+### EnvironmentCollector redaction
+
+`EnvironmentCollector` keeps env/server **keys** but replaces values with `***`
+(`EnvironmentCollector::REDACTED`) when the key matches
+`EnvironmentCollector::DEFAULT_SENSITIVE_KEY_PATTERN`
+(`/(PASS|PASSWORD|SECRET|TOKEN|KEY|DSN|CREDENTIAL|PRIVATE|AUTH)/i`). Override via the first
+constructor argument (`sensitiveKeyPattern`; `null` disables). Git info (`branch`, `commit`,
+`commitFull`) is memoised per request and each `git` call runs through `Helper\BoundedProcess`
+with `gitTimeout` (default and ceiling `DEFAULT_GIT_TIMEOUT` = 5s); `gitBinary` is overridable
+for tests.

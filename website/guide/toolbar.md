@@ -137,6 +137,7 @@ When the iframe is enabled (via the Panel button), the toolbar loads the full de
 - **Entry selection** — Selecting an entry in the toolbar navigates the iframe to that entry
 - **Collector navigation** — Clicking a metric chip navigates the iframe to the corresponding collector view
 - **Resizable** — Drag the separator bar to resize the iframe height
+- **Mount-agnostic** — The iframe loads the panel HTML from `panel.viewer_base_path`; that HTML carries `<base href="<mount>/">`, so the embedded panel and its deep links work whether the panel is mounted at `/debug`, `/tools/debug` or any other prefix (issue #113)
 
 ### Redux State Sync
 

@@ -6,6 +6,7 @@ namespace AppDevPanel\Adapter\Yii2\Tests\Unit;
 
 use AppDevPanel\Adapter\Yii2\Collector\DbProfilingTarget;
 use AppDevPanel\Adapter\Yii2\Collector\DebugLogTarget;
+use AppDevPanel\Adapter\Yii2\EventListener\WebListener;
 use AppDevPanel\Adapter\Yii2\Module;
 use AppDevPanel\Adapter\Yii2\Proxy\UrlRuleProxy;
 use AppDevPanel\Api\ApiApplication;
@@ -466,6 +467,96 @@ final class ModuleBootstrapTest extends TestCase
             $rootPath,
             'Root path should not be the same as @app when @app may be a subdirectory',
         );
+    }
+
+    /**
+     * Regression for GitHub issue #108: `bootstrap()` runs twice when the module is
+     * listed in the app `bootstrap` array AND auto-registered via composer
+     * `extra.bootstrap`. The second run used to create a second collector set and a
+     * second Debugger while the WebListener kept the first collectors → empty entries.
+     */
+    public function testBootstrapTwiceIsIdempotent(): void
+    {
+        $existingRule = $this->createMock(UrlRule::class);
+        $existingRule->name = 'existing/route';
+        $app = $this->createWebApp([$existingRule]);
+
+        $module = new Module('app-dev-panel', null, ['storagePath' => $this->storagePath . '/debug']);
+        $module->bootstrap($app);
+        $debuggerAfterFirst = $module->getDebugger();
+        $collectorsAfterFirst = $module->getCollectorInstances();
+        $rulesAfterFirst = $app->getUrlManager()->rules;
+
+        $module->bootstrap($app);
+
+        $this->assertTrue($module->isBootstrapped());
+
+        // One collector instance per class, same instances as after the first run.
+        $collectors = $module->getCollectorInstances();
+        $classes = array_map(static fn(CollectorInterface $c) => $c::class, $collectors);
+        $this->assertSame(array_values(array_unique($classes)), $classes, 'duplicate collector instances');
+        $this->assertSame($collectorsAfterFirst, $collectors);
+
+        // One Debugger, shared by the module and the DI container.
+        $this->assertSame($debuggerAfterFirst, $module->getDebugger());
+        $this->assertSame($debuggerAfterFirst, \Yii::$container->get(Debugger::class));
+
+        // URL rules: no double wrapping, no duplicate ADP routes.
+        $rules = $app->getUrlManager()->rules;
+        $this->assertCount(count($rulesAfterFirst), $rules);
+        $this->assertContainsOnlyInstancesOf(UrlRuleProxy::class, $rules);
+        $innerRules = array_map(static fn(UrlRuleProxy $rule) => $rule->getInnerRule(), $rules);
+        $this->assertSame([], array_filter($innerRules, static fn($inner) => $inner instanceof UrlRuleProxy));
+
+        // Exactly one WebListener registered, and it holds the registered collectors.
+        $afterRequestHandlers = $this->classEventHandlers(Application::class, Application::EVENT_AFTER_REQUEST);
+        $this->assertCount(1, $afterRequestHandlers);
+        $listener = $afterRequestHandlers[0][0][0];
+        $this->assertInstanceOf(WebListener::class, $listener);
+
+        $listenerRequestCollector = new \ReflectionProperty($listener, 'requestCollector')->getValue($listener);
+        $this->assertSame($module->getCollector(RequestCollector::class), $listenerRequestCollector);
+        $this->assertSame($module->getDebugger(), new \ReflectionProperty($listener, 'debugger')->getValue($listener));
+
+        $debuggerCollectors = new \ReflectionProperty(Debugger::class, 'collectors')->getValue($module->getDebugger());
+        $this->assertContains($listenerRequestCollector, $debuggerCollectors);
+        $this->assertSame($collectors, $debuggerCollectors);
+    }
+
+    public function testDisabledTimelineCollectorIsNotRegistered(): void
+    {
+        $module = $this->createModuleAndBootstrap(['collectors' => ['timeline' => false]]);
+
+        $classes = array_map(static fn(CollectorInterface $c) => $c::class, $module->getCollectorInstances());
+        $this->assertNotContains(TimelineCollector::class, $classes);
+        // Dependants still receive a (never started, hence inert) timeline instance.
+        $this->assertContains(RequestCollector::class, $classes);
+    }
+
+    public function testWebListenerReceivesConfiguredRoutePrefixes(): void
+    {
+        $this->createModuleAndBootstrap(['routePrefix' => 'adp', 'inspectorRoutePrefix' => 'adp-inspect']);
+
+        $handlers = $this->classEventHandlers(Application::class, Application::EVENT_AFTER_REQUEST);
+        $listener = $handlers[0][0][0];
+        $this->assertInstanceOf(WebListener::class, $listener);
+        $this->assertSame('adp', new \ReflectionProperty($listener, 'routePrefix')->getValue($listener));
+        $this->assertSame(
+            'adp-inspect',
+            new \ReflectionProperty($listener, 'inspectorRoutePrefix')->getValue($listener),
+        );
+    }
+
+    /**
+     * Class-level handlers registered via `Event::on($class, $name, …)` for exactly `$class`.
+     *
+     * @return list<array{0: callable, 1: mixed}>
+     */
+    private function classEventHandlers(string $class, string $name): array
+    {
+        $events = new \ReflectionProperty(Event::class, '_events')->getValue();
+
+        return array_values($events[$name][ltrim($class, '\\')] ?? []);
     }
 
     private function createModuleAndBootstrap(array $extraConfig = []): Module

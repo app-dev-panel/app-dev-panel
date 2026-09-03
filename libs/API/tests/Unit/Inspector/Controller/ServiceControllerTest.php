@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AppDevPanel\Api\Tests\Unit\Inspector\Controller;
 
 use AppDevPanel\Api\Inspector\Controller\ServiceController;
+use AppDevPanel\Api\Security\UrlPolicy;
 use AppDevPanel\Kernel\Service\FileServiceRegistry;
 use AppDevPanel\Kernel\Service\ServiceDescriptor;
 use InvalidArgumentException;
@@ -24,11 +25,24 @@ final class ServiceControllerTest extends ControllerTestCase
         $this->removeDir($this->storagePath);
     }
 
-    private function createController(): ServiceController
+    /**
+     * Stub DNS so the SSRF policy never touches the network: `python-app` is public,
+     * `internal.corp` is RFC1918, everything else is unresolvable.
+     */
+    private function urlPolicy(bool $publicOnly = false): UrlPolicy
+    {
+        return new UrlPolicy($publicOnly, static fn(string $host): array => match ($host) {
+            'python-app' => ['203.0.113.10'],
+            'internal.corp' => ['10.0.0.5'],
+            default => [],
+        });
+    }
+
+    private function createController(bool $publicOnly = false): ServiceController
     {
         $registry = new FileServiceRegistry($this->storagePath);
 
-        return new ServiceController($this->createResponseFactory(), $registry);
+        return new ServiceController($this->createResponseFactory(), $registry, $this->urlPolicy($publicOnly));
     }
 
     private function createControllerWithService(string $service = 'test-svc'): ServiceController
@@ -39,7 +53,7 @@ final class ServiceControllerTest extends ControllerTestCase
             new ServiceDescriptor($service, 'python', 'http://localhost:9090', ['config', 'routes'], $now, $now),
         );
 
-        return new ServiceController($this->createResponseFactory(), $registry);
+        return new ServiceController($this->createResponseFactory(), $registry, $this->urlPolicy());
     }
 
     public function testRegister(): void
@@ -92,6 +106,83 @@ final class ServiceControllerTest extends ControllerTestCase
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('inspectorUrl');
         $controller->register($this->post(['service' => 'my-app']));
+    }
+
+    /**
+     * Refused in both policy modes.
+     *
+     * @return iterable<string, array{string, string}>
+     */
+    public static function rejectedInspectorUrls(): iterable
+    {
+        yield 'cloud metadata' => ['http://169.254.169.254/latest/meta-data', 'link-local'];
+        yield 'link local v6' => ['http://[fe80::1]:9090', 'link-local'];
+        yield 'unspecified' => ['http://0.0.0.0:9090', 'link-local'];
+        yield 'userinfo' => ['http://admin:pw@python-app:9090', 'credentials'];
+        yield 'gopher scheme' => ['gopher://python-app:70', 'scheme'];
+        yield 'javascript scheme' => ['javascript://python-app/%0aalert(1)', 'scheme'];
+        yield 'file scheme' => ['file:///etc/passwd', 'malformed'];
+        yield 'unresolvable' => ['http://nope.invalid', 'could not be resolved'];
+    }
+
+    #[\PHPUnit\Framework\Attributes\DataProvider('rejectedInspectorUrls')]
+    public function testRegisterRejectsUnsafeInspectorUrl(string $url, string $reason): void
+    {
+        foreach ([false, true] as $publicOnly) {
+            $controller = $this->createController($publicOnly);
+
+            try {
+                $controller->register($this->post(['service' => 'evil', 'inspectorUrl' => $url]));
+                $this->fail('Expected the inspectorUrl to be rejected.');
+            } catch (InvalidArgumentException $e) {
+                $this->assertStringContainsString('inspectorUrl', $e->getMessage());
+                $this->assertStringContainsString($reason, $e->getMessage());
+            }
+
+            // Nothing must have been persisted.
+            $this->assertSame([], $this->responseData($controller->list($this->get())));
+        }
+    }
+
+    /**
+     * The normal localhost / docker-compose case: accepted by default.
+     *
+     * @return iterable<string, array{string}>
+     */
+    public static function privateInspectorUrls(): iterable
+    {
+        yield 'localhost' => ['http://localhost:9090'];
+        yield 'loopback' => ['http://127.0.0.1:9090'];
+        yield 'loopback v6' => ['http://[::1]:9090'];
+        yield 'rfc1918 literal' => ['http://10.0.0.5:9090'];
+        yield 'docker network name' => ['http://internal.corp:9090'];
+    }
+
+    #[\PHPUnit\Framework\Attributes\DataProvider('privateInspectorUrls')]
+    public function testRegisterAllowsPrivateInspectorUrlByDefault(string $url): void
+    {
+        $controller = $this->createController();
+        $response = $controller->register($this->post(['service' => 'local-python', 'inspectorUrl' => $url]));
+
+        $this->assertSame(200, $response->getStatusCode());
+        $this->assertTrue($this->responseData($response)['registered']);
+        $this->assertSame($url, $this->responseData($controller->list($this->get()))[0]['inspectorUrl']);
+    }
+
+    #[\PHPUnit\Framework\Attributes\DataProvider('privateInspectorUrls')]
+    public function testRegisterRejectsPrivateInspectorUrlInPublicHostsOnlyMode(string $url): void
+    {
+        $controller = $this->createController(publicOnly: true);
+
+        try {
+            $controller->register($this->post(['service' => 'local-python', 'inspectorUrl' => $url]));
+            $this->fail('Expected the inspectorUrl to be rejected.');
+        } catch (InvalidArgumentException $e) {
+            $this->assertStringContainsString('inspectorUrl', $e->getMessage());
+            $this->assertMatchesRegularExpression('/loopback|private/', $e->getMessage());
+        }
+
+        $this->assertSame([], $this->responseData($controller->list($this->get())));
     }
 
     public function testHeartbeat(): void

@@ -18,7 +18,9 @@ use PHPUnit\Framework\TestCase;
  *  3. Debugger starts and stops
  *  4. Data is flushed to SqliteStorage
  *
- * Requires: playground/symfony-app with `composer install` completed.
+ * Requires: playground/symfony-app with `composer install` completed. Belongs to the
+ * `playground` group (excluded from the default suite); when the group is run, a missing
+ * playground is a hard failure, never a skip.
  */
 #[CoversNothing]
 #[Group('playground')]
@@ -32,14 +34,11 @@ final class ConsoleProcessIntegrationTest extends TestCase
     {
         $consolePath = realpath(self::PLAYGROUND_DIR . '/bin/console');
         if ($consolePath === false || !is_executable($consolePath)) {
-            $this->markTestSkipped('Playground app not available (bin/console not found or not executable).');
+            self::fail('Playground app not available (bin/console not found or not executable).');
         }
 
-        $vendorPath = realpath(self::PLAYGROUND_DIR . '/vendor/autoload.php');
-        if ($vendorPath === false) {
-            $this->markTestSkipped(
-                'Playground vendor not installed. Run: cd playground/symfony-app && composer install',
-            );
+        if (realpath(self::PLAYGROUND_DIR . '/vendor/autoload.php') === false) {
+            self::fail('Playground vendor not installed. Run: cd playground/symfony-app && composer install');
         }
 
         $this->debugStoragePath = realpath(self::PLAYGROUND_DIR) . '/var/debug';

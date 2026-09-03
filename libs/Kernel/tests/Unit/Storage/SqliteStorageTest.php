@@ -279,6 +279,55 @@ final class SqliteStorageTest extends AbstractStorageTestCase
         $storage->read('not-a-real-column');
     }
 
+    /**
+     * @return iterable<string, array{string}>
+     */
+    public static function invalidIds(): iterable
+    {
+        yield 'traversal' => ['../../etc'];
+        yield 'slash' => ['foo/bar'];
+        yield 'dot' => ['foo.json'];
+        yield 'empty' => [''];
+        yield 'sql' => ["x' OR '1'='1"];
+        yield 'too long' => [str_repeat('x', 65)];
+    }
+
+    #[DataProvider('invalidIds')]
+    public function testReadRejectsInvalidId(string $id): void
+    {
+        $storage = $this->getStorage(new DebuggerIdGenerator());
+
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Invalid debug entry id');
+
+        $storage->read(StorageInterface::TYPE_DATA, $id);
+    }
+
+    #[DataProvider('invalidIds')]
+    public function testWriteRejectsInvalidId(string $id): void
+    {
+        $storage = $this->getStorage(new DebuggerIdGenerator());
+
+        try {
+            $storage->write($id, ['id' => $id], [], []);
+            $this->fail('Expected InvalidArgumentException.');
+        } catch (\InvalidArgumentException $e) {
+            $this->assertStringContainsString('Invalid debug entry id', $e->getMessage());
+        }
+
+        $this->assertSame([], $storage->read(StorageInterface::TYPE_SUMMARY));
+    }
+
+    public function testGeneratedAndExternalIdsRoundTrip(): void
+    {
+        $storage = $this->getStorage(new DebuggerIdGenerator());
+
+        foreach ([new DebuggerIdGenerator()->getId(), 'external-123_abc', str_repeat('x', 64)] as $id) {
+            $storage->write($id, ['id' => $id], ['key' => 'value'], []);
+            $this->assertSame(['id' => $id], $storage->read(StorageInterface::TYPE_SUMMARY, $id)[$id]);
+        }
+    }
+
     public function getStorage(DebuggerIdGenerator $idGenerator): SqliteStorage
     {
         return new SqliteStorage($this->path, $idGenerator);

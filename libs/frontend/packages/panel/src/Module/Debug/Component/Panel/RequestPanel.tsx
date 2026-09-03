@@ -8,9 +8,9 @@ import {EmptyState} from '@app-dev-panel/sdk/Component/EmptyState';
 import {FilterInput} from '@app-dev-panel/sdk/Component/FilterInput';
 import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
 import {monoFontFamily} from '@app-dev-panel/sdk/Component/Theme/DefaultTheme';
+import {copyText} from '@app-dev-panel/sdk/Helper/clipboard';
 import {Box, Chip, Icon, IconButton, Tab, Tabs, type Theme, Tooltip, Typography} from '@mui/material';
 import {styled, useTheme} from '@mui/material/styles';
-import clipboardCopy from 'clipboard-copy';
 import {useCallback, useMemo, useState} from 'react';
 import {useSearchParams} from 'react-router';
 
@@ -333,7 +333,7 @@ export const RequestPanel = ({data}: RequestPanelProps) => {
             console.error(result.error);
             return;
         }
-        clipboardCopy(result.data.command);
+        void copyText(result.data.command);
     }, [debugEntry, postCurlBuildInfo]);
 
     if (!data) {

@@ -8,53 +8,82 @@ use AppDevPanel\Api\Inspector\Controller\OpcacheController;
 
 final class OpcacheControllerTest extends ControllerTestCase
 {
-    public function testIndexWhenOpcacheAvailable(): void
+    private const array STATUS = [
+        'opcache_enabled' => true,
+        'memory_usage' => ['used_memory' => 1024, 'free_memory' => 4096],
+    ];
+
+    private const array CONFIGURATION = [
+        'directives' => ['opcache.enable' => true],
+        'version' => ['version' => '8.4.0'],
+    ];
+
+    public function testIndexReturnsStatusAndConfigurationWhenAvailable(): void
     {
-        $controller = new OpcacheController($this->createResponseFactory());
+        $configurationCalls = 0;
+        $controller = new OpcacheController(
+            $this->createResponseFactory(),
+            static fn(): array => self::STATUS,
+            static function () use (&$configurationCalls): array {
+                $configurationCalls++;
+                return self::CONFIGURATION;
+            },
+        );
+
         $response = $controller->index($this->get());
 
-        // opcache may or may not be available in the test environment
-        $this->assertContains($response->getStatusCode(), [200, 422]);
+        $this->assertSame(200, $response->getStatusCode());
+        $this->assertSame(
+            ['status' => self::STATUS, 'configuration' => self::CONFIGURATION],
+            $this->responseData($response),
+        );
+        $this->assertSame(1, $configurationCalls);
     }
 
-    public function testIndexResponseStructure(): void
+    public function testIndexReturns422WhenStatusProviderReportsUnavailable(): void
     {
-        $controller = new OpcacheController($this->createResponseFactory());
-        $response = $controller->index($this->get());
+        $configurationCalls = 0;
+        $controller = new OpcacheController(
+            $this->createResponseFactory(),
+            static fn(): false => false,
+            static function () use (&$configurationCalls): array {
+                $configurationCalls++;
+                return self::CONFIGURATION;
+            },
+        );
 
-        $data = $this->responseData($response);
-
-        if ($response->getStatusCode() === 422) {
-            // OPcache not available
-            $this->assertArrayHasKey('message', $data);
-            $this->assertStringContainsString('OPcache', $data['message']);
-        } else {
-            // OPcache available
-            $this->assertArrayHasKey('status', $data);
-            $this->assertArrayHasKey('configuration', $data);
-        }
-    }
-
-    public function testIndexReturns422MessageWhenNotAvailable(): void
-    {
-        // If opcache is not loaded, we should get a 422 with a message
-        if (\function_exists('opcache_get_status') && \opcache_get_status(true) !== false) {
-            $this->markTestSkipped('OPcache is enabled in this environment.');
-        }
-
-        $controller = new OpcacheController($this->createResponseFactory());
         $response = $controller->index($this->get());
 
         $this->assertSame(422, $response->getStatusCode());
-        $data = $this->responseData($response);
-        $this->assertSame('OPcache is not installed or configured', $data['message']);
+        $this->assertSame(['message' => 'OPcache is not installed or configured'], $this->responseData($response));
+        $this->assertSame(0, $configurationCalls, 'Configuration must not be read when OPcache is unavailable');
     }
 
     public function testIndexContentType(): void
     {
-        $controller = new OpcacheController($this->createResponseFactory());
+        $controller = new OpcacheController($this->createResponseFactory(), static fn(): false => false);
+
         $response = $controller->index($this->get());
 
         $this->assertSame('application/json', $response->getHeaderLine('Content-Type'));
+    }
+
+    public function testDefaultProvidersProduceAValidResponseShape(): void
+    {
+        // Default providers call the real extension; the environment decides which branch is taken,
+        // but the response shape must be valid either way.
+        $controller = new OpcacheController($this->createResponseFactory());
+
+        $response = $controller->index($this->get());
+        $data = $this->responseData($response);
+
+        if ($response->getStatusCode() === 422) {
+            $this->assertSame(['message' => 'OPcache is not installed or configured'], $data);
+            return;
+        }
+
+        $this->assertSame(200, $response->getStatusCode());
+        $this->assertIsArray($data['status']);
+        $this->assertIsArray($data['configuration']);
     }
 }

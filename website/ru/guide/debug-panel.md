@@ -37,6 +37,10 @@ http://ваше-приложение/debug
 
 Панель поддерживает клиентскую маршрутизацию, поэтому все подпути (например, `/debug/logs`, `/debug/inspector/routes`) обрабатываются SPA.
 
+::: tip Любая глубина монтирования
+Отдаваемый HTML содержит `<base href="<mount>/">` (например, `<base href="/debug/">`), поэтому все относительные URL в бандле — `bundle.js`, ленивые чанки, service worker, favicon, манифест — резолвятся от каталога монтирования. Открытие `/debug`, `/debug/` или прямой ссылки вроде `/debug/inspector/routes` загружает одни и те же ассеты, а встроенный iframe панели в тулбаре работает на любой глубине монтирования. См. [GitHub issue #113](https://github.com/app-dev-panel/app-dev-panel/issues/113).
+:::
+
 ::: tip Встроенный сервер PHP
 При использовании встроенного сервера PHP установите `PHP_CLI_SERVER_WORKERS=3` или больше. ADP выполняет параллельные запросы (SSE + получение данных); однопоточный режим вызывает таймауты.
 
@@ -142,7 +146,7 @@ make build-install-panel    # Сборка + публикация одной к�
 
 | Адаптер | Источник | Раздаётся как |
 |---------|----------|---------------|
-| Symfony | `<projectDir>/public/bundles/appdevpanel/bundle.js` (после `bin/console app-dev-panel:assets:install`) или `Resources/public/bundle.js` (легаси `make build-panel`) → `/bundles/appdevpanel`. До запуска команды используется CDN; статику отдаёт веб-сервер (nginx/Apache) | `/bundles/appdevpanel` или CDN |
+| Symfony | `<projectDir>/public/bundles/appdevpanel/bundle.js` (после `bin/console app-dev-panel:assets:install`) → `/bundles/appdevpanel`. Учитывается только опубликованная копия — неопубликованный `Resources/public/bundle.js` (легаси `make build-panel`) оставляет панель на CDN; статику отдаёт веб-сервер (nginx/Apache) | `/bundles/appdevpanel` или CDN |
 | Laravel | `FrontendAssets::path()` или `resources/dist/` → `vendor:publish --tag=app-dev-panel-assets` | `/vendor/app-dev-panel` |
 | Yii 3 | `FrontendAssets::path()` или `resources/dist/` → симлинк в `@public/app-dev-panel/` | `/app-dev-panel` |
 | Yii 2 | `FrontendAssets::path()` или `resources/dist/` → симлинк в `@webroot/app-dev-panel/` | `/app-dev-panel` |
@@ -221,6 +225,7 @@ GET /debug/logs/detail
     → Адаптер перехватывает /debug/* (но не /debug/api/*)
     → ApiApplication направляет в PanelController
     → PanelController рендерит HTML с:
+        - <base href="/debug/"> (каталог монтирования, issue #113)
         - <link> на bundle.css
         - <script> с конфигом window['AppDevPanelWidget']
         - <script> загружающий bundle.js
@@ -252,6 +257,12 @@ php vendor/bin/adp serve --host=127.0.0.1 --port=8888 --storage-path=./var/adp
 ```bash
 php vendor/bin/adp serve --frontend-path=/path/to/my/dist
 ```
+
+Предсобранный `index.html` отдаётся с внедрённым `<base href="/">`, поэтому прямые ссылки (`/debug/logs`, `/inspector/routes`) запрашивают `/bundle.js`, а не `/debug/bundle.js` — SPA-фоллбек работает на любой глубине.
+
+::: warning Безопасные значения по умолчанию
+`serve` принимает API-запросы только от loopback-клиентов (`127.0.0.1`, `::1`), если иное не задано через `--allowed-ips` / `ADP_ALLOWED_IPS` (`*` = все), и отказывается запускаться на не-loopback `--host` без `--auth-token` / `ADP_AUTH_TOKEN` (клиенты передают его в заголовке `X-Debug-Token`). Подробности на [странице CLI](/ru/guide/cli#serve-автономный-сервер-adp).
+:::
 
 ### Обновление фронтенда
 

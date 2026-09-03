@@ -218,7 +218,7 @@ final class ScenarioTest extends FixtureTestCase
         // Find a debug ID that has log data
         $logFixtureId = self::$fixtureDebugIds['logs:basic'] ?? null;
         if ($logFixtureId === null) {
-            self::markTestSkipped('logs:basic fixture not available');
+            self::fail('logs:basic fixture did not produce a debug entry on this playground');
         }
 
         $data = self::getDebugData($logFixtureId);

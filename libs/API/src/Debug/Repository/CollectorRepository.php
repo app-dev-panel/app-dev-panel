@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AppDevPanel\Api\Debug\Repository;
 
 use AppDevPanel\Api\Debug\Exception\NotFoundException;
+use AppDevPanel\Api\Security\DebugIdValidator;
 use AppDevPanel\Kernel\Storage\StorageInterface;
 
 final class CollectorRepository implements CollectorRepositoryInterface
@@ -36,10 +37,12 @@ final class CollectorRepository implements CollectorRepositoryInterface
     public function getObject(string $id, string $objectId): ?array
     {
         $dump = $this->loadData(StorageInterface::TYPE_OBJECTS, $id);
+        $suffix = "#{$objectId}";
 
         foreach ($dump as $name => $value) {
-            if (($pos = strrpos((string) $name, "#{$objectId}")) !== false) {
-                return [substr($name, 0, $pos), $value];
+            $name = (string) $name;
+            if (str_ends_with($name, $suffix)) {
+                return [substr($name, 0, -strlen($suffix)), $value];
             }
         }
 
@@ -48,9 +51,15 @@ final class CollectorRepository implements CollectorRepositoryInterface
 
     /**
      * @throws NotFoundException
+     * @throws \AppDevPanel\Api\Debug\Exception\BadRequestException when `$id` is not a valid entry id
      */
     private function loadData(string $fileType, ?string $id = null): array
     {
+        if ($id !== null && $id !== '') {
+            // The id becomes a path segment inside the storage; refuse anything else early.
+            DebugIdValidator::assertValid($id);
+        }
+
         $data = $this->storage->read($fileType, $id);
         if ($id !== null && $id !== '') {
             if (!array_key_exists($id, $data)) {

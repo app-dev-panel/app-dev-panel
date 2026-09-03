@@ -109,6 +109,25 @@ final class DebugControllerTest extends TestCase
         $this->assertStringContainsString('Hi', $payload['__html']);
     }
 
+    public function testViewWithUnsafeCollectorNameDoesNotAutoload(): void
+    {
+        // An ingested entry may carry arbitrary collector keys; a non-identifier must
+        // never reach is_subclass_of()/the autoloader and is served as plain data.
+        $detailData = ['../../evil/Class' => ['x' => 1]];
+
+        $repository = $this->createMock(CollectorRepositoryInterface::class);
+        $repository->expects($this->once())->method('getDetail')->with('123')->willReturn($detailData);
+
+        $controller = $this->createController($repository);
+        $request = new ServerRequest('GET', '/test')
+            ->withAttribute('id', '123')
+            ->withQueryParams(['collector' => '../../evil/Class']);
+        $response = $controller->view($request);
+
+        $this->assertSame(200, $response->getStatusCode());
+        $this->assertSame(['x' => 1], json_decode((string) $response->getBody(), true));
+    }
+
     public function testViewWithCollectorNotFound(): void
     {
         $detailData = [

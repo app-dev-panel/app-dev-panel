@@ -8,11 +8,11 @@ import {JsonRenderer} from '@app-dev-panel/sdk/Component/JsonRenderer';
 import {PageHeader} from '@app-dev-panel/sdk/Component/PageHeader';
 import {QueryErrorState} from '@app-dev-panel/sdk/Component/QueryErrorState';
 import {SectionTitle} from '@app-dev-panel/sdk/Component/SectionTitle';
+import {copyText} from '@app-dev-panel/sdk/Helper/clipboard';
 import {useEditorUrl} from '@app-dev-panel/sdk/Helper/useEditorUrl';
 import {Code, ContentCopy, FolderOpen, OpenInNew, SwapHoriz} from '@mui/icons-material';
 import {Box, Chip, IconButton, Tab, Tabs, Tooltip, Typography} from '@mui/material';
 import {styled, useTheme} from '@mui/material/styles';
-import clipboardCopy from 'clipboard-copy';
 import React, {type SyntheticEvent, useCallback, useDeferredValue, useMemo, useState} from 'react';
 import {useNavigate} from 'react-router';
 
@@ -135,7 +135,7 @@ const PackageItem = React.memo(({pkg, onSwitch}: PackageItemProps) => {
                     <IconButton
                         className="copy-btn"
                         size="small"
-                        onClick={() => clipboardCopy(pkg.name)}
+                        onClick={() => void copyText(pkg.name)}
                         sx={{p: 0.25, opacity: 0, transition: 'opacity 0.15s ease'}}
                     >
                         <ContentCopy sx={{fontSize: 14}} />

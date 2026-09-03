@@ -2,6 +2,7 @@
     "name": "app-dev-panel/testing",
     "type": "library",
     "description": "ADP Testing — fixture definitions and runner for verifying collectors across all framework adapters",
+    "license": "MIT",
     "keywords": [
         "debug",
         "debug-panel",

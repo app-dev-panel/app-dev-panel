@@ -11,7 +11,14 @@ use Symfony\Component\Process\Process;
 
 class MagoCommand implements CommandInterface
 {
+    use ProcessCommandTrait;
+
     public const COMMAND_NAME = 'analyse/mago';
+
+    private const float BINARY_LOOKUP_TIMEOUT = 5.0;
+
+    /** Memoised `command -v mago` result — the lookup spawns a process, so do it once per PHP process. */
+    private static ?bool $binaryOnPath = null;
 
     public function __construct(
         private readonly PathResolverInterface $pathResolver,
@@ -23,9 +30,7 @@ class MagoCommand implements CommandInterface
             return true;
         }
 
-        $check = DIRECTORY_SEPARATOR === '\\' ? 'where mago 2>NUL' : 'command -v mago 2>/dev/null';
-
-        return !empty(trim((string) @shell_exec($check)));
+        return self::isBinaryOnPath();
     }
 
     public static function getTitle(): string
@@ -53,7 +58,9 @@ class MagoCommand implements CommandInterface
 
         $process = new Process($params);
 
-        $process->setWorkingDirectory($projectDirectory)->setTimeout(null)->run();
+        if (!$this->runProcess($process, $projectDirectory)) {
+            return $this->timedOutResponse();
+        }
 
         $processOutput = rtrim($process->getOutput() . $process->getErrorOutput());
 
@@ -67,5 +74,26 @@ class MagoCommand implements CommandInterface
             status: $process->isSuccessful() ? CommandResponse::STATUS_OK : CommandResponse::STATUS_ERROR,
             result: $processOutput,
         );
+    }
+
+    private static function isBinaryOnPath(): bool
+    {
+        if (self::$binaryOnPath !== null) {
+            return self::$binaryOnPath;
+        }
+
+        $process = DIRECTORY_SEPARATOR === '\\'
+            ? new Process(['where', 'mago'])
+            : Process::fromShellCommandline('command -v mago');
+        $process->setTimeout(self::BINARY_LOOKUP_TIMEOUT);
+
+        try {
+            $process->run();
+            self::$binaryOnPath = $process->isSuccessful() && trim($process->getOutput()) !== '';
+        } catch (\Throwable) {
+            self::$binaryOnPath = false;
+        }
+
+        return self::$binaryOnPath;
     }
 }

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AppDevPanel\Kernel\Tests\Unit;
 
 use AppDevPanel\Kernel\DumpContext;
+use AppDevPanel\Kernel\Tests\Support\Stub\ResourceHoldingStreamWrapper;
 use PHPUnit\Framework\TestCase;
 
 final class DumpContextTest extends TestCase
@@ -465,5 +466,46 @@ final class DumpContextTest extends TestCase
 
         // Both parent and child should be cached
         $this->assertCount(2, $context->objects);
+    }
+
+    public function testDumpUserWrapperStreamResourceIsJsonSafe(): void
+    {
+        ResourceHoldingStreamWrapper::register();
+        try {
+            $resource = fopen(ResourceHoldingStreamWrapper::SCHEME . '://anything', 'r');
+            $this->assertIsResource($resource);
+            $this->assertInstanceOf(
+                ResourceHoldingStreamWrapper::class,
+                stream_get_meta_data($resource)['wrapper_data'],
+                'Precondition: user wrappers expose their instance as wrapper_data',
+            );
+
+            $context = new DumpContext(objects: [], excludedClasses: []);
+            $result = $context->dumpNestedInternal($resource, 3, 0, 0, false);
+            fclose($resource);
+        } finally {
+            ResourceHoldingStreamWrapper::unregister();
+        }
+
+        $this->assertIsArray($result);
+        $this->assertSame('user-space', $result['wrapper_type']);
+        $this->assertIsString($result['wrapper_data']);
+        $this->assertStringStartsWith(ResourceHoldingStreamWrapper::class . '#', $result['wrapper_data']);
+
+        // The whole description must be encodable without JSON_PARTIAL_OUTPUT_ON_ERROR.
+        $json = json_encode($result, JSON_THROW_ON_ERROR);
+        $this->assertJson($json);
+    }
+
+    public function testBuildObjectsCacheStopsOnArrayReferenceCycle(): void
+    {
+        $leaf = new \stdClass();
+        $cycle = ['leaf' => $leaf];
+        $cycle['self'] = &$cycle;
+
+        $context = new DumpContext(objects: [], excludedClasses: []);
+        $context->buildObjectsCache($cycle);
+
+        $this->assertCount(1, $context->objects);
     }
 }

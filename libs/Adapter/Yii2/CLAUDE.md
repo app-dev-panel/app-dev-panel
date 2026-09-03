@@ -90,11 +90,20 @@ It registers the `app-dev-panel` module if enabled (auto-enables in YII_DEBUG mo
 ### 3. Module Bootstrap (`Module::bootstrap()`)
 
 Executes in order:
-1. `registerServices($app)` — Core DI: `StorageInterface`, `DebuggerIdGenerator`, PSR-17 factories, API services, inspector providers, all inspector controllers
-2. `registerCollectors()` — Creates all enabled collector instances
+1. `registerServices($app)` — Core DI: `StorageInterface` (`BroadcastingStorage` wired with the shared `DebuggerIdGenerator`), PSR-17 factories, API services, inspector providers, all inspector controllers
+2. `registerCollectors()` — Replaces (never appends to) the collector instance list with all enabled collectors. `TimelineCollector` is always constructed (it is a dependency of most collectors) but only registered when the `timeline` toggle is on; unregistered it is never started and silently drops events
 3. `buildDebugger()` — Builds `Debugger` with all collectors + storage
-4. `registerEventListeners()` — Attaches web/console event listeners
-5. `registerRoutes()` — Adds URL rules for `/debug/api/*` and `/inspect/api/*`
+4. `registerRoutes()` — Adds URL rules for `/<routePrefix>/api/*` and `/<inspectorRoutePrefix>/api/*`
+5. `wrapUrlRules()` — Wraps every `UrlManager` rule in `UrlRuleProxy` (existing proxies are left as-is)
+6. `registerEventListeners()` — Attaches web/console event listeners, error-handler hook
+7. `registerConsoleCommands()`
+
+**Idempotence (issue #108):** `bootstrap()` is guarded by a `$bootstrapped` flag
+(`Module::isBootstrapped()`). Yii 2 invokes it once per entry in the application `bootstrap`
+array and once more through composer `extra.bootstrap` → `Bootstrap::bootstrap()` → the same
+module instance. The second call is a no-op; without the guard a second collector set and a
+second `Debugger` replaced the first in DI while the registered `WebListener` kept feeding the
+first collectors, producing empty entries.
 
 ### 4. Event Wiring
 
@@ -105,6 +114,12 @@ Executes in order:
 | `Application::EVENT_BEFORE_REQUEST` | Convert Yii Request → PSR-7, `Debugger::startup()`, `RequestCollector`, `WebAppInfoCollector` |
 | `Application::EVENT_AFTER_REQUEST` | Convert Yii Response → PSR-7, `RequestCollector` captures response, adds `X-Debug-Id` header, `Debugger::shutdown()` |
 | `User::EVENT_AFTER_LOGIN` / `EVENT_AFTER_LOGOUT` | `AuthorizationListener` → `AuthorizationCollector` |
+
+`WebListener` skips ADP's own API requests (`/<routePrefix>/api…`, `/<inspectorRoutePrefix>/api…`);
+the prefixes are passed from `Module::$routePrefix` / `Module::$inspectorRoutePrefix` (ctor args
+`routePrefix`, `inspectorRoutePrefix`, defaults `debug` / `inspect`) and a non-root
+`Request::getBaseUrl()` is stripped before matching. Panel SPA routes (`/<routePrefix>`) are regular
+requests as far as the listener is concerned — `Module::$ignoredRequests` handles those.
 
 **Console events (`ConsoleListener`):**
 

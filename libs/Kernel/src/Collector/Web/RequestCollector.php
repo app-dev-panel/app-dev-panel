@@ -7,13 +7,19 @@ namespace AppDevPanel\Kernel\Collector\Web;
 use AppDevPanel\Kernel\Collector\CollectorTrait;
 use AppDevPanel\Kernel\Collector\SummaryCollectorInterface;
 use AppDevPanel\Kernel\Collector\TimelineCollector;
-use GuzzleHttp\Psr7\Message;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
 final class RequestCollector implements SummaryCollectorInterface
 {
     use CollectorTrait;
+
+    /**
+     * Bodies larger than this are not materialised into `requestRaw` / `responseRaw`.
+     */
+    public const int DEFAULT_MAX_BODY_SIZE = 1024 * 1024;
+
+    private readonly HttpMessageRenderer $renderer;
 
     private string $requestUrl = '';
     private string $requestPath = '';
@@ -27,22 +33,13 @@ final class RequestCollector implements SummaryCollectorInterface
 
     public function __construct(
         private readonly TimelineCollector $timelineCollector,
-    ) {}
+        int $maxBodySize = self::DEFAULT_MAX_BODY_SIZE,
+    ) {
+        $this->renderer = new HttpMessageRenderer($maxBodySize);
+    }
 
     public function getCollected(): array
     {
-        $requestRaw = null;
-        if ($this->request instanceof ServerRequestInterface) {
-            $requestRaw = Message::toString($this->request);
-            Message::rewindBody($this->request);
-        }
-
-        $responseRaw = null;
-        if ($this->response instanceof ResponseInterface) {
-            $responseRaw = Message::toString($this->response);
-            Message::rewindBody($this->response);
-        }
-
         return [
             'requestUrl' => $this->requestUrl,
             'requestPath' => $this->requestPath,
@@ -52,9 +49,9 @@ final class RequestCollector implements SummaryCollectorInterface
             'userIp' => $this->userIp,
             'responseStatusCode' => $this->responseStatusCode,
             'request' => $this->request,
-            'requestRaw' => $requestRaw,
+            'requestRaw' => $this->request === null ? null : $this->renderer->render($this->request),
             'response' => $this->response,
-            'responseRaw' => $responseRaw,
+            'responseRaw' => $this->response === null ? null : $this->renderer->render($this->response),
         ];
     }
 

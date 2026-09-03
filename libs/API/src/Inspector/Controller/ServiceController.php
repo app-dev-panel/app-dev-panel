@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AppDevPanel\Api\Inspector\Controller;
 
 use AppDevPanel\Api\Http\JsonResponseFactoryInterface;
+use AppDevPanel\Api\Security\UrlPolicy;
 use AppDevPanel\Kernel\Service\ServiceDescriptor;
 use AppDevPanel\Kernel\Service\ServiceRegistryInterface;
 use InvalidArgumentException;
@@ -13,9 +14,14 @@ use Psr\Http\Message\ServerRequestInterface;
 
 final class ServiceController
 {
+    /**
+     * @param UrlPolicy $urlPolicy SSRF guard applied to `inspectorUrl` on registration; build it
+     *                             from `ApiSecurityConfig::$restrictInspectorUrlsToPublicHosts`.
+     */
     public function __construct(
         private readonly JsonResponseFactoryInterface $responseFactory,
         private readonly ServiceRegistryInterface $registry,
+        private readonly UrlPolicy $urlPolicy = new UrlPolicy(),
     ) {}
 
     public function register(ServerRequestInterface $request): ResponseInterface
@@ -33,6 +39,16 @@ final class ServiceController
 
         if (!array_key_exists('inspectorUrl', $body) || !is_string($body['inspectorUrl'])) {
             throw new InvalidArgumentException('Field "inspectorUrl" is required and must be a string.');
+        }
+
+        try {
+            $this->urlPolicy->assertAllowed($body['inspectorUrl']);
+        } catch (InvalidArgumentException $e) {
+            throw new InvalidArgumentException(
+                sprintf('Field "inspectorUrl" is rejected: %s', $e->getMessage()),
+                0,
+                $e,
+            );
         }
 
         $now = microtime(true);

@@ -244,7 +244,11 @@ final class FrontendUpdateCommand extends Command
     {
         $client = $this->httpClient ?? new Client();
         $extension = str_ends_with($assetName, '.tar.gz') ? '.tar.gz' : '.zip';
-        $tempFile = tempnam(sys_get_temp_dir(), 'adp-frontend-') . $extension;
+        // tempnam() creates a placeholder file; the archive itself needs the real
+        // extension (PharData/ZipArchive sniff it), so both get removed at the end.
+        $tempBase = tempnam(sys_get_temp_dir(), 'adp-frontend-')
+        ?: throw new \RuntimeException('Cannot create a temporary file for the download.');
+        $tempFile = $tempBase . $extension;
 
         try {
             $client->get($url, [
@@ -261,46 +265,16 @@ final class FrontendUpdateCommand extends Command
                 mkdir($path, 0o777, true);
             }
 
+            $extractor = new ArchiveExtractor();
             if ($extension === '.tar.gz') {
-                $this->extractTarGz($tempFile, $path);
+                $extractor->extractTarGz($tempFile, $path);
             } else {
-                $this->extractZip($tempFile, $path);
+                $extractor->extractZip($tempFile, $path);
             }
 
             $io->text(sprintf('Extracted to %s', $path));
         } finally {
-            if (file_exists($tempFile)) {
-                unlink($tempFile);
-            }
-        }
-    }
-
-    private function extractZip(string $archive, string $path): void
-    {
-        $zip = new \ZipArchive();
-        $result = $zip->open($archive);
-        if ($result !== true) {
-            throw new \RuntimeException(sprintf('Failed to open zip archive (error code: %d)', $result));
-        }
-        $zip->extractTo($path);
-        $zip->close();
-    }
-
-    private function extractTarGz(string $archive, string $path): void
-    {
-        // PharData::decompress writes a sibling .tar; extract that and clean up.
-        $phar = new \PharData($archive);
-        $tarPath = $archive . '.tar';
-        try {
-            $phar->decompress();
-            $tarPhar = new \PharData($tarPath);
-            $tarPhar->extractTo($path, null, true);
-        } finally {
-            // Force PharData destructors to release the files before unlink on Windows.
-            unset($phar, $tarPhar);
-            if (file_exists($tarPath)) {
-                @unlink($tarPath);
-            }
+            array_map(unlink(...), array_filter([$tempFile, $tempBase], file_exists(...)));
         }
     }
 

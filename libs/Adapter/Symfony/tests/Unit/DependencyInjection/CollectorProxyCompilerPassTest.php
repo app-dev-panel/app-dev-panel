@@ -354,12 +354,8 @@ final class CollectorProxyCompilerPassTest extends TestCase
 
     public function testUpgradesSchemaProviderWhenDoctrineAvailable(): void
     {
-        // This test exercises upgradeSchemaProvider() when doctrine.dbal.default_connection exists.
-        // Doctrine\DBAL\Connection class must exist (it does since it's in composer deps).
-        if (!class_exists(\Doctrine\DBAL\Connection::class)) {
-            $this->markTestSkipped('Doctrine DBAL not installed');
-        }
-
+        // Exercises upgradeSchemaProvider() when doctrine.dbal.default_connection exists
+        // (doctrine/dbal is a required dev dependency).
         $container = $this->createLoadedContainer();
 
         // Register a fake doctrine connection service
@@ -379,10 +375,6 @@ final class CollectorProxyCompilerPassTest extends TestCase
 
     public function testSkipsSchemaProviderUpgradeWhenNoDbalConnection(): void
     {
-        if (!class_exists(\Doctrine\DBAL\Connection::class)) {
-            $this->markTestSkipped('Doctrine DBAL not installed');
-        }
-
         $container = $this->createLoadedContainer();
 
         // Don't register doctrine.dbal.default_connection

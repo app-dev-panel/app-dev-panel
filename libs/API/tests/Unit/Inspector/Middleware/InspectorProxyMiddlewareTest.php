@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AppDevPanel\Api\Tests\Unit\Inspector\Middleware;
 
 use AppDevPanel\Api\Inspector\Middleware\InspectorProxyMiddleware;
+use AppDevPanel\Api\Security\UrlPolicy;
 use AppDevPanel\Kernel\Service\ServiceDescriptor;
 use AppDevPanel\Kernel\Service\ServiceRegistryInterface;
 use Nyholm\Psr7\Factory\Psr17Factory;
@@ -21,6 +22,7 @@ final class InspectorProxyMiddlewareTest extends TestCase
     private function createMiddleware(
         ?ServiceRegistryInterface $registry = null,
         ?ClientInterface $httpClient = null,
+        ?UrlPolicy $urlPolicy = null,
     ): InspectorProxyMiddleware {
         $psr17 = new Psr17Factory();
 
@@ -30,7 +32,23 @@ final class InspectorProxyMiddlewareTest extends TestCase
             $psr17,
             $psr17,
             $psr17,
+            $urlPolicy ?? $this->urlPolicy(),
         );
+    }
+
+    /**
+     * Stub DNS: the hosts used by the fixtures resolve to public addresses,
+     * `evil-internal` to a private one, `evil-metadata` to the cloud metadata
+     * address, everything else does not resolve.
+     */
+    private function urlPolicy(bool $publicOnly = false): UrlPolicy
+    {
+        return new UrlPolicy($publicOnly, static fn(string $host): array => match ($host) {
+            'python-app', 'full', 'dead' => ['203.0.113.10'],
+            'evil-internal' => ['10.0.0.8'],
+            'evil-metadata' => ['169.254.169.254'],
+            default => [],
+        });
     }
 
     private function emptyRegistry(): ServiceRegistryInterface
@@ -371,5 +389,117 @@ final class InspectorProxyMiddlewareTest extends TestCase
         $response = $middleware->process($request, $this->neverCalledHandler());
 
         $this->assertSame(502, $response->getStatusCode());
+    }
+
+    public function testRechecksInspectorUrlBeforeProxying(): void
+    {
+        $now = microtime(true);
+        // Registered earlier (or with a different policy) — must still be refused at proxy time.
+        $descriptor = new ServiceDescriptor('meta', 'python', 'http://169.254.169.254', ['*'], $now, $now);
+
+        $client = $this->createMock(ClientInterface::class);
+        $client->expects($this->never())->method('sendRequest');
+
+        $middleware = $this->createMiddleware($this->registryWith($descriptor), $client);
+        $request = new ServerRequest('GET', '/inspect/api/config?service=meta')->withQueryParams([
+            'service' => 'meta',
+        ]);
+
+        $response = $middleware->process($request, $this->neverCalledHandler());
+
+        $this->assertSame(502, $response->getStatusCode());
+        $body = json_decode((string) $response->getBody(), true);
+        $this->assertStringContainsString('rejected', $body['error']);
+        $this->assertStringContainsString('169.254.169.254', $body['error']);
+    }
+
+    public function testRechecksHostResolutionBeforeProxying(): void
+    {
+        $now = microtime(true);
+        $descriptor = new ServiceDescriptor('rebound', 'python', 'http://evil-metadata:9090', ['*'], $now, $now);
+
+        $client = $this->createMock(ClientInterface::class);
+        $client->expects($this->never())->method('sendRequest');
+
+        $middleware = $this->createMiddleware($this->registryWith($descriptor), $client);
+        $request = new ServerRequest('GET', '/inspect/api/config?service=rebound')->withQueryParams([
+            'service' => 'rebound',
+        ]);
+
+        $response = $middleware->process($request, $this->neverCalledHandler());
+
+        $this->assertSame(502, $response->getStatusCode());
+        $this->assertStringContainsString('169.254.169.254', json_decode((string) $response->getBody(), true)['error']);
+    }
+
+    public function testRechecksPrivateHostResolutionInPublicHostsOnlyMode(): void
+    {
+        $now = microtime(true);
+        $descriptor = new ServiceDescriptor('rebound', 'python', 'http://evil-internal:9090', ['*'], $now, $now);
+
+        $client = $this->createMock(ClientInterface::class);
+        $client->expects($this->never())->method('sendRequest');
+
+        $middleware = $this->createMiddleware($this->registryWith($descriptor), $client, $this->urlPolicy(true));
+        $request = new ServerRequest('GET', '/inspect/api/config?service=rebound')->withQueryParams([
+            'service' => 'rebound',
+        ]);
+
+        $response = $middleware->process($request, $this->neverCalledHandler());
+
+        $this->assertSame(502, $response->getStatusCode());
+        $this->assertStringContainsString('10.0.0.8', json_decode((string) $response->getBody(), true)['error']);
+    }
+
+    /**
+     * @return iterable<string, array{string}>
+     */
+    public static function privateInspectorUrls(): iterable
+    {
+        yield 'loopback' => ['http://127.0.0.1:9090'];
+        yield 'localhost' => ['http://localhost:9090'];
+        yield 'docker network name' => ['http://evil-internal:9090'];
+    }
+
+    #[\PHPUnit\Framework\Attributes\DataProvider('privateInspectorUrls')]
+    public function testPrivateInspectorUrlIsProxiedByDefault(string $inspectorUrl): void
+    {
+        $now = microtime(true);
+        $descriptor = new ServiceDescriptor('local-py', 'python', $inspectorUrl, ['*'], $now, $now);
+
+        /** @var RequestInterface|null $captured */
+        $captured = null;
+        $httpClient = $this->capturingHttpClient(new Response(200), $captured);
+
+        $middleware = $this->createMiddleware($this->registryWith($descriptor), $httpClient);
+        $request = new ServerRequest('GET', '/inspect/api/config?service=local-py')->withQueryParams([
+            'service' => 'local-py',
+        ]);
+
+        $response = $middleware->process($request, $this->neverCalledHandler());
+
+        $this->assertSame(200, $response->getStatusCode());
+        $this->assertNotNull($captured);
+        $this->assertStringStartsWith($inspectorUrl . '/inspect/api/config', (string) $captured->getUri());
+    }
+
+    #[\PHPUnit\Framework\Attributes\DataProvider('privateInspectorUrls')]
+    public function testPrivateInspectorUrlIsRefusedInPublicHostsOnlyMode(string $inspectorUrl): void
+    {
+        $now = microtime(true);
+        $descriptor = new ServiceDescriptor('local-py', 'python', $inspectorUrl, ['*'], $now, $now);
+
+        $client = $this->createMock(ClientInterface::class);
+        $client->expects($this->never())->method('sendRequest');
+
+        $middleware = $this->createMiddleware($this->registryWith($descriptor), $client, $this->urlPolicy(true));
+        $request = new ServerRequest('GET', '/inspect/api/config?service=local-py')->withQueryParams([
+            'service' => 'local-py',
+        ]);
+
+        $response = $middleware->process($request, $this->neverCalledHandler());
+
+        $this->assertSame(502, $response->getStatusCode());
+        $this->assertStringContainsString('rejected', json_decode((string) $response->getBody(), true)['error']);
     }
 }

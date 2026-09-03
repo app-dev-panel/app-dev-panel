@@ -11,13 +11,6 @@ use PHPUnit\Framework\TestCase;
 
 final class QueueWorkerInterfaceProxyTest extends TestCase
 {
-    protected function setUp(): void
-    {
-        if (!interface_exists(\Yiisoft\Queue\Worker\WorkerInterface::class, true)) {
-            $this->markTestSkipped('yiisoft/queue is not installed.');
-        }
-    }
-
     public function testProcessDelegatesToDecoratedAndCollects(): void
     {
         $message = $this->createMock(\Yiisoft\Queue\Message\MessageInterface::class);

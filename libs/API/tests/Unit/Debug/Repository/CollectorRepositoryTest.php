@@ -160,4 +160,65 @@ final class CollectorRepositoryTest extends TestCase
         $this->assertSame(['id' => 'id3'], $result[0]);
         $this->assertSame(['id' => 'id1'], $result[2]);
     }
+
+    public function testObjectMatchesExactSuffixOnly(): void
+    {
+        $storage = $this->createStub(StorageInterface::class);
+        $storage
+            ->method('read')
+            ->willReturn([
+                'testId' => [
+                    'Foo#123' => 'wrong',
+                    'Bar#12' => 'right',
+                ],
+            ]);
+
+        $repository = new CollectorRepository($storage);
+
+        // "#12" must not match the substring inside "Foo#123".
+        $this->assertSame(['Bar', 'right'], $repository->getObject('testId', '12'));
+        $this->assertSame(['Foo', 'wrong'], $repository->getObject('testId', '123'));
+        $this->assertNull($repository->getObject('testId', '2'));
+    }
+
+    /**
+     * @return iterable<string, array{string}>
+     */
+    public static function unsafeIds(): iterable
+    {
+        yield 'traversal' => ['../../etc'];
+        yield 'glob' => ['*'];
+        yield 'nested' => ['2026-01-01/x'];
+    }
+
+    #[\PHPUnit\Framework\Attributes\DataProvider('unsafeIds')]
+    public function testUnsafeIdNeverReachesStorage(string $id): void
+    {
+        $storage = $this->createMock(StorageInterface::class);
+        $storage->expects($this->never())->method('read');
+
+        $repository = new CollectorRepository($storage);
+
+        $this->expectException(\AppDevPanel\Api\Debug\Exception\BadRequestException::class);
+        $repository->getDetail($id);
+    }
+
+    public function testUnsafeIdRejectedForSummaryDumpAndObject(): void
+    {
+        $storage = $this->createMock(StorageInterface::class);
+        $storage->expects($this->never())->method('read');
+        $repository = new CollectorRepository($storage);
+
+        foreach (['getSummary', 'getDumpObject'] as $method) {
+            try {
+                $repository->$method('../x');
+                $this->fail("Expected BadRequestException from {$method}.");
+            } catch (\AppDevPanel\Api\Debug\Exception\BadRequestException) {
+                $this->addToAssertionCount(1);
+            }
+        }
+
+        $this->expectException(\AppDevPanel\Api\Debug\Exception\BadRequestException::class);
+        $repository->getObject('../x', '1');
+    }
 }

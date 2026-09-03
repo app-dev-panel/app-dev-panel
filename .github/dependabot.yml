@@ -1,0 +1,61 @@
+version: 2
+
+updates:
+  # Root Composer manifest (all PHP libs are path repositories under libs/)
+  - package-ecosystem: composer
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 10
+    groups:
+      laravel:
+        patterns:
+          - "illuminate/*"
+          - "laravel/*"
+      symfony:
+        patterns:
+          - "symfony/*"
+      yiisoft:
+        patterns:
+          - "yiisoft/*"
+      composer-minor-patch:
+        update-types:
+          - minor
+          - patch
+
+  # Frontend monorepo (npm workspaces)
+  - package-ecosystem: npm
+    directory: /libs/frontend
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 10
+    groups:
+      mui:
+        patterns:
+          - "@mui/*"
+      npm-minor-patch:
+        update-types:
+          - minor
+          - patch
+
+  # VitePress documentation site
+  - package-ecosystem: npm
+    directory: /website
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      website-minor-patch:
+        update-types:
+          - minor
+          - patch
+
+  # GitHub Actions used by workflows
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      actions:
+        patterns:
+          - "*"

@@ -2,6 +2,7 @@
     "name": "app-dev-panel/cli",
     "type": "library",
     "description": "ADP CLI — console commands for the debug server, data queries, storage reset, and standalone HTTP server",
+    "license": "MIT",
     "keywords": [
         "debug",
         "debug-panel",

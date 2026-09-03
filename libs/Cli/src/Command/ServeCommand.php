@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Cli\Command;
 
+use AppDevPanel\Cli\Server\ServerSecurityConfig;
 use AppDevPanel\FrontendAssets\FrontendAssets;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -32,7 +33,19 @@ final class ServeCommand extends Command
             ->addOption('storage-path', null, InputOption::VALUE_OPTIONAL, 'Debug data storage path')
             ->addOption('root-path', null, InputOption::VALUE_OPTIONAL, 'Project root path', getcwd())
             ->addOption('runtime-path', null, InputOption::VALUE_OPTIONAL, 'Runtime/temp path')
-            ->addOption('frontend-path', null, InputOption::VALUE_OPTIONAL, 'Path to built frontend assets');
+            ->addOption('frontend-path', null, InputOption::VALUE_OPTIONAL, 'Path to built frontend assets')
+            ->addOption(
+                'allowed-ips',
+                null,
+                InputOption::VALUE_OPTIONAL,
+                'Comma separated client IPs allowed to use the API ("*" for everyone). Defaults to ADP_ALLOWED_IPS or loopback only',
+            )
+            ->addOption(
+                'auth-token',
+                null,
+                InputOption::VALUE_OPTIONAL,
+                'X-Debug-Token required by API clients. Defaults to ADP_AUTH_TOKEN; mandatory for non-loopback hosts',
+            );
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -63,18 +76,30 @@ final class ServeCommand extends Command
             return Command::FAILURE;
         }
 
+        // Fail fast before spawning the server: binding to a non-loopback host
+        // without ADP_AUTH_TOKEN would expose file/command/SQL endpoints.
+        $security = self::resolveSecurity($input);
+        $unsafeReason = $security->unsafeBindReason((string) $host);
+        if ($unsafeReason !== null) {
+            $io->error($unsafeReason);
+            return Command::FAILURE;
+        }
+
         $io->title('ADP Standalone Server');
         $io->success(sprintf('Starting server on http://%s:%s', $host, $port));
         $io->text([
             sprintf('Storage: %s', $storagePath),
             sprintf('Root: %s', $rootPath),
             sprintf('Frontend: %s', $frontendPath ?? '(not configured)'),
+            sprintf('Allowed IPs: %s', $security->describeAllowedIps()),
+            sprintf('Auth token: %s', $security->describeAuthToken()),
         ]);
 
         $env = [
             'ADP_STORAGE_PATH' => $storagePath,
             'ADP_ROOT_PATH' => $rootPath,
             'ADP_RUNTIME_PATH' => $runtimePath,
+            ...$security->toEnvironment((string) $host),
         ];
         if ($frontendPath !== null) {
             $env['ADP_FRONTEND_PATH'] = $frontendPath;
@@ -102,6 +127,23 @@ final class ServeCommand extends Command
     }
 
     /**
+     * `--allowed-ips` / `--auth-token` (when given) take precedence over the
+     * `ADP_ALLOWED_IPS` / `ADP_AUTH_TOKEN` environment variables.
+     */
+    private static function resolveSecurity(InputInterface $input): ServerSecurityConfig
+    {
+        $overrides = array_filter(
+            [
+                ServerSecurityConfig::ENV_ALLOWED_IPS => $input->getOption('allowed-ips'),
+                ServerSecurityConfig::ENV_AUTH_TOKEN => $input->getOption('auth-token'),
+            ],
+            is_string(...),
+        );
+
+        return ServerSecurityConfig::fromEnvironment($overrides + getenv());
+    }
+
+    /**
      * Auto-resolve the frontend dist path from the `app-dev-panel/frontend-assets`
      * Composer package when `--frontend-path` is not supplied. Returns `null` if
      * the package is not installed or the bundle is empty, so the serve command
@@ -109,10 +151,6 @@ final class ServeCommand extends Command
      */
     private function resolveFrontendPath(): ?string
     {
-        if (!class_exists(FrontendAssets::class)) {
-            return null;
-        }
-
-        return FrontendAssets::exists() ? FrontendAssets::path() : null;
+        return class_exists(FrontendAssets::class) ? FrontendAssets::resolve() : null;
     }
 }

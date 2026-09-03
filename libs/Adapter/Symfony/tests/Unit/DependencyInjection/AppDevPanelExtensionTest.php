@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Adapter\Symfony\Tests\Unit\DependencyInjection;
 
+use AppDevPanel\Adapter\Symfony\Command\AssetsInstallCommand;
 use AppDevPanel\Adapter\Symfony\DependencyInjection\AppDevPanelExtension;
 use AppDevPanel\Adapter\Symfony\EventSubscriber\ConsoleSubscriber;
 use AppDevPanel\Adapter\Symfony\EventSubscriber\HttpSubscriber;
@@ -13,6 +14,7 @@ use AppDevPanel\Adapter\Symfony\Inspector\SymfonyUrlMatcherAdapter;
 use AppDevPanel\Api\Inspector\Controller\DatabaseController;
 use AppDevPanel\Api\Inspector\Controller\RoutingController;
 use AppDevPanel\Api\Inspector\Database\SchemaProviderInterface;
+use AppDevPanel\Api\Panel\PanelConfig;
 use AppDevPanel\Kernel\Collector\AssetBundleCollector;
 use AppDevPanel\Kernel\Collector\AuthorizationCollector;
 use AppDevPanel\Kernel\Collector\CacheCollector;
@@ -290,6 +292,97 @@ final class AppDevPanelExtensionTest extends TestCase
         // ToolRegistry should be registered without InspectorClient (no inspector_url configured)
         $this->assertTrue($container->hasDefinition(ToolRegistry::class));
         $this->assertFalse($container->hasDefinition(InspectorClient::class));
+    }
+
+    public function testPanelStaticUrlFallsBackToCdnWhenNothingIsPublished(): void
+    {
+        $projectDir = $this->makeProjectDir();
+        $container = new ContainerBuilder();
+        $container->setParameter('kernel.project_dir', $projectDir);
+
+        new AppDevPanelExtension()->load([['enabled' => true]], $container);
+
+        $this->assertSame(
+            PanelConfig::DEFAULT_STATIC_URL,
+            $container->getDefinition(PanelConfig::class)->getArgument(0),
+        );
+    }
+
+    public function testPanelStaticUrlFallsBackToCdnWithoutProjectDir(): void
+    {
+        $container = new ContainerBuilder();
+
+        new AppDevPanelExtension()->load([['enabled' => true]], $container);
+
+        $this->assertSame(
+            PanelConfig::DEFAULT_STATIC_URL,
+            $container->getDefinition(PanelConfig::class)->getArgument(0),
+        );
+    }
+
+    public function testPanelStaticUrlUsesPublishedBundle(): void
+    {
+        $projectDir = $this->makeProjectDir();
+        $bundleDir = $projectDir . '/public/' . AssetsInstallCommand::PUBLIC_SUBPATH;
+        mkdir($bundleDir, 0o777, true);
+        file_put_contents($bundleDir . '/bundle.js', 'console.log(1);');
+
+        $container = new ContainerBuilder();
+        $container->setParameter('kernel.project_dir', $projectDir);
+
+        new AppDevPanelExtension()->load([['enabled' => true]], $container);
+
+        $this->assertSame(
+            '/' . AssetsInstallCommand::PUBLIC_SUBPATH,
+            $container->getDefinition(PanelConfig::class)->getArgument(0),
+        );
+    }
+
+    public function testExplicitPanelStaticUrlWins(): void
+    {
+        $container = new ContainerBuilder();
+
+        new AppDevPanelExtension()->load([[
+            'enabled' => true,
+            'panel' => ['static_url' => 'https://cdn.example.com/adp'],
+        ]], $container);
+
+        $this->assertSame('https://cdn.example.com/adp', $container->getDefinition(PanelConfig::class)->getArgument(0));
+    }
+
+    /** @var string[] */
+    private array $tempDirs = [];
+
+    protected function tearDown(): void
+    {
+        foreach ($this->tempDirs as $dir) {
+            $this->removeDir($dir);
+        }
+        $this->tempDirs = [];
+    }
+
+    private function makeProjectDir(): string
+    {
+        $dir = sys_get_temp_dir() . '/adp-symfony-ext-' . uniqid();
+        mkdir($dir, 0o777, true);
+        $this->tempDirs[] = $dir;
+
+        return $dir;
+    }
+
+    private function removeDir(string $dir): void
+    {
+        if (!is_dir($dir)) {
+            return;
+        }
+        foreach (scandir($dir) ?: [] as $entry) {
+            if ($entry === '.' || $entry === '..') {
+                continue;
+            }
+            $path = $dir . '/' . $entry;
+            is_dir($path) ? $this->removeDir($path) : unlink($path);
+        }
+        rmdir($dir);
     }
 
     public function testToolRegistryRegisteredWithInspectorClientWhenUrlConfigured(): void

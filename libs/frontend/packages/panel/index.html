@@ -2,16 +2,34 @@
 <html lang="en">
     <head>
         <meta charset="utf-8" />
+        <!--
+      Issue #113 — the bundle is built with a relative Vite base ("./"), so every
+      asset below resolves against this <base>. Servers that know the mount path
+      (PanelController, `adp serve`) rewrite the href to "<mount>/" (see
+      AppDevPanel\Api\Panel\PanelHtml). When the file is served as-is from a
+      plain static directory, the inline script below derives the directory
+      from the current URL so "/debug" and "/debug/" both load "/debug/bundle.js".
+    -->
+        <base href="./" data-adp-base />
+        <script>
+            (function () {
+                var base = document.querySelector('base[data-adp-base]');
+                if (!base || base.getAttribute('href') !== './') return;
+                var path = window.location.pathname.replace(/[^/]*\.[^/]*$/, '');
+                if (path.charAt(path.length - 1) !== '/') path += '/';
+                base.setAttribute('href', path);
+            })();
+        </script>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="description" content="Application Development Panel" />
         <meta http-equiv="Permissions-Policy" content="interest-cohort=()" />
 
-        <link rel="icon" href="/favicon.ico" />
-        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
-        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+        <link rel="icon" href="favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png" />
+        <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png" />
 
-        <link rel="apple-touch-icon" sizes="192x192" href="/android-chrome-192x192.png" />
-        <link rel="apple-touch-startup-image" sizes="512x512" href="/android-chrome-512x512.png" />
+        <link rel="apple-touch-icon" sizes="192x192" href="android-chrome-192x192.png" />
+        <link rel="apple-touch-startup-image" sizes="512x512" href="android-chrome-512x512.png" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-title" content="App Dev Panel" />
         <meta name="application-name" content="App Dev Panel" />
@@ -21,15 +39,11 @@
       manifest.json provides metadata used when your web app is installed on a
       user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
     -->
-        <link rel="manifest" href="/manifest.json" />
+        <link rel="manifest" href="manifest.json" />
         <!--
-      Notice the use of  in the tags above.
-      It will be replaced with the URL of the `public` folder during the build.
-      Only files inside the `public` folder can be referenced from the HTML.
-
-      Unlike "/favicon.ico" or "favicon.ico", "/favicon.ico" will
-      work correctly both with client-side routing and a non-root public URL.
-      Learn how to configure a non-root public URL by running `npm run build`.
+      Every href/src in this file is relative on purpose: root-absolute URLs
+      ("/favicon.ico") only work when the panel is mounted at "/". Vite rewrites
+      the module script to "./bundle.js" at build time.
     -->
         <title>App Dev Panel</title>
     </head>
@@ -37,7 +51,7 @@
         <noscript>You need to enable JavaScript to run this app.</noscript>
         <div id="root" style="flex: 1"></div>
 
-        <script type="module" src="/src/index.tsx"></script>
+        <script type="module" src="./src/index.tsx"></script>
         <!--
       This HTML file is a template.
       If you open it directly in the browser, you will see an empty page.

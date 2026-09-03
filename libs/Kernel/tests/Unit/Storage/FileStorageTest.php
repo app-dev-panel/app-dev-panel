@@ -6,7 +6,11 @@ namespace AppDevPanel\Kernel\Tests\Unit\Storage;
 
 use AppDevPanel\Kernel\DebuggerIdGenerator;
 use AppDevPanel\Kernel\Storage\FileStorage;
+use AppDevPanel\Kernel\Storage\StorageIdValidator;
 use AppDevPanel\Kernel\Storage\StorageInterface;
+use AppDevPanel\Kernel\Tests\Support\Stub\ResourceHoldingStreamWrapper;
+use GuzzleHttp\Psr7\Response;
+use GuzzleHttp\Psr7\Utils;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Yiisoft\Aliases\Aliases;
 use Yiisoft\Files\FileHelper;
@@ -423,6 +427,154 @@ final class FileStorageTest extends AbstractStorageTestCase
         // Try to read data type — readFile returns null
         $result = $storage->read(StorageInterface::TYPE_DATA, $id);
         $this->assertSame([], $result);
+    }
+
+    /**
+     * Regression for GitHub issue #114: `JsonException "Type is not supported"`
+     * thrown from `Debugger::shutdown()` on asset-serving requests.
+     *
+     * Collector data holding raw resources (including one opened through a
+     * user-space stream wrapper, whose meta-data embeds the wrapper object) and
+     * a PSR-7 response backed by a file stream must flush to valid JSON.
+     */
+    public function testFlushWithResourcesAndStreamBackedResponseProducesValidJson(): void
+    {
+        ResourceHoldingStreamWrapper::register();
+        $memory = fopen('php://memory', 'r+');
+        $wrapped = fopen(ResourceHoldingStreamWrapper::SCHEME . '://asset.png', 'r');
+        $file = tmpfile();
+        fwrite($file, str_repeat("\x89PNG\r\n", 16));
+        rewind($file);
+
+        try {
+            $response = new Response(200, ['Content-Type' => 'image/png'], Utils::streamFor($file));
+            $data = [
+                'memory' => $memory,
+                'wrapped' => $wrapped,
+                'response' => $response,
+                'closure' => static fn(): string => 'x',
+                'nested' => ['deep' => ['resource' => $memory]],
+            ];
+
+            $idGenerator = new DebuggerIdGenerator();
+            $storage = $this->getStorage($idGenerator);
+            $storage->addCollector($this->createFakeCollector($data));
+            $storage->addCollector($this->createFakeSummaryCollector($data));
+
+            $storage->flush();
+
+            $entryDir = $this->path . '/' . date('Y-m-d') . '/' . $idGenerator->getId();
+            foreach ([StorageInterface::TYPE_DATA, StorageInterface::TYPE_OBJECTS] as $type) {
+                $raw = gzdecode((string) file_get_contents($entryDir . '/' . $type . '.json.gz'));
+                $decoded = json_decode((string) $raw, true, 512, JSON_THROW_ON_ERROR);
+                $this->assertIsArray($decoded, $type . ' must decode to an array');
+            }
+            $summary = json_decode(
+                (string) file_get_contents($entryDir . '/' . StorageInterface::TYPE_SUMMARY . '.json'),
+                true,
+                512,
+                JSON_THROW_ON_ERROR,
+            );
+            $this->assertSame($idGenerator->getId(), $summary['id']);
+
+            $stored = $storage->read(StorageInterface::TYPE_DATA, $idGenerator->getId())[$idGenerator->getId()];
+            $collected = $stored['Mock_Collector'];
+            $this->assertSame('user-space', $collected['wrapped']['wrapper_type']);
+            $this->assertIsString($collected['wrapped']['wrapper_data']);
+            $this->assertSame('PHP', $collected['memory']['wrapper_type']);
+            // Closures dump as {"Closure#<id>": {__closure: true, ...}}
+            $this->assertArrayHasKey('__closure', (array) current($collected['closure']));
+            // Nested objects are collapsed to references in data.json; the full dump lives in objects.json.
+            $this->assertStringStartsWith('object@GuzzleHttp\Psr7\Response#', $collected['response']);
+            $objects = $storage->read(StorageInterface::TYPE_OBJECTS, $idGenerator->getId())[$idGenerator->getId()];
+            $this->assertStringContainsString('image/png', json_encode(
+                $objects,
+                JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES,
+            ));
+        } finally {
+            fclose($memory);
+            fclose($wrapped);
+            ResourceHoldingStreamWrapper::unregister();
+        }
+    }
+
+    /**
+     * @return iterable<string, array{string}>
+     */
+    public static function invalidIds(): iterable
+    {
+        yield 'traversal' => ['../../etc'];
+        yield 'nested traversal' => ['../../etc/passwd'];
+        yield 'slash' => ['foo/bar'];
+        yield 'backslash' => ['foo\\bar'];
+        yield 'dot' => ['foo.json'];
+        yield 'glob' => ['*'];
+        yield 'empty' => [''];
+        yield 'space' => ['a b'];
+        yield 'null byte' => ["abc\0def"];
+        yield 'too long' => [str_repeat('x', 65)];
+    }
+
+    #[DataProvider('invalidIds')]
+    public function testReadRejectsInvalidIdBeforeTouchingTheFilesystem(string $id): void
+    {
+        $storage = $this->getStorage(new DebuggerIdGenerator());
+
+        try {
+            $storage->read(StorageInterface::TYPE_DATA, $id);
+            $this->fail('Expected InvalidArgumentException.');
+        } catch (\InvalidArgumentException $e) {
+            $this->assertStringContainsString('Invalid debug entry id', $e->getMessage());
+        }
+
+        $this->assertDirectoryDoesNotExist($this->path);
+    }
+
+    #[DataProvider('invalidIds')]
+    public function testWriteRejectsInvalidIdBeforeTouchingTheFilesystem(string $id): void
+    {
+        $storage = $this->getStorage(new DebuggerIdGenerator());
+
+        try {
+            $storage->write($id, ['id' => $id], ['key' => 'value'], []);
+            $this->fail('Expected InvalidArgumentException.');
+        } catch (\InvalidArgumentException $e) {
+            $this->assertStringContainsString('Invalid debug entry id', $e->getMessage());
+        }
+
+        $this->assertDirectoryDoesNotExist($this->path);
+        $this->assertDirectoryDoesNotExist(dirname($this->path) . '/etc');
+    }
+
+    /**
+     * @return iterable<string, array{string}>
+     */
+    public static function validIds(): iterable
+    {
+        yield 'generated' => [new DebuggerIdGenerator()->getId()];
+        yield 'dashes and underscores' => ['external-123_abc'];
+        yield 'single char' => ['a'];
+        yield 'max length' => [str_repeat('x', 64)];
+    }
+
+    #[DataProvider('validIds')]
+    public function testValidIdsRoundTrip(string $id): void
+    {
+        $this->assertSame($id, StorageIdValidator::assertValid($id));
+
+        $storage = $this->getStorage(new DebuggerIdGenerator());
+        $storage->write($id, ['id' => $id], ['key' => 'value'], []);
+
+        $this->assertSame(['id' => $id], $storage->read(StorageInterface::TYPE_SUMMARY, $id)[$id]);
+        $this->assertSame(['key' => 'value'], $storage->read(StorageInterface::TYPE_DATA, $id)[$id]);
+    }
+
+    public function testStorageIdValidatorAcceptsOnlyStrings(): void
+    {
+        $this->assertFalse(StorageIdValidator::isValid(null));
+        $this->assertFalse(StorageIdValidator::isValid(123));
+        $this->assertFalse(StorageIdValidator::isValid(['a']));
+        $this->assertTrue(StorageIdValidator::isValid('abc'));
     }
 
     public function getStorage(DebuggerIdGenerator $idGenerator): FileStorage

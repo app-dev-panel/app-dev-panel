@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Api\Tests\Unit\Ingestion\Controller;
 
+use AppDevPanel\Api\Debug\Exception\BadRequestException;
 use AppDevPanel\Api\Http\JsonResponseFactoryInterface;
 use AppDevPanel\Api\Ingestion\Controller\IngestionController;
 use AppDevPanel\Kernel\DebuggerIdGenerator;
@@ -376,6 +377,75 @@ final class IngestionControllerTest extends TestCase
         $summary = array_values($summaries)[0];
         $this->assertSame('generic', $summary['context']['type']);
         $this->assertSame('external', $summary['context']['service']);
+    }
+
+    /**
+     * @return iterable<string, array{mixed}>
+     */
+    public static function unsafeDebugIds(): iterable
+    {
+        yield 'path traversal' => ['../../../etc/cron.d/evil'];
+        yield 'nested path' => ['2026-01-01/other-entry'];
+        yield 'glob' => ['*'];
+        yield 'empty' => [''];
+        yield 'too long' => [str_repeat('a', 65)];
+        yield 'not a string' => [['nested']];
+    }
+
+    #[\PHPUnit\Framework\Attributes\DataProvider('unsafeDebugIds')]
+    public function testIngestRejectsUnsafeDebugIdBeforeWriting(mixed $debugId): void
+    {
+        $controller = $this->createController();
+
+        try {
+            $controller->ingest($this->post([
+                'debugId' => $debugId,
+                'collectors' => ['logs' => [['level' => 'info', 'message' => 'x']]],
+            ]));
+            $this->fail('Expected BadRequestException.');
+        } catch (BadRequestException $e) {
+            $this->assertStringContainsString('debugId', $e->getMessage());
+        }
+
+        $this->assertSame([], $this->storage->read(StorageInterface::TYPE_SUMMARY));
+    }
+
+    public function testIngestBatchRejectsUnsafeDebugIdInAnyEntry(): void
+    {
+        $controller = $this->createController();
+
+        $this->expectException(BadRequestException::class);
+        $controller->ingestBatch($this->post([
+            'entries' => [
+                ['debugId' => 'fine-1', 'collectors' => ['logs' => []]],
+                ['debugId' => '../escape', 'collectors' => ['logs' => []]],
+            ],
+        ]));
+    }
+
+    public function testOpenapiIsEncodedExactlyOnce(): void
+    {
+        $captured = null;
+        $factory = $this->createMock(JsonResponseFactoryInterface::class);
+        $factory
+            ->method('createJsonResponse')
+            ->willReturnCallback(static function (mixed $data, int $status = 200) use (&$captured): Response {
+                $captured = $data;
+
+                return new Response($status, ['Content-Type' => 'application/json'], json_encode($data));
+            });
+
+        $controller = new IngestionController($factory, $this->storage);
+        $response = $controller->openapi(new ServerRequest('GET', '/debug/api/openapi.json'));
+
+        $this->assertSame(200, $response->getStatusCode());
+        // The factory must receive the decoded document, not a pre-encoded JSON string.
+        $this->assertIsArray($captured);
+        $this->assertArrayHasKey('openapi', $captured);
+
+        $decoded = json_decode((string) $response->getBody(), true, 512, JSON_THROW_ON_ERROR);
+        $this->assertIsArray($decoded);
+        $this->assertArrayHasKey('paths', $decoded);
     }
 
     private function removeDir(string $dir): void

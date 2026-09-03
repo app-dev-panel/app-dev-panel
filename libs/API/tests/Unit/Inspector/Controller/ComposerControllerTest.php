@@ -5,19 +5,25 @@ declare(strict_types=1);
 namespace AppDevPanel\Api\Tests\Unit\Inspector\Controller;
 
 use AppDevPanel\Api\ApiSecurityConfig;
+use AppDevPanel\Api\Inspector\CommandResponse;
 use AppDevPanel\Api\Inspector\Controller\ComposerController;
 use AppDevPanel\Api\PathResolverInterface;
 use Exception;
 use InvalidArgumentException;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 final class ComposerControllerTest extends ControllerTestCase
 {
     private string $fixtureDir;
 
+    /** @var list<list<string>> argv of every command handed to the fake runner */
+    private array $commands = [];
+
     protected function setUp(): void
     {
         $this->fixtureDir = sys_get_temp_dir() . '/adp-composer-test-' . uniqid();
         mkdir($this->fixtureDir, 0o755, true);
+        $this->commands = [];
     }
 
     protected function tearDown(): void
@@ -44,16 +50,29 @@ final class ComposerControllerTest extends ControllerTestCase
         rmdir($dir);
     }
 
-    private function createController(bool $allowDestructive = true): ComposerController
-    {
+    /**
+     * Fake process runner: records the argv and answers with the canned response.
+     * No composer binary, no subprocess, no network.
+     */
+    private function createController(
+        bool $allowDestructive = true,
+        ?CommandResponse $response = null,
+    ): ComposerController {
         $pathResolver = $this->createMock(PathResolverInterface::class);
         $pathResolver->method('getRootPath')->willReturn($this->fixtureDir);
         $pathResolver->method('getRuntimePath')->willReturn($this->fixtureDir . '/runtime');
+
+        $response ??= new CommandResponse(CommandResponse::STATUS_OK, '');
 
         return new ComposerController(
             $this->createResponseFactory(),
             $pathResolver,
             new ApiSecurityConfig(allowDestructiveOperations: $allowDestructive),
+            function (array $command) use ($response): CommandResponse {
+                $this->commands[] = $command;
+
+                return $response;
+            },
         );
     }
 
@@ -75,6 +94,7 @@ final class ComposerControllerTest extends ControllerTestCase
         $this->assertSame('test/app', $data['json']['name']);
         $this->assertArrayHasKey('lock', $data);
         $this->assertIsArray($data['lock']);
+        $this->assertSame([], $this->commands);
     }
 
     public function testIndexWithJsonOnly(): void
@@ -98,24 +118,6 @@ final class ComposerControllerTest extends ControllerTestCase
         $this->expectException(Exception::class);
         $this->expectExceptionMessage('composer.json');
         $controller->index($this->get());
-    }
-
-    public function testInspectMissingPackage(): void
-    {
-        $controller = $this->createController();
-
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('package');
-        $controller->inspect($this->get());
-    }
-
-    public function testRequireMissingPackage(): void
-    {
-        $controller = $this->createController();
-
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('package');
-        $controller->require($this->post([]));
     }
 
     public function testIndexWithInvalidJson(): void
@@ -183,45 +185,103 @@ final class ComposerControllerTest extends ControllerTestCase
         $this->assertCount(1, $data['lock']['packages-dev']);
     }
 
-    public function testInspectWithExistingPackage(): void
+    public function testInspectMissingPackage(): void
     {
-        // Use the real project root so `composer show` works
-        $pathResolver = $this->createMock(PathResolverInterface::class);
-        $pathResolver->method('getRootPath')->willReturn(dirname(__DIR__, 6));
-        $pathResolver->method('getRuntimePath')->willReturn(dirname(__DIR__, 6) . '/runtime');
+        $controller = $this->createController();
 
-        $controller = new ComposerController(
-            $this->createResponseFactory(),
-            $pathResolver,
-            new ApiSecurityConfig(allowDestructiveOperations: true),
-        );
+        try {
+            $controller->inspect($this->get());
+            $this->fail('Expected InvalidArgumentException.');
+        } catch (InvalidArgumentException $e) {
+            $this->assertStringContainsString('package', $e->getMessage());
+        }
+
+        $this->assertSame([], $this->commands, 'No command must run without a package name.');
+    }
+
+    public function testInspectRunsComposerShowAndDecodesJson(): void
+    {
+        $controller = $this->createController(response: new CommandResponse(
+            CommandResponse::STATUS_OK,
+            '{"name":"phpunit/phpunit","versions":["11.5.0"],"licenses":[{"osi":"BSD-3-Clause"}]}',
+        ));
+
         $response = $controller->inspect($this->get(['package' => 'phpunit/phpunit']));
 
         $this->assertSame(200, $response->getStatusCode());
+        $this->assertSame([['composer', 'show', 'phpunit/phpunit', '--all', '--format=json']], $this->commands);
         $data = $this->responseData($response);
-        $this->assertArrayHasKey('status', $data);
-        $this->assertArrayHasKey('result', $data);
-        $this->assertArrayHasKey('errors', $data);
+        $this->assertSame('ok', $data['status']);
+        $this->assertSame('phpunit/phpunit', $data['result']['name']);
+        $this->assertSame(['11.5.0'], $data['result']['versions']);
+        $this->assertSame([], $data['errors']);
     }
 
-    public function testInspectWithNonexistentPackage(): void
+    public function testInspectStripsComposerNoticesAroundJson(): void
     {
-        $pathResolver = $this->createMock(PathResolverInterface::class);
-        $pathResolver->method('getRootPath')->willReturn(dirname(__DIR__, 6));
-        $pathResolver->method('getRuntimePath')->willReturn(dirname(__DIR__, 6) . '/runtime');
+        $controller = $this->createController(response: new CommandResponse(
+            CommandResponse::STATUS_OK,
+            "Do not run Composer as root/super user! See https://getcomposer.org/root for details\n"
+            . "{\"name\":\"vendor/pkg\",\"description\":\"a {braced} description\"}\n"
+            . "Continue as root/super user [yes]? \n",
+        ));
 
-        $controller = new ComposerController(
-            $this->createResponseFactory(),
-            $pathResolver,
-            new ApiSecurityConfig(allowDestructiveOperations: true),
+        $data = $this->responseData($controller->inspect($this->get(['package' => 'vendor/pkg'])));
+
+        $this->assertSame('ok', $data['status']);
+        $this->assertSame(['name' => 'vendor/pkg', 'description' => 'a {braced} description'], $data['result']);
+    }
+
+    public function testInspectFailurePassesErrorsThrough(): void
+    {
+        $controller = $this->createController(
+            response: new CommandResponse(CommandResponse::STATUS_FAIL, null, ['Package "nonexistent/pkg" not found']),
         );
-        $response = $controller->inspect($this->get(['package' => 'nonexistent/pkg-zzz-999']));
 
-        $this->assertSame(200, $response->getStatusCode());
-        $data = $this->responseData($response);
-        $this->assertArrayHasKey('status', $data);
-        // Nonexistent package: command fails
-        $this->assertNotSame('ok', $data['status']);
+        $data = $this->responseData($controller->inspect($this->get(['package' => 'nonexistent/pkg'])));
+
+        $this->assertSame([['composer', 'show', 'nonexistent/pkg', '--all', '--format=json']], $this->commands);
+        $this->assertSame('fail', $data['status']);
+        $this->assertNull($data['result']);
+        $this->assertSame(['Package "nonexistent/pkg" not found'], $data['errors']);
+    }
+
+    public function testInspectErrorStatusReturnsNullResult(): void
+    {
+        $controller = $this->createController(response: new CommandResponse(
+            CommandResponse::STATUS_ERROR,
+            '[InvalidArgumentException] Package nonexistent/pkg not found',
+        ));
+
+        $data = $this->responseData($controller->inspect($this->get(['package' => 'nonexistent/pkg'])));
+
+        $this->assertSame('error', $data['status']);
+        $this->assertNull($data['result']);
+    }
+
+    public function testInspectWithNonJsonOutputThrows(): void
+    {
+        $controller = $this->createController(response: new CommandResponse(
+            CommandResponse::STATUS_OK,
+            'composer: command not found',
+        ));
+
+        $this->expectException(\JsonException::class);
+        $controller->inspect($this->get(['package' => 'vendor/pkg']));
+    }
+
+    public function testRequireMissingPackage(): void
+    {
+        $controller = $this->createController();
+
+        try {
+            $controller->require($this->post([]));
+            $this->fail('Expected InvalidArgumentException.');
+        } catch (InvalidArgumentException $e) {
+            $this->assertStringContainsString('package', $e->getMessage());
+        }
+
+        $this->assertSame([], $this->commands);
     }
 
     public function testRequireWithInvalidBodyJson(): void
@@ -246,39 +306,88 @@ final class ComposerControllerTest extends ControllerTestCase
         $controller->require($this->post(['package' => null]));
     }
 
-    public function testRequireWithEmptyBody(): void
+    /**
+     * @return iterable<string, array{array<string, mixed>, list<string>}>
+     */
+    public static function requireCommandLines(): iterable
     {
-        $controller = $this->createController();
-
-        $this->expectException(InvalidArgumentException::class);
-        $controller->require($this->post([]));
+        yield 'version' => [
+            ['package' => 'vendor/pkg', 'version' => '1.0.0', 'isDev' => false],
+            ['composer', 'require', 'vendor/pkg:1.0.0', '-n'],
+        ];
+        yield 'no version' => [
+            ['package' => 'vendor/pkg'],
+            ['composer', 'require', 'vendor/pkg:*', '-n'],
+        ];
+        yield 'null version' => [
+            ['package' => 'vendor/pkg', 'version' => null],
+            ['composer', 'require', 'vendor/pkg:*', '-n'],
+        ];
+        yield 'dev' => [
+            ['package' => 'vendor/tool', 'version' => '^2.0', 'isDev' => true],
+            ['composer', 'require', 'vendor/tool:^2.0', '-n', '--dev'],
+        ];
     }
 
-    public function testRequireWithPackageReturnsResult(): void
+    #[DataProvider('requireCommandLines')]
+    public function testRequireBuildsExactCommandLine(array $body, array $expectedCommand): void
     {
-        // Use the real project root so composer binary is available
-        $pathResolver = $this->createMock(PathResolverInterface::class);
-        $pathResolver->method('getRootPath')->willReturn(dirname(__DIR__, 6));
-        $pathResolver->method('getRuntimePath')->willReturn(dirname(__DIR__, 6) . '/runtime');
+        $controller = $this->createController(response: new CommandResponse(
+            CommandResponse::STATUS_OK,
+            "./composer.json has been updated\nNothing to install, update or remove\n",
+        ));
 
-        $controller = new ComposerController(
-            $this->createResponseFactory(),
-            $pathResolver,
-            new ApiSecurityConfig(allowDestructiveOperations: true),
-        );
-
-        // Dry-run: require a non-existent package — will error but exercises the method
-        $response = $controller->require($this->post([
-            'package' => 'nonexistent/package-zzz-999',
-            'version' => '1.0.0',
-            'isDev' => false,
-        ]));
+        $response = $controller->require($this->post($body));
 
         $this->assertSame(200, $response->getStatusCode());
+        $this->assertSame([$expectedCommand], $this->commands);
         $data = $this->responseData($response);
-        $this->assertArrayHasKey('status', $data);
-        $this->assertArrayHasKey('result', $data);
-        $this->assertArrayHasKey('errors', $data);
+        $this->assertSame('ok', $data['status']);
+        $this->assertSame("./composer.json has been updated\nNothing to install, update or remove\n", $data['result']);
+        $this->assertSame([], $data['errors']);
+    }
+
+    public function testRequireDecodesJsonOutput(): void
+    {
+        $controller = $this->createController(response: new CommandResponse(
+            CommandResponse::STATUS_OK,
+            '{"installed":["vendor/pkg"]}',
+        ));
+
+        $data = $this->responseData($controller->require($this->post(['package' => 'vendor/pkg'])));
+
+        $this->assertSame('ok', $data['status']);
+        $this->assertSame(['installed' => ['vendor/pkg']], $data['result']);
+    }
+
+    public function testRequireErrorReturnsRawOutput(): void
+    {
+        $controller = $this->createController(response: new CommandResponse(
+            CommandResponse::STATUS_ERROR,
+            'Could not find a matching version of package nonexistent/pkg',
+        ));
+
+        $data = $this->responseData($controller->require($this->post([
+            'package' => 'nonexistent/pkg',
+            'version' => '1.0.0',
+        ])));
+
+        $this->assertSame([['composer', 'require', 'nonexistent/pkg:1.0.0', '-n']], $this->commands);
+        $this->assertSame('error', $data['status']);
+        $this->assertSame('Could not find a matching version of package nonexistent/pkg', $data['result']);
+    }
+
+    public function testRequireFailurePassesErrorsThrough(): void
+    {
+        $controller = $this->createController(
+            response: new CommandResponse(CommandResponse::STATUS_FAIL, null, ['Command timed out after 120 seconds.']),
+        );
+
+        $data = $this->responseData($controller->require($this->post(['package' => 'vendor/pkg'])));
+
+        $this->assertSame('fail', $data['status']);
+        $this->assertNull($data['result']);
+        $this->assertSame(['Command timed out after 120 seconds.'], $data['errors']);
     }
 
     public function testRequireReturns403WhenDestructiveOperationsDisabled(): void
@@ -295,27 +404,19 @@ final class ComposerControllerTest extends ControllerTestCase
         $this->assertSame('error', $data['status']);
         $this->assertNotEmpty($data['errors']);
         $this->assertStringContainsString('allowDestructiveOperations', $data['errors'][0]);
+        $this->assertSame([], $this->commands, 'The guard must short-circuit before any command runs.');
     }
 
-    public function testRequireWithDevFlag(): void
+    public function testInspectIsNotGuardedByDestructiveFlag(): void
     {
-        $pathResolver = $this->createMock(PathResolverInterface::class);
-        $pathResolver->method('getRootPath')->willReturn(dirname(__DIR__, 6));
-        $pathResolver->method('getRuntimePath')->willReturn(dirname(__DIR__, 6) . '/runtime');
-
-        $controller = new ComposerController(
-            $this->createResponseFactory(),
-            $pathResolver,
-            new ApiSecurityConfig(allowDestructiveOperations: true),
+        $controller = $this->createController(
+            allowDestructive: false,
+            response: new CommandResponse(CommandResponse::STATUS_OK, '{"name":"vendor/pkg"}'),
         );
 
-        $response = $controller->require($this->post([
-            'package' => 'nonexistent/package-zzz-999',
-            'isDev' => true,
-        ]));
+        $data = $this->responseData($controller->inspect($this->get(['package' => 'vendor/pkg'])));
 
-        $this->assertSame(200, $response->getStatusCode());
-        $data = $this->responseData($response);
-        $this->assertArrayHasKey('status', $data);
+        $this->assertSame('ok', $data['status']);
+        $this->assertCount(1, $this->commands);
     }
 }

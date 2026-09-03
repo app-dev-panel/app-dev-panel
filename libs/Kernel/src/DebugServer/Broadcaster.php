@@ -8,9 +8,26 @@ namespace AppDevPanel\Kernel\DebugServer;
  * Broadcasts messages to all connected debug servers.
  *
  * Cross-platform: discovers servers via .sock files (Unix) or .port files (Windows).
+ *
+ * Every socket operation is bounded by {@see self::DEFAULT_TIMEOUT} seconds
+ * (see {@see DatagramSocket}): a receiver whose buffer is full costs at most one
+ * timeout per discovery file instead of the process-wide `default_socket_timeout`,
+ * and PHP notices raised by the stream layer are returned as errors, never printed.
  */
-final class Broadcaster
+final class Broadcaster implements BroadcasterInterface
 {
+    /**
+     * Hard cap on the connect / send wait, in seconds.
+     */
+    public const float DEFAULT_TIMEOUT = 0.2;
+
+    private readonly float $timeout;
+
+    public function __construct(float $timeout = self::DEFAULT_TIMEOUT)
+    {
+        $this->timeout = max(0.001, min($timeout, self::DEFAULT_TIMEOUT));
+    }
+
     /**
      * Broadcasts a message to all connected debug servers.
      *
@@ -23,22 +40,21 @@ final class Broadcaster
             return [];
         }
 
-        $payload = json_encode([$type, $data], JSON_THROW_ON_ERROR);
+        // Format: 8-byte length header + base64-encoded JSON payload, one datagram per message.
+        $encoded = base64_encode(json_encode([$type, $data], JSON_THROW_ON_ERROR));
+        $datagram = pack('P', strlen($encoded)) . $encoded;
         $uniqueErrors = [];
 
         foreach ($files as $file) {
-            $socket = Connection::isWindows()
-                ? $this->openUdpSocket($file, $uniqueErrors)
-                : $this->openUnixSocket($file, $uniqueErrors);
-
+            $socket = $this->open($file, $uniqueErrors);
             if ($socket === null) {
                 continue;
             }
 
-            try {
-                $this->writePayload($socket, $payload, $uniqueErrors);
-            } finally {
-                fclose($socket);
+            $error = $socket->send($datagram);
+            $socket->close();
+            if ($error !== null) {
+                $uniqueErrors[$error] = $error;
             }
         }
 
@@ -46,70 +62,45 @@ final class Broadcaster
     }
 
     /**
-     * @return resource|null
+     * Connects to the server behind a discovery file; removes the file when it is stale.
      */
-    private function openUnixSocket(string $file, array &$errors)
+    private function open(string $file, array &$errors): ?DatagramSocket
     {
-        $socket = @fsockopen('udg://' . $file, -1, $errno, $errstr);
-
-        if ($errno === SOCKET_ECONNREFUSED) {
-            @unlink($file);
-            return null;
-        }
-        if ($socket === false || $errno !== 0) {
-            if ($errno !== 0) {
-                $errors[$errno] = $errstr;
-            }
+        $endpoint = $this->resolveEndpoint($file);
+        if ($endpoint === null) {
+            DatagramSocket::silenced(static fn() => unlink($file));
             return null;
         }
 
-        return $socket;
+        $socket = DatagramSocket::connect($endpoint[0], $endpoint[1], $this->timeout);
+        if ($socket->isOpen()) {
+            return $socket;
+        }
+
+        // Nobody is bound behind the file (Unix reports ECONNREFUSED; UDP cannot tell,
+        // so a failed connect is treated as stale too) — drop it so it is not retried.
+        if ($socket->errno === SOCKET_ECONNREFUSED || Connection::isWindows()) {
+            DatagramSocket::silenced(static fn() => unlink($file));
+        }
+        if ($socket->errno !== 0 && $socket->errno !== SOCKET_ECONNREFUSED) {
+            $errors[$socket->errno] = $socket->errstr;
+        }
+
+        return null;
     }
 
     /**
-     * @return resource|null
+     * @return array{0: string, 1: int}|null `[address, port]`, or `null` for an unusable discovery file.
      */
-    private function openUdpSocket(string $file, array &$errors)
+    private function resolveEndpoint(string $file): ?array
     {
-        $portStr = @file_get_contents($file);
-        if ($portStr === false) {
-            return null;
+        if (!Connection::isWindows()) {
+            return ['udg://' . $file, -1];
         }
 
-        $port = (int) $portStr;
-        if ($port <= 0) {
-            @unlink($file);
-            return null;
-        }
+        $portStr = DatagramSocket::silenced(static fn() => file_get_contents($file));
+        $port = $portStr === false ? 0 : (int) $portStr;
 
-        $socket = @fsockopen('udp://127.0.0.1', $port, $errno, $errstr);
-
-        if ($socket === false || $errno !== 0) {
-            if ($errno !== 0) {
-                $errors[$errno] = $errstr;
-            }
-            @unlink($file);
-            return null;
-        }
-
-        return $socket;
-    }
-
-    /**
-     * Writes an entire message as one atomic datagram (correct for SOCK_DGRAM).
-     * Format: 8-byte length header + base64-encoded payload.
-     *
-     * @param resource $fp
-     */
-    private function writePayload($fp, string $payload, array &$errors): void
-    {
-        stream_set_write_buffer($fp, 0);
-
-        $encoded = base64_encode($payload);
-        $datagram = pack('P', strlen($encoded)) . $encoded;
-
-        if (fwrite($fp, $datagram) === false) {
-            $errors[] = error_get_last();
-        }
+        return $port > 0 ? ['udp://127.0.0.1', $port] : null;
     }
 }

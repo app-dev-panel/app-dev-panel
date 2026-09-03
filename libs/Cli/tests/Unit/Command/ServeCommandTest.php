@@ -84,10 +84,6 @@ final class ServeCommandTest extends TestCase
 
     public function testExecuteWithInvalidHostExitsWithFailure(): void
     {
-        if (PHP_OS_FAMILY === 'Windows') {
-            $this->markTestSkipped('Process tests unreliable on Windows (PHP built-in server exit behavior differs).');
-        }
-
         $storagePath = sys_get_temp_dir() . '/adp-test-' . uniqid();
 
         $command = new ServeCommand();
@@ -96,6 +92,7 @@ final class ServeCommandTest extends TestCase
         $tester->execute([
             '--host' => '999.999.999.999',
             '--port' => '1',
+            '--auth-token' => 'test-token',
             '--storage-path' => $storagePath,
         ]);
 
@@ -115,10 +112,6 @@ final class ServeCommandTest extends TestCase
 
     public function testExecuteCreatesStorageDirectory(): void
     {
-        if (PHP_OS_FAMILY === 'Windows') {
-            $this->markTestSkipped('Process tests unreliable on Windows (PHP built-in server exit behavior differs).');
-        }
-
         $storagePath = sys_get_temp_dir() . '/adp-test-serve-' . uniqid();
         $this->assertDirectoryDoesNotExist($storagePath);
 
@@ -128,6 +121,7 @@ final class ServeCommandTest extends TestCase
         $tester->execute([
             '--host' => '999.999.999.999',
             '--port' => '1',
+            '--auth-token' => 'test-token',
             '--storage-path' => $storagePath,
         ]);
 
@@ -139,10 +133,6 @@ final class ServeCommandTest extends TestCase
 
     public function testExecuteWithFrontendPath(): void
     {
-        if (PHP_OS_FAMILY === 'Windows') {
-            $this->markTestSkipped('Process tests unreliable on Windows (PHP built-in server exit behavior differs).');
-        }
-
         $storagePath = sys_get_temp_dir() . '/adp-test-fp-' . uniqid();
         $frontendPath = sys_get_temp_dir() . '/adp-test-frontend-' . uniqid();
         mkdir($frontendPath, 0o777, true);
@@ -153,6 +143,7 @@ final class ServeCommandTest extends TestCase
         $tester->execute([
             '--host' => '999.999.999.999',
             '--port' => '1',
+            '--auth-token' => 'test-token',
             '--storage-path' => $storagePath,
             '--frontend-path' => $frontendPath,
         ]);
@@ -169,10 +160,6 @@ final class ServeCommandTest extends TestCase
 
     public function testExecuteWithoutFrontendPathAutoResolvesFromFrontendAssets(): void
     {
-        if (PHP_OS_FAMILY === 'Windows') {
-            $this->markTestSkipped('Process tests unreliable on Windows (PHP built-in server exit behavior differs).');
-        }
-
         $storagePath = sys_get_temp_dir() . '/adp-test-nofp-' . uniqid();
 
         $command = new ServeCommand();
@@ -181,6 +168,7 @@ final class ServeCommandTest extends TestCase
         $tester->execute([
             '--host' => '999.999.999.999',
             '--port' => '1',
+            '--auth-token' => 'test-token',
             '--storage-path' => $storagePath,
         ]);
 
@@ -200,10 +188,6 @@ final class ServeCommandTest extends TestCase
 
     public function testExecuteWithRuntimePath(): void
     {
-        if (PHP_OS_FAMILY === 'Windows') {
-            $this->markTestSkipped('Process tests unreliable on Windows (PHP built-in server exit behavior differs).');
-        }
-
         $storagePath = sys_get_temp_dir() . '/adp-test-rp-' . uniqid();
         $runtimePath = sys_get_temp_dir() . '/adp-test-runtime';
 
@@ -213,6 +197,7 @@ final class ServeCommandTest extends TestCase
         $tester->execute([
             '--host' => '999.999.999.999',
             '--port' => '1',
+            '--auth-token' => 'test-token',
             '--storage-path' => $storagePath,
             '--runtime-path' => $runtimePath,
         ]);
@@ -227,9 +212,47 @@ final class ServeCommandTest extends TestCase
 
     public function testExecuteUsesDefaultStoragePath(): void
     {
-        if (PHP_OS_FAMILY === 'Windows') {
-            $this->markTestSkipped('Process tests unreliable on Windows (PHP built-in server exit behavior differs).');
+        $command = new ServeCommand();
+        $tester = new CommandTester($command);
+
+        $tester->execute([
+            '--host' => '999.999.999.999',
+            '--port' => '1',
+            '--auth-token' => 'test-token',
+        ]);
+
+        $display = $tester->getDisplay();
+        $this->assertStringContainsString(sys_get_temp_dir() . '/adp', $display);
+    }
+
+    public function testNonLoopbackHostWithoutTokenFailsBeforeStartingServer(): void
+    {
+        $storagePath = sys_get_temp_dir() . '/adp-test-sec-' . uniqid();
+
+        $command = new ServeCommand();
+        $tester = new CommandTester($command);
+
+        $tester->execute([
+            '--host' => '0.0.0.0',
+            '--port' => '1',
+            '--storage-path' => $storagePath,
+            '--auth-token' => '',
+        ]);
+
+        $display = $tester->getDisplay();
+        $this->assertSame(1, $tester->getStatusCode());
+        $this->assertStringContainsString('ADP_AUTH_TOKEN', $display);
+        $this->assertStringContainsString('0.0.0.0', $display);
+        $this->assertStringNotContainsString('Starting server', $display);
+
+        if (is_dir($storagePath)) {
+            rmdir($storagePath);
         }
+    }
+
+    public function testSecurityOptionsAreEchoedInStartupSummary(): void
+    {
+        $storagePath = sys_get_temp_dir() . '/adp-test-sec2-' . uniqid();
 
         $command = new ServeCommand();
         $tester = new CommandTester($command);
@@ -237,10 +260,19 @@ final class ServeCommandTest extends TestCase
         $tester->execute([
             '--host' => '999.999.999.999',
             '--port' => '1',
+            '--storage-path' => $storagePath,
+            '--auth-token' => 'secret',
+            '--allowed-ips' => '10.0.0.1, 10.0.0.2',
         ]);
 
         $display = $tester->getDisplay();
-        $this->assertStringContainsString(sys_get_temp_dir() . '/adp', $display);
+        $this->assertStringContainsString('Allowed IPs: 10.0.0.1, 10.0.0.2', $display);
+        $this->assertStringContainsString('Auth token: (set)', $display);
+        $this->assertStringNotContainsString('secret', $display);
+
+        if (is_dir($storagePath)) {
+            rmdir($storagePath);
+        }
     }
 
     public function testRouterScriptNotFound(): void

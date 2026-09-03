@@ -148,3 +148,98 @@ describe('projectSyncMiddleware', () => {
         expect(getState()[openApiSlice.name].entries).toEqual({Local: 'https://local.example/'});
     });
 });
+
+describe('projectSyncMiddleware event stream', () => {
+    class FakeEventSource {
+        static instances: FakeEventSource[] = [];
+        closed = false;
+        onmessage: ((event: MessageEvent) => void) | null = null;
+        onerror: (() => void) | null = null;
+
+        constructor(public url: string) {
+            FakeEventSource.instances.push(this);
+        }
+
+        close() {
+            this.closed = true;
+        }
+    }
+
+    type State = SliceState & {application: {baseUrl: string}};
+
+    const createStreamHarness = async (baseUrl: string) => {
+        let state: State = {
+            application: {baseUrl},
+            [openApiSlice.name]: {entries: {}},
+            [framesSlice.name]: {frames: {}},
+        };
+        const dispatched: Action[] = [];
+        const dispatch = vi.fn((action: unknown) => {
+            if (typeof action === 'function') {
+                dispatched.push({type: '<thunk>', payload: action});
+                return action;
+            }
+            dispatched.push(action as Action);
+            return action;
+        });
+        const api = {dispatch, getState: () => state};
+        const handler = projectSyncMiddleware(api as never)(vi.fn((a: unknown) => a));
+
+        handler({type: '@@harness/init'});
+        await Promise.resolve();
+        dispatched.length = 0;
+
+        return {
+            handler,
+            dispatched,
+            setBaseUrl: (url: string) => {
+                state = {...state, application: {baseUrl: url}};
+            },
+        };
+    };
+
+    beforeEach(() => {
+        FakeEventSource.instances = [];
+        vi.stubGlobal('EventSource', FakeEventSource);
+        vi.stubGlobal(
+            'fetch',
+            vi.fn(() => new Promise(() => {})),
+        );
+    });
+
+    afterEach(() => {
+        vi.unstubAllGlobals();
+        vi.restoreAllMocks();
+    });
+
+    it('opens the stream against the current backend on bootstrap', async () => {
+        await createStreamHarness('http://one.test/');
+
+        expect(FakeEventSource.instances).toHaveLength(1);
+        expect(FakeEventSource.instances[0].url).toBe('http://one.test/debug/api/project/event-stream');
+    });
+
+    it('re-opens the stream and refetches when application.baseUrl changes', async () => {
+        const {handler, setBaseUrl, dispatched} = await createStreamHarness('http://one.test');
+        const first = FakeEventSource.instances[0];
+
+        setBaseUrl('http://two.test');
+        handler({type: 'application/changeBaseUrl', payload: 'http://two.test'});
+
+        expect(first.closed).toBe(true);
+        expect(FakeEventSource.instances).toHaveLength(2);
+        expect(FakeEventSource.instances[1].url).toBe('http://two.test/debug/api/project/event-stream');
+        // getProjectConfig + getSecrets forced refetch thunks.
+        expect(dispatched.filter((a) => a.type === '<thunk>')).toHaveLength(2);
+    });
+
+    it('keeps the stream when the base URL is unchanged', async () => {
+        const {handler} = await createStreamHarness('http://one.test');
+
+        handler({type: 'application/setToolbarOpen', payload: true});
+        handler({type: 'application/changeBaseUrl', payload: 'http://one.test'});
+
+        expect(FakeEventSource.instances).toHaveLength(1);
+        expect(FakeEventSource.instances[0].closed).toBe(false);
+    });
+});

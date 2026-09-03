@@ -13,7 +13,12 @@ export const MemoryItem = ({data, iframeUrlHandler}: MemoryItemProps) => {
     const collector = isDebugEntryAboutWeb(data)
         ? CollectorsMap.WebAppInfoCollector
         : CollectorsMap.ConsoleAppInfoCollector;
-    const peakUsage = (data.web || data.console).memory.peakUsage;
+    // Entries ingested from external services (or trimmed summaries) may carry
+    // neither `web` nor `console` timing — render nothing instead of crashing.
+    const peakUsage = (data.web || data.console)?.memory?.peakUsage;
+    if (typeof peakUsage !== 'number') {
+        return null;
+    }
 
     return (
         <Tooltip title={`${peakUsage.toLocaleString(undefined)} bytes`} arrow>

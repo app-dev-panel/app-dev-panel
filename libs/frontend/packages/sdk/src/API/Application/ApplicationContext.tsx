@@ -3,7 +3,7 @@ import {createSlice, PayloadAction} from '@reduxjs/toolkit';
 
 export type ToolbarPosition = 'float' | 'bottom' | 'right' | 'left';
 
-type ApplicationContext = {
+export type ApplicationState = {
     baseUrl: string;
     preferredPageSize: number;
     toolbarOpen: boolean;
@@ -34,7 +34,7 @@ export const ApplicationSlice = createSlice({
         showInactiveCollectors: false,
         liveFeedOpen: false,
         editorConfig: defaultEditorConfig,
-    } as ApplicationContext,
+    } as ApplicationState,
     reducers: {
         changeBaseUrl(state, action: PayloadAction<string>) {
             state.baseUrl = action.payload;

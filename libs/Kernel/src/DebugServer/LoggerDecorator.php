@@ -15,7 +15,7 @@ final class LoggerDecorator implements LoggerInterface
     use LoggerTrait;
     use ProxyDecoratedCalls;
 
-    public Broadcaster $broadcaster;
+    public BroadcasterInterface $broadcaster;
 
     public function __construct(
         private LoggerInterface $decorated,

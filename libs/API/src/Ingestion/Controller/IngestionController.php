@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace AppDevPanel\Api\Ingestion\Controller;
 
 use AppDevPanel\Api\Http\JsonResponseFactoryInterface;
+use AppDevPanel\Api\Ingestion\OpenApiSpecLoader;
+use AppDevPanel\Api\Security\DebugIdValidator;
 use AppDevPanel\Kernel\DebuggerIdGenerator;
 use AppDevPanel\Kernel\Storage\StorageInterface;
 use InvalidArgumentException;
@@ -73,19 +75,11 @@ final class IngestionController
     }
 
     /**
-     * Serve the OpenAPI specification.
+     * Serve the OpenAPI specification (decoded document; the factory encodes it exactly once).
      */
     public function openapi(ServerRequestInterface $request): ResponseInterface
     {
-        $specPath = dirname(__DIR__, 4) . '/openapi/ingestion.yaml';
-        if (!file_exists($specPath)) {
-            throw new \RuntimeException('OpenAPI spec not found.');
-        }
-
-        $yaml = file_get_contents($specPath);
-        $json = json_encode(yaml_parse($yaml), JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
-
-        return $this->responseFactory->createJsonResponse($json);
+        return $this->responseFactory->createJsonResponse(new OpenApiSpecLoader()->load());
     }
 
     private function decodeRequestBody(ServerRequestInterface $request): array
@@ -130,9 +124,9 @@ final class IngestionController
 
     private function writeEntry(array $entry): string
     {
-        $idGenerator = new DebuggerIdGenerator();
-        /** @var string $id */
-        $id = $entry['debugId'] ?? $idGenerator->getId();
+        $id = array_key_exists('debugId', $entry)
+            ? DebugIdValidator::assertValid($entry['debugId'], 'debugId')
+            : new DebuggerIdGenerator()->getId();
 
         /** @var array<string, array> $collectors */
         $collectors = $entry['collectors'];

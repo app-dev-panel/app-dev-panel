@@ -1,6 +1,7 @@
 import {DebugEntry} from '@app-dev-panel/sdk/API/Debug/Debug';
 import {buttonColorHttp} from '@app-dev-panel/sdk/Helper/buttonColor';
 import {serializeCallable} from '@app-dev-panel/sdk/Helper/callableSerializer';
+import {copyText} from '@app-dev-panel/sdk/Helper/clipboard';
 import {openInNewTabOnModifier} from '@app-dev-panel/sdk/Helper/openInNewTabOnModifier';
 import {panelPagePath} from '@app-dev-panel/sdk/Helper/panelMountPath';
 import {usePostCurlBuildMutation} from '@app-dev-panel/toolbar/Module/Toolbar/API/inspector';
@@ -38,7 +39,7 @@ export const RequestItem = ({data}: RequestItemProps) => {
         try {
             const result = await postCurlBuild(data.id).unwrap();
             if (result?.command) {
-                await navigator.clipboard.writeText(result.command);
+                await copyText(result.command);
             }
         } catch (e) {
             console.error('[ADP Toolbar] Copy cURL failed:', e);

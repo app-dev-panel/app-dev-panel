@@ -1,6 +1,7 @@
 import App from '@app-dev-panel/panel/App';
 import '@app-dev-panel/panel/index.css';
 import {Config} from '@app-dev-panel/sdk/Config';
+import {basenameFromDocument} from '@app-dev-panel/sdk/Helper/panelBase';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 
@@ -29,7 +30,11 @@ try {
             containerId: 'root',
             options: {
                 modules: {toolbar: queryParams?.toolbar !== '0'},
-                router: {basename: '', useHashRouter: Config.appEnv === 'github'},
+                // Issue #113: when no host page injected a config (static
+                // index.html served by `adp serve`, Vite dev server, …) the
+                // mount directory is whatever `<base href>` resolved to, so
+                // deep links such as `/debug/inspector/routes` route correctly.
+                router: {basename: basenameFromDocument(), useHashRouter: Config.appEnv === 'github'},
                 backend: {
                     baseUrl: import.meta.env.VITE_BACKEND_URL || 'http://127.0.0.1:8080',
                     favoriteUrls: [],

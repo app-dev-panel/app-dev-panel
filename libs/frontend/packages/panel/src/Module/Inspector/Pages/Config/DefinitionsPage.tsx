@@ -8,12 +8,12 @@ import {FullScreenCircularProgress} from '@app-dev-panel/sdk/Component/FullScree
 import {GroupCard} from '@app-dev-panel/sdk/Component/GroupCard';
 import {JsonRenderer} from '@app-dev-panel/sdk/Component/JsonRenderer';
 import {QueryErrorState} from '@app-dev-panel/sdk/Component/QueryErrorState';
+import {copyText} from '@app-dev-panel/sdk/Helper/clipboard';
 import {searchVariants} from '@app-dev-panel/sdk/Helper/layoutTranslit';
 import {regexpQuote} from '@app-dev-panel/sdk/Helper/regexpQuote';
 import {ChevronRight, Code, ContentCopy, DataObject, Download, ErrorOutline} from '@mui/icons-material';
 import {Box, CircularProgress, Collapse, IconButton, Tooltip, Typography} from '@mui/material';
 import {alpha, styled} from '@mui/material/styles';
-import clipboardCopy from 'clipboard-copy';
 import {useCallback, useContext, useEffect, useMemo, useState} from 'react';
 import {Link as RouterLink, useSearchParams} from 'react-router';
 
@@ -498,7 +498,7 @@ const DefinitionRow = ({
                         </Tooltip>
                     )}
                     <Tooltip title="Copy name">
-                        <IconButton size="small" onClick={() => clipboardCopy(entry.id)} aria-label="Copy name">
+                        <IconButton size="small" onClick={() => void copyText(entry.id)} aria-label="Copy name">
                             <ContentCopy sx={{fontSize: 14}} />
                         </IconButton>
                     </Tooltip>
@@ -551,7 +551,7 @@ const DefinitionRow = ({
                                     <Tooltip title="Copy source">
                                         <IconButton
                                             size="small"
-                                            onClick={() => clipboardCopy(factoryMeta.source)}
+                                            onClick={() => void copyText(factoryMeta.source)}
                                             aria-label="Copy source"
                                         >
                                             <ContentCopy sx={{fontSize: 14}} />

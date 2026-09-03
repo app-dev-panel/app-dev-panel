@@ -25,11 +25,9 @@ final class PlaygroundConfigTest extends TestCase
 
     protected function setUp(): void
     {
-        $configPath = dirname(__DIR__, 3) . '/../../playground/yii2-basic-app/config/web.php';
+        $configPath = dirname(__DIR__, 5) . '/playground/yii2-basic-app/config/web.php';
 
-        if (!file_exists($configPath)) {
-            $this->markTestSkipped('Playground config not found at: ' . $configPath);
-        }
+        $this->assertFileExists($configPath, 'The Yii 2 playground config is part of this repository.');
 
         $this->config = require $configPath;
     }
@@ -63,10 +61,7 @@ final class PlaygroundConfigTest extends TestCase
         $debugIndex = array_search('app-dev-panel', $bootstrap, true);
         $logIndex = array_search('log', $bootstrap, true);
 
-        if ($logIndex === false) {
-            $this->markTestSkipped('No "log" component in bootstrap array.');
-        }
-
+        $this->assertNotFalse($logIndex, '"log" must be in the playground bootstrap array');
         $this->assertNotFalse($debugIndex, '"adp" should be in bootstrap array');
         $this->assertLessThan(
             $logIndex,

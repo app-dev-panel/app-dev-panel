@@ -9,6 +9,7 @@ import {PageToolbar} from '@app-dev-panel/sdk/Component/PageToolbar';
 import {QueryErrorState} from '@app-dev-panel/sdk/Component/QueryErrorState';
 import {serializeCallable} from '@app-dev-panel/sdk/Helper/callableSerializer';
 import {concatClassMethod} from '@app-dev-panel/sdk/Helper/classMethodConcater';
+import {copyText} from '@app-dev-panel/sdk/Helper/clipboard';
 import {ContentCopy, OpenInNew} from '@mui/icons-material';
 import {
     Alert,
@@ -25,7 +26,6 @@ import {
     Typography,
 } from '@mui/material';
 import {styled, useTheme} from '@mui/material/styles';
-import clipboardCopy from 'clipboard-copy';
 import React, {useCallback, useDeferredValue, useEffect, useMemo, useState} from 'react';
 import {Link as RouterLink} from 'react-router';
 
@@ -267,7 +267,7 @@ const RouteDetail = ({route}: {route: RouteType}) => {
                                 size="small"
                                 onClick={(e) => {
                                     e.stopPropagation();
-                                    clipboardCopy(actionFull);
+                                    void copyText(actionFull);
                                 }}
                             >
                                 <ContentCopy sx={{fontSize: 14}} />

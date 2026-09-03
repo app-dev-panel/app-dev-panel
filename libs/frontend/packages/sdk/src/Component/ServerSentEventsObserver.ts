@@ -35,6 +35,12 @@ class ServerSentEvents {
     }
 
     private connect() {
+        // A pending reconnect would otherwise fire on top of this connection
+        // and open a second EventSource for the same URL.
+        if (this.reconnectTimer !== null) {
+            clearTimeout(this.reconnectTimer);
+            this.reconnectTimer = null;
+        }
         if (this.eventSource !== null) {
             this.eventSource.close();
         }

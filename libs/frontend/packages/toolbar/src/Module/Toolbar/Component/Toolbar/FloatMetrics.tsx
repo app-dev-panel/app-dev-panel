@@ -1,6 +1,10 @@
 import {DebugEntry} from '@app-dev-panel/sdk/API/Debug/Debug';
+import {CollectorsMap} from '@app-dev-panel/sdk/Helper/collectors';
 import {isDebugEntryAboutConsole, isDebugEntryAboutWeb} from '@app-dev-panel/sdk/Helper/debugEntry';
+import {openInNewTabOnModifier} from '@app-dev-panel/sdk/Helper/openInNewTabOnModifier';
+import {panelPagePath} from '@app-dev-panel/sdk/Helper/panelMountPath';
 import {Box, Chip} from '@mui/material';
+import type {MouseEvent} from 'react';
 
 const chipSx = {
     height: 27,
@@ -11,6 +15,22 @@ const chipSx = {
     cursor: 'pointer',
     '& .MuiChip-label': {px: 1},
 };
+
+// Emoji glyphs are kept in JS strings on purpose: JSX attribute literals do
+// not process `\uXXXX` escapes, so `icon="⏱"` renders the six literal
+// characters instead of the stopwatch glyph.
+export const METRIC_ICONS = {
+    time: '⏱',
+    memory: '💾',
+    db: '🗄',
+    http: '🌐',
+    logs: '📋',
+    events: '⚡',
+    deprecations: '⚠️',
+    exception: '💥',
+    validation: '✅',
+    route: '🔀',
+} as const;
 
 const formatTime = (seconds: number): string => {
     const ms = seconds * 1000;
@@ -23,62 +43,178 @@ const formatMemory = (bytes: number): string => {
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 };
 
+/**
+ * `{mount}/debug?collector=<fqcn>&debugEntry=<id>` — the same URL shape every
+ * bottom-bar badge (`MemoryItem`, `DatabaseItem`, …) hands to `iframeUrlHandler`.
+ * The first `/debug` is the mount, the second the panel-internal collector route.
+ */
+export const collectorPagePath = (entry: DebugEntry, collector: string): string =>
+    panelPagePath(`/debug?collector=${encodeURIComponent(collector)}&debugEntry=${encodeURIComponent(entry.id)}`);
+
+/** `{mount}/inspector/files?class=<fqcn>` — mirrors `ExceptionItem`'s "Open in panel". */
+export const exceptionPagePath = (entry: DebugEntry): string =>
+    panelPagePath(`/inspector/files?class=${encodeURIComponent(entry.exception?.class ?? '')}`);
+
+const appInfoCollector = (entry: DebugEntry): string =>
+    isDebugEntryAboutWeb(entry) ? CollectorsMap.WebAppInfoCollector : CollectorsMap.ConsoleAppInfoCollector;
+
+type MetricTarget = {
+    key: keyof typeof METRIC_ICONS;
+    label: string;
+    value: string | number;
+    url: string;
+    color?: string;
+};
+
+/**
+ * Every metric an entry exposes, in display order, with the panel URL a click
+ * should open. Shared by the float chips and the side-rail rows so both modes
+ * navigate exactly like the bottom-bar badges do.
+ */
+export const metricTargets = (entry: DebugEntry): MetricTarget[] => {
+    const timing = entry.web || entry.console;
+    const targets: MetricTarget[] = [];
+
+    if (timing) {
+        targets.push({
+            key: 'time',
+            label: 'Response time',
+            value: formatTime(timing.request.processingTime),
+            url: collectorPagePath(entry, CollectorsMap.TimelineCollector),
+        });
+        targets.push({
+            key: 'memory',
+            label: 'Peak memory',
+            value: formatMemory(timing.memory.peakUsage),
+            url: collectorPagePath(entry, appInfoCollector(entry)),
+        });
+    }
+    if (entry.db) {
+        targets.push({
+            key: 'db',
+            label: 'DB queries',
+            value: entry.db.queries.total,
+            url: collectorPagePath(entry, CollectorsMap.DatabaseCollector),
+        });
+    }
+    if (entry.http && entry.http.count > 0) {
+        targets.push({
+            key: 'http',
+            label: 'HTTP requests',
+            value: entry.http.count,
+            url: collectorPagePath(entry, CollectorsMap.HttpClientCollector),
+        });
+    }
+    if (entry.logger && entry.logger.total > 0) {
+        targets.push({
+            key: 'logs',
+            label: 'Log entries',
+            value: entry.logger.total,
+            url: collectorPagePath(entry, CollectorsMap.LogCollector),
+        });
+    }
+    if (entry.event && entry.event.total > 0) {
+        targets.push({
+            key: 'events',
+            label: 'Events fired',
+            value: entry.event.total,
+            url: collectorPagePath(entry, CollectorsMap.EventCollector),
+        });
+    }
+    if (entry.deprecation && entry.deprecation.total > 0) {
+        targets.push({
+            key: 'deprecations',
+            label: 'Deprecations',
+            value: entry.deprecation.total,
+            url: collectorPagePath(entry, CollectorsMap.DeprecationCollector),
+            color: '#D97706',
+        });
+    }
+    if (entry.exception) {
+        targets.push({
+            key: 'exception',
+            label: 'Exception',
+            value: entry.exception.class,
+            url: exceptionPagePath(entry),
+            color: '#DC2626',
+        });
+    }
+    if (entry.validator) {
+        targets.push({
+            key: 'validation',
+            label: 'Validation',
+            value: entry.validator.invalid > 0 ? `${entry.validator.invalid} invalid` : 'OK',
+            url: collectorPagePath(entry, CollectorsMap.ValidatorCollector),
+            color: entry.validator.invalid > 0 ? '#D97706' : '#16A34A',
+        });
+    }
+    if (entry.router) {
+        targets.push({
+            key: 'route',
+            label: 'Route',
+            value: entry.router.name,
+            url: collectorPagePath(entry, CollectorsMap.RouterCollector),
+        });
+    }
+
+    return targets;
+};
+
+const makeClickHandler = (url: string, iframeUrlHandler: (url: string) => void) => (e: MouseEvent) => {
+    if (openInNewTabOnModifier(e, url)) return;
+    iframeUrlHandler(url);
+    e.stopPropagation();
+    e.preventDefault();
+};
+
+const FLOAT_KEYS: ReadonlySet<MetricTarget['key']> = new Set([
+    'time',
+    'memory',
+    'db',
+    'http',
+    'logs',
+    'events',
+    'deprecations',
+    'exception',
+]);
+
+const floatChipLabel = (target: MetricTarget): string => {
+    const icon = METRIC_ICONS[target.key];
+    switch (target.key) {
+        case 'db':
+            return `${icon} DB ${target.value}`;
+        case 'http':
+            return `${icon} HTTP ${target.value}`;
+        case 'logs':
+            return `${icon} Logs ${target.value}`;
+        case 'events':
+            return `${icon} Ev ${target.value}`;
+        case 'deprecations':
+            return `${icon} Depr ${target.value}`;
+        default:
+            return `${icon} ${target.value}`;
+    }
+};
+
 type FloatMetricsProps = {entry: DebugEntry; iframeUrlHandler: (url: string) => void};
 
-export const FloatMetrics = ({entry}: FloatMetricsProps) => {
-    const timing = entry.web || entry.console;
-
-    return (
-        <Box sx={{display: 'flex', flexWrap: 'wrap', gap: 0.5, alignContent: 'flex-start'}}>
-            {timing && (
+export const FloatMetrics = ({entry, iframeUrlHandler}: FloatMetricsProps) => (
+    <Box sx={{display: 'flex', flexWrap: 'wrap', gap: 0.5, alignContent: 'flex-start'}}>
+        {metricTargets(entry)
+            .filter((target) => FLOAT_KEYS.has(target.key))
+            .map((target) => (
                 <Chip
-                    label={`\u23F1 ${formatTime(timing.request.processingTime)}`}
+                    key={target.key}
+                    label={floatChipLabel(target)}
                     size="small"
                     variant="outlined"
+                    color={target.key === 'deprecations' ? 'warning' : target.key === 'exception' ? 'error' : 'default'}
+                    onClick={makeClickHandler(target.url, iframeUrlHandler)}
                     sx={chipSx}
                 />
-            )}
-            {timing && (
-                <Chip
-                    label={`\uD83D\uDCBE ${formatMemory(timing.memory.peakUsage)}`}
-                    size="small"
-                    variant="outlined"
-                    sx={chipSx}
-                />
-            )}
-            {entry.db && (
-                <Chip label={`\uD83D\uDDC4 DB ${entry.db.queries.total}`} size="small" variant="outlined" sx={chipSx} />
-            )}
-            {entry.http && entry.http.count > 0 && (
-                <Chip label={`\uD83C\uDF10 HTTP ${entry.http.count}`} size="small" variant="outlined" sx={chipSx} />
-            )}
-            {entry.logger && entry.logger.total > 0 && (
-                <Chip label={`\uD83D\uDCCB Logs ${entry.logger.total}`} size="small" variant="outlined" sx={chipSx} />
-            )}
-            {entry.event && entry.event.total > 0 && (
-                <Chip label={`\u26A1 Ev ${entry.event.total}`} size="small" variant="outlined" sx={chipSx} />
-            )}
-            {entry.deprecation && entry.deprecation.total > 0 && (
-                <Chip
-                    label={`\u26A0 Depr ${entry.deprecation.total}`}
-                    size="small"
-                    variant="outlined"
-                    color="warning"
-                    sx={chipSx}
-                />
-            )}
-            {entry.exception && (
-                <Chip
-                    label={`\uD83D\uDCA5 ${entry.exception.class}`}
-                    size="small"
-                    variant="outlined"
-                    color="error"
-                    sx={chipSx}
-                />
-            )}
-        </Box>
-    );
-};
+            ))}
+    </Box>
+);
 
 /** Request hero bar for float/side modes */
 export const RequestHeroBar = ({entry}: {entry: DebugEntry}) => {
@@ -169,10 +305,12 @@ export const SideMetricRow = ({
     label: string;
     value: string | number;
     color?: string;
-    onClick?: () => void;
+    onClick?: (e: MouseEvent) => void;
 }) => (
     <Box
         onClick={onClick}
+        role={onClick ? 'button' : undefined}
+        aria-label={onClick ? label : undefined}
         sx={{
             display: 'flex',
             alignItems: 'center',
@@ -202,48 +340,20 @@ export const SideMetricRow = ({
     </Box>
 );
 
-/** All side metrics for an entry */
-export const SideMetrics = ({entry}: {entry: DebugEntry}) => {
-    const timing = entry.web || entry.console;
+type SideMetricsProps = {entry: DebugEntry; iframeUrlHandler: (url: string) => void};
 
-    return (
-        <Box sx={{flex: 1, overflowY: 'auto'}}>
-            {timing && (
-                <SideMetricRow icon="\u23F1" label="Response time" value={formatTime(timing.request.processingTime)} />
-            )}
-            {timing && (
-                <SideMetricRow icon="\uD83D\uDCBE" label="Peak memory" value={formatMemory(timing.memory.peakUsage)} />
-            )}
-            {entry.db && <SideMetricRow icon="\uD83D\uDDC4" label="DB queries" value={entry.db.queries.total} />}
-            {entry.http && entry.http.count > 0 && (
-                <SideMetricRow icon="\uD83C\uDF10" label="HTTP requests" value={entry.http.count} />
-            )}
-            {entry.logger && entry.logger.total > 0 && (
-                <SideMetricRow icon="\uD83D\uDCCB" label="Log entries" value={entry.logger.total} />
-            )}
-            {entry.event && entry.event.total > 0 && (
-                <SideMetricRow icon="\u26A1" label="Events fired" value={entry.event.total} />
-            )}
-            {entry.deprecation && entry.deprecation.total > 0 && (
-                <SideMetricRow
-                    icon="\u26A0\uFE0F"
-                    label="Deprecations"
-                    value={entry.deprecation.total}
-                    color="#D97706"
-                />
-            )}
-            {entry.exception && (
-                <SideMetricRow icon="\uD83D\uDCA5" label="Exception" value={entry.exception.class} color="#DC2626" />
-            )}
-            {entry.validator && (
-                <SideMetricRow
-                    icon="\u2705"
-                    label="Validation"
-                    value={entry.validator.invalid > 0 ? `${entry.validator.invalid} invalid` : 'OK'}
-                    color={entry.validator.invalid > 0 ? '#D97706' : '#16A34A'}
-                />
-            )}
-            {entry.router && <SideMetricRow icon="\uD83D\uDD00" label="Route" value={entry.router.name} />}
-        </Box>
-    );
-};
+/** All side metrics for an entry */
+export const SideMetrics = ({entry, iframeUrlHandler}: SideMetricsProps) => (
+    <Box sx={{flex: 1, overflowY: 'auto'}}>
+        {metricTargets(entry).map((target) => (
+            <SideMetricRow
+                key={target.key}
+                icon={METRIC_ICONS[target.key]}
+                label={target.label}
+                value={target.value}
+                color={target.color}
+                onClick={makeClickHandler(target.url, iframeUrlHandler)}
+            />
+        ))}
+    </Box>
+);

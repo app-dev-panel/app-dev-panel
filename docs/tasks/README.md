@@ -12,6 +12,7 @@ Review inputs: `make modulite` (0 violations), `make mago` (pass + 219 baseline 
 | P2 | [`p2-code-quality.md`](p2-code-quality.md) | High | Refactor + Mago | `LlmController` split + helpers, fix mago warnings, PHPUnit attributes migration |
 | P3 | [`p3-docs.md`](p3-docs.md) | Medium | Documentation | Sync CLAUDE.md files with actual code (Kernel, API, Laravel) |
 | P4 | [`p4-debt.md`](p4-debt.md) | Low | Tech debt | Baseline regen, Cli coverage, Yiisoft dependency review |
+| P5 | [`p5-stabilization.md`](p5-stabilization.md) | Critical | Stabilization | Red CI, zero-tolerance test policy, open issues #108/#111/#113/#114, security, timeouts, automation gaps |
 
 ## Workflow
 

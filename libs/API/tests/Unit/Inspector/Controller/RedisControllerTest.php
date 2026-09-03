@@ -115,10 +115,6 @@ final class RedisControllerTest extends ControllerTestCase
 
     public function testPingSuccess(): void
     {
-        if (!extension_loaded('redis')) {
-            $this->markTestSkipped('Redis extension not available.');
-        }
-
         $redis = $this->createMock(\Redis::class);
         $redis->method('ping')->willReturn('+PONG');
 
@@ -132,10 +128,6 @@ final class RedisControllerTest extends ControllerTestCase
 
     public function testPingException(): void
     {
-        if (!extension_loaded('redis')) {
-            $this->markTestSkipped('Redis extension not available.');
-        }
-
         $redis = $this->createMock(\Redis::class);
         $redis->method('ping')->willThrowException(new \RedisException('Connection refused'));
 
@@ -149,10 +141,6 @@ final class RedisControllerTest extends ControllerTestCase
 
     public function testInfoSuccess(): void
     {
-        if (!extension_loaded('redis')) {
-            $this->markTestSkipped('Redis extension not available.');
-        }
-
         $redis = $this->createMock(\Redis::class);
         $redis->method('info')->willReturn(['redis_version' => '7.0.0']);
 
@@ -166,10 +154,6 @@ final class RedisControllerTest extends ControllerTestCase
 
     public function testInfoWithSection(): void
     {
-        if (!extension_loaded('redis')) {
-            $this->markTestSkipped('Redis extension not available.');
-        }
-
         $redis = $this->createMock(\Redis::class);
         $redis->expects($this->once())->method('info')->with('memory')->willReturn(['used_memory' => '1024']);
 
@@ -181,10 +165,6 @@ final class RedisControllerTest extends ControllerTestCase
 
     public function testInfoException(): void
     {
-        if (!extension_loaded('redis')) {
-            $this->markTestSkipped('Redis extension not available.');
-        }
-
         $redis = $this->createMock(\Redis::class);
         $redis->method('info')->willThrowException(new \RedisException('Timeout'));
 
@@ -198,10 +178,6 @@ final class RedisControllerTest extends ControllerTestCase
 
     public function testDbSizeSuccess(): void
     {
-        if (!extension_loaded('redis')) {
-            $this->markTestSkipped('Redis extension not available.');
-        }
-
         $redis = $this->createMock(\Redis::class);
         $redis->method('dbSize')->willReturn(42);
 
@@ -215,10 +191,6 @@ final class RedisControllerTest extends ControllerTestCase
 
     public function testDbSizeException(): void
     {
-        if (!extension_loaded('redis')) {
-            $this->markTestSkipped('Redis extension not available.');
-        }
-
         $redis = $this->createMock(\Redis::class);
         $redis->method('dbSize')->willThrowException(new \RedisException('Err'));
 
@@ -230,10 +202,6 @@ final class RedisControllerTest extends ControllerTestCase
 
     public function testKeysExceptionFromScan(): void
     {
-        if (!extension_loaded('redis')) {
-            $this->markTestSkipped('Redis extension not available.');
-        }
-
         $redis = $this->createMock(\Redis::class);
         $redis->method('scan')->willThrowException(new \RedisException('Err'));
 
@@ -245,10 +213,6 @@ final class RedisControllerTest extends ControllerTestCase
 
     public function testGetStringValue(): void
     {
-        if (!extension_loaded('redis')) {
-            $this->markTestSkipped('Redis extension not available.');
-        }
-
         $redis = $this->createMock(\Redis::class);
         $redis->method('type')->willReturn(\Redis::REDIS_STRING);
         $redis->method('ttl')->willReturn(300);
@@ -267,10 +231,6 @@ final class RedisControllerTest extends ControllerTestCase
 
     public function testGetListValue(): void
     {
-        if (!extension_loaded('redis')) {
-            $this->markTestSkipped('Redis extension not available.');
-        }
-
         $redis = $this->createMock(\Redis::class);
         $redis->method('type')->willReturn(\Redis::REDIS_LIST);
         $redis->method('ttl')->willReturn(-1);
@@ -287,10 +247,6 @@ final class RedisControllerTest extends ControllerTestCase
 
     public function testGetSetValue(): void
     {
-        if (!extension_loaded('redis')) {
-            $this->markTestSkipped('Redis extension not available.');
-        }
-
         $redis = $this->createMock(\Redis::class);
         $redis->method('type')->willReturn(\Redis::REDIS_SET);
         $redis->method('ttl')->willReturn(-1);
@@ -306,10 +262,6 @@ final class RedisControllerTest extends ControllerTestCase
 
     public function testGetZsetValue(): void
     {
-        if (!extension_loaded('redis')) {
-            $this->markTestSkipped('Redis extension not available.');
-        }
-
         $redis = $this->createMock(\Redis::class);
         $redis->method('type')->willReturn(\Redis::REDIS_ZSET);
         $redis->method('ttl')->willReturn(-1);
@@ -325,10 +277,6 @@ final class RedisControllerTest extends ControllerTestCase
 
     public function testGetHashValue(): void
     {
-        if (!extension_loaded('redis')) {
-            $this->markTestSkipped('Redis extension not available.');
-        }
-
         $redis = $this->createMock(\Redis::class);
         $redis->method('type')->willReturn(\Redis::REDIS_HASH);
         $redis->method('ttl')->willReturn(-1);
@@ -345,10 +293,6 @@ final class RedisControllerTest extends ControllerTestCase
 
     public function testGetStreamValue(): void
     {
-        if (!extension_loaded('redis')) {
-            $this->markTestSkipped('Redis extension not available.');
-        }
-
         $redis = $this->createMock(\Redis::class);
         $redis->method('type')->willReturn(\Redis::REDIS_STREAM);
         $redis->method('ttl')->willReturn(-1);
@@ -364,10 +308,6 @@ final class RedisControllerTest extends ControllerTestCase
 
     public function testGetNotFoundType(): void
     {
-        if (!extension_loaded('redis')) {
-            $this->markTestSkipped('Redis extension not available.');
-        }
-
         $redis = $this->createMock(\Redis::class);
         $redis->method('type')->willReturn(\Redis::REDIS_NOT_FOUND);
         $redis->method('ttl')->willReturn(-2);
@@ -383,10 +323,6 @@ final class RedisControllerTest extends ControllerTestCase
 
     public function testGetException(): void
     {
-        if (!extension_loaded('redis')) {
-            $this->markTestSkipped('Redis extension not available.');
-        }
-
         $redis = $this->createMock(\Redis::class);
         $redis->method('type')->willThrowException(new \RedisException('Get failed'));
 
@@ -400,10 +336,6 @@ final class RedisControllerTest extends ControllerTestCase
 
     public function testDeleteSuccess(): void
     {
-        if (!extension_loaded('redis')) {
-            $this->markTestSkipped('Redis extension not available.');
-        }
-
         $redis = $this->createMock(\Redis::class);
         $redis->method('del')->willReturn(1);
 
@@ -417,10 +349,6 @@ final class RedisControllerTest extends ControllerTestCase
 
     public function testDeleteException(): void
     {
-        if (!extension_loaded('redis')) {
-            $this->markTestSkipped('Redis extension not available.');
-        }
-
         $redis = $this->createMock(\Redis::class);
         $redis->method('del')->willThrowException(new \RedisException('Del failed'));
 
@@ -432,10 +360,6 @@ final class RedisControllerTest extends ControllerTestCase
 
     public function testFlushDbSuccess(): void
     {
-        if (!extension_loaded('redis')) {
-            $this->markTestSkipped('Redis extension not available.');
-        }
-
         $redis = $this->createMock(\Redis::class);
         $redis->method('flushDB')->willReturn(true);
 
@@ -449,10 +373,6 @@ final class RedisControllerTest extends ControllerTestCase
 
     public function testFlushDbException(): void
     {
-        if (!extension_loaded('redis')) {
-            $this->markTestSkipped('Redis extension not available.');
-        }
-
         $redis = $this->createMock(\Redis::class);
         $redis->method('flushDB')->willThrowException(new \RedisException('Flush failed'));
 

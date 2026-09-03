@@ -7,6 +7,7 @@ declare(ticks=1);
 namespace AppDevPanel\Cli\Command;
 
 use AppDevPanel\Kernel\DebugServer\Broadcaster;
+use AppDevPanel\Kernel\DebugServer\BroadcasterInterface;
 use AppDevPanel\Kernel\DebugServer\Connection;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
@@ -23,9 +24,9 @@ final class DebugServerBroadcastCommand extends Command
     public const COMMAND_NAME = 'dev:broadcast';
 
     private readonly LoggerInterface $logger;
-    private readonly Broadcaster $broadcaster;
+    private readonly BroadcasterInterface $broadcaster;
 
-    public function __construct(?LoggerInterface $logger = null, ?Broadcaster $broadcaster = null)
+    public function __construct(?LoggerInterface $logger = null, ?BroadcasterInterface $broadcaster = null)
     {
         $this->logger = $logger ?? new NullLogger();
         $this->broadcaster = $broadcaster ?? new Broadcaster();
@@ -55,10 +56,19 @@ final class DebugServerBroadcastCommand extends Command
 
         $this->logger->info('Starting broadcast.', ['message' => $data]);
 
-        $this->broadcaster->broadcast(Connection::MESSAGE_TYPE_LOGGER, $data);
-        $this->broadcaster->broadcast(Connection::MESSAGE_TYPE_VAR_DUMPER, json_encode([
+        $errors = $this->broadcaster->broadcast(Connection::MESSAGE_TYPE_LOGGER, $data);
+        $errors += $this->broadcaster->broadcast(Connection::MESSAGE_TYPE_VAR_DUMPER, json_encode([
             '$data' => $data,
         ], JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE));
+
+        if ($errors !== []) {
+            foreach ($errors as $error) {
+                $io->warning(is_string($error) ? $error : json_encode($error, JSON_THROW_ON_ERROR));
+            }
+            $this->logger->warning('Broadcast finished with errors.', ['message' => $data, 'errors' => $errors]);
+
+            return Command::FAILURE;
+        }
 
         $this->logger->info('Broadcast complete.', ['message' => $data]);
 

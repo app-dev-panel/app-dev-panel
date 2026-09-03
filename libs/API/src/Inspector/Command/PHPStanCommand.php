@@ -11,6 +11,8 @@ use Symfony\Component\Process\Process;
 
 class PHPStanCommand implements CommandInterface
 {
+    use ProcessCommandTrait;
+
     public const COMMAND_NAME = 'analyse/phpstan';
 
     public function __construct(
@@ -45,7 +47,9 @@ class PHPStanCommand implements CommandInterface
 
         $process = new Process($params);
 
-        $process->setWorkingDirectory($projectDirectory)->setTimeout(null)->run();
+        if (!$this->runProcess($process, $projectDirectory)) {
+            return $this->timedOutResponse();
+        }
 
         $output = $process->getOutput();
         $processOutput = json_decode($output, true, 512, JSON_THROW_ON_ERROR);

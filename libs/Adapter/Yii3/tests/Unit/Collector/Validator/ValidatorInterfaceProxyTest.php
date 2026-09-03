@@ -10,13 +10,6 @@ use PHPUnit\Framework\TestCase;
 
 final class ValidatorInterfaceProxyTest extends TestCase
 {
-    protected function setUp(): void
-    {
-        if (!interface_exists(\Yiisoft\Validator\ValidatorInterface::class, true)) {
-            $this->markTestSkipped('yiisoft/validator is not installed.');
-        }
-    }
-
     public function testValidateDelegatesToDecoratedAndCollects(): void
     {
         $result = new \Yiisoft\Validator\Result();

@@ -8,6 +8,14 @@ use AppDevPanel\Kernel\Inspector\ClosureDescriptor;
 
 final class Dumper
 {
+    /**
+     * Maximum nesting `sanitizeForJson()` descends into before replacing the
+     * remainder with a placeholder. Must stay below the `json_encode()` depth
+     * limit (512) so a pathological array never produces "Maximum stack depth
+     * exceeded" and loses the whole entry.
+     */
+    public const int MAX_JSON_DEPTH = 500;
+
     private readonly DumpContext $context;
 
     private function __construct(
@@ -57,15 +65,37 @@ final class Dumper
         );
     }
 
+    /**
+     * Encodes with graceful degradation: leaves that `json_encode()` cannot
+     * represent are replaced by descriptive placeholders up front; should the
+     * encoder still fail, the partial output is kept (unencodable values become
+     * `null`) rather than losing the whole entry; as a last resort a small
+     * error document is returned. This method never throws.
+     */
     private function encodeJson(mixed $data, bool $format): string
     {
-        $options = JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE;
+        $options = JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE;
 
         if ($format) {
             $options |= JSON_PRETTY_PRINT;
         }
 
-        return json_encode(self::sanitizeForJson($data), $options);
+        $sanitized = self::sanitizeForJson($data);
+
+        try {
+            return json_encode($sanitized, $options | JSON_THROW_ON_ERROR);
+        } catch (\JsonException $e) {
+            $partial = json_encode($sanitized, $options | JSON_PARTIAL_OUTPUT_ON_ERROR);
+            if (is_string($partial)) {
+                return $partial;
+            }
+
+            $fallback = json_encode([
+                '__error' => 'JSON encoding failed: ' . $e->getMessage(),
+            ], JSON_PARTIAL_OUTPUT_ON_ERROR);
+
+            return is_string($fallback) ? $fallback : '{"__error":"JSON encoding failed"}';
+        }
     }
 
     /**
@@ -73,7 +103,7 @@ final class Dumper
      * a descriptive placeholder string. Handles resources, NAN, INF, closures,
      * and other non-encodable types without silently dropping data.
      */
-    private static function sanitizeForJson(mixed $value): mixed
+    private static function sanitizeForJson(mixed $value, int $depth = 0): mixed
     {
         if (is_resource($value)) {
             return sprintf('(resource: %s, id=%d)', get_resource_type($value), (int) $value);
@@ -94,9 +124,12 @@ final class Dumper
         }
 
         if (is_array($value)) {
+            if ($depth >= self::MAX_JSON_DEPTH) {
+                return sprintf('array (%d items) [max depth reached]', count($value));
+            }
             $out = [];
             foreach ($value as $k => $v) {
-                $out[$k] = self::sanitizeForJson($v);
+                $out[$k] = self::sanitizeForJson($v, $depth + 1);
             }
             return $out;
         }

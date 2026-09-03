@@ -42,17 +42,25 @@ final class SqliteStorage implements StorageInterface
         $this->historySize = $historySize;
     }
 
+    /**
+     * @throws \InvalidArgumentException when `$id` is not a valid entry id (see {@see StorageIdValidator})
+     */
     public function read(string $type, ?string $id = null): array
     {
         if ($id !== null) {
-            return $this->readEntry($type, $id);
+            return $this->readEntry($type, StorageIdValidator::assertValid($id));
         }
 
         return $this->readAll($type);
     }
 
+    /**
+     * @throws \InvalidArgumentException when `$id` is not a valid entry id (see {@see StorageIdValidator})
+     */
     public function write(string $id, array $summary, array $data, array $objects): void
     {
+        StorageIdValidator::assertValid($id);
+
         $stmt = $this->pdo->prepare(
             'INSERT OR REPLACE INTO entries (id, summary, data, objects, created_at) VALUES (:id, :summary, :data, :objects, :created_at)',
         );

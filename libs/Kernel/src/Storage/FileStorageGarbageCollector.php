@@ -15,8 +15,18 @@ use function strlen;
 use function substr;
 use function uasort;
 
+/**
+ * Removes the oldest `FileStorage` entries beyond the configured history size.
+ *
+ * Concurrent runs are serialised with an advisory `flock()` on `<path>/.gc.lock`.
+ * The lock file is deliberately **never unlinked**: removing it while another
+ * process is about to `fopen()` it would hand that process a fresh inode, so two
+ * processes could both hold an "exclusive" lock and delete each other's entries.
+ */
 final class FileStorageGarbageCollector
 {
+    public const string LOCK_FILE = '.gc.lock';
+
     public function __construct(
         private readonly string $path,
         private readonly int $historySize,
@@ -41,7 +51,7 @@ final class FileStorageGarbageCollector
      */
     private function acquireLock(): mixed
     {
-        $lockFile = $this->path . '/.gc.lock';
+        $lockFile = $this->path . '/' . self::LOCK_FILE;
         set_error_handler(static fn(): bool => true);
         try {
             $lockHandle = fopen($lockFile, 'c');
@@ -96,11 +106,7 @@ final class FileStorageGarbageCollector
      */
     private function releaseLock(mixed $lockHandle): void
     {
-        $lockFile = $this->path . '/.gc.lock';
         flock($lockHandle, LOCK_UN);
         fclose($lockHandle);
-        if (file_exists($lockFile)) {
-            unlink($lockFile);
-        }
     }
 }

@@ -6,12 +6,12 @@ import {FullScreenCircularProgress} from '@app-dev-panel/sdk/Component/FullScree
 import {GroupCard} from '@app-dev-panel/sdk/Component/GroupCard';
 import {JsonRenderer} from '@app-dev-panel/sdk/Component/JsonRenderer';
 import {QueryErrorState} from '@app-dev-panel/sdk/Component/QueryErrorState';
+import {copyText} from '@app-dev-panel/sdk/Helper/clipboard';
 import {searchVariants} from '@app-dev-panel/sdk/Helper/layoutTranslit';
 import {regexpQuote} from '@app-dev-panel/sdk/Helper/regexpQuote';
 import {Code, ContentCopy, DataObject, Download, ErrorOutline} from '@mui/icons-material';
 import {Box, CircularProgress, IconButton, Tooltip, Typography} from '@mui/material';
 import {styled} from '@mui/material/styles';
-import clipboardCopy from 'clipboard-copy';
 import {useCallback, useContext, useEffect, useMemo, useState} from 'react';
 import {Link as RouterLink, useSearchParams} from 'react-router';
 
@@ -204,7 +204,7 @@ export const ContainerPage = () => {
                                 <Tooltip title="Copy class name">
                                     <IconButton
                                         size="small"
-                                        onClick={() => clipboardCopy(entry.id)}
+                                        onClick={() => void copyText(entry.id)}
                                         aria-label="Copy class name"
                                     >
                                         <ContentCopy sx={{fontSize: 14}} />

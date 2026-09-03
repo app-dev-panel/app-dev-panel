@@ -11,13 +11,6 @@ use PHPUnit\Framework\TestCase;
 
 final class AssetLoaderInterfaceProxyTest extends TestCase
 {
-    protected function setUp(): void
-    {
-        if (!interface_exists(\Yiisoft\Assets\AssetLoaderInterface::class, true)) {
-            $this->markTestSkipped('yiisoft/assets is not installed.');
-        }
-    }
-
     public function testLoadBundleDelegatesToDecoratedAndCollectsBundle(): void
     {
         $timeline = new TimelineCollector();
@@ -37,7 +30,8 @@ final class AssetLoaderInterfaceProxyTest extends TestCase
         $bundle->publishOptions = [];
 
         $decorated = $this->createMock(\Yiisoft\Assets\AssetLoaderInterface::class);
-        $decorated->expects($this->once())
+        $decorated
+            ->expects($this->once())
             ->method('loadBundle')
             ->with('App\\Assets\\MainAsset', [])
             ->willReturn($bundle);
@@ -65,7 +59,8 @@ final class AssetLoaderInterfaceProxyTest extends TestCase
         $bundle = $this->createMock(\Yiisoft\Assets\AssetBundle::class);
 
         $decorated = $this->createMock(\Yiisoft\Assets\AssetLoaderInterface::class);
-        $decorated->expects($this->once())
+        $decorated
+            ->expects($this->once())
             ->method('getAssetUrl')
             ->with($bundle, 'app.js')
             ->willReturn('/assets/app.js');
@@ -106,8 +101,7 @@ final class AssetLoaderInterfaceProxyTest extends TestCase
         $bundle2->publishOptions = [];
 
         $decorated = $this->createMock(\Yiisoft\Assets\AssetLoaderInterface::class);
-        $decorated->method('loadBundle')
-            ->willReturnOnConsecutiveCalls($bundle1, $bundle2);
+        $decorated->method('loadBundle')->willReturnOnConsecutiveCalls($bundle1, $bundle2);
 
         $proxy = new AssetLoaderInterfaceProxy($decorated, $collector);
         $proxy->loadBundle('Bundle1');

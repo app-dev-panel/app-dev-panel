@@ -37,6 +37,10 @@ http://your-app/debug
 
 The panel supports client-side routing, so all sub-paths (e.g., `/debug/logs`, `/debug/inspector/routes`) are handled by the SPA.
 
+::: tip Any mount depth
+The served HTML carries `<base href="<mount>/">` (e.g. `<base href="/debug/">`), so every relative URL in the bundle — `bundle.js`, lazy chunks, the service worker, favicons, the manifest — resolves from the mount directory. Opening `/debug`, `/debug/` or a deep link such as `/debug/inspector/routes` directly all load the same assets, and the toolbar's embedded panel iframe works at any mount depth. See [GitHub issue #113](https://github.com/app-dev-panel/app-dev-panel/issues/113).
+:::
+
 ::: tip PHP Built-in Server
 When using PHP's built-in server, set `PHP_CLI_SERVER_WORKERS=3` or higher. ADP makes concurrent requests (SSE + data fetching); single-worker mode causes timeouts.
 
@@ -142,7 +146,7 @@ When `static_url` is left empty (the default), each adapter resolves the panel/t
 
 | Adapter | Source location | Served as |
 |---------|-----------------|-----------|
-| Symfony | `<projectDir>/public/bundles/appdevpanel/bundle.js` (after `bin/console app-dev-panel:assets:install`) or `Resources/public/bundle.js` (legacy `make build-panel`) → `/bundles/appdevpanel`. Falls back to the CDN until the command is run; web server (nginx/Apache) serves the static files | `/bundles/appdevpanel` or CDN |
+| Symfony | `<projectDir>/public/bundles/appdevpanel/bundle.js` (after `bin/console app-dev-panel:assets:install`) → `/bundles/appdevpanel`. Only the published copy counts — a `Resources/public/bundle.js` (legacy `make build-panel`) that has not been published stays on the CDN; web server (nginx/Apache) serves the static files | `/bundles/appdevpanel` or CDN |
 | Laravel | `FrontendAssets::path()` or `resources/dist/` → `vendor:publish --tag=app-dev-panel-assets` | `/vendor/app-dev-panel` |
 | Yii 3 | `FrontendAssets::path()` or `resources/dist/` → symlinked to `@public/app-dev-panel/` | `/app-dev-panel` |
 | Yii 2 | `FrontendAssets::path()` or `resources/dist/` → symlinked to `@webroot/app-dev-panel/` | `/app-dev-panel` |
@@ -221,6 +225,7 @@ GET /debug/logs/detail
     → Adapter catches /debug/* (not /debug/api/*)
     → ApiApplication routes to PanelController
     → PanelController renders HTML with:
+        - <base href="/debug/"> (mount directory, issue #113)
         - <link> to bundle.css
         - <script> injecting window['AppDevPanelWidget'] config
         - <script> loading bundle.js
@@ -252,6 +257,12 @@ To serve a different bundle (e.g. a custom build or a local dev copy):
 ```bash
 php vendor/bin/adp serve --frontend-path=/path/to/my/dist
 ```
+
+The prebuilt `index.html` is served with `<base href="/">` injected, so deep links (`/debug/logs`, `/inspector/routes`) request `/bundle.js` rather than `/debug/bundle.js` — the SPA fallback works at any depth.
+
+::: warning Secure defaults
+`serve` only accepts API requests from loopback clients (`127.0.0.1`, `::1`) unless `--allowed-ips` / `ADP_ALLOWED_IPS` says otherwise (`*` = everyone), and it refuses to start on a non-loopback `--host` without `--auth-token` / `ADP_AUTH_TOKEN` (sent by clients as `X-Debug-Token`). Details on the [CLI page](/guide/cli#serve-standalone-adp-server).
+:::
 
 ### Updating the frontend
 

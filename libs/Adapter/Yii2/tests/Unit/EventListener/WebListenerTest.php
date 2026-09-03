@@ -63,6 +63,61 @@ final class WebListenerTest extends TestCase
         $this->assertNull($collected['request'] ?? null);
     }
 
+    public function testOwnApiPathsAreDerivedFromConfiguredPrefixes(): void
+    {
+        $idGenerator = new DebuggerIdGenerator();
+        $storage = new MemoryStorage($idGenerator);
+        $timeline = new TimelineCollector();
+        $debugger = new Debugger($idGenerator, $storage, [$timeline]);
+        $listener = new WebListener($debugger, routePrefix: '/adp/', inspectorRoutePrefix: 'adp-inspect');
+
+        foreach (['/adp/api', '/adp/api/entries?x=1', '/adp-inspect/api/routes'] as $skipped) {
+            $listener->onBeforeRequest(new Event(['sender' => $this->createWebApp($skipped)]));
+            $this->assertSame([], $storage->getData(), $skipped . ' must not start the debugger');
+        }
+
+        // The default prefix is no longer special once a custom one is configured.
+        $listener->onBeforeRequest(new Event(['sender' => $this->createWebApp('/debug/api/entries')]));
+        $this->assertArrayHasKey(TimelineCollector::class, $storage->getData());
+        $debugger->stop();
+
+        $listener->onBeforeRequest(new Event(['sender' => $this->createWebApp('/adp')]));
+        $this->assertArrayHasKey(TimelineCollector::class, $storage->getData(), 'panel SPA route is a regular request');
+        $debugger->stop();
+    }
+
+    public function testOwnApiDetectionHonoursBaseUrl(): void
+    {
+        $idGenerator = new DebuggerIdGenerator();
+        $storage = new MemoryStorage($idGenerator);
+        $timeline = new TimelineCollector();
+        $debugger = new Debugger($idGenerator, $storage, [$timeline]);
+        $listener = new WebListener($debugger);
+
+        $app = $this->createWebApp('/sub/app/debug/api/entries', '/sub/app');
+        $listener->onBeforeRequest(new Event(['sender' => $app]));
+        $this->assertSame([], $storage->getData());
+
+        $app = $this->createWebApp('/sub/app/site/index', '/sub/app');
+        $listener->onBeforeRequest(new Event(['sender' => $app]));
+        $this->assertArrayHasKey(TimelineCollector::class, $storage->getData());
+        $debugger->stop();
+    }
+
+    public function testOnAfterRequestSkipsOwnApiWithCustomPrefix(): void
+    {
+        $idGenerator = new DebuggerIdGenerator();
+        $storage = new MemoryStorage($idGenerator);
+        $timeline = new TimelineCollector();
+        $debugger = new Debugger($idGenerator, $storage, [$timeline]);
+        $listener = new WebListener($debugger, routePrefix: 'adp');
+
+        $app = $this->createWebApp('/adp/api/entries');
+        $listener->onAfterRequest(new Event(['sender' => $app]));
+
+        $this->assertNull($app->getResponse()->getHeaders()->get('X-Debug-Id'));
+    }
+
     public function testOnAfterRequestShutsDownDebugger(): void
     {
         [$listener, $debugger, , $storage] = $this->createListener();
@@ -404,15 +459,16 @@ final class WebListenerTest extends TestCase
         return [$listener, $debugger];
     }
 
-    private function createWebApp(string $url): Application
+    private function createWebApp(string $url, string $baseUrl = ''): Application
     {
-        return $this->createWebAppWithStatus($url, 200);
+        return $this->createWebAppWithStatus($url, 200, $baseUrl);
     }
 
-    private function createWebAppWithStatus(string $url, int $statusCode): Application
+    private function createWebAppWithStatus(string $url, int $statusCode, string $baseUrl = ''): Application
     {
         $request = $this->createMock(Request::class);
         $request->method('getUrl')->willReturn($url);
+        $request->method('getBaseUrl')->willReturn($baseUrl);
         $request->method('getAbsoluteUrl')->willReturn('http://localhost' . $url);
         $request->method('getMethod')->willReturn('GET');
         $request->method('getHeaders')->willReturn(new HeaderCollection());

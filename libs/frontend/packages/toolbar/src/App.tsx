@@ -1,3 +1,4 @@
+import {preloadedApplicationState} from '@app-dev-panel/sdk/API/Application/api';
 import {RouterOptionsContextProvider} from '@app-dev-panel/sdk/Component/RouterOptions';
 import {DefaultThemeProvider} from '@app-dev-panel/sdk/Component/Theme/DefaultTheme';
 import {modules} from '@app-dev-panel/toolbar/modules';
@@ -63,7 +64,13 @@ export default function App({config}: AppProps) {
     const {store, router} = useMemo(() => {
         const r = createRouter(modules, config.router);
         const {store: s} = createStore({
-            application: {baseUrl: config.backend.baseUrl, favoriteUrls: config.backend.favoriteUrls ?? []} as any,
+            application: preloadedApplicationState({
+                baseUrl: config.backend.baseUrl,
+                favoriteUrls: config.backend.favoriteUrls ?? [],
+                // The embedded toolbar starts as the collapsed pill; redux-persist
+                // restores the user's last open/closed choice on rehydration.
+                toolbarOpen: false,
+            }),
         });
         return {store: s, router: r};
     }, []);

@@ -6,6 +6,7 @@ namespace AppDevPanel\Api\Llm;
 
 use AppDevPanel\Kernel\Project\SecretsConfig;
 use AppDevPanel\Kernel\Project\SecretsStorageInterface;
+use Psr\Log\LoggerInterface;
 use SensitiveParameter;
 
 /**
@@ -42,10 +43,12 @@ final class FileLlmSettings implements LlmSettingsInterface
      * @param string $storagePath Runtime debug dir (used by ACP daemon + history;
      *                            also scanned for the legacy `.llm-settings.json`).
      * @param SecretsStorageInterface $secrets New canonical store (`<projectConfigDir>/secrets.json`).
+     * @param LoggerInterface|null $logger Receives an info line when a legacy file is migrated.
      */
     public function __construct(
         private readonly string $storagePath,
         private readonly SecretsStorageInterface $secrets,
+        private readonly ?LoggerInterface $logger = null,
     ) {
         $this->config = SecretsConfig::empty();
     }
@@ -281,15 +284,9 @@ final class FileLlmSettings implements LlmSettingsInterface
         // the suffix marks it as migrated so the legacy code path never runs again.
         @rename($legacy, $legacy . '.migrated');
 
-        // Stderr so production logs surface the move; suppressed under tests
-        // that capture stderr (PHPUnit's `beStrictAboutOutputDuringTests` is
-        // already configured for stdout, not stderr).
-        if (defined('STDERR') && is_resource(STDERR)) {
-            @fwrite(STDERR, sprintf(
-                "[ADP] Migrated LLM settings from %s to %s/secrets.json\n",
-                $legacy,
-                $this->secrets->getConfigDir(),
-            ));
-        }
+        $this->logger?->info('[ADP] Migrated LLM settings from {legacy} to {target}', [
+            'legacy' => $legacy,
+            'target' => $this->secrets->getConfigDir() . '/secrets.json',
+        ]);
     }
 }

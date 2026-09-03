@@ -5,12 +5,15 @@ declare(strict_types=1);
 namespace AppDevPanel\Api\Inspector\Controller;
 
 use Alexkart\CurlBuilder\Command;
+use AppDevPanel\Api\Debug\Exception\NotFoundException;
 use AppDevPanel\Api\Debug\Repository\CollectorRepositoryInterface;
 use AppDevPanel\Api\Http\JsonResponseFactoryInterface;
+use AppDevPanel\Api\Security\DebugIdValidator;
 use AppDevPanel\Kernel\Inspector\Primitives;
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\Message;
 use InvalidArgumentException;
+use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Throwable;
@@ -30,13 +33,7 @@ final class RequestController
 
     public function request(ServerRequestInterface $request): ResponseInterface
     {
-        $queryParams = $request->getQueryParams();
-        $debugEntryId = $queryParams['debugEntryId'] ?? null;
-
-        $data = $this->collectorRepository->getDetail($debugEntryId);
-        $rawRequest = $data[self::REQUEST_COLLECTOR]['requestRaw'];
-
-        $parsedRequest = Message::parseRequest($rawRequest);
+        $parsedRequest = $this->loadCapturedRequest($request);
 
         $this->validateHost($parsedRequest->getUri()->getHost());
 
@@ -50,13 +47,7 @@ final class RequestController
 
     public function buildCurl(ServerRequestInterface $request): ResponseInterface
     {
-        $queryParams = $request->getQueryParams();
-        $debugEntryId = $queryParams['debugEntryId'] ?? null;
-
-        $data = $this->collectorRepository->getDetail($debugEntryId);
-        $rawRequest = $data[self::REQUEST_COLLECTOR]['requestRaw'];
-
-        $parsedRequest = Message::parseRequest($rawRequest);
+        $parsedRequest = $this->loadCapturedRequest($request);
 
         try {
             $output = new Command()
@@ -72,6 +63,25 @@ final class RequestController
         return $this->responseFactory->createJsonResponse([
             'command' => $output,
         ]);
+    }
+
+    /**
+     * @throws \AppDevPanel\Api\Debug\Exception\BadRequestException when `debugEntryId` is missing or malformed
+     * @throws NotFoundException when the entry has no captured raw request
+     */
+    private function loadCapturedRequest(ServerRequestInterface $request): RequestInterface
+    {
+        $queryParams = $request->getQueryParams();
+        $debugEntryId = DebugIdValidator::assertValid($queryParams['debugEntryId'] ?? null, 'debugEntryId');
+
+        $data = $this->collectorRepository->getDetail($debugEntryId);
+        $rawRequest = $data[self::REQUEST_COLLECTOR]['requestRaw'] ?? null;
+
+        if (!is_string($rawRequest) || $rawRequest === '') {
+            throw new NotFoundException(sprintf('Debug entry "%s" has no captured raw HTTP request.', $debugEntryId));
+        }
+
+        return Message::parseRequest($rawRequest);
     }
 
     private function validateHost(string $host): void

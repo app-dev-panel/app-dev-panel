@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Kernel\Collector;
 
+use AppDevPanel\Kernel\Helper\BoundedProcess;
 use Psr\Http\Message\ServerRequestInterface;
 
 /**
@@ -12,10 +13,23 @@ use Psr\Http\Message\ServerRequestInterface;
  *
  * This is a "common" collector — it works for both web and console contexts.
  * Server parameters can be fed from a PSR-7 request or fall back to $_SERVER.
+ *
+ * Values of environment variables and server parameters whose key matches
+ * {@see self::DEFAULT_SENSITIVE_KEY_PATTERN} are replaced by {@see self::REDACTED};
+ * the key names are kept so the panel still shows what is configured.
  */
 final class EnvironmentCollector implements SummaryCollectorInterface
 {
     use CollectorTrait;
+
+    public const string DEFAULT_SENSITIVE_KEY_PATTERN = '/(PASS|PASSWORD|SECRET|TOKEN|KEY|DSN|CREDENTIAL|PRIVATE|AUTH)/i';
+
+    public const string REDACTED = '***';
+
+    /**
+     * Upper bound for a single `git` invocation, in seconds.
+     */
+    public const float DEFAULT_GIT_TIMEOUT = 5.0;
 
     /**
      * @var array<string, mixed>
@@ -26,6 +40,23 @@ final class EnvironmentCollector implements SummaryCollectorInterface
      * @var array<string, mixed>
      */
     private array $envVars = [];
+
+    /**
+     * @var array<string, string|null>|null Memoised per request: `getCollected()` and `getSummary()` both need it.
+     */
+    private ?array $gitInfo = null;
+
+    /**
+     * @param string|null $sensitiveKeyPattern PCRE matched against env/server keys; matching values are redacted.
+     *                                         `null` disables redaction.
+     * @param float $gitTimeout Maximum seconds to wait for each `git` subprocess (capped at 5s).
+     * @param string $gitBinary Command prefix used to invoke git (overridable for tests).
+     */
+    public function __construct(
+        private readonly ?string $sensitiveKeyPattern = self::DEFAULT_SENSITIVE_KEY_PATTERN,
+        private readonly float $gitTimeout = self::DEFAULT_GIT_TIMEOUT,
+        private readonly string $gitBinary = 'git',
+    ) {}
 
     public function getCollected(): array
     {
@@ -49,7 +80,7 @@ final class EnvironmentCollector implements SummaryCollectorInterface
 
         /** @var array<string, mixed> $serverParams */
         $serverParams = $request->getServerParams();
-        $this->serverParams = $serverParams;
+        $this->serverParams = $this->redact($serverParams);
         $this->envVars = $this->collectEnvVars();
     }
 
@@ -62,7 +93,7 @@ final class EnvironmentCollector implements SummaryCollectorInterface
             return;
         }
 
-        $this->serverParams = $_SERVER;
+        $this->serverParams = $this->redact($_SERVER);
         $this->envVars = $this->collectEnvVars();
     }
 
@@ -110,8 +141,7 @@ final class EnvironmentCollector implements SummaryCollectorInterface
 
     /**
      * Returns extension version string if loaded, false otherwise.
-     */
-    /**
+     *
      * @param non-empty-string $name
      */
     private function extensionVersion(string $name): string|false
@@ -156,41 +186,25 @@ final class EnvironmentCollector implements SummaryCollectorInterface
      */
     private function collectGitInfo(): array
     {
+        if ($this->gitInfo !== null) {
+            return $this->gitInfo;
+        }
+
         $cwd = getcwd() ?: null;
 
-        return [
-            'branch' => $this->runGitCommand('git rev-parse --abbrev-ref HEAD', $cwd),
-            'commit' => $this->runGitCommand('git rev-parse --short HEAD', $cwd),
-            'commitFull' => $this->runGitCommand('git rev-parse HEAD', $cwd),
+        return $this->gitInfo = [
+            'branch' => $this->runGitCommand('rev-parse --abbrev-ref HEAD', $cwd),
+            'commit' => $this->runGitCommand('rev-parse --short HEAD', $cwd),
+            'commitFull' => $this->runGitCommand('rev-parse HEAD', $cwd),
         ];
     }
 
-    private function runGitCommand(string $command, ?string $cwd): ?string
+    private function runGitCommand(string $arguments, ?string $cwd): ?string
     {
-        $descriptors = [
-            1 => ['pipe', 'w'],
-            2 => ['pipe', 'w'],
-        ];
+        $timeout = min($this->gitTimeout, self::DEFAULT_GIT_TIMEOUT);
+        $result = BoundedProcess::run($this->gitBinary . ' ' . $arguments, $cwd, $timeout);
 
-        $process = proc_open($command, $descriptors, $pipes, $cwd);
-
-        if (!is_resource($process)) {
-            return null;
-        }
-
-        $output = stream_get_contents($pipes[1]);
-        fclose($pipes[1]);
-        fclose($pipes[2]);
-
-        $exitCode = proc_close($process);
-
-        if ($exitCode !== 0 || $output === false) {
-            return null;
-        }
-
-        $result = trim($output);
-
-        return $result !== '' ? $result : null;
+        return $result === '' ? null : $result;
     }
 
     /**
@@ -202,12 +216,34 @@ final class EnvironmentCollector implements SummaryCollectorInterface
 
         ksort($env);
 
-        return $env;
+        return $this->redact($env);
+    }
+
+    /**
+     * @param array<array-key, mixed> $values
+     *
+     * @return array<array-key, mixed>
+     */
+    private function redact(array $values): array
+    {
+        if ($this->sensitiveKeyPattern === null) {
+            return $values;
+        }
+
+        foreach (array_keys($values) as $key) {
+            if (!is_string($key) || preg_match($this->sensitiveKeyPattern, $key) !== 1) {
+                continue;
+            }
+            $values[$key] = self::REDACTED;
+        }
+
+        return $values;
     }
 
     private function reset(): void
     {
         $this->serverParams = [];
         $this->envVars = [];
+        $this->gitInfo = null;
     }
 }

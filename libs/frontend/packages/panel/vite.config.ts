@@ -31,7 +31,8 @@ export default defineConfig(() => ({
             devOptions: {
                 enabled: process.env.NODE_ENV === 'development',
                 type: 'module',
-                navigateFallback: '/index.html',
+                // Relative — the panel may be mounted under a prefix (issue #113).
+                navigateFallback: 'index.html',
             },
             registerType: 'autoUpdate',
             injectManifest: {

@@ -87,8 +87,19 @@ final class Debugger
         // upcoming flush can still read collected data via getCollected() /
         // getSummary(). Without this order the storage flush itself would feed
         // the still-active stream wrappers and tail-pollute the entry.
+        //
+        // This method runs as a `register_shutdown_function` callback: a Throwable
+        // escaping here becomes a fatal error emitted AFTER the response, so every
+        // step is isolated and failures are only logged.
         foreach ($this->collectors as $collector) {
-            $collector->shutdown();
+            try {
+                $collector->shutdown();
+            } catch (\Throwable $e) {
+                $this->logger->error('Debugger: collector shutdown failed', [
+                    'collector' => $collector::class,
+                    'exception' => $e,
+                ]);
+            }
         }
 
         try {
@@ -99,6 +110,11 @@ final class Debugger
                 ]);
                 $this->target->flush();
             }
+        } catch (\Throwable $e) {
+            $this->logger->error('Debugger: flush failed, debug entry lost', [
+                'id' => $this->idGenerator->getId(),
+                'exception' => $e,
+            ]);
         } finally {
             $this->active = false;
             $this->logger->debug('Debugger: shutdown complete');

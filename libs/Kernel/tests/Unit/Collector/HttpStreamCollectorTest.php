@@ -6,12 +6,22 @@ namespace AppDevPanel\Kernel\Tests\Unit\Collector;
 
 use AppDevPanel\Kernel\Collector\CollectorInterface;
 use AppDevPanel\Kernel\Collector\Stream\HttpStreamCollector;
+use AppDevPanel\Kernel\Collector\Stream\HttpStreamProxy;
 use AppDevPanel\Kernel\Tests\Shared\AbstractCollectorTestCase;
 use PHPUnit\Framework\Attributes\DataProvider;
-use PHPUnit\Framework\TestCase;
+
+use function in_array;
+use function stream_get_wrappers;
 
 final class HttpStreamCollectorTest extends AbstractCollectorTestCase
 {
+    /**
+     * The proxy is driven directly with a `data:` URL: the real `StreamWrapper` opens it
+     * through PHP's built-in RFC 2397 wrapper, so the whole HttpStreamProxy path (ignore
+     * filtering, context inspection, collection) is exercised without DNS or sockets.
+     */
+    private const string URL = 'data://text/plain,hello-from-adp';
+
     /**
      * @param HttpStreamCollector $collector
      */
@@ -21,126 +31,143 @@ final class HttpStreamCollectorTest extends AbstractCollectorTestCase
         $collector->collect(operation: 'read', path: __FILE__, args: ['arg3' => 'v3', 'arg4' => 'v4']);
     }
 
-    #[DataProvider('dataSkipCollectOnMatchIgnoreReferences')]
-    #[\PHPUnit\Framework\Attributes\RequiresPhpExtension('sockets')]
-    #[\PHPUnit\Framework\Attributes\Group('network')]
-    public function testSkipCollectOnMatchIgnoreReferences(
-        string $url,
-        callable $before,
+    public function testStartupRegistersProxyAndShutdownRestoresBuiltInWrappers(): void
+    {
+        $collector = new HttpStreamCollector(ignoredUrls: ['ignored-host']);
+
+        $collector->startup();
+        try {
+            $this->assertTrue(HttpStreamProxy::$registered);
+            $this->assertSame($collector, HttpStreamProxy::$collector);
+            $this->assertSame(['ignored-host'], HttpStreamProxy::$ignoredUrls);
+            $this->assertTrue(in_array('http', stream_get_wrappers(), true));
+        } finally {
+            $collector->shutdown();
+        }
+
+        $this->assertFalse(HttpStreamProxy::$registered);
+        $this->assertNull(HttpStreamProxy::$collector);
+        $this->assertTrue(in_array('http', stream_get_wrappers(), true), 'Built-in http wrapper must be restored');
+
+        // Collector is inactive after shutdown: further collect() calls are dropped.
+        $collector->collect(operation: 'read', path: self::URL, args: []);
+        $this->assertSame([], $collector->getCollected());
+    }
+
+    public function testReadIsCollectedOnceWithMethodAndHeadersFromContext(): void
+    {
+        $collector = new HttpStreamCollector();
+        $collector->startup();
+        try {
+            $proxy = new HttpStreamProxy();
+            $proxy->decorated->context = stream_context_create([
+                'http' => ['method' => 'POST', 'header' => ['X-Test: 1', 'Accept: text/plain']],
+            ]);
+
+            $this->assertTrue($this->openThroughProxy($proxy, self::URL));
+            $this->assertSame('hell', $proxy->stream_read(4));
+            $this->assertSame('o-from-adp', $proxy->stream_read(1024));
+            $this->assertTrue($proxy->stream_eof());
+            $proxy->stream_close();
+
+            $collected = $collector->getCollected();
+        } finally {
+            $collector->shutdown();
+        }
+
+        $this->assertSame(
+            [
+                'read' => [
+                    [
+                        'uri' => self::URL,
+                        'args' => [
+                            'method' => 'POST',
+                            'response_headers' => [],
+                            'request_headers' => ['X-Test: 1', 'Accept: text/plain'],
+                        ],
+                    ],
+                ],
+            ],
+            $collected,
+        );
+        $this->assertSame(['http_stream' => ['read' => 1]], $collector->getSummary());
+    }
+
+    public function testReadWithoutContextDefaultsToGet(): void
+    {
+        $collector = new HttpStreamCollector();
+        $collector->startup();
+        try {
+            $proxy = new HttpStreamProxy();
+
+            $this->assertTrue($this->openThroughProxy($proxy, self::URL));
+            $proxy->stream_read(4);
+            $proxy->stream_close();
+
+            $collected = $collector->getCollected();
+        } finally {
+            $collector->shutdown();
+        }
+
+        $this->assertCount(1, $collected['read']);
+        $this->assertSame('GET', $collected['read'][0]['args']['method']);
+        $this->assertSame([], $collected['read'][0]['args']['request_headers']);
+    }
+
+    #[DataProvider('dataIgnoredReads')]
+    public function testReadIsNotCollectedWhenIgnored(
         array $ignoredPathPatterns,
         array $ignoredClasses,
         array $ignoredUrls,
-        callable $operation,
-        callable $after,
-        array|callable $assertResult,
     ): void {
-        $before($url);
-
+        $collector = new HttpStreamCollector(
+            ignoredPathPatterns: $ignoredPathPatterns,
+            ignoredClasses: $ignoredClasses,
+            ignoredUrls: $ignoredUrls,
+        );
+        $collector->startup();
         try {
-            $collector = new HttpStreamCollector(
-                ignoredPathPatterns: $ignoredPathPatterns,
-                ignoredClasses: $ignoredClasses,
-                ignoredUrls: $ignoredUrls,
-            );
-            $collector->startup();
+            $proxy = new HttpStreamProxy();
 
-            $operation($url);
+            $this->assertTrue($this->openThroughProxy($proxy, self::URL));
+            $this->assertTrue($proxy->ignored);
+            $this->assertSame('hello', $proxy->stream_read(5));
+            $proxy->stream_close();
 
             $collected = $collector->getCollected();
-            $collector->shutdown();
         } finally {
-            $after($url);
+            $collector->shutdown();
         }
-        if (is_array($assertResult)) {
-            $this->assertSame($assertResult, $collected);
-        } else {
-            $assertResult($this, $url, $collected);
-        }
+
+        $this->assertSame([], $collected);
+        $this->assertSame(['http_stream' => []], $collector->getSummary());
     }
 
-    public static function dataSkipCollectOnMatchIgnoreReferences(): iterable
+    public static function dataIgnoredReads(): iterable
     {
-        $httpStreamBefore = static function (string $url) {
-            $host = parse_url($url, PHP_URL_HOST);
-            if ($host !== null) {
-                set_error_handler(static fn() => true);
-                try {
-                    $records = dns_get_record($host, DNS_A);
-                } finally {
-                    restore_error_handler();
-                }
-                if (!$records) {
-                    TestCase::markTestSkipped("Cannot resolve host: {$host} (no network)");
-                }
-            }
-        };
-        $httpStreamOperation = static function (string $url) {
-            $stream = fopen($url, 'r');
-            fread($stream, 4);
-            ftell($stream);
-            feof($stream);
-            fstat($stream);
-            fclose($stream);
-        };
-        $httpStreamAfter = $httpStreamBefore;
+        yield 'ignored by calling file pattern' => [[basename(__FILE__, '.php')], [], []];
+        yield 'ignored by calling class' => [[], [self::class], []];
+        yield 'ignored by url pattern' => [[], [], ['hello-from-adp']];
+    }
 
-        yield 'file stream matched' => [
-            $url = 'http://example.com',
-            $httpStreamBefore,
-            [],
-            [],
-            [],
-            $httpStreamOperation,
-            $httpStreamAfter,
-            static function (TestCase $testCase, string $url, array $collected) {
-                $testCase->assertArrayHasKey('read', $collected);
-                $testCase->assertIsArray($collected['read']);
-                $testCase->assertCount(1, $collected['read']);
+    public function testNothingIsCollectedWhenInactive(): void
+    {
+        $collector = new HttpStreamCollector();
 
-                $readItem = $collected['read'][0];
-                $testCase->assertSame($url, $readItem['uri']);
-                $testCase->assertArrayHasKey('args', $readItem);
+        $collector->collect(operation: 'read', path: self::URL, args: []);
 
-                $readItemArgs = $readItem['args'];
-                $testCase->assertCount(3, $readItemArgs);
+        $this->assertSame([], $collector->getCollected());
+    }
 
-                $testCase->assertSame('GET', $readItemArgs['method']);
-                $testCase->assertIsArray($readItemArgs['response_headers']);
-                $testCase->assertNotEmpty($readItemArgs['response_headers']);
-                $testCase->assertIsArray($readItemArgs['request_headers']);
-                $testCase->assertEmpty($readItemArgs['request_headers']);
-            },
-        ];
-        yield 'file stream ignored by path' => [
-            $url,
-            $httpStreamBefore,
-            [basename(__FILE__, '.php')],
-            [],
-            [],
-            $httpStreamOperation,
-            $httpStreamAfter,
-            [],
-        ];
-        yield 'file stream ignored by class' => [
-            $url,
-            $httpStreamBefore,
-            [],
-            [self::class],
-            [],
-            $httpStreamOperation,
-            $httpStreamAfter,
-            [],
-        ];
-        yield 'file stream ignored by url' => [
-            $url,
-            $httpStreamBefore,
-            [],
-            [],
-            ['example'],
-            $httpStreamOperation,
-            $httpStreamAfter,
-            [],
-        ];
+    /**
+     * Mirrors the frame layout of a real `fopen()` call site: BacktraceIgnoreMatcher inspects
+     * frame 2 (calling file) and frame 3 (calling class) relative to `HttpStreamProxy::isIgnored()`.
+     */
+    private function openThroughProxy(HttpStreamProxy $proxy, string $url): bool
+    {
+        $openedPath = null;
+
+        return $proxy->stream_open($url, 'r', 0, $openedPath);
     }
 
     protected function getCollector(): CollectorInterface

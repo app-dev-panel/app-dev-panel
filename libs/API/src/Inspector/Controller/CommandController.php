@@ -8,6 +8,7 @@ use AppDevPanel\Api\Http\JsonResponseFactoryInterface;
 use AppDevPanel\Api\Inspector\Command\BashCommand;
 use AppDevPanel\Api\Inspector\Command\CodeceptionCommand;
 use AppDevPanel\Api\Inspector\Command\CodeceptionRawCommand;
+use AppDevPanel\Api\Inspector\Command\CommandTimeout;
 use AppDevPanel\Api\Inspector\Command\MagoCommand;
 use AppDevPanel\Api\Inspector\Command\PestCommand;
 use AppDevPanel\Api\Inspector\Command\PHPStanCommand;
@@ -84,7 +85,7 @@ class CommandController
 
         $this->validateCommandName($commandName, $commandList);
 
-        $command = $this->resolveCommand($commandList[$commandName]);
+        $command = CommandTimeout::applyFromQuery($this->resolveCommand($commandList[$commandName]), $queryParams);
         $result = $command->run();
 
         return $this->responseFactory->createJsonResponse([

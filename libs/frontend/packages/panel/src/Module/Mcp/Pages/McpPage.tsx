@@ -1,5 +1,6 @@
 import {useSelector} from '@app-dev-panel/panel/store';
 import {CodeHighlight} from '@app-dev-panel/sdk/Component/CodeHighlight';
+import {copyText} from '@app-dev-panel/sdk/Helper/clipboard';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import {
     Box,
@@ -82,7 +83,7 @@ export const McpPage = () => {
     const config = useMemo(() => buildConfig(tab, mcpUrl), [tab, mcpUrl]);
 
     const handleCopy = useCallback(async () => {
-        await navigator.clipboard.writeText(config);
+        if (!(await copyText(config))) return;
         setCopied(true);
         clearTimeout(copyTimerRef.current);
         copyTimerRef.current = setTimeout(() => setCopied(false), 2000);

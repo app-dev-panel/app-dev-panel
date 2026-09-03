@@ -17,7 +17,13 @@ final class JsonResponseFactory implements JsonResponseFactoryInterface
 
     public function createJsonResponse(mixed $data, int $status = 200): ResponseInterface
     {
-        $json = json_encode($data, JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        // INVALID_UTF8_SUBSTITUTE: collected payloads may carry binary/latin-1 bytes
+        // (request bodies, exception messages); replace them with U+FFFD instead of
+        // failing the whole response.
+        $json = json_encode(
+            $data,
+            JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE,
+        );
 
         return $this->responseFactory
             ->createResponse($status)

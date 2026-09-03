@@ -515,8 +515,13 @@ export default defineConfig({
               items: [
                 { text: "Панель отладки", link: "/ru/guide/debug-panel" },
                 { text: "ИИ чат", link: "/ru/guide/ai-chat" },
+                { text: "Live Feed", link: "/ru/guide/live-feed" },
+                {
+                  text: "Внутреннее устройство Live Feed",
+                  link: "/ru/guide/live-feed-internals",
+                },
                 { text: "Тулбар", link: "/ru/guide/toolbar" },
-                { text: "OpenAPI Viewer", link: "/guide/openapi" },
+                { text: "OpenAPI Viewer", link: "/ru/guide/openapi" },
                 {
                   text: "Конфигурация проекта",
                   link: "/ru/guide/project-config",

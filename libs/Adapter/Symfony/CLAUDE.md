@@ -85,11 +85,12 @@ Registers in order:
 
 ### Panel static URL resolution
 
-Static files are served by the web server, not by PHP. `AppDevPanelExtension::load()` picks `panel.static_url` in this order when the user leaves it empty:
+Static files are served by the web server, not by PHP. `AppDevPanelExtension::registerApiControllers()` picks `panel.static_url` in this order when the user leaves it empty:
 
-1. `<projectDir>/public/bundles/appdevpanel/bundle.js` exists (after `bin/console app-dev-panel:assets:install`) → `/bundles/appdevpanel`
-2. `Resources/public/bundle.js` exists (legacy `make build-panel` flow before Symfony's `assets:install`) → `/bundles/appdevpanel`
-3. `PanelConfig::DEFAULT_STATIC_URL` (GitHub Pages CDN) — fallback when nothing has been published yet
+1. `%kernel.project_dir%/public/bundles/appdevpanel/bundle.js` exists (`AssetsInstallCommand::PUBLIC_SUBPATH`, published by `bin/console app-dev-panel:assets:install` or Symfony's `assets:install`) → `/bundles/appdevpanel`
+2. Otherwise → `PanelConfig::DEFAULT_STATIC_URL` (GitHub Pages CDN)
+
+Only the **published** file in `public/` may select `/bundles/appdevpanel`. A `bundle.js` that merely exists in the adapter's `Resources/public/` (legacy `make build-panel` output) is not reachable by nginx/Apache until it has been published, so it no longer triggers the public URL — pointing there would 404 (issue #113). When `kernel.project_dir` is not set (`$publicBundle === null`) the CDN is used.
 
 ### 4. Compiler Pass (`CollectorProxyCompilerPass`)
 

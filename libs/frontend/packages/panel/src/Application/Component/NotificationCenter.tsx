@@ -9,6 +9,7 @@ import {
     selectNotifications,
     selectUnreadCount,
 } from '@app-dev-panel/sdk/Component/Notifications';
+import {copyText} from '@app-dev-panel/sdk/Helper/clipboard';
 import {Alert, AlertTitle, Box, Button, Divider, Icon, IconButton, Popover, Tooltip, Typography} from '@mui/material';
 import {styled, useTheme} from '@mui/material/styles';
 import React, {useCallback} from 'react';
@@ -49,7 +50,7 @@ const copyNotificationText = async (notification: Notification) => {
         parts.push(notification.title);
     }
     parts.push(notification.text);
-    await navigator.clipboard.writeText(parts.join('\n'));
+    await copyText(parts.join('\n'));
 };
 
 const NotificationEntry = React.memo(

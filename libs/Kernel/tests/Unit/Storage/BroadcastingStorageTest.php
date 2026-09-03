@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Kernel\Tests\Unit\Storage;
 
+use AppDevPanel\Kernel\DebuggerIdGenerator;
 use AppDevPanel\Kernel\DebugServer\Broadcaster;
+use AppDevPanel\Kernel\DebugServer\BroadcasterInterface;
 use AppDevPanel\Kernel\DebugServer\Connection;
 use AppDevPanel\Kernel\DebugServer\SocketReader;
 use AppDevPanel\Kernel\Storage\BroadcastingStorage;
@@ -66,10 +68,11 @@ final class BroadcastingStorageTest extends TestCase
 
         try {
             $decorated = $this->createMock(StorageInterface::class);
+            // Storages list summaries in ascending creation order: newest LAST.
             $decorated
                 ->method('read')
                 ->with(StorageInterface::TYPE_SUMMARY, null)
-                ->willReturn(['latest-id' => ['id' => 'latest-id'], 'older-id' => ['id' => 'older-id']]);
+                ->willReturn(['older-id' => ['id' => 'older-id'], 'latest-id' => ['id' => 'latest-id']]);
 
             $storage = new BroadcastingStorage($decorated);
             $storage->flush();
@@ -85,6 +88,100 @@ final class BroadcastingStorageTest extends TestCase
         } finally {
             $connection->close();
         }
+    }
+
+    public function testFlushWithIdGeneratorBroadcastsFlushedIdWithoutReadingStorage(): void
+    {
+        $idGenerator = new DebuggerIdGenerator();
+        $flushedId = $idGenerator->getId();
+
+        $decorated = $this->createMock(StorageInterface::class);
+        $decorated->expects($this->once())->method('flush');
+        $decorated->expects($this->never())->method('read');
+
+        $broadcaster = $this->recordingBroadcaster();
+        $storage = new BroadcastingStorage($decorated, $broadcaster, $idGenerator);
+        $storage->flush();
+
+        $this->assertSame([[Connection::MESSAGE_TYPE_ENTRY_CREATED, $flushedId]], $broadcaster->calls);
+    }
+
+    public function testFlushWithIdGeneratorBroadcastsTheEntryJustFlushedNotAnOlderOne(): void
+    {
+        $idGenerator = new DebuggerIdGenerator();
+        $flushedId = $idGenerator->getId();
+
+        $decorated = $this->createMock(StorageInterface::class);
+        // Even if a re-read would list an older entry first, the flushed id wins.
+        $decorated->method('read')->willReturn(['older-id' => [], $flushedId => []]);
+
+        $broadcaster = $this->recordingBroadcaster();
+        $storage = new BroadcastingStorage($decorated, $broadcaster, $idGenerator);
+        $storage->flush();
+
+        $this->assertSame($flushedId, $broadcaster->calls[0][1]);
+    }
+
+    public function testFlushWithoutIdGeneratorFallsBackToNewestSummary(): void
+    {
+        $decorated = $this->createMock(StorageInterface::class);
+        $decorated
+            ->expects($this->once())
+            ->method('read')
+            ->with(StorageInterface::TYPE_SUMMARY, null)
+            ->willReturn(['first' => [], 'second' => [], 'newest' => []]);
+
+        $broadcaster = $this->recordingBroadcaster();
+        $storage = new BroadcastingStorage($decorated, $broadcaster);
+        $storage->flush();
+
+        $this->assertSame([[Connection::MESSAGE_TYPE_ENTRY_CREATED, 'newest']], $broadcaster->calls);
+    }
+
+    public function testFlushWithEmptyStorageBroadcastsNothing(): void
+    {
+        $decorated = $this->createMock(StorageInterface::class);
+        $decorated->method('read')->willReturn([]);
+
+        $broadcaster = $this->recordingBroadcaster();
+        $storage = new BroadcastingStorage($decorated, $broadcaster);
+        $storage->flush();
+
+        $this->assertSame([], $broadcaster->calls);
+    }
+
+    public function testThrowingBroadcasterDoesNotBreakFlush(): void
+    {
+        $idGenerator = new DebuggerIdGenerator();
+        $decorated = $this->createMock(StorageInterface::class);
+        $decorated->expects($this->once())->method('flush');
+
+        $broadcaster = new class implements BroadcasterInterface {
+            public function broadcast(int $type, string $data): array
+            {
+                throw new \RuntimeException('socket exploded');
+            }
+        };
+
+        $storage = new BroadcastingStorage($decorated, $broadcaster, $idGenerator);
+        $storage->flush();
+    }
+
+    /**
+     * @return BroadcasterInterface&object{calls: list<array{0: int, 1: string}>}
+     */
+    private function recordingBroadcaster(): BroadcasterInterface
+    {
+        return new class implements BroadcasterInterface {
+            /** @var list<array{0: int, 1: string}> */
+            public array $calls = [];
+
+            public function broadcast(int $type, string $data): array
+            {
+                $this->calls[] = [$type, $data];
+                return [];
+            }
+        };
     }
 
     public function testReadDelegatesToDecorated(): void

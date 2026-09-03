@@ -170,4 +170,25 @@ describe('ServerSentEventsObserver', () => {
         // No new instances created
         expect(MockEventSource.instances.length).toBe(1);
     });
+
+    it('does not open a second connection when subscribing while a reconnect is pending', () => {
+        const observer = createServerSentEventsObserver('http://localhost');
+        const first = vi.fn();
+        observer.subscribe(first);
+        expect(MockEventSource.instances.length).toBe(1);
+
+        // Error schedules a reconnect in 1s and leaves the observer without an EventSource.
+        MockEventSource.instances[0].fireError();
+        expect(MockEventSource.instances.length).toBe(1);
+
+        // A new subscriber arriving before the timer fires connects immediately…
+        observer.subscribe(vi.fn());
+        expect(MockEventSource.instances.length).toBe(2);
+
+        // …and the pending timer must have been cancelled, not doubled up.
+        vi.advanceTimersByTime(5_000);
+        expect(MockEventSource.instances.length).toBe(2);
+        expect(MockEventSource.instances[1].readyState).not.toBe(MockEventSource.CLOSED);
+        observer.close();
+    });
 });

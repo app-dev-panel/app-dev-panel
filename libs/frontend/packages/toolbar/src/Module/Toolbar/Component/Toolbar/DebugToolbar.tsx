@@ -135,6 +135,21 @@ const ToolbarErrorFallback = ({resetErrorBoundary}: FallbackProps) => (
 
 const serviceWorker = navigator?.serviceWorker;
 
+/**
+ * Extract the `x-debug-id` header from a `FETCH` message posted by the ADP
+ * service worker. Any other message shape (including `null` data from third
+ * party workers) yields `null`.
+ */
+export const readDebugIdFromServiceWorkerMessage = (data: unknown): string | null => {
+    if (typeof data !== 'object' || data === null) return null;
+    const payload = (data as {payload?: unknown}).payload;
+    if (typeof payload !== 'object' || payload === null) return null;
+    const headers = (payload as {headers?: unknown}).headers;
+    if (typeof headers !== 'object' || headers === null || !('x-debug-id' in headers)) return null;
+    const debugId = (headers as Record<string, unknown>)['x-debug-id'];
+    return typeof debugId === 'string' && debugId !== '' ? debugId : null;
+};
+
 type DebugIFrameProps = {baseUrlState: string; iframeEnabled: boolean; iframeSrc: string | null};
 
 /**
@@ -152,13 +167,18 @@ const getPanelMountPath = (): string => {
 };
 
 /**
- * Build the initial iframe URL combining origin + panel mount + panel-internal
- * route + a forced `toolbar=0` flag. Uses the URL API so trailing/leading
- * slashes and existing query strings are handled safely.
+ * Build the initial iframe URL: origin + panel page + a forced `toolbar=0` flag.
+ *
+ * `panelPath` is a *mount-prefixed* panel URL as produced by `panelPagePath`
+ * (`/debug/debug?collector=…` — first segment is the mount, second the
+ * panel-internal collector route). It must not be prefixed with the mount
+ * again, which previously produced `/debug/debug/debug?…` (issue #111).
+ * When no page was requested yet the iframe opens the panel root (`panelMount`).
+ * Uses the URL API so trailing/leading slashes and existing query strings are
+ * handled safely.
  */
-const buildIframeSrc = (baseUrl: string, panelMount: string, internalPath: string | null): string => {
-    const path = panelMount + (internalPath ?? '');
-    const url = new URL(path, baseUrl);
+export const buildIframeSrc = (baseUrl: string, panelMount: string, panelPath: string | null): string => {
+    const url = new URL(panelPath ?? panelMount, baseUrl);
     url.searchParams.set('toolbar', '0');
     return url.toString();
 };
@@ -212,15 +232,16 @@ export const DebugToolbar = ({activeComponents}: DebugToolbarProps) => {
     // Service worker listener for debug IDs
     useEffect(() => {
         const onMessageHandler = (event: MessageEvent) => {
-            if (!event.data.payload?.headers || !('x-debug-id' in event.data.payload.headers)) return;
+            const debugId = readDebugIdFromServiceWorkerMessage(event.data);
+            if (debugId === null) return;
             dispatch(debugApi.util.invalidateTags(['debug/list']));
-            dispatch(addCurrentPageRequestId(event.data.payload.headers['x-debug-id']));
+            dispatch(addCurrentPageRequestId(debugId));
         };
         serviceWorker?.addEventListener('message', onMessageHandler);
         return () => {
             serviceWorker?.removeEventListener('message', onMessageHandler);
         };
-    }, []);
+    }, [dispatch]);
 
     const [isToolbarOpened, setIsToolbarOpened] = useState<boolean>(false);
     const getDebugQuery = useGetDebugQuery();
@@ -231,7 +252,7 @@ export const DebugToolbar = ({activeComponents}: DebugToolbarProps) => {
         if (!getDebugQuery.isFetching && getDebugQuery.data && getDebugQuery.data.length > 0) {
             setSelectedEntry(getDebugQuery.data[0]);
         }
-    }, [getDebugQuery.isFetching]);
+    }, [getDebugQuery.isFetching, getDebugQuery.data]);
 
     const toolbarOpenState = useSelector((state) => state.application.toolbarOpen);
     const iframeHeight = useSelector((state) => state.application.iframeHeight);
@@ -330,7 +351,12 @@ export const DebugToolbar = ({activeComponents}: DebugToolbarProps) => {
 
     const iframeRouteNavigate = useCallback(
         (url: string) => {
-            if (!activeComponents.iframe) return;
+            if (!activeComponents.iframe) {
+                // No embedded panel available (e.g. `toolbar=0` hosts): open
+                // the page in the host window instead of silently dropping the click.
+                window.open(new URL(url, baseUrlState).toString(), '_top');
+                return;
+            }
             setIframeSrc(url);
             // Hot path: panel already mounted and booted — navigate via postMessage
             // to preserve panel state and avoid a full iframe reload.
@@ -349,7 +375,7 @@ export const DebugToolbar = ({activeComponents}: DebugToolbarProps) => {
             // to queue, the browser load carries the URL to the panel.
             setIframeEnabled(true);
         },
-        [iframeEnabled, iframeReady, activeComponents],
+        [iframeEnabled, iframeReady, activeComponents, baseUrlState],
     );
 
     const toggleIframeHandler = useCallback(() => {
@@ -648,7 +674,7 @@ export const DebugToolbar = ({activeComponents}: DebugToolbarProps) => {
                         </IconButton>
                     </Box>
                     {selectedEntry && <RequestHeroBar entry={selectedEntry} />}
-                    {selectedEntry && <SideMetrics entry={selectedEntry} />}
+                    {selectedEntry && <SideMetrics entry={selectedEntry} iframeUrlHandler={iframeRouteNavigate} />}
                     <Divider />
                     <Box sx={{p: 1, display: 'flex', gap: 0.5}}>{actionButtons}</Box>
                 </Paper>

@@ -1,7 +1,7 @@
 import {renderWithProviders} from '@app-dev-panel/sdk/test-utils';
 import {fireEvent, screen} from '@testing-library/react';
 import {describe, expect, it, vi} from 'vitest';
-import {EvictedEntryState} from './Layout';
+import {CollectorData, EvictedEntryState} from './Layout';
 
 describe('EvictedEntryState', () => {
     const baseProps = {
@@ -51,5 +51,26 @@ describe('EvictedEntryState', () => {
         );
         fireEvent.click(screen.getByRole('button', {name: 'View all entries'}));
         expect(onViewAllEntries).toHaveBeenCalledTimes(1);
+    });
+});
+
+describe('CollectorData default renderer', () => {
+    it('does not crash when an unknown collector returns null data', () => {
+        // `typeof null === 'object'` — reading `.__isPanelRemote__` used to throw.
+        expect(() =>
+            renderWithProviders(<CollectorData selectedCollector="App\\Collector\\Custom" collectorData={null} />),
+        ).not.toThrow();
+    });
+
+    it('renders plain strings that are not JSON as preformatted text', () => {
+        renderWithProviders(<CollectorData selectedCollector="App\\Collector\\Custom" collectorData="plain text" />);
+        expect(screen.getByText('plain text')).toBeInTheDocument();
+    });
+
+    it('renders SSR html payloads through the SSR panel', () => {
+        renderWithProviders(
+            <CollectorData selectedCollector="App\\Collector\\Custom" collectorData={{__html: '<b>ssr</b>'}} />,
+        );
+        expect(document.body.textContent).toContain('ssr');
     });
 });

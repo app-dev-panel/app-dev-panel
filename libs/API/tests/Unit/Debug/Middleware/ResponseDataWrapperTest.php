@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Api\Tests\Unit\Debug\Middleware;
 
+use AppDevPanel\Api\Debug\Exception\BadRequestException;
 use AppDevPanel\Api\Debug\Exception\NotFoundException;
 use AppDevPanel\Api\Debug\Middleware\ResponseDataWrapper;
 use AppDevPanel\Api\Http\JsonResponseFactoryInterface;
@@ -212,6 +213,39 @@ final class ResponseDataWrapperTest extends TestCase
 
         $data = json_decode($response->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR);
         $this->assertSame('debug-123', $data['id']);
+    }
+
+    public function testBadRequestExceptionMapsTo400WithoutTrace(): void
+    {
+        $middleware = $this->createMiddleware();
+        $response = $middleware->process(
+            new ServerRequest('GET', '/test'),
+            $this->createExceptionRequestHandler(new BadRequestException('Invalid debug entry id.')),
+        );
+
+        $this->assertSame(400, $response->getStatusCode());
+        $data = json_decode($response->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR);
+        $this->assertSame(
+            ['id' => null, 'data' => null, 'error' => 'Invalid debug entry id.', 'success' => false],
+            $data,
+        );
+    }
+
+    public function testExceptionDetailsHiddenWhenFlagIsOff(): void
+    {
+        $middleware = new ResponseDataWrapper($this->createJsonResponseFactory(), exposeExceptionDetails: false);
+        $response = $middleware->process(
+            new ServerRequest('GET', '/test'),
+            $this->createExceptionRequestHandler(new \RuntimeException('Something broke')),
+        );
+
+        $this->assertSame(500, $response->getStatusCode());
+        $data = json_decode($response->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR);
+        $this->assertSame('Something broke', $data['error']);
+        $this->assertSame(['class' => \RuntimeException::class, 'message' => 'Something broke'], $data['data']);
+        $this->assertArrayNotHasKey('file', $data['data']);
+        $this->assertArrayNotHasKey('line', $data['data']);
+        $this->assertArrayNotHasKey('trace', $data['data']);
     }
 
     private function createMiddleware(): ResponseDataWrapper

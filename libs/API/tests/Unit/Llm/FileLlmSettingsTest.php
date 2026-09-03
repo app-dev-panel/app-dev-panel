@@ -30,9 +30,9 @@ final class FileLlmSettingsTest extends TestCase
         @rmdir($base);
     }
 
-    private function build(): FileLlmSettings
+    private function build(?\Psr\Log\LoggerInterface $logger = null): FileLlmSettings
     {
-        return new FileLlmSettings($this->runtimeDir, new FileSecretsStorage($this->configDir));
+        return new FileLlmSettings($this->runtimeDir, new FileSecretsStorage($this->configDir), $logger);
     }
 
     public function testDefaults(): void
@@ -233,9 +233,23 @@ final class FileLlmSettingsTest extends TestCase
             ]),
         );
 
-        $settings = $this->build();
+        $logger = $this->createMock(\Psr\Log\LoggerInterface::class);
+        $logger
+            ->expects($this->once())
+            ->method('info')
+            ->with(
+                $this->stringContains('Migrated LLM settings'),
+                $this->callback(
+                    static fn(array $context): bool => (
+                        str_ends_with($context['legacy'], '.llm-settings.json')
+                        && str_ends_with($context['target'], '/secrets.json')
+                    ),
+                ),
+            );
 
-        // First read auto-migrates; values become available transparently.
+        $settings = $this->build($logger);
+
+        // First read auto-migrates; values become available transparently (logged, never printed).
         $this->assertSame('sk-legacy', $settings->getApiKey());
         $this->assertSame('anthropic', $settings->getProvider());
         $this->assertSame('claude-3-haiku', $settings->getModel());
