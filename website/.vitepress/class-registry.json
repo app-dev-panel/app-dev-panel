@@ -32,6 +32,17 @@
         "path": "libs/Adapter/Laravel/src/Collector/RouterDataExtractor.php",
         "modifier": "final"
     },
+    "AppDevPanel\\Adapter\\Laravel\\Collector\\TemplateCollectorCompilerEngine": {
+        "fqcn": "AppDevPanel\\Adapter\\Laravel\\Collector\\TemplateCollectorCompilerEngine",
+        "short": "TemplateCollectorCompilerEngine",
+        "type": "class",
+        "library": "Adapter/Laravel",
+        "description": "Wraps Laravel's CompilerEngine to capture Blade template rendering into the framework-agnostic TemplateCollector.",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Adapter/Laravel/src/Collector/TemplateCollectorCompilerEngine.php",
+        "path": "libs/Adapter/Laravel/src/Collector/TemplateCollectorCompilerEngine.php",
+        "modifier": "final",
+        "extends": "CompilerEngine"
+    },
     "AppDevPanel\\Adapter\\Laravel\\Controller\\AdpApiController": {
         "fqcn": "AppDevPanel\\Adapter\\Laravel\\Controller\\AdpApiController",
         "short": "AdpApiController",
@@ -77,9 +88,19 @@
         "short": "DatabaseListener",
         "type": "class",
         "library": "Adapter/Laravel",
-        "description": "Listens for Illuminate\\Database\\Events\\QueryExecuted and feeds the DatabaseCollector.",
+        "description": "Listens for database query events and feeds the DatabaseCollector.",
         "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Adapter/Laravel/src/EventListener/DatabaseListener.php",
         "path": "libs/Adapter/Laravel/src/EventListener/DatabaseListener.php",
+        "modifier": "final"
+    },
+    "AppDevPanel\\Adapter\\Laravel\\EventListener\\GateListener": {
+        "fqcn": "AppDevPanel\\Adapter\\Laravel\\EventListener\\GateListener",
+        "short": "GateListener",
+        "type": "class",
+        "library": "Adapter/Laravel",
+        "description": "Listens for Laravel Gate evaluation events and feeds AuthorizationCollector with access decision data (granted/denied).",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Adapter/Laravel/src/EventListener/GateListener.php",
+        "path": "libs/Adapter/Laravel/src/EventListener/GateListener.php",
         "modifier": "final"
     },
     "AppDevPanel\\Adapter\\Laravel\\EventListener\\HttpClientListener": {
@@ -111,6 +132,49 @@
         "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Adapter/Laravel/src/EventListener/QueueListener.php",
         "path": "libs/Adapter/Laravel/src/EventListener/QueueListener.php",
         "modifier": "final"
+    },
+    "AppDevPanel\\Adapter\\Laravel\\EventListener\\RedisListener": {
+        "fqcn": "AppDevPanel\\Adapter\\Laravel\\EventListener\\RedisListener",
+        "short": "RedisListener",
+        "type": "class",
+        "library": "Adapter/Laravel",
+        "description": "Listens for Illuminate\\Redis\\Events\\CommandExecuted and feeds the RedisCollector.",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Adapter/Laravel/src/EventListener/RedisListener.php",
+        "path": "libs/Adapter/Laravel/src/EventListener/RedisListener.php",
+        "modifier": "final"
+    },
+    "AppDevPanel\\Adapter\\Laravel\\EventListener\\ValidatorListener": {
+        "fqcn": "AppDevPanel\\Adapter\\Laravel\\EventListener\\ValidatorListener",
+        "short": "ValidatorListener",
+        "type": "class",
+        "library": "Adapter/Laravel",
+        "description": "Hooks into Laravel's Validator factory via resolver() to feed the ValidatorCollector.",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Adapter/Laravel/src/EventListener/ValidatorListener.php",
+        "path": "libs/Adapter/Laravel/src/EventListener/ValidatorListener.php",
+        "modifier": "final"
+    },
+    "AppDevPanel\\Adapter\\Laravel\\EventListener\\ViteAssetListener": {
+        "fqcn": "AppDevPanel\\Adapter\\Laravel\\EventListener\\ViteAssetListener",
+        "short": "ViteAssetListener",
+        "type": "class",
+        "library": "Adapter/Laravel",
+        "description": "Collects rendered Vite assets after the response is created.",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Adapter/Laravel/src/EventListener/ViteAssetListener.php",
+        "path": "libs/Adapter/Laravel/src/EventListener/ViteAssetListener.php",
+        "modifier": "final"
+    },
+    "AppDevPanel\\Adapter\\Laravel\\Inspector\\LaravelAuthorizationConfigProvider": {
+        "fqcn": "AppDevPanel\\Adapter\\Laravel\\Inspector\\LaravelAuthorizationConfigProvider",
+        "short": "LaravelAuthorizationConfigProvider",
+        "type": "class",
+        "library": "Adapter/Laravel",
+        "description": "Laravel implementation of {@see AuthorizationConfigProviderInterface}.",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Adapter/Laravel/src/Inspector/LaravelAuthorizationConfigProvider.php",
+        "path": "libs/Adapter/Laravel/src/Inspector/LaravelAuthorizationConfigProvider.php",
+        "modifier": "final",
+        "implements": [
+            "AuthorizationConfigProviderInterface"
+        ]
     },
     "AppDevPanel\\Adapter\\Laravel\\Inspector\\LaravelConfigProvider": {
         "fqcn": "AppDevPanel\\Adapter\\Laravel\\Inspector\\LaravelConfigProvider",
@@ -265,6 +329,17 @@
         "path": "libs/Adapter/Symfony/src/Collector/RouterDataExtractor.php",
         "modifier": "final"
     },
+    "AppDevPanel\\Adapter\\Symfony\\Command\\AssetsInstallCommand": {
+        "fqcn": "AppDevPanel\\Adapter\\Symfony\\Command\\AssetsInstallCommand",
+        "short": "AssetsInstallCommand",
+        "type": "class",
+        "library": "Adapter/Symfony",
+        "description": "Assets Install CLI command.",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Adapter/Symfony/src/Command/AssetsInstallCommand.php",
+        "path": "libs/Adapter/Symfony/src/Command/AssetsInstallCommand.php",
+        "modifier": "final",
+        "extends": "Command"
+    },
     "AppDevPanel\\Adapter\\Symfony\\Controller\\AdpApiController": {
         "fqcn": "AppDevPanel\\Adapter\\Symfony\\Controller\\AdpApiController",
         "short": "AdpApiController",
@@ -310,6 +385,32 @@
         "modifier": "final",
         "implements": [
             "ConfigurationInterface"
+        ]
+    },
+    "AppDevPanel\\Adapter\\Symfony\\DependencyInjection\\DoctrineMiddlewarePass": {
+        "fqcn": "AppDevPanel\\Adapter\\Symfony\\DependencyInjection\\DoctrineMiddlewarePass",
+        "short": "DoctrineMiddlewarePass",
+        "type": "class",
+        "library": "Adapter/Symfony",
+        "description": "Registers the DoctrineDbalMiddleware with the `doctrine.middleware` tag.",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Adapter/Symfony/src/DependencyInjection/DoctrineMiddlewarePass.php",
+        "path": "libs/Adapter/Symfony/src/DependencyInjection/DoctrineMiddlewarePass.php",
+        "modifier": "final",
+        "implements": [
+            "CompilerPassInterface"
+        ]
+    },
+    "AppDevPanel\\Adapter\\Symfony\\EventSubscriber\\AssetMapperSubscriber": {
+        "fqcn": "AppDevPanel\\Adapter\\Symfony\\EventSubscriber\\AssetMapperSubscriber",
+        "short": "AssetMapperSubscriber",
+        "type": "class",
+        "library": "Adapter/Symfony",
+        "description": "Collects mapped assets from Symfony's AssetMapper at the end of a request.",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Adapter/Symfony/src/EventSubscriber/AssetMapperSubscriber.php",
+        "path": "libs/Adapter/Symfony/src/EventSubscriber/AssetMapperSubscriber.php",
+        "modifier": "final",
+        "implements": [
+            "EventSubscriberInterface"
         ]
     },
     "AppDevPanel\\Adapter\\Symfony\\EventSubscriber\\AuthorizationSubscriber": {
@@ -374,6 +475,19 @@
         "path": "libs/Adapter/Symfony/src/EventSubscriber/HttpSubscriberCollectors.php",
         "modifier": "readonly"
     },
+    "AppDevPanel\\Adapter\\Symfony\\EventSubscriber\\MailerSubscriber": {
+        "fqcn": "AppDevPanel\\Adapter\\Symfony\\EventSubscriber\\MailerSubscriber",
+        "short": "MailerSubscriber",
+        "type": "class",
+        "library": "Adapter/Symfony",
+        "description": "Listens to Symfony Mailer events and feeds MailerCollector.",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Adapter/Symfony/src/EventSubscriber/MailerSubscriber.php",
+        "path": "libs/Adapter/Symfony/src/EventSubscriber/MailerSubscriber.php",
+        "modifier": "final",
+        "implements": [
+            "EventSubscriberInterface"
+        ]
+    },
     "AppDevPanel\\Adapter\\Symfony\\EventSubscriber\\Psr7Converter": {
         "fqcn": "AppDevPanel\\Adapter\\Symfony\\EventSubscriber\\Psr7Converter",
         "short": "Psr7Converter",
@@ -408,6 +522,19 @@
         "modifier": "final",
         "implements": [
             "SchemaProviderInterface"
+        ]
+    },
+    "AppDevPanel\\Adapter\\Symfony\\Inspector\\SymfonyAuthorizationConfigProvider": {
+        "fqcn": "AppDevPanel\\Adapter\\Symfony\\Inspector\\SymfonyAuthorizationConfigProvider",
+        "short": "SymfonyAuthorizationConfigProvider",
+        "type": "class",
+        "library": "Adapter/Symfony",
+        "description": "Symfony implementation of {@see AuthorizationConfigProviderInterface}.",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Adapter/Symfony/src/Inspector/SymfonyAuthorizationConfigProvider.php",
+        "path": "libs/Adapter/Symfony/src/Inspector/SymfonyAuthorizationConfigProvider.php",
+        "modifier": "final",
+        "implements": [
+            "AuthorizationConfigProviderInterface"
         ]
     },
     "AppDevPanel\\Adapter\\Symfony\\Inspector\\SymfonyConfigProvider": {
@@ -460,6 +587,78 @@
         "path": "libs/Adapter/Symfony/src/Inspector/SymfonyUrlMatcherAdapter.php",
         "modifier": "final"
     },
+    "AppDevPanel\\Adapter\\Symfony\\Proxy\\DoctrineDbalConnection": {
+        "fqcn": "AppDevPanel\\Adapter\\Symfony\\Proxy\\DoctrineDbalConnection",
+        "short": "DoctrineDbalConnection",
+        "type": "class",
+        "library": "Adapter/Symfony",
+        "description": "DBAL connection wrapper that intercepts prepare(), query(), and exec() to feed query data to DatabaseCollector.",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Adapter/Symfony/src/Proxy/DoctrineDbalConnection.php",
+        "path": "libs/Adapter/Symfony/src/Proxy/DoctrineDbalConnection.php",
+        "modifier": "final",
+        "extends": "AbstractConnectionMiddleware"
+    },
+    "AppDevPanel\\Adapter\\Symfony\\Proxy\\DoctrineDbalDriver": {
+        "fqcn": "AppDevPanel\\Adapter\\Symfony\\Proxy\\DoctrineDbalDriver",
+        "short": "DoctrineDbalDriver",
+        "type": "class",
+        "library": "Adapter/Symfony",
+        "description": "DBAL driver wrapper that intercepts connect() to return a profiling connection.",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Adapter/Symfony/src/Proxy/DoctrineDbalDriver.php",
+        "path": "libs/Adapter/Symfony/src/Proxy/DoctrineDbalDriver.php",
+        "modifier": "final",
+        "extends": "AbstractDriverMiddleware"
+    },
+    "AppDevPanel\\Adapter\\Symfony\\Proxy\\DoctrineDbalMiddleware": {
+        "fqcn": "AppDevPanel\\Adapter\\Symfony\\Proxy\\DoctrineDbalMiddleware",
+        "short": "DoctrineDbalMiddleware",
+        "type": "class",
+        "library": "Adapter/Symfony",
+        "description": "Doctrine DBAL Middleware that feeds query data to DatabaseCollector.",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Adapter/Symfony/src/Proxy/DoctrineDbalMiddleware.php",
+        "path": "libs/Adapter/Symfony/src/Proxy/DoctrineDbalMiddleware.php",
+        "modifier": "final",
+        "implements": [
+            "Middleware"
+        ]
+    },
+    "AppDevPanel\\Adapter\\Symfony\\Proxy\\DoctrineDbalStatement": {
+        "fqcn": "AppDevPanel\\Adapter\\Symfony\\Proxy\\DoctrineDbalStatement",
+        "short": "DoctrineDbalStatement",
+        "type": "class",
+        "library": "Adapter/Symfony",
+        "description": "DBAL statement wrapper that captures bound parameters and execution timing.",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Adapter/Symfony/src/Proxy/DoctrineDbalStatement.php",
+        "path": "libs/Adapter/Symfony/src/Proxy/DoctrineDbalStatement.php",
+        "modifier": "final",
+        "extends": "AbstractStatementMiddleware"
+    },
+    "AppDevPanel\\Adapter\\Symfony\\Proxy\\MessengerCollectorMiddleware": {
+        "fqcn": "AppDevPanel\\Adapter\\Symfony\\Proxy\\MessengerCollectorMiddleware",
+        "short": "MessengerCollectorMiddleware",
+        "type": "class",
+        "library": "Adapter/Symfony",
+        "description": "Symfony Messenger middleware that feeds message data to QueueCollector.",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Adapter/Symfony/src/Proxy/MessengerCollectorMiddleware.php",
+        "path": "libs/Adapter/Symfony/src/Proxy/MessengerCollectorMiddleware.php",
+        "modifier": "final",
+        "implements": [
+            "MiddlewareInterface"
+        ]
+    },
+    "AppDevPanel\\Adapter\\Symfony\\Proxy\\SymfonyCacheProxy": {
+        "fqcn": "AppDevPanel\\Adapter\\Symfony\\Proxy\\SymfonyCacheProxy",
+        "short": "SymfonyCacheProxy",
+        "type": "class",
+        "library": "Adapter/Symfony",
+        "description": "Decorates PSR-6 CacheItemPoolInterface to feed cache operations to CacheCollector.",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Adapter/Symfony/src/Proxy/SymfonyCacheProxy.php",
+        "path": "libs/Adapter/Symfony/src/Proxy/SymfonyCacheProxy.php",
+        "modifier": "final",
+        "implements": [
+            "CacheItemPoolInterface"
+        ]
+    },
     "AppDevPanel\\Adapter\\Symfony\\Proxy\\SymfonyEventDispatcherProxy": {
         "fqcn": "AppDevPanel\\Adapter\\Symfony\\Proxy\\SymfonyEventDispatcherProxy",
         "short": "SymfonyEventDispatcherProxy",
@@ -486,6 +685,30 @@
             "TranslatorInterface"
         ]
     },
+    "AppDevPanel\\Adapter\\Symfony\\Proxy\\SymfonyValidatorProxy": {
+        "fqcn": "AppDevPanel\\Adapter\\Symfony\\Proxy\\SymfonyValidatorProxy",
+        "short": "SymfonyValidatorProxy",
+        "type": "class",
+        "library": "Adapter/Symfony",
+        "description": "Decorates Symfony's ValidatorInterface to feed validation results to ValidatorCollector.",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Adapter/Symfony/src/Proxy/SymfonyValidatorProxy.php",
+        "path": "libs/Adapter/Symfony/src/Proxy/SymfonyValidatorProxy.php",
+        "modifier": "final",
+        "implements": [
+            "ValidatorInterface"
+        ]
+    },
+    "AppDevPanel\\Adapter\\Symfony\\Proxy\\TwigEnvironmentProxy": {
+        "fqcn": "AppDevPanel\\Adapter\\Symfony\\Proxy\\TwigEnvironmentProxy",
+        "short": "TwigEnvironmentProxy",
+        "type": "class",
+        "library": "Adapter/Symfony",
+        "description": "Decorates Twig\\Environment to feed template render data to TemplateCollector.",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Adapter/Symfony/src/Proxy/TwigEnvironmentProxy.php",
+        "path": "libs/Adapter/Symfony/src/Proxy/TwigEnvironmentProxy.php",
+        "modifier": "final",
+        "extends": "Environment"
+    },
     "AppDevPanel\\Adapter\\Yii2\\Bootstrap": {
         "fqcn": "AppDevPanel\\Adapter\\Yii2\\Bootstrap",
         "short": "Bootstrap",
@@ -499,6 +722,17 @@
             "BootstrapInterface"
         ]
     },
+    "AppDevPanel\\Adapter\\Yii2\\Collector\\BroadcastingLogTarget": {
+        "fqcn": "AppDevPanel\\Adapter\\Yii2\\Collector\\BroadcastingLogTarget",
+        "short": "BroadcastingLogTarget",
+        "type": "class",
+        "library": "Adapter/Yii2",
+        "description": "Log target that broadcasts log messages via UDP for the Live Feed.",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Adapter/Yii2/src/Collector/BroadcastingLogTarget.php",
+        "path": "libs/Adapter/Yii2/src/Collector/BroadcastingLogTarget.php",
+        "modifier": "final",
+        "extends": "Target"
+    },
     "AppDevPanel\\Adapter\\Yii2\\Collector\\DebugLogTarget": {
         "fqcn": "AppDevPanel\\Adapter\\Yii2\\Collector\\DebugLogTarget",
         "short": "DebugLogTarget",
@@ -510,16 +744,14 @@
         "modifier": "final",
         "extends": "Target"
     },
-    "AppDevPanel\\Adapter\\Yii2\\Collector\\DbProfilingTarget": {
-        "fqcn": "AppDevPanel\\Adapter\\Yii2\\Collector\\DbProfilingTarget",
-        "short": "DbProfilingTarget",
+    "AppDevPanel\\Adapter\\Yii2\\Collector\\uses": {
+        "fqcn": "AppDevPanel\\Adapter\\Yii2\\Collector\\uses",
+        "short": "uses",
         "type": "class",
         "library": "Adapter/Yii2",
-        "description": "Yii 2 profiling target that captures database query timing and feeds it to DbCollector.",
+        "description": "Class uses.",
         "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Adapter/Yii2/src/Collector/DbProfilingTarget.php",
-        "path": "libs/Adapter/Yii2/src/Collector/DbProfilingTarget.php",
-        "modifier": "final",
-        "extends": "Target"
+        "path": "libs/Adapter/Yii2/src/Collector/DbProfilingTarget.php"
     },
     "AppDevPanel\\Adapter\\Yii2\\Controller\\AdpApiController": {
         "fqcn": "AppDevPanel\\Adapter\\Yii2\\Controller\\AdpApiController",
@@ -529,6 +761,17 @@
         "description": "Catch-all controller that bridges Yii 2 HTTP into the framework-agnostic ADP ApiApplication.",
         "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Adapter/Yii2/src/Controller/AdpApiController.php",
         "path": "libs/Adapter/Yii2/src/Controller/AdpApiController.php",
+        "modifier": "final",
+        "extends": "Controller"
+    },
+    "AppDevPanel\\Adapter\\Yii2\\Controller\\DebugDumpController": {
+        "fqcn": "AppDevPanel\\Adapter\\Yii2\\Controller\\DebugDumpController",
+        "short": "DebugDumpController",
+        "type": "class",
+        "library": "Adapter/Yii2",
+        "description": "View dumped objects for a debug entry.",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Adapter/Yii2/src/Controller/DebugDumpController.php",
+        "path": "libs/Adapter/Yii2/src/Controller/DebugDumpController.php",
         "modifier": "final",
         "extends": "Controller"
     },
@@ -554,6 +797,83 @@
         "modifier": "final",
         "extends": "Controller"
     },
+    "AppDevPanel\\Adapter\\Yii2\\Controller\\DebugSummaryController": {
+        "fqcn": "AppDevPanel\\Adapter\\Yii2\\Controller\\DebugSummaryController",
+        "short": "DebugSummaryController",
+        "type": "class",
+        "library": "Adapter/Yii2",
+        "description": "Show brief summary of a debug entry.",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Adapter/Yii2/src/Controller/DebugSummaryController.php",
+        "path": "libs/Adapter/Yii2/src/Controller/DebugSummaryController.php",
+        "modifier": "final",
+        "extends": "Controller"
+    },
+    "AppDevPanel\\Adapter\\Yii2\\Controller\\DebugTailController": {
+        "fqcn": "AppDevPanel\\Adapter\\Yii2\\Controller\\DebugTailController",
+        "short": "DebugTailController",
+        "type": "class",
+        "library": "Adapter/Yii2",
+        "description": "Watch debug entries in real-time.",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Adapter/Yii2/src/Controller/DebugTailController.php",
+        "path": "libs/Adapter/Yii2/src/Controller/DebugTailController.php",
+        "modifier": "final",
+        "extends": "Controller"
+    },
+    "AppDevPanel\\Adapter\\Yii2\\Controller\\DevBroadcastController": {
+        "fqcn": "AppDevPanel\\Adapter\\Yii2\\Controller\\DevBroadcastController",
+        "short": "DevBroadcastController",
+        "type": "class",
+        "library": "Adapter/Yii2",
+        "description": "Broadcast test messages to debug server clients for Live Feed testing.",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Adapter/Yii2/src/Controller/DevBroadcastController.php",
+        "path": "libs/Adapter/Yii2/src/Controller/DevBroadcastController.php",
+        "modifier": "final",
+        "extends": "Controller"
+    },
+    "AppDevPanel\\Adapter\\Yii2\\Controller\\DevServerController": {
+        "fqcn": "AppDevPanel\\Adapter\\Yii2\\Controller\\DevServerController",
+        "short": "DevServerController",
+        "type": "class",
+        "library": "Adapter/Yii2",
+        "description": "Start the ADP debug socket server for real-time Live Feed.",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Adapter/Yii2/src/Controller/DevServerController.php",
+        "path": "libs/Adapter/Yii2/src/Controller/DevServerController.php",
+        "modifier": "final",
+        "extends": "Controller"
+    },
+    "AppDevPanel\\Adapter\\Yii2\\Controller\\InspectConfigController": {
+        "fqcn": "AppDevPanel\\Adapter\\Yii2\\Controller\\InspectConfigController",
+        "short": "InspectConfigController",
+        "type": "class",
+        "library": "Adapter/Yii2",
+        "description": "Inspect application configuration.",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Adapter/Yii2/src/Controller/InspectConfigController.php",
+        "path": "libs/Adapter/Yii2/src/Controller/InspectConfigController.php",
+        "modifier": "final",
+        "extends": "Controller"
+    },
+    "AppDevPanel\\Adapter\\Yii2\\Controller\\InspectDatabaseController": {
+        "fqcn": "AppDevPanel\\Adapter\\Yii2\\Controller\\InspectDatabaseController",
+        "short": "InspectDatabaseController",
+        "type": "class",
+        "library": "Adapter/Yii2",
+        "description": "Inspect database: list tables, view schema, execute queries.",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Adapter/Yii2/src/Controller/InspectDatabaseController.php",
+        "path": "libs/Adapter/Yii2/src/Controller/InspectDatabaseController.php",
+        "modifier": "final",
+        "extends": "Controller"
+    },
+    "AppDevPanel\\Adapter\\Yii2\\Controller\\InspectRoutesController": {
+        "fqcn": "AppDevPanel\\Adapter\\Yii2\\Controller\\InspectRoutesController",
+        "short": "InspectRoutesController",
+        "type": "class",
+        "library": "Adapter/Yii2",
+        "description": "Inspect application routes.",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Adapter/Yii2/src/Controller/InspectRoutesController.php",
+        "path": "libs/Adapter/Yii2/src/Controller/InspectRoutesController.php",
+        "modifier": "final",
+        "extends": "Controller"
+    },
     "AppDevPanel\\Adapter\\Yii2\\EventListener\\AuthorizationListener": {
         "fqcn": "AppDevPanel\\Adapter\\Yii2\\EventListener\\AuthorizationListener",
         "short": "AuthorizationListener",
@@ -572,6 +892,16 @@
         "description": "Maps Yii 2 console application events to the ADP Debugger lifecycle.",
         "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Adapter/Yii2/src/EventListener/ConsoleListener.php",
         "path": "libs/Adapter/Yii2/src/EventListener/ConsoleListener.php",
+        "modifier": "final"
+    },
+    "AppDevPanel\\Adapter\\Yii2\\EventListener\\QueueListener": {
+        "fqcn": "AppDevPanel\\Adapter\\Yii2\\EventListener\\QueueListener",
+        "short": "QueueListener",
+        "type": "class",
+        "library": "Adapter/Yii2",
+        "description": "Feeds {@see QueueCollector} from `yii\\queue\\Queue` events.",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Adapter/Yii2/src/EventListener/QueueListener.php",
+        "path": "libs/Adapter/Yii2/src/EventListener/QueueListener.php",
         "modifier": "final"
     },
     "AppDevPanel\\Adapter\\Yii2\\EventListener\\WebListener": {
@@ -597,6 +927,29 @@
             "SchemaProviderInterface"
         ]
     },
+    "AppDevPanel\\Adapter\\Yii2\\Inspector\\Yii2ActionResolver": {
+        "fqcn": "AppDevPanel\\Adapter\\Yii2\\Inspector\\Yii2ActionResolver",
+        "short": "Yii2ActionResolver",
+        "type": "class",
+        "library": "Adapter/Yii2",
+        "description": "Resolves Yii 2 route strings (e.g. \"site/index\") to controller class + action method.",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Adapter/Yii2/src/Inspector/Yii2ActionResolver.php",
+        "path": "libs/Adapter/Yii2/src/Inspector/Yii2ActionResolver.php",
+        "modifier": "final"
+    },
+    "AppDevPanel\\Adapter\\Yii2\\Inspector\\Yii2AuthorizationConfigProvider": {
+        "fqcn": "AppDevPanel\\Adapter\\Yii2\\Inspector\\Yii2AuthorizationConfigProvider",
+        "short": "Yii2AuthorizationConfigProvider",
+        "type": "class",
+        "library": "Adapter/Yii2",
+        "description": "Yii 2 implementation of {@see AuthorizationConfigProviderInterface}.",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Adapter/Yii2/src/Inspector/Yii2AuthorizationConfigProvider.php",
+        "path": "libs/Adapter/Yii2/src/Inspector/Yii2AuthorizationConfigProvider.php",
+        "modifier": "final",
+        "implements": [
+            "AuthorizationConfigProviderInterface"
+        ]
+    },
     "AppDevPanel\\Adapter\\Yii2\\Inspector\\Yii2ConfigProvider": {
         "fqcn": "AppDevPanel\\Adapter\\Yii2\\Inspector\\Yii2ConfigProvider",
         "short": "Yii2ConfigProvider",
@@ -605,6 +958,16 @@
         "description": "Provides configuration data from Yii 2's application for the ADP inspector.",
         "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Adapter/Yii2/src/Inspector/Yii2ConfigProvider.php",
         "path": "libs/Adapter/Yii2/src/Inspector/Yii2ConfigProvider.php",
+        "modifier": "final"
+    },
+    "AppDevPanel\\Adapter\\Yii2\\Inspector\\Yii2MatchResult": {
+        "fqcn": "AppDevPanel\\Adapter\\Yii2\\Inspector\\Yii2MatchResult",
+        "short": "Yii2MatchResult",
+        "type": "class",
+        "library": "Adapter/Yii2",
+        "description": "Result of a Yii 2 URL match, compatible with the interface expected by {@see \\AppDevPanel\\Api\\Inspector\\Controller\\RoutingController::checkRoute()}.",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Adapter/Yii2/src/Inspector/Yii2MatchResult.php",
+        "path": "libs/Adapter/Yii2/src/Inspector/Yii2MatchResult.php",
         "modifier": "final"
     },
     "AppDevPanel\\Adapter\\Yii2\\Inspector\\Yii2RouteAdapter": {
@@ -627,6 +990,16 @@
         "path": "libs/Adapter/Yii2/src/Inspector/Yii2RouteCollection.php",
         "modifier": "final"
     },
+    "AppDevPanel\\Adapter\\Yii2\\Inspector\\Yii2UrlMatcherAdapter": {
+        "fqcn": "AppDevPanel\\Adapter\\Yii2\\Inspector\\Yii2UrlMatcherAdapter",
+        "short": "Yii2UrlMatcherAdapter",
+        "type": "class",
+        "library": "Adapter/Yii2",
+        "description": "Adapts Yii 2's UrlManager::parseRequest() to the URL matcher interface expected by {@see \\AppDevPanel\\Api\\Inspector\\Controller\\RoutingController::checkRoute()}.",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Adapter/Yii2/src/Inspector/Yii2UrlMatcherAdapter.php",
+        "path": "libs/Adapter/Yii2/src/Inspector/Yii2UrlMatcherAdapter.php",
+        "modifier": "final"
+    },
     "AppDevPanel\\Adapter\\Yii2\\Inspector\\to": {
         "fqcn": "AppDevPanel\\Adapter\\Yii2\\Inspector\\to",
         "short": "to",
@@ -635,6 +1008,16 @@
         "description": "Class to.",
         "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Adapter/Yii2/src/Inspector/Yii2DbSchemaProvider.php",
         "path": "libs/Adapter/Yii2/src/Inspector/Yii2DbSchemaProvider.php"
+    },
+    "AppDevPanel\\Adapter\\Yii2\\InstallWarnings": {
+        "fqcn": "AppDevPanel\\Adapter\\Yii2\\InstallWarnings",
+        "short": "InstallWarnings",
+        "type": "class",
+        "library": "Adapter/Yii2",
+        "description": "Surfaces install-time problems that silently break the panel or toolbar.",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Adapter/Yii2/src/InstallWarnings.php",
+        "path": "libs/Adapter/Yii2/src/InstallWarnings.php",
+        "modifier": "final"
     },
     "AppDevPanel\\Adapter\\Yii2\\Module": {
         "fqcn": "AppDevPanel\\Adapter\\Yii2\\Module",
@@ -665,7 +1048,7 @@
         "short": "RouterMatchRecorder",
         "type": "class",
         "library": "Adapter/Yii2",
-        "description": "Records the URL rule that matched the current request during UrlManager::parseRequest().",
+        "description": "Records route matching attempts during UrlManager::parseRequest().",
         "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Adapter/Yii2/src/Proxy/RouterMatchRecorder.php",
         "path": "libs/Adapter/Yii2/src/Proxy/RouterMatchRecorder.php",
         "modifier": "final"
@@ -683,6 +1066,15 @@
             "UrlRuleInterface"
         ]
     },
+    "AppDevPanel\\Adapter\\Yii2\\Proxy\\must": {
+        "fqcn": "AppDevPanel\\Adapter\\Yii2\\Proxy\\must",
+        "short": "must",
+        "type": "class",
+        "library": "Adapter/Yii2",
+        "description": "Class must.",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Adapter/Yii2/src/Proxy/CacheProxy.php",
+        "path": "libs/Adapter/Yii2/src/Proxy/CacheProxy.php"
+    },
     "AppDevPanel\\Adapter\\Yii3\\Api\\AliasPathResolver": {
         "fqcn": "AppDevPanel\\Adapter\\Yii3\\Api\\AliasPathResolver",
         "short": "AliasPathResolver",
@@ -696,6 +1088,19 @@
             "PathResolverInterface"
         ]
     },
+    "AppDevPanel\\Adapter\\Yii3\\Api\\ToolbarMiddleware": {
+        "fqcn": "AppDevPanel\\Adapter\\Yii3\\Api\\ToolbarMiddleware",
+        "short": "ToolbarMiddleware",
+        "type": "class",
+        "library": "Adapter/Yii3",
+        "description": "PSR-15 middleware that injects the ADP debug toolbar into HTML responses.",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Adapter/Yii3/src/Api/ToolbarMiddleware.php",
+        "path": "libs/Adapter/Yii3/src/Api/ToolbarMiddleware.php",
+        "modifier": "final",
+        "implements": [
+            "MiddlewareInterface"
+        ]
+    },
     "AppDevPanel\\Adapter\\Yii3\\Api\\YiiApiMiddleware": {
         "fqcn": "AppDevPanel\\Adapter\\Yii3\\Api\\YiiApiMiddleware",
         "short": "YiiApiMiddleware",
@@ -707,6 +1112,19 @@
         "modifier": "final",
         "implements": [
             "MiddlewareInterface"
+        ]
+    },
+    "AppDevPanel\\Adapter\\Yii3\\Collector\\Asset\\AssetLoaderInterfaceProxy": {
+        "fqcn": "AppDevPanel\\Adapter\\Yii3\\Collector\\Asset\\AssetLoaderInterfaceProxy",
+        "short": "AssetLoaderInterfaceProxy",
+        "type": "class",
+        "library": "Adapter/Yii3",
+        "description": "Decorates AssetLoaderInterface to capture loaded asset bundles into the framework-agnostic AssetBundleCollector.",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Adapter/Yii3/src/Collector/Asset/AssetLoaderInterfaceProxy.php",
+        "path": "libs/Adapter/Yii3/src/Collector/Asset/AssetLoaderInterfaceProxy.php",
+        "modifier": "final",
+        "implements": [
+            "AssetLoaderInterface"
         ]
     },
     "AppDevPanel\\Adapter\\Yii3\\Collector\\Db\\CommandInterfaceProxy": {
@@ -894,6 +1312,29 @@
             "SchemaProviderInterface"
         ]
     },
+    "AppDevPanel\\Adapter\\Yii3\\Inspector\\Yii3AuthorizationConfigProvider": {
+        "fqcn": "AppDevPanel\\Adapter\\Yii3\\Inspector\\Yii3AuthorizationConfigProvider",
+        "short": "Yii3AuthorizationConfigProvider",
+        "type": "class",
+        "library": "Adapter/Yii3",
+        "description": "Yii 3 implementation of {@see AuthorizationConfigProviderInterface}.",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Adapter/Yii3/src/Inspector/Yii3AuthorizationConfigProvider.php",
+        "path": "libs/Adapter/Yii3/src/Inspector/Yii3AuthorizationConfigProvider.php",
+        "modifier": "final",
+        "implements": [
+            "AuthorizationConfigProviderInterface"
+        ]
+    },
+    "AppDevPanel\\Adapter\\Yii3\\Inspector\\Yii3ConfigProvider": {
+        "fqcn": "AppDevPanel\\Adapter\\Yii3\\Inspector\\Yii3ConfigProvider",
+        "short": "Yii3ConfigProvider",
+        "type": "class",
+        "library": "Adapter/Yii3",
+        "description": "Provides configuration data from Yii 3's merged config for the ADP inspector.",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Adapter/Yii3/src/Inspector/Yii3ConfigProvider.php",
+        "path": "libs/Adapter/Yii3/src/Inspector/Yii3ConfigProvider.php",
+        "modifier": "final"
+    },
     "AppDevPanel\\Adapter\\Yii3\\Proxy\\ContainerInterfaceProxy": {
         "fqcn": "AppDevPanel\\Adapter\\Yii3\\Proxy\\ContainerInterfaceProxy",
         "short": "ContainerInterfaceProxy",
@@ -1041,6 +1482,17 @@
         "path": "libs/API/src/Debug/Controller/SettingsController.php",
         "modifier": "final"
     },
+    "AppDevPanel\\Api\\Debug\\Exception\\BadRequestException": {
+        "fqcn": "AppDevPanel\\Api\\Debug\\Exception\\BadRequestException",
+        "short": "BadRequestException",
+        "type": "class",
+        "library": "API",
+        "description": "Client-side input error. {@see \\AppDevPanel\\Api\\Debug\\Middleware\\ResponseDataWrapper} maps it to HTTP 400 (a plain {@see InvalidArgumentException} still maps to 500).",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/API/src/Debug/Exception/BadRequestException.php",
+        "path": "libs/API/src/Debug/Exception/BadRequestException.php",
+        "modifier": "final",
+        "extends": "InvalidArgumentException"
+    },
     "AppDevPanel\\Api\\Debug\\Exception\\NotFoundException": {
         "fqcn": "AppDevPanel\\Api\\Debug\\Exception\\NotFoundException",
         "short": "NotFoundException",
@@ -1063,15 +1515,15 @@
         "modifier": "final",
         "extends": "Exception"
     },
-    "AppDevPanel\\Api\\Debug\\HtmlViewProviderInterface": {
-        "fqcn": "AppDevPanel\\Api\\Debug\\HtmlViewProviderInterface",
-        "short": "HtmlViewProviderInterface",
-        "type": "interface",
+    "AppDevPanel\\Api\\Debug\\LiveEventStreamFactory": {
+        "fqcn": "AppDevPanel\\Api\\Debug\\LiveEventStreamFactory",
+        "short": "LiveEventStreamFactory",
+        "type": "class",
         "library": "API",
-        "description": "Html View Provider contract.",
-        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/API/src/Debug/HtmlViewProviderInterface.php",
-        "path": "libs/API/src/Debug/HtmlViewProviderInterface.php",
-        "extends": "CollectorInterface"
+        "description": "Class LiveEventStreamFactory.",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/API/src/Debug/LiveEventStreamFactory.php",
+        "path": "libs/API/src/Debug/LiveEventStreamFactory.php",
+        "modifier": "final"
     },
     "AppDevPanel\\Api\\Debug\\Middleware\\DebugHeaders": {
         "fqcn": "AppDevPanel\\Api\\Debug\\Middleware\\DebugHeaders",
@@ -1196,6 +1648,16 @@
         "path": "libs/API/src/Ingestion/Controller/OtlpController.php",
         "modifier": "final"
     },
+    "AppDevPanel\\Api\\Ingestion\\OpenApiSpecLoader": {
+        "fqcn": "AppDevPanel\\Api\\Ingestion\\OpenApiSpecLoader",
+        "short": "OpenApiSpecLoader",
+        "type": "class",
+        "library": "API",
+        "description": "Locates and decodes `openapi/ingestion.yaml` for the `/debug/api/openapi.json` endpoint.",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/API/src/Ingestion/OpenApiSpecLoader.php",
+        "path": "libs/API/src/Ingestion/OpenApiSpecLoader.php",
+        "modifier": "final"
+    },
     "AppDevPanel\\Api\\Inspector\\ApplicationState": {
         "fqcn": "AppDevPanel\\Api\\Inspector\\ApplicationState",
         "short": "ApplicationState",
@@ -1271,6 +1733,52 @@
             "CommandInterface"
         ]
     },
+    "AppDevPanel\\Api\\Inspector\\Command\\CodeceptionRawCommand": {
+        "fqcn": "AppDevPanel\\Api\\Inspector\\Command\\CodeceptionRawCommand",
+        "short": "CodeceptionRawCommand",
+        "type": "class",
+        "library": "API",
+        "description": "Runs Codeception without a custom reporter and returns raw stdout+stderr. Companion to {@see CodeceptionCommand}, which produces a structured JSON report.",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/API/src/Inspector/Command/CodeceptionRawCommand.php",
+        "path": "libs/API/src/Inspector/Command/CodeceptionRawCommand.php",
+        "implements": [
+            "CommandInterface"
+        ]
+    },
+    "AppDevPanel\\Api\\Inspector\\Command\\CommandTimeout": {
+        "fqcn": "AppDevPanel\\Api\\Inspector\\Command\\CommandTimeout",
+        "short": "CommandTimeout",
+        "type": "class",
+        "library": "API",
+        "description": "Hard wall-clock limit for inspector subprocesses (tests, linters, shell commands).",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/API/src/Inspector/Command/CommandTimeout.php",
+        "path": "libs/API/src/Inspector/Command/CommandTimeout.php",
+        "modifier": "final"
+    },
+    "AppDevPanel\\Api\\Inspector\\Command\\MagoCommand": {
+        "fqcn": "AppDevPanel\\Api\\Inspector\\Command\\MagoCommand",
+        "short": "MagoCommand",
+        "type": "class",
+        "library": "API",
+        "description": "Mago CLI command.",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/API/src/Inspector/Command/MagoCommand.php",
+        "path": "libs/API/src/Inspector/Command/MagoCommand.php",
+        "implements": [
+            "CommandInterface"
+        ]
+    },
+    "AppDevPanel\\Api\\Inspector\\Command\\PHPStanCommand": {
+        "fqcn": "AppDevPanel\\Api\\Inspector\\Command\\PHPStanCommand",
+        "short": "PHPStanCommand",
+        "type": "class",
+        "library": "API",
+        "description": "PHPStan CLI command.",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/API/src/Inspector/Command/PHPStanCommand.php",
+        "path": "libs/API/src/Inspector/Command/PHPStanCommand.php",
+        "implements": [
+            "CommandInterface"
+        ]
+    },
     "AppDevPanel\\Api\\Inspector\\Command\\PHPUnitCommand": {
         "fqcn": "AppDevPanel\\Api\\Inspector\\Command\\PHPUnitCommand",
         "short": "PHPUnitCommand",
@@ -1283,6 +1791,39 @@
             "CommandInterface"
         ]
     },
+    "AppDevPanel\\Api\\Inspector\\Command\\PHPUnitRawCommand": {
+        "fqcn": "AppDevPanel\\Api\\Inspector\\Command\\PHPUnitRawCommand",
+        "short": "PHPUnitRawCommand",
+        "type": "class",
+        "library": "API",
+        "description": "Runs PHPUnit without a custom reporter and returns raw stdout+stderr. Companion to {@see PHPUnitCommand}, which produces a structured JSON report.",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/API/src/Inspector/Command/PHPUnitRawCommand.php",
+        "path": "libs/API/src/Inspector/Command/PHPUnitRawCommand.php",
+        "implements": [
+            "CommandInterface"
+        ]
+    },
+    "AppDevPanel\\Api\\Inspector\\Command\\PestCommand": {
+        "fqcn": "AppDevPanel\\Api\\Inspector\\Command\\PestCommand",
+        "short": "PestCommand",
+        "type": "class",
+        "library": "API",
+        "description": "Pest CLI command.",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/API/src/Inspector/Command/PestCommand.php",
+        "path": "libs/API/src/Inspector/Command/PestCommand.php",
+        "implements": [
+            "CommandInterface"
+        ]
+    },
+    "AppDevPanel\\Api\\Inspector\\Command\\ProcessCommandTrait": {
+        "fqcn": "AppDevPanel\\Api\\Inspector\\Command\\ProcessCommandTrait",
+        "short": "ProcessCommandTrait",
+        "type": "trait",
+        "library": "API",
+        "description": "Shared subprocess plumbing for inspector commands: every process gets the {@see CommandTimeout} ceiling (optionally shortened per instance) and a timeout is reported as a failed {@see CommandResponse} instead of an uncaught exception.",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/API/src/Inspector/Command/ProcessCommandTrait.php",
+        "path": "libs/API/src/Inspector/Command/ProcessCommandTrait.php"
+    },
     "AppDevPanel\\Api\\Inspector\\Command\\PsalmCommand": {
         "fqcn": "AppDevPanel\\Api\\Inspector\\Command\\PsalmCommand",
         "short": "PsalmCommand",
@@ -1291,6 +1832,18 @@
         "description": "Psalm CLI command.",
         "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/API/src/Inspector/Command/PsalmCommand.php",
         "path": "libs/API/src/Inspector/Command/PsalmCommand.php",
+        "implements": [
+            "CommandInterface"
+        ]
+    },
+    "AppDevPanel\\Api\\Inspector\\Command\\TestoCommand": {
+        "fqcn": "AppDevPanel\\Api\\Inspector\\Command\\TestoCommand",
+        "short": "TestoCommand",
+        "type": "class",
+        "library": "API",
+        "description": "Testo CLI command.",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/API/src/Inspector/Command/TestoCommand.php",
+        "path": "libs/API/src/Inspector/Command/TestoCommand.php",
         "implements": [
             "CommandInterface"
         ]
@@ -1319,7 +1872,7 @@
         "short": "CodeCoverageController",
         "type": "class",
         "library": "API",
-        "description": "Code Coverage inspector API controller.",
+        "description": "Serves code coverage recorded by `CodeCoverageCollector` for a stored debug entry.",
         "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/API/src/Inspector/Controller/CodeCoverageController.php",
         "path": "libs/API/src/Inspector/Controller/CodeCoverageController.php",
         "modifier": "final"
@@ -1392,6 +1945,16 @@
         "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/API/src/Inspector/Controller/GitRepositoryProvider.php",
         "path": "libs/API/src/Inspector/Controller/GitRepositoryProvider.php"
     },
+    "AppDevPanel\\Api\\Inspector\\Controller\\HttpMockController": {
+        "fqcn": "AppDevPanel\\Api\\Inspector\\Controller\\HttpMockController",
+        "short": "HttpMockController",
+        "type": "class",
+        "library": "API",
+        "description": "Http Mock inspector API controller.",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/API/src/Inspector/Controller/HttpMockController.php",
+        "path": "libs/API/src/Inspector/Controller/HttpMockController.php",
+        "modifier": "final"
+    },
     "AppDevPanel\\Api\\Inspector\\Controller\\InspectController": {
         "fqcn": "AppDevPanel\\Api\\Inspector\\Controller\\InspectController",
         "short": "InspectController",
@@ -1462,6 +2025,16 @@
         "path": "libs/API/src/Inspector/Controller/TranslationController.php",
         "modifier": "final"
     },
+    "AppDevPanel\\Api\\Inspector\\Coverage\\StoredCoverageReader": {
+        "fqcn": "AppDevPanel\\Api\\Inspector\\Coverage\\StoredCoverageReader",
+        "short": "StoredCoverageReader",
+        "type": "class",
+        "library": "API",
+        "description": "Reads the {@see CodeCoverageCollector} payload out of stored debug entries.",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/API/src/Inspector/Coverage/StoredCoverageReader.php",
+        "path": "libs/API/src/Inspector/Coverage/StoredCoverageReader.php",
+        "modifier": "final"
+    },
     "AppDevPanel\\Api\\Inspector\\Database\\NullSchemaProvider": {
         "fqcn": "AppDevPanel\\Api\\Inspector\\Database\\NullSchemaProvider",
         "short": "NullSchemaProvider",
@@ -1504,6 +2077,41 @@
             "ElasticsearchProviderInterface"
         ]
     },
+    "AppDevPanel\\Api\\Inspector\\HttpMock\\HttpMockProviderInterface": {
+        "fqcn": "AppDevPanel\\Api\\Inspector\\HttpMock\\HttpMockProviderInterface",
+        "short": "HttpMockProviderInterface",
+        "type": "interface",
+        "library": "API",
+        "description": "Http Mock Provider contract.",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/API/src/Inspector/HttpMock/HttpMockProviderInterface.php",
+        "path": "libs/API/src/Inspector/HttpMock/HttpMockProviderInterface.php"
+    },
+    "AppDevPanel\\Api\\Inspector\\HttpMock\\NullHttpMockProvider": {
+        "fqcn": "AppDevPanel\\Api\\Inspector\\HttpMock\\NullHttpMockProvider",
+        "short": "NullHttpMockProvider",
+        "type": "class",
+        "library": "API",
+        "description": "Provides Null Http Mock data.",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/API/src/Inspector/HttpMock/NullHttpMockProvider.php",
+        "path": "libs/API/src/Inspector/HttpMock/NullHttpMockProvider.php",
+        "modifier": "final",
+        "implements": [
+            "HttpMockProviderInterface"
+        ]
+    },
+    "AppDevPanel\\Api\\Inspector\\HttpMock\\PhiremockProvider": {
+        "fqcn": "AppDevPanel\\Api\\Inspector\\HttpMock\\PhiremockProvider",
+        "short": "PhiremockProvider",
+        "type": "class",
+        "library": "API",
+        "description": "Phiremock-based HTTP mock provider.",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/API/src/Inspector/HttpMock/PhiremockProvider.php",
+        "path": "libs/API/src/Inspector/HttpMock/PhiremockProvider.php",
+        "modifier": "final",
+        "implements": [
+            "HttpMockProviderInterface"
+        ]
+    },
     "AppDevPanel\\Api\\Inspector\\Middleware\\InspectorProxyMiddleware": {
         "fqcn": "AppDevPanel\\Api\\Inspector\\Middleware\\InspectorProxyMiddleware",
         "short": "InspectorProxyMiddleware",
@@ -1533,12 +2141,97 @@
         "short": "PHPUnitJSONReporter",
         "type": "class",
         "library": "API",
-        "description": "Class PHPUnitJSONReporter.",
+        "description": "PHPUnit 10+ extension that collects test outcomes into a JSON file.",
         "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/API/src/Inspector/Test/PHPUnitJSONReporter.php",
         "path": "libs/API/src/Inspector/Test/PHPUnitJSONReporter.php",
+        "modifier": "final",
         "implements": [
-            "ResultPrinter"
+            "Extension"
         ]
+    },
+    "AppDevPanel\\Api\\Inspector\\Test\\PHPUnitReportCollector": {
+        "fqcn": "AppDevPanel\\Api\\Inspector\\Test\\PHPUnitReportCollector",
+        "short": "PHPUnitReportCollector",
+        "type": "class",
+        "library": "API",
+        "description": "Collects PHPUnit Report data during application lifecycle.",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/API/src/Inspector/Test/PHPUnitReportCollector.php",
+        "path": "libs/API/src/Inspector/Test/PHPUnitReportCollector.php",
+        "modifier": "final"
+    },
+    "AppDevPanel\\Api\\Llm\\Acp\\AcpCommandAllowlist": {
+        "fqcn": "AppDevPanel\\Api\\Llm\\Acp\\AcpCommandAllowlist",
+        "short": "AcpCommandAllowlist",
+        "type": "class",
+        "library": "API",
+        "description": "Allowlist for ACP agent commands. The ACP connect endpoint accepts a command from the client and spawns it as a subprocess. Even though `escapeshellarg` blocks shell injection, without this allowlist any binary on PATH could be launched as the web-server user.",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/API/src/Llm/Acp/AcpCommandAllowlist.php",
+        "path": "libs/API/src/Llm/Acp/AcpCommandAllowlist.php",
+        "modifier": "final"
+    },
+    "AppDevPanel\\Api\\Llm\\Acp\\AcpCommandVerifier": {
+        "fqcn": "AppDevPanel\\Api\\Llm\\Acp\\AcpCommandVerifier",
+        "short": "AcpCommandVerifier",
+        "type": "class",
+        "library": "API",
+        "description": "Default command verifier: uses `which`/`where` to check if a command exists on PATH.",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/API/src/Llm/Acp/AcpCommandVerifier.php",
+        "path": "libs/API/src/Llm/Acp/AcpCommandVerifier.php",
+        "modifier": "final",
+        "implements": [
+            "AcpCommandVerifierInterface"
+        ]
+    },
+    "AppDevPanel\\Api\\Llm\\Acp\\AcpCommandVerifierInterface": {
+        "fqcn": "AppDevPanel\\Api\\Llm\\Acp\\AcpCommandVerifierInterface",
+        "short": "AcpCommandVerifierInterface",
+        "type": "interface",
+        "library": "API",
+        "description": "Checks whether an ACP agent command is available on the system.",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/API/src/Llm/Acp/AcpCommandVerifierInterface.php",
+        "path": "libs/API/src/Llm/Acp/AcpCommandVerifierInterface.php"
+    },
+    "AppDevPanel\\Api\\Llm\\Acp\\AcpDaemonManager": {
+        "fqcn": "AppDevPanel\\Api\\Llm\\Acp\\AcpDaemonManager",
+        "short": "AcpDaemonManager",
+        "type": "class",
+        "library": "API",
+        "description": "Manages the ACP daemon lifecycle and session-scoped agent subprocesses.",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/API/src/Llm/Acp/AcpDaemonManager.php",
+        "path": "libs/API/src/Llm/Acp/AcpDaemonManager.php",
+        "modifier": "final",
+        "implements": [
+            "AcpDaemonManagerInterface"
+        ]
+    },
+    "AppDevPanel\\Api\\Llm\\Acp\\AcpDaemonManagerInterface": {
+        "fqcn": "AppDevPanel\\Api\\Llm\\Acp\\AcpDaemonManagerInterface",
+        "short": "AcpDaemonManagerInterface",
+        "type": "interface",
+        "library": "API",
+        "description": "Interface for managing the ACP daemon and its agent sessions.",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/API/src/Llm/Acp/AcpDaemonManagerInterface.php",
+        "path": "libs/API/src/Llm/Acp/AcpDaemonManagerInterface.php"
+    },
+    "AppDevPanel\\Api\\Llm\\Acp\\AcpResponse": {
+        "fqcn": "AppDevPanel\\Api\\Llm\\Acp\\AcpResponse",
+        "short": "AcpResponse",
+        "type": "class",
+        "library": "API",
+        "description": "Value object representing a collected ACP agent response.",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/API/src/Llm/Acp/AcpResponse.php",
+        "path": "libs/API/src/Llm/Acp/AcpResponse.php",
+        "modifier": "readonly"
+    },
+    "AppDevPanel\\Api\\Llm\\Acp\\AcpSocketLocator": {
+        "fqcn": "AppDevPanel\\Api\\Llm\\Acp\\AcpSocketLocator",
+        "short": "AcpSocketLocator",
+        "type": "class",
+        "library": "API",
+        "description": "Decides where the ACP daemon's Unix socket lives and verifies it can be trusted.",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/API/src/Llm/Acp/AcpSocketLocator.php",
+        "path": "libs/API/src/Llm/Acp/AcpSocketLocator.php",
+        "modifier": "final"
     },
     "AppDevPanel\\Api\\Llm\\Controller\\LlmController": {
         "fqcn": "AppDevPanel\\Api\\Llm\\Controller\\LlmController",
@@ -1563,18 +2256,15 @@
             "LlmHistoryStorageInterface"
         ]
     },
-    "AppDevPanel\\Api\\Llm\\FileLlmSettings": {
-        "fqcn": "AppDevPanel\\Api\\Llm\\FileLlmSettings",
-        "short": "FileLlmSettings",
+    "AppDevPanel\\Api\\Llm\\LlmContextBuilder": {
+        "fqcn": "AppDevPanel\\Api\\Llm\\LlmContextBuilder",
+        "short": "LlmContextBuilder",
         "type": "class",
         "library": "API",
-        "description": "Class FileLlmSettings.",
-        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/API/src/Llm/FileLlmSettings.php",
-        "path": "libs/API/src/Llm/FileLlmSettings.php",
-        "modifier": "final",
-        "implements": [
-            "LlmSettingsInterface"
-        ]
+        "description": "Builds hidden system prompts for LLM providers and injects them into an outgoing message chain. Handles both the browser-derived context (URL / selected debug entry / environment) and the user-configured custom prompt, plus the provider-specific placement \u2014 `system` role where supported, merged into the first user message otherwise.",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/API/src/Llm/LlmContextBuilder.php",
+        "path": "libs/API/src/Llm/LlmContextBuilder.php",
+        "modifier": "final"
     },
     "AppDevPanel\\Api\\Llm\\LlmHistoryStorageInterface": {
         "fqcn": "AppDevPanel\\Api\\Llm\\LlmHistoryStorageInterface",
@@ -1585,6 +2275,16 @@
         "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/API/src/Llm/LlmHistoryStorageInterface.php",
         "path": "libs/API/src/Llm/LlmHistoryStorageInterface.php"
     },
+    "AppDevPanel\\Api\\Llm\\LlmProviderService": {
+        "fqcn": "AppDevPanel\\Api\\Llm\\LlmProviderService",
+        "short": "LlmProviderService",
+        "type": "class",
+        "library": "API",
+        "description": "Handles communication with LLM providers (OpenRouter, Anthropic, OpenAI, ACP).",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/API/src/Llm/LlmProviderService.php",
+        "path": "libs/API/src/Llm/LlmProviderService.php",
+        "modifier": "final"
+    },
     "AppDevPanel\\Api\\Llm\\LlmSettingsInterface": {
         "fqcn": "AppDevPanel\\Api\\Llm\\LlmSettingsInterface",
         "short": "LlmSettingsInterface",
@@ -1593,6 +2293,15 @@
         "description": "Llm Settings contract.",
         "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/API/src/Llm/LlmSettingsInterface.php",
         "path": "libs/API/src/Llm/LlmSettingsInterface.php"
+    },
+    "AppDevPanel\\Api\\Llm\\is": {
+        "fqcn": "AppDevPanel\\Api\\Llm\\is",
+        "short": "is",
+        "type": "class",
+        "library": "API",
+        "description": "Class is.",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/API/src/Llm/FileLlmSettings.php",
+        "path": "libs/API/src/Llm/FileLlmSettings.php"
     },
     "AppDevPanel\\Api\\Mcp\\Controller\\McpController": {
         "fqcn": "AppDevPanel\\Api\\Mcp\\Controller\\McpController",
@@ -1623,6 +2332,19 @@
         "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/API/src/Mcp/McpSettings.php",
         "path": "libs/API/src/Mcp/McpSettings.php",
         "modifier": "final"
+    },
+    "AppDevPanel\\Api\\Middleware\\CacheControlMiddleware": {
+        "fqcn": "AppDevPanel\\Api\\Middleware\\CacheControlMiddleware",
+        "short": "CacheControlMiddleware",
+        "type": "class",
+        "library": "API",
+        "description": "Adds Cache-Control headers to API responses.",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/API/src/Middleware/CacheControlMiddleware.php",
+        "path": "libs/API/src/Middleware/CacheControlMiddleware.php",
+        "modifier": "final",
+        "implements": [
+            "MiddlewareInterface"
+        ]
     },
     "AppDevPanel\\Api\\Middleware\\CorsMiddleware": {
         "fqcn": "AppDevPanel\\Api\\Middleware\\CorsMiddleware",
@@ -1696,6 +2418,16 @@
         "path": "libs/API/src/Panel/PanelController.php",
         "modifier": "final"
     },
+    "AppDevPanel\\Api\\Panel\\PanelHtml": {
+        "fqcn": "AppDevPanel\\Api\\Panel\\PanelHtml",
+        "short": "PanelHtml",
+        "type": "class",
+        "library": "API",
+        "description": "Helpers that make the panel SPA mount-agnostic (issue #113).",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/API/src/Panel/PanelHtml.php",
+        "path": "libs/API/src/Panel/PanelHtml.php",
+        "modifier": "final"
+    },
     "AppDevPanel\\Api\\PathMapper": {
         "fqcn": "AppDevPanel\\Api\\PathMapper",
         "short": "PathMapper",
@@ -1740,6 +2472,26 @@
         "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/API/src/PathResolverInterface.php",
         "path": "libs/API/src/PathResolverInterface.php"
     },
+    "AppDevPanel\\Api\\Project\\Controller\\ProjectController": {
+        "fqcn": "AppDevPanel\\Api\\Project\\Controller\\ProjectController",
+        "short": "ProjectController",
+        "type": "class",
+        "library": "API",
+        "description": "Exposes the project-level configuration (frames, OpenAPI specs, ...) that is committed alongside the application source code in `config/adp/project.json`.",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/API/src/Project/Controller/ProjectController.php",
+        "path": "libs/API/src/Project/Controller/ProjectController.php",
+        "modifier": "final"
+    },
+    "AppDevPanel\\Api\\Project\\Controller\\SecretsController": {
+        "fqcn": "AppDevPanel\\Api\\Project\\Controller\\SecretsController",
+        "short": "SecretsController",
+        "type": "class",
+        "library": "API",
+        "description": "Manages the local-only secrets file (`<configDir>/secrets.json`).",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/API/src/Project/Controller/SecretsController.php",
+        "path": "libs/API/src/Project/Controller/SecretsController.php",
+        "modifier": "final"
+    },
     "AppDevPanel\\Api\\Router\\Route": {
         "fqcn": "AppDevPanel\\Api\\Router\\Route",
         "short": "Route",
@@ -1760,6 +2512,55 @@
         "path": "libs/API/src/Router/Router.php",
         "modifier": "final"
     },
+    "AppDevPanel\\Api\\Security\\DebugIdValidator": {
+        "fqcn": "AppDevPanel\\Api\\Security\\DebugIdValidator",
+        "short": "DebugIdValidator",
+        "type": "class",
+        "library": "API",
+        "description": "HTTP-layer wrapper around Kernel's {@see StorageIdValidator}: same `[A-Za-z0-9_-]{1,64}` format, but an invalid id becomes a {@see BadRequestException} (400) instead of the Kernel's `InvalidArgumentException`. Applied before an id reaches storage so a traversal attempt never turns into a 500 from `FileStorage` / `SqliteStorage`.",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/API/src/Security/DebugIdValidator.php",
+        "path": "libs/API/src/Security/DebugIdValidator.php",
+        "modifier": "final"
+    },
+    "AppDevPanel\\Api\\Security\\NetworkAddressClassifier": {
+        "fqcn": "AppDevPanel\\Api\\Security\\NetworkAddressClassifier",
+        "short": "NetworkAddressClassifier",
+        "type": "class",
+        "library": "API",
+        "description": "IP / hostname classification used by {@see UrlPolicy}.",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/API/src/Security/NetworkAddressClassifier.php",
+        "path": "libs/API/src/Security/NetworkAddressClassifier.php",
+        "modifier": "final"
+    },
+    "AppDevPanel\\Api\\Security\\SystemDnsResolver": {
+        "fqcn": "AppDevPanel\\Api\\Security\\SystemDnsResolver",
+        "short": "SystemDnsResolver",
+        "type": "class",
+        "library": "API",
+        "description": "Default hostname resolver for {@see UrlPolicy}: system DNS (A + AAAA). Tests inject a closure instead so they never touch the network.",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/API/src/Security/SystemDnsResolver.php",
+        "path": "libs/API/src/Security/SystemDnsResolver.php",
+        "modifier": "final"
+    },
+    "AppDevPanel\\Api\\Security\\UrlPolicy": {
+        "fqcn": "AppDevPanel\\Api\\Security\\UrlPolicy",
+        "short": "UrlPolicy",
+        "type": "class",
+        "library": "API",
+        "description": "SSRF guard for operator-supplied URLs the panel will connect to (external service `inspectorUrl` \u2014 see ServiceController / InspectorProxyMiddleware).",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/API/src/Security/UrlPolicy.php",
+        "path": "libs/API/src/Security/UrlPolicy.php",
+        "modifier": "final"
+    },
+    "AppDevPanel\\Api\\Security\\names": {
+        "fqcn": "AppDevPanel\\Api\\Security\\names",
+        "short": "names",
+        "type": "class",
+        "library": "API",
+        "description": "Class names.",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/API/src/Security/ClassNameValidator.php",
+        "path": "libs/API/src/Security/ClassNameValidator.php"
+    },
     "AppDevPanel\\Api\\ServerSentEventsStream": {
         "fqcn": "AppDevPanel\\Api\\ServerSentEventsStream",
         "short": "ServerSentEventsStream",
@@ -1773,6 +2574,47 @@
             "StreamInterface",
             "\\Stringable"
         ]
+    },
+    "AppDevPanel\\Api\\Toolbar\\ToolbarConfig": {
+        "fqcn": "AppDevPanel\\Api\\Toolbar\\ToolbarConfig",
+        "short": "ToolbarConfig",
+        "type": "class",
+        "library": "API",
+        "description": "Configuration for the embeddable debug toolbar.",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/API/src/Toolbar/ToolbarConfig.php",
+        "path": "libs/API/src/Toolbar/ToolbarConfig.php",
+        "modifier": "final"
+    },
+    "AppDevPanel\\Api\\Toolbar\\ToolbarInjector": {
+        "fqcn": "AppDevPanel\\Api\\Toolbar\\ToolbarInjector",
+        "short": "ToolbarInjector",
+        "type": "class",
+        "library": "API",
+        "description": "Injects the ADP debug toolbar widget into HTML responses.",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/API/src/Toolbar/ToolbarInjector.php",
+        "path": "libs/API/src/Toolbar/ToolbarInjector.php",
+        "modifier": "final"
+    },
+    "AppDevPanel\\Cli\\Command\\ArchiveExtractor": {
+        "fqcn": "AppDevPanel\\Cli\\Command\\ArchiveExtractor",
+        "short": "ArchiveExtractor",
+        "type": "class",
+        "library": "Cli",
+        "description": "Extracts release archives (`.zip`, `.tar.gz`) with a zip-slip guard: every entry name must be relative and must not contain `..` segments.",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Cli/src/Command/ArchiveExtractor.php",
+        "path": "libs/Cli/src/Command/ArchiveExtractor.php",
+        "modifier": "final"
+    },
+    "AppDevPanel\\Cli\\Command\\DebugDumpCommand": {
+        "fqcn": "AppDevPanel\\Cli\\Command\\DebugDumpCommand",
+        "short": "DebugDumpCommand",
+        "type": "class",
+        "library": "Cli",
+        "description": "Debug Dump CLI command.",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Cli/src/Command/DebugDumpCommand.php",
+        "path": "libs/Cli/src/Command/DebugDumpCommand.php",
+        "modifier": "final",
+        "extends": "Command"
     },
     "AppDevPanel\\Cli\\Command\\DebugQueryCommand": {
         "fqcn": "AppDevPanel\\Cli\\Command\\DebugQueryCommand",
@@ -1818,6 +2660,72 @@
         "modifier": "final",
         "extends": "Command"
     },
+    "AppDevPanel\\Cli\\Command\\DebugSummaryCommand": {
+        "fqcn": "AppDevPanel\\Cli\\Command\\DebugSummaryCommand",
+        "short": "DebugSummaryCommand",
+        "type": "class",
+        "library": "Cli",
+        "description": "Debug Summary CLI command.",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Cli/src/Command/DebugSummaryCommand.php",
+        "path": "libs/Cli/src/Command/DebugSummaryCommand.php",
+        "modifier": "final",
+        "extends": "Command"
+    },
+    "AppDevPanel\\Cli\\Command\\DebugTailCommand": {
+        "fqcn": "AppDevPanel\\Cli\\Command\\DebugTailCommand",
+        "short": "DebugTailCommand",
+        "type": "class",
+        "library": "Cli",
+        "description": "Debug Tail CLI command.",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Cli/src/Command/DebugTailCommand.php",
+        "path": "libs/Cli/src/Command/DebugTailCommand.php",
+        "modifier": "final",
+        "extends": "Command"
+    },
+    "AppDevPanel\\Cli\\Command\\FrontendUpdateCommand": {
+        "fqcn": "AppDevPanel\\Cli\\Command\\FrontendUpdateCommand",
+        "short": "FrontendUpdateCommand",
+        "type": "class",
+        "library": "Cli",
+        "description": "Frontend Update CLI command.",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Cli/src/Command/FrontendUpdateCommand.php",
+        "path": "libs/Cli/src/Command/FrontendUpdateCommand.php",
+        "modifier": "final",
+        "extends": "Command"
+    },
+    "AppDevPanel\\Cli\\Command\\InspectConfigCommand": {
+        "fqcn": "AppDevPanel\\Cli\\Command\\InspectConfigCommand",
+        "short": "InspectConfigCommand",
+        "type": "class",
+        "library": "Cli",
+        "description": "Inspect Config CLI command.",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Cli/src/Command/InspectConfigCommand.php",
+        "path": "libs/Cli/src/Command/InspectConfigCommand.php",
+        "modifier": "final",
+        "extends": "Command"
+    },
+    "AppDevPanel\\Cli\\Command\\InspectDatabaseCommand": {
+        "fqcn": "AppDevPanel\\Cli\\Command\\InspectDatabaseCommand",
+        "short": "InspectDatabaseCommand",
+        "type": "class",
+        "library": "Cli",
+        "description": "Inspect Database CLI command.",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Cli/src/Command/InspectDatabaseCommand.php",
+        "path": "libs/Cli/src/Command/InspectDatabaseCommand.php",
+        "modifier": "final",
+        "extends": "Command"
+    },
+    "AppDevPanel\\Cli\\Command\\InspectRoutesCommand": {
+        "fqcn": "AppDevPanel\\Cli\\Command\\InspectRoutesCommand",
+        "short": "InspectRoutesCommand",
+        "type": "class",
+        "library": "Cli",
+        "description": "Inspect Routes CLI command.",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Cli/src/Command/InspectRoutesCommand.php",
+        "path": "libs/Cli/src/Command/InspectRoutesCommand.php",
+        "modifier": "final",
+        "extends": "Command"
+    },
     "AppDevPanel\\Cli\\Command\\McpServeCommand": {
         "fqcn": "AppDevPanel\\Cli\\Command\\McpServeCommand",
         "short": "McpServeCommand",
@@ -1839,6 +2747,16 @@
         "path": "libs/Cli/src/Command/ServeCommand.php",
         "modifier": "final",
         "extends": "Command"
+    },
+    "AppDevPanel\\Cli\\Server\\ServerSecurityConfig": {
+        "fqcn": "AppDevPanel\\Cli\\Server\\ServerSecurityConfig",
+        "short": "ServerSecurityConfig",
+        "type": "class",
+        "library": "Cli",
+        "description": "Resolves the network security settings of the standalone `adp serve` server.",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Cli/src/Server/ServerSecurityConfig.php",
+        "path": "libs/Cli/src/Server/ServerSecurityConfig.php",
+        "modifier": "final"
     },
     "AppDevPanel\\Kernel\\Collector\\AssetBundleCollector": {
         "fqcn": "AppDevPanel\\Kernel\\Collector\\AssetBundleCollector",
@@ -2037,7 +2955,8 @@
         "path": "libs/Kernel/src/Collector/EventCollector.php",
         "modifier": "final",
         "implements": [
-            "SummaryCollectorInterface"
+            "SummaryCollectorInterface",
+            "HtmlViewProviderInterface"
         ]
     },
     "AppDevPanel\\Kernel\\Collector\\EventDispatcherInterfaceProxy": {
@@ -2065,6 +2984,16 @@
         "implements": [
             "SummaryCollectorInterface"
         ]
+    },
+    "AppDevPanel\\Kernel\\Collector\\HtmlViewProviderInterface": {
+        "fqcn": "AppDevPanel\\Kernel\\Collector\\HtmlViewProviderInterface",
+        "short": "HtmlViewProviderInterface",
+        "type": "interface",
+        "library": "Kernel",
+        "description": "Marks a collector that ships its own server-rendered HTML view.",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Kernel/src/Collector/HtmlViewProviderInterface.php",
+        "path": "libs/Kernel/src/Collector/HtmlViewProviderInterface.php",
+        "extends": "CollectorInterface"
     },
     "AppDevPanel\\Kernel\\Collector\\HttpClientCollector": {
         "fqcn": "AppDevPanel\\Kernel\\Collector\\HttpClientCollector",
@@ -2245,7 +3174,8 @@
         "path": "libs/Kernel/src/Collector/ServiceCollector.php",
         "modifier": "final",
         "implements": [
-            "SummaryCollectorInterface"
+            "SummaryCollectorInterface",
+            "HtmlViewProviderInterface"
         ]
     },
     "AppDevPanel\\Kernel\\Collector\\SpanProcessorInterfaceProxy": {
@@ -2347,7 +3277,7 @@
         "short": "TemplateCollector",
         "type": "class",
         "library": "Kernel",
-        "description": "Captures template/view rendering with optional timing, output, parameters, and duplicate detection.",
+        "description": "Captures template/view rendering with optional timing, output, and parameters.",
         "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Kernel/src/Collector/TemplateCollector.php",
         "path": "libs/Kernel/src/Collector/TemplateCollector.php",
         "modifier": "final",
@@ -2417,6 +3347,16 @@
             "SummaryCollectorInterface"
         ]
     },
+    "AppDevPanel\\Kernel\\Collector\\Web\\HttpMessageRenderer": {
+        "fqcn": "AppDevPanel\\Kernel\\Collector\\Web\\HttpMessageRenderer",
+        "short": "HttpMessageRenderer",
+        "type": "class",
+        "library": "Kernel",
+        "description": "Renders a PSR-7 message as raw HTTP text (start line, headers, body) for the request panel \u2014 like `GuzzleHttp\\Psr7\\Message::toString()`, but safe for debug tooling: binary bodies (images, fonts, archives, octet streams \u2014 i.e. served assets) are never read, and the body is read through {@see StreamBodyReader} (size cap, seekability, exception safety).",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Kernel/src/Collector/Web/HttpMessageRenderer.php",
+        "path": "libs/Kernel/src/Collector/Web/HttpMessageRenderer.php",
+        "modifier": "final"
+    },
     "AppDevPanel\\Kernel\\Collector\\Web\\RequestCollector": {
         "fqcn": "AppDevPanel\\Kernel\\Collector\\Web\\RequestCollector",
         "short": "RequestCollector",
@@ -2429,6 +3369,16 @@
         "implements": [
             "SummaryCollectorInterface"
         ]
+    },
+    "AppDevPanel\\Kernel\\Collector\\Web\\StreamBodyReader": {
+        "fqcn": "AppDevPanel\\Kernel\\Collector\\Web\\StreamBodyReader",
+        "short": "StreamBodyReader",
+        "type": "class",
+        "library": "Kernel",
+        "description": "Reads a PSR-7 body for display without ever consuming or blowing up on it: size-capped (also for unknown-length streams), non-seekable / non-readable streams are described instead of read, the position is restored afterwards, and a throwing stream yields a placeholder rather than an exception.",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Kernel/src/Collector/Web/StreamBodyReader.php",
+        "path": "libs/Kernel/src/Collector/Web/StreamBodyReader.php",
+        "modifier": "final"
     },
     "AppDevPanel\\Kernel\\Collector\\Web\\WebAppInfoCollector": {
         "fqcn": "AppDevPanel\\Kernel\\Collector\\Web\\WebAppInfoCollector",
@@ -2448,10 +3398,22 @@
         "short": "Broadcaster",
         "type": "class",
         "library": "Kernel",
-        "description": "Class Broadcaster.",
+        "description": "Broadcasts messages to all connected debug servers.",
         "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Kernel/src/DebugServer/Broadcaster.php",
         "path": "libs/Kernel/src/DebugServer/Broadcaster.php",
-        "modifier": "final"
+        "modifier": "final",
+        "implements": [
+            "BroadcasterInterface"
+        ]
+    },
+    "AppDevPanel\\Kernel\\DebugServer\\BroadcasterInterface": {
+        "fqcn": "AppDevPanel\\Kernel\\DebugServer\\BroadcasterInterface",
+        "short": "BroadcasterInterface",
+        "type": "interface",
+        "library": "Kernel",
+        "description": "Sends a message to every connected debug server.",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Kernel/src/DebugServer/BroadcasterInterface.php",
+        "path": "libs/Kernel/src/DebugServer/BroadcasterInterface.php"
     },
     "AppDevPanel\\Kernel\\DebugServer\\Connection": {
         "fqcn": "AppDevPanel\\Kernel\\DebugServer\\Connection",
@@ -2461,6 +3423,16 @@
         "description": "Class Connection.",
         "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Kernel/src/DebugServer/Connection.php",
         "path": "libs/Kernel/src/DebugServer/Connection.php",
+        "modifier": "final"
+    },
+    "AppDevPanel\\Kernel\\DebugServer\\DatagramSocket": {
+        "fqcn": "AppDevPanel\\Kernel\\DebugServer\\DatagramSocket",
+        "short": "DatagramSocket",
+        "type": "class",
+        "library": "Kernel",
+        "description": "A connected datagram socket (`udg://` on Unix, `udp://` on Windows) with bounded, notice-free I/O.",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Kernel/src/DebugServer/DatagramSocket.php",
+        "path": "libs/Kernel/src/DebugServer/DatagramSocket.php",
         "modifier": "final"
     },
     "AppDevPanel\\Kernel\\DebugServer\\LoggerDecorator": {
@@ -2574,9 +3546,39 @@
         "short": "BacktraceIgnoreMatcher",
         "type": "class",
         "library": "Kernel",
-        "description": "All backtrace parameters should contain at least 4 elements in the following order: 0 – Called method 1 – Proxy 2 – Real using place / Composer\\ClassLoader include function 3 – Whatever / Composer\\ClassLoader",
+        "description": "All backtrace parameters should contain at least 4 elements in the following order: 0 \u2013 Called method 1 \u2013 Proxy 2 \u2013 Real using place / Composer\\ClassLoader include function 3 \u2013 Whatever / Composer\\ClassLoader",
         "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Kernel/src/Helper/BacktraceIgnoreMatcher.php",
         "path": "libs/Kernel/src/Helper/BacktraceIgnoreMatcher.php",
+        "modifier": "final"
+    },
+    "AppDevPanel\\Kernel\\Helper\\BoundedProcess": {
+        "fqcn": "AppDevPanel\\Kernel\\Helper\\BoundedProcess",
+        "short": "BoundedProcess",
+        "type": "class",
+        "library": "Kernel",
+        "description": "Runs a short-lived subprocess with a hard deadline and returns its stdout.",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Kernel/src/Helper/BoundedProcess.php",
+        "path": "libs/Kernel/src/Helper/BoundedProcess.php",
+        "modifier": "final"
+    },
+    "AppDevPanel\\Kernel\\Helper\\Json": {
+        "fqcn": "AppDevPanel\\Kernel\\Helper\\Json",
+        "short": "Json",
+        "type": "class",
+        "library": "Kernel",
+        "description": "Internal JSON helper with ADP-default flags. Kept intentionally minimal \u2014 we only encode arrays/scalars (collector payloads) and always decode to arrays. Throws `\\JsonException` on failure via `JSON_THROW_ON_ERROR`.",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Kernel/src/Helper/Json.php",
+        "path": "libs/Kernel/src/Helper/Json.php",
+        "modifier": "final"
+    },
+    "AppDevPanel\\Kernel\\Helper\\Silencer": {
+        "fqcn": "AppDevPanel\\Kernel\\Helper\\Silencer",
+        "short": "Silencer",
+        "type": "class",
+        "library": "Kernel",
+        "description": "Runs a callback with PHP warnings/notices muted for its duration.",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Kernel/src/Helper/Silencer.php",
+        "path": "libs/Kernel/src/Helper/Silencer.php",
         "modifier": "final"
     },
     "AppDevPanel\\Kernel\\Helper\\StreamWrapper\\StreamWrapper": {
@@ -2601,15 +3603,110 @@
         "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Kernel/src/Helper/StreamWrapper/StreamWrapperInterface.php",
         "path": "libs/Kernel/src/Helper/StreamWrapper/StreamWrapperInterface.php"
     },
-    "AppDevPanel\\Kernel\\IgnoreConfig": {
-        "fqcn": "AppDevPanel\\Kernel\\IgnoreConfig",
-        "short": "IgnoreConfig",
+    "AppDevPanel\\Kernel\\Inspector\\ClosureDescriptor": {
+        "fqcn": "AppDevPanel\\Kernel\\Inspector\\ClosureDescriptor",
+        "short": "ClosureDescriptor",
         "type": "class",
         "library": "Kernel",
-        "description": "Class IgnoreConfig.",
-        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Kernel/src/IgnoreConfig.php",
-        "path": "libs/Kernel/src/IgnoreConfig.php",
+        "description": "Converts a {@see Closure} into a structured descriptor the frontend can render as code.",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Kernel/src/Inspector/ClosureDescriptor.php",
+        "path": "libs/Kernel/src/Inspector/ClosureDescriptor.php",
         "modifier": "final"
+    },
+    "AppDevPanel\\Kernel\\Inspector\\Primitives": {
+        "fqcn": "AppDevPanel\\Kernel\\Inspector\\Primitives",
+        "short": "Primitives",
+        "type": "class",
+        "library": "Kernel",
+        "description": "Canonical serializer for the inspector HTTP layer.",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Kernel/src/Inspector/Primitives.php",
+        "path": "libs/Kernel/src/Inspector/Primitives.php",
+        "modifier": "final"
+    },
+    "AppDevPanel\\Kernel\\Inspector\\for": {
+        "fqcn": "AppDevPanel\\Kernel\\Inspector\\for",
+        "short": "for",
+        "type": "trait",
+        "library": "Kernel",
+        "description": "Provides for functionality.",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Kernel/src/Inspector/ClosureDescriptorTrait.php",
+        "path": "libs/Kernel/src/Inspector/ClosureDescriptorTrait.php"
+    },
+    "AppDevPanel\\Kernel\\Project\\FileProjectConfigStorage": {
+        "fqcn": "AppDevPanel\\Kernel\\Project\\FileProjectConfigStorage",
+        "short": "FileProjectConfigStorage",
+        "type": "class",
+        "library": "Kernel",
+        "description": "JSON-file-backed implementation of {@see ProjectConfigStorageInterface}.",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Kernel/src/Project/FileProjectConfigStorage.php",
+        "path": "libs/Kernel/src/Project/FileProjectConfigStorage.php",
+        "modifier": "final",
+        "implements": [
+            "ProjectConfigStorageInterface"
+        ]
+    },
+    "AppDevPanel\\Kernel\\Project\\FileSecretsStorage": {
+        "fqcn": "AppDevPanel\\Kernel\\Project\\FileSecretsStorage",
+        "short": "FileSecretsStorage",
+        "type": "class",
+        "library": "Kernel",
+        "description": "JSON-file-backed implementation of {@see SecretsStorageInterface}.",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Kernel/src/Project/FileSecretsStorage.php",
+        "path": "libs/Kernel/src/Project/FileSecretsStorage.php",
+        "modifier": "final",
+        "implements": [
+            "SecretsStorageInterface"
+        ]
+    },
+    "AppDevPanel\\Kernel\\Project\\ProjectConfig": {
+        "fqcn": "AppDevPanel\\Kernel\\Project\\ProjectConfig",
+        "short": "ProjectConfig",
+        "type": "class",
+        "library": "Kernel",
+        "description": "Immutable project-level configuration shared across the team via VCS.",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Kernel/src/Project/ProjectConfig.php",
+        "path": "libs/Kernel/src/Project/ProjectConfig.php",
+        "modifier": "final"
+    },
+    "AppDevPanel\\Kernel\\Project\\ProjectConfigStorageInterface": {
+        "fqcn": "AppDevPanel\\Kernel\\Project\\ProjectConfigStorageInterface",
+        "short": "ProjectConfigStorageInterface",
+        "type": "interface",
+        "library": "Kernel",
+        "description": "Project Config Storage contract.",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Kernel/src/Project/ProjectConfigStorageInterface.php",
+        "path": "libs/Kernel/src/Project/ProjectConfigStorageInterface.php"
+    },
+    "AppDevPanel\\Kernel\\Project\\SecretsStorageInterface": {
+        "fqcn": "AppDevPanel\\Kernel\\Project\\SecretsStorageInterface",
+        "short": "SecretsStorageInterface",
+        "type": "interface",
+        "library": "Kernel",
+        "description": "Secrets Storage contract.",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Kernel/src/Project/SecretsStorageInterface.php",
+        "path": "libs/Kernel/src/Project/SecretsStorageInterface.php"
+    },
+    "AppDevPanel\\Kernel\\Project\\per": {
+        "fqcn": "AppDevPanel\\Kernel\\Project\\per",
+        "short": "per",
+        "type": "class",
+        "library": "Kernel",
+        "description": "Class per.",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Kernel/src/Project/SecretsConfig.php",
+        "path": "libs/Kernel/src/Project/SecretsConfig.php"
+    },
+    "AppDevPanel\\Kernel\\Proxy\\Psr16CacheProxy": {
+        "fqcn": "AppDevPanel\\Kernel\\Proxy\\Psr16CacheProxy",
+        "short": "Psr16CacheProxy",
+        "type": "class",
+        "library": "Kernel",
+        "description": "PSR-16 (SimpleCache) decorator that feeds every cache operation into {@see CacheCollector}.",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Kernel/src/Proxy/Psr16CacheProxy.php",
+        "path": "libs/Kernel/src/Proxy/Psr16CacheProxy.php",
+        "modifier": "final",
+        "implements": [
+            "CacheInterface"
+        ]
     },
     "AppDevPanel\\Kernel\\Service\\FileServiceRegistry": {
         "fqcn": "AppDevPanel\\Kernel\\Service\\FileServiceRegistry",
@@ -2643,6 +3740,16 @@
         "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Kernel/src/Service/ServiceRegistryInterface.php",
         "path": "libs/Kernel/src/Service/ServiceRegistryInterface.php"
     },
+    "AppDevPanel\\Kernel\\Slot\\Slot": {
+        "fqcn": "AppDevPanel\\Kernel\\Slot\\Slot",
+        "short": "Slot",
+        "type": "class",
+        "library": "Kernel",
+        "description": "Class Slot.",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Kernel/src/Slot/Slot.php",
+        "path": "libs/Kernel/src/Slot/Slot.php",
+        "modifier": "final"
+    },
     "AppDevPanel\\Kernel\\StartupContext": {
         "fqcn": "AppDevPanel\\Kernel\\StartupContext",
         "short": "StartupContext",
@@ -2652,6 +3759,19 @@
         "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Kernel/src/StartupContext.php",
         "path": "libs/Kernel/src/StartupContext.php",
         "modifier": "final"
+    },
+    "AppDevPanel\\Kernel\\Storage\\BroadcastingStorage": {
+        "fqcn": "AppDevPanel\\Kernel\\Storage\\BroadcastingStorage",
+        "short": "BroadcastingStorage",
+        "type": "class",
+        "library": "Kernel",
+        "description": "Storage decorator that broadcasts entry-created notifications via UDP.",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Kernel/src/Storage/BroadcastingStorage.php",
+        "path": "libs/Kernel/src/Storage/BroadcastingStorage.php",
+        "modifier": "final",
+        "implements": [
+            "StorageInterface"
+        ]
     },
     "AppDevPanel\\Kernel\\Storage\\FileStorage": {
         "fqcn": "AppDevPanel\\Kernel\\Storage\\FileStorage",
@@ -2671,19 +3791,9 @@
         "short": "FileStorageGarbageCollector",
         "type": "class",
         "library": "Kernel",
-        "description": "Collects File Storage Garbage data during application lifecycle.",
+        "description": "Removes the oldest `FileStorage` entries beyond the configured history size.",
         "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Kernel/src/Storage/FileStorageGarbageCollector.php",
         "path": "libs/Kernel/src/Storage/FileStorageGarbageCollector.php",
-        "modifier": "final"
-    },
-    "AppDevPanel\\Kernel\\Storage\\GarbageCollector": {
-        "fqcn": "AppDevPanel\\Kernel\\Storage\\GarbageCollector",
-        "short": "GarbageCollector",
-        "type": "class",
-        "library": "Kernel",
-        "description": "Collects Garbage data during application lifecycle.",
-        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Kernel/src/Storage/GarbageCollector.php",
-        "path": "libs/Kernel/src/Storage/GarbageCollector.php",
         "modifier": "final"
     },
     "AppDevPanel\\Kernel\\Storage\\MemoryStorage": {
@@ -2699,6 +3809,29 @@
             "StorageInterface"
         ]
     },
+    "AppDevPanel\\Kernel\\Storage\\SqliteStorage": {
+        "fqcn": "AppDevPanel\\Kernel\\Storage\\SqliteStorage",
+        "short": "SqliteStorage",
+        "type": "class",
+        "library": "Kernel",
+        "description": "Class SqliteStorage.",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Kernel/src/Storage/SqliteStorage.php",
+        "path": "libs/Kernel/src/Storage/SqliteStorage.php",
+        "modifier": "final",
+        "implements": [
+            "StorageInterface"
+        ]
+    },
+    "AppDevPanel\\Kernel\\Storage\\StorageIdValidator": {
+        "fqcn": "AppDevPanel\\Kernel\\Storage\\StorageIdValidator",
+        "short": "StorageIdValidator",
+        "type": "class",
+        "library": "Kernel",
+        "description": "Canonical debug entry id format, shared by every storage driver and by the API layer.",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Kernel/src/Storage/StorageIdValidator.php",
+        "path": "libs/Kernel/src/Storage/StorageIdValidator.php",
+        "modifier": "final"
+    },
     "AppDevPanel\\Kernel\\Storage\\StorageInterface": {
         "fqcn": "AppDevPanel\\Kernel\\Storage\\StorageInterface",
         "short": "StorageInterface",
@@ -2707,6 +3840,15 @@
         "description": "Debug data storage responsibility is to store debug data from collectors added",
         "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Kernel/src/Storage/StorageInterface.php",
         "path": "libs/Kernel/src/Storage/StorageInterface.php"
+    },
+    "AppDevPanel\\Kernel\\Storage\\name": {
+        "fqcn": "AppDevPanel\\Kernel\\Storage\\name",
+        "short": "name",
+        "type": "class",
+        "library": "Kernel",
+        "description": "Class name.",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Kernel/src/Storage/StorageFactory.php",
+        "path": "libs/Kernel/src/Storage/StorageFactory.php"
     },
     "AppDevPanel\\Kernel\\must": {
         "fqcn": "AppDevPanel\\Kernel\\must",
@@ -2726,6 +3868,37 @@
         "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Kernel/src/FlattenException.php",
         "path": "libs/Kernel/src/FlattenException.php"
     },
+    "AppDevPanel\\McpServer\\Inspector\\InspectorClient": {
+        "fqcn": "AppDevPanel\\McpServer\\Inspector\\InspectorClient",
+        "short": "InspectorClient",
+        "type": "class",
+        "library": "McpServer",
+        "description": "HTTP client for ADP Inspector API. Uses file_get_contents with stream context to avoid requiring a PSR-18 client dependency.",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/McpServer/src/Inspector/InspectorClient.php",
+        "path": "libs/McpServer/src/Inspector/InspectorClient.php",
+        "implements": [
+            "InspectorInterface"
+        ]
+    },
+    "AppDevPanel\\McpServer\\Inspector\\InspectorInterface": {
+        "fqcn": "AppDevPanel\\McpServer\\Inspector\\InspectorInterface",
+        "short": "InspectorInterface",
+        "type": "interface",
+        "library": "McpServer",
+        "description": "Contract for HTTP clients that query the ADP Inspector API. Implementations make GET/POST requests to Inspector endpoints and return a normalized result array.",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/McpServer/src/Inspector/InspectorInterface.php",
+        "path": "libs/McpServer/src/Inspector/InspectorInterface.php"
+    },
+    "AppDevPanel\\McpServer\\McpConfig": {
+        "fqcn": "AppDevPanel\\McpServer\\McpConfig",
+        "short": "McpConfig",
+        "type": "class",
+        "library": "McpServer",
+        "description": "Configuration for the MCP tool registry. Controls which optional inspector tools are registered when an InspectorInterface is provided.",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/McpServer/src/McpConfig.php",
+        "path": "libs/McpServer/src/McpConfig.php",
+        "modifier": "final"
+    },
     "AppDevPanel\\McpServer\\McpServer": {
         "fqcn": "AppDevPanel\\McpServer\\McpServer",
         "short": "McpServer",
@@ -2741,7 +3914,7 @@
         "short": "McpToolRegistryFactory",
         "type": "class",
         "library": "McpServer",
-        "description": "Creates a ToolRegistry with all debug tools pre-registered. Shared between stdio (bin/adp-mcp, mcp:serve) and HTTP (McpController) entry points.",
+        "description": "Creates a ToolRegistry with all debug and inspector tools pre-registered. Shared between stdio (bin/adp-mcp, mcp:serve) and HTTP (McpController) entry points.",
         "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/McpServer/src/McpToolRegistryFactory.php",
         "path": "libs/McpServer/src/McpToolRegistryFactory.php",
         "modifier": "final"
@@ -2824,6 +3997,45 @@
             "ToolInterface"
         ]
     },
+    "AppDevPanel\\McpServer\\Tool\\Inspector\\InspectConfigTool": {
+        "fqcn": "AppDevPanel\\McpServer\\Tool\\Inspector\\InspectConfigTool",
+        "short": "InspectConfigTool",
+        "type": "class",
+        "library": "McpServer",
+        "description": "MCP tool that exposes application parameters and DI configuration by querying the live Inspector API.",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/McpServer/src/Tool/Inspector/InspectConfigTool.php",
+        "path": "libs/McpServer/src/Tool/Inspector/InspectConfigTool.php",
+        "modifier": "final",
+        "implements": [
+            "ToolInterface"
+        ]
+    },
+    "AppDevPanel\\McpServer\\Tool\\Inspector\\InspectDatabaseSchemaTool": {
+        "fqcn": "AppDevPanel\\McpServer\\Tool\\Inspector\\InspectDatabaseSchemaTool",
+        "short": "InspectDatabaseSchemaTool",
+        "type": "class",
+        "library": "McpServer",
+        "description": "MCP tool that exposes database schema information (tables, columns, indexes) by querying the live Inspector API.",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/McpServer/src/Tool/Inspector/InspectDatabaseSchemaTool.php",
+        "path": "libs/McpServer/src/Tool/Inspector/InspectDatabaseSchemaTool.php",
+        "modifier": "final",
+        "implements": [
+            "ToolInterface"
+        ]
+    },
+    "AppDevPanel\\McpServer\\Tool\\Inspector\\InspectRoutesTool": {
+        "fqcn": "AppDevPanel\\McpServer\\Tool\\Inspector\\InspectRoutesTool",
+        "short": "InspectRoutesTool",
+        "type": "class",
+        "library": "McpServer",
+        "description": "MCP tool that lists application routes and tests route matching by querying the live Inspector API.",
+        "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/McpServer/src/Tool/Inspector/InspectRoutesTool.php",
+        "path": "libs/McpServer/src/Tool/Inspector/InspectRoutesTool.php",
+        "modifier": "final",
+        "implements": [
+            "ToolInterface"
+        ]
+    },
     "AppDevPanel\\McpServer\\Tool\\ToolInterface": {
         "fqcn": "AppDevPanel\\McpServer\\Tool\\ToolInterface",
         "short": "ToolInterface",
@@ -2857,7 +4069,7 @@
         "short": "StdioTransport",
         "type": "class",
         "library": "McpServer",
-        "description": "MCP stdio transport — reads/writes JSON-RPC 2.0 messages over stdin/stdout.",
+        "description": "MCP stdio transport \u2014 reads/writes JSON-RPC 2.0 messages over stdin/stdout.",
         "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/McpServer/src/Transport/StdioTransport.php",
         "path": "libs/McpServer/src/Transport/StdioTransport.php",
         "modifier": "final"
@@ -3012,275 +4224,5 @@
         "github": "https://github.com/app-dev-panel/app-dev-panel/blob/master/libs/Testing/src/Runner/FixtureRunner.php",
         "path": "libs/Testing/src/Runner/FixtureRunner.php",
         "modifier": "final"
-    },
-    "Psr\\Log\\LoggerInterface": {
-        "fqcn": "Psr\\Log\\LoggerInterface",
-        "short": "LoggerInterface",
-        "type": "interface",
-        "library": "PSR-3",
-        "description": "PSR-3 Logger Interface. Describes a logger instance.",
-        "github": "https://github.com/php-fig/log/blob/master/src/LoggerInterface.php",
-        "path": "vendor/psr/log/src/LoggerInterface.php"
-    },
-    "Psr\\EventDispatcher\\EventDispatcherInterface": {
-        "fqcn": "Psr\\EventDispatcher\\EventDispatcherInterface",
-        "short": "EventDispatcherInterface",
-        "type": "interface",
-        "library": "PSR-14",
-        "description": "PSR-14 Event Dispatcher Interface. Defines a dispatcher for events.",
-        "github": "https://github.com/php-fig/event-dispatcher/blob/master/src/EventDispatcherInterface.php",
-        "path": "vendor/psr/event-dispatcher/src/EventDispatcherInterface.php"
-    },
-    "Psr\\Http\\Client\\ClientInterface": {
-        "fqcn": "Psr\\Http\\Client\\ClientInterface",
-        "short": "ClientInterface",
-        "type": "interface",
-        "library": "PSR-18",
-        "description": "PSR-18 HTTP Client Interface. Sends PSR-7 requests and returns PSR-7 responses.",
-        "github": "https://github.com/php-fig/http-client/blob/master/src/ClientInterface.php",
-        "path": "vendor/psr/http-client/src/ClientInterface.php"
-    },
-    "Psr\\SimpleCache\\CacheInterface": {
-        "fqcn": "Psr\\SimpleCache\\CacheInterface",
-        "short": "CacheInterface",
-        "type": "interface",
-        "library": "PSR-16",
-        "description": "PSR-16 Simple Cache Interface. Defines basic cache operations.",
-        "github": "https://github.com/php-fig/simple-cache/blob/master/src/CacheInterface.php",
-        "path": "vendor/psr/simple-cache/src/CacheInterface.php"
-    },
-    "Psr\\Container\\ContainerInterface": {
-        "fqcn": "Psr\\Container\\ContainerInterface",
-        "short": "ContainerInterface",
-        "type": "interface",
-        "library": "PSR-11",
-        "description": "PSR-11 Container Interface. Describes the interface of a dependency injection container.",
-        "github": "https://github.com/php-fig/container/blob/master/src/ContainerInterface.php",
-        "path": "vendor/psr/container/src/ContainerInterface.php"
-    },
-    "Psr\\Http\\Message\\ServerRequestInterface": {
-        "fqcn": "Psr\\Http\\Message\\ServerRequestInterface",
-        "short": "ServerRequestInterface",
-        "type": "interface",
-        "library": "PSR-7",
-        "description": "PSR-7 Server Request Interface. Representation of an incoming, server-side HTTP request.",
-        "github": "https://github.com/php-fig/http-message/blob/master/src/ServerRequestInterface.php",
-        "path": "vendor/psr/http-message/src/ServerRequestInterface.php"
-    },
-    "Psr\\Http\\Message\\ResponseInterface": {
-        "fqcn": "Psr\\Http\\Message\\ResponseInterface",
-        "short": "ResponseInterface",
-        "type": "interface",
-        "library": "PSR-7",
-        "description": "PSR-7 Response Interface. Representation of an outgoing, server-side response.",
-        "github": "https://github.com/php-fig/http-message/blob/master/src/ResponseInterface.php",
-        "path": "vendor/psr/http-message/src/ResponseInterface.php"
-    },
-    "Psr\\Http\\Server\\MiddlewareInterface": {
-        "fqcn": "Psr\\Http\\Server\\MiddlewareInterface",
-        "short": "MiddlewareInterface",
-        "type": "interface",
-        "library": "PSR-15",
-        "description": "PSR-15 Middleware Interface. Participant in processing a server request and response.",
-        "github": "https://github.com/php-fig/http-server-middleware/blob/master/src/MiddlewareInterface.php",
-        "path": "vendor/psr/http-server-middleware/src/MiddlewareInterface.php"
-    },
-    "Psr\\Http\\Server\\RequestHandlerInterface": {
-        "fqcn": "Psr\\Http\\Server\\RequestHandlerInterface",
-        "short": "RequestHandlerInterface",
-        "type": "interface",
-        "library": "PSR-15",
-        "description": "PSR-15 Request Handler Interface. Handles a server request and produces a response.",
-        "github": "https://github.com/php-fig/http-server-handler/blob/master/src/RequestHandlerInterface.php",
-        "path": "vendor/psr/http-server-handler/src/RequestHandlerInterface.php"
-    },
-    "Psr\\Http\\Message\\RequestInterface": {
-        "fqcn": "Psr\\Http\\Message\\RequestInterface",
-        "short": "RequestInterface",
-        "type": "interface",
-        "library": "PSR-7",
-        "description": "PSR-7 Request Interface. Representation of an outgoing, client-side request.",
-        "github": "https://github.com/php-fig/http-message/blob/master/src/RequestInterface.php",
-        "path": "vendor/psr/http-message/src/RequestInterface.php"
-    },
-    "Symfony\\Contracts\\Translation\\TranslatorInterface": {
-        "fqcn": "Symfony\\Contracts\\Translation\\TranslatorInterface",
-        "short": "TranslatorInterface",
-        "type": "interface",
-        "library": "Symfony",
-        "description": "Symfony Translation Contract. Translates messages using message catalogs.",
-        "github": "https://github.com/symfony/translation-contracts/blob/main/TranslatorInterface.php",
-        "path": "vendor/symfony/translation-contracts/TranslatorInterface.php"
-    },
-    "Symfony\\Component\\Routing\\Matcher\\UrlMatcherInterface": {
-        "fqcn": "Symfony\\Component\\Routing\\Matcher\\UrlMatcherInterface",
-        "short": "UrlMatcherInterface",
-        "type": "interface",
-        "library": "Symfony",
-        "description": "Symfony Routing URL Matcher. Matches a URL path to a set of route parameters.",
-        "github": "https://github.com/symfony/routing/blob/7.2/Matcher/UrlMatcherInterface.php",
-        "path": "vendor/symfony/routing/Matcher/UrlMatcherInterface.php"
-    },
-    "Symfony\\Component\\Validator\\Validator\\ValidatorInterface": {
-        "fqcn": "Symfony\\Component\\Validator\\Validator\\ValidatorInterface",
-        "short": "ValidatorInterface",
-        "type": "interface",
-        "library": "Symfony",
-        "description": "Symfony Validator Interface. Validates PHP values against constraints.",
-        "github": "https://github.com/symfony/validator/blob/7.2/Validator/ValidatorInterface.php",
-        "path": "vendor/symfony/validator/Validator/ValidatorInterface.php"
-    },
-    "Symfony\\Contracts\\EventDispatcher\\EventDispatcherInterface": {
-        "fqcn": "Symfony\\Contracts\\EventDispatcher\\EventDispatcherInterface",
-        "short": "EventDispatcherInterface",
-        "type": "interface",
-        "library": "Symfony",
-        "description": "Symfony Event Dispatcher Contract. Dispatches events to registered listeners.",
-        "github": "https://github.com/symfony/event-dispatcher-contracts/blob/main/EventDispatcherInterface.php",
-        "path": "vendor/symfony/event-dispatcher-contracts/EventDispatcherInterface.php"
-    },
-    "yii\\base\\BootstrapInterface": {
-        "fqcn": "yii\\base\\BootstrapInterface",
-        "short": "BootstrapInterface",
-        "type": "interface",
-        "library": "Yii 2",
-        "description": "Yii 2 Bootstrap Interface. Allows a class to participate in the application bootstrapping process.",
-        "github": "https://github.com/yiisoft/yii2/blob/master/framework/base/BootstrapInterface.php",
-        "path": "vendor/yiisoft/yii2/base/BootstrapInterface.php"
-    },
-    "yii\\i18n\\I18N": {
-        "fqcn": "yii\\i18n\\I18N",
-        "short": "I18N",
-        "type": "class",
-        "library": "Yii 2",
-        "description": "Yii 2 I18N component. Provides internationalization and translation features.",
-        "github": "https://github.com/yiisoft/yii2/blob/master/framework/i18n/I18N.php",
-        "path": "vendor/yiisoft/yii2/i18n/I18N.php"
-    },
-    "Cycle\\ORM\\SchemaInterface": {
-        "fqcn": "Cycle\\ORM\\SchemaInterface",
-        "short": "SchemaInterface",
-        "type": "interface",
-        "library": "Cycle ORM",
-        "description": "Cycle ORM Schema Interface. Provides access to ORM entity schema definitions.",
-        "github": "https://github.com/cycle/orm/blob/master/src/SchemaInterface.php",
-        "path": "vendor/cycle/orm/src/SchemaInterface.php"
-    },
-    "Illuminate\\Contracts\\Translation\\Translator": {
-        "fqcn": "Illuminate\\Contracts\\Translation\\Translator",
-        "short": "Translator",
-        "type": "interface",
-        "library": "Laravel",
-        "description": "Laravel Translator Contract. Provides translation services for the application.",
-        "github": "https://github.com/laravel/framework/blob/12.x/src/Illuminate/Contracts/Translation/Translator.php",
-        "path": "vendor/laravel/framework/src/Illuminate/Contracts/Translation/Translator.php"
-    },
-    "Illuminate\\Routing\\Router": {
-        "fqcn": "Illuminate\\Routing\\Router",
-        "short": "Router",
-        "type": "class",
-        "library": "Laravel",
-        "description": "Laravel Router. Registers routes and dispatches HTTP requests to controllers.",
-        "github": "https://github.com/laravel/framework/blob/12.x/src/Illuminate/Routing/Router.php",
-        "path": "vendor/laravel/framework/src/Illuminate/Routing/Router.php"
-    },
-    "Symfony\\Component\\Security\\Http\\Event\\LoginSuccessEvent": {
-        "fqcn": "Symfony\\Component\\Security\\Http\\Event\\LoginSuccessEvent",
-        "short": "LoginSuccessEvent",
-        "type": "class",
-        "library": "Symfony",
-        "description": "Dispatched after a successful authentication. Contains the authenticated token, request, and firewall name.",
-        "github": "https://github.com/symfony/security-http/blob/7.2/Event/LoginSuccessEvent.php",
-        "path": "vendor/symfony/security-http/Event/LoginSuccessEvent.php"
-    },
-    "Symfony\\Component\\Security\\Http\\Event\\LoginFailureEvent": {
-        "fqcn": "Symfony\\Component\\Security\\Http\\Event\\LoginFailureEvent",
-        "short": "LoginFailureEvent",
-        "type": "class",
-        "library": "Symfony",
-        "description": "Dispatched when authentication fails. Contains the authentication exception and request.",
-        "github": "https://github.com/symfony/security-http/blob/7.2/Event/LoginFailureEvent.php",
-        "path": "vendor/symfony/security-http/Event/LoginFailureEvent.php"
-    },
-    "Symfony\\Component\\Security\\Http\\Event\\LogoutEvent": {
-        "fqcn": "Symfony\\Component\\Security\\Http\\Event\\LogoutEvent",
-        "short": "LogoutEvent",
-        "type": "class",
-        "library": "Symfony",
-        "description": "Dispatched on user logout. Contains the request, response, and token.",
-        "github": "https://github.com/symfony/security-http/blob/7.2/Event/LogoutEvent.php",
-        "path": "vendor/symfony/security-http/Event/LogoutEvent.php"
-    },
-    "Symfony\\Component\\Security\\Http\\Event\\SwitchUserEvent": {
-        "fqcn": "Symfony\\Component\\Security\\Http\\Event\\SwitchUserEvent",
-        "short": "SwitchUserEvent",
-        "type": "class",
-        "library": "Symfony",
-        "description": "Dispatched when impersonation (user switching) occurs.",
-        "github": "https://github.com/symfony/security-http/blob/7.2/Event/SwitchUserEvent.php",
-        "path": "vendor/symfony/security-http/Event/SwitchUserEvent.php"
-    },
-    "Symfony\\Component\\Security\\Core\\Event\\VoteEvent": {
-        "fqcn": "Symfony\\Component\\Security\\Core\\Event\\VoteEvent",
-        "short": "VoteEvent",
-        "type": "class",
-        "library": "Symfony",
-        "description": "Dispatched by the access decision manager for each voter's vote on an authorization check.",
-        "github": "https://github.com/symfony/security-core/blob/7.2/Event/VoteEvent.php",
-        "path": "vendor/symfony/security-core/Event/VoteEvent.php"
-    },
-    "Illuminate\\Auth\\Events\\Authenticated": {
-        "fqcn": "Illuminate\\Auth\\Events\\Authenticated",
-        "short": "Authenticated",
-        "type": "class",
-        "library": "Laravel",
-        "description": "Fired when a user is authenticated (on each request after session check).",
-        "github": "https://github.com/laravel/framework/blob/12.x/src/Illuminate/Auth/Events/Authenticated.php",
-        "path": "vendor/laravel/framework/src/Illuminate/Auth/Events/Authenticated.php"
-    },
-    "Illuminate\\Auth\\Events\\Login": {
-        "fqcn": "Illuminate\\Auth\\Events\\Login",
-        "short": "Login",
-        "type": "class",
-        "library": "Laravel",
-        "description": "Fired when a user logs in via credentials or remember token.",
-        "github": "https://github.com/laravel/framework/blob/12.x/src/Illuminate/Auth/Events/Login.php",
-        "path": "vendor/laravel/framework/src/Illuminate/Auth/Events/Login.php"
-    },
-    "Illuminate\\Auth\\Events\\Logout": {
-        "fqcn": "Illuminate\\Auth\\Events\\Logout",
-        "short": "Logout",
-        "type": "class",
-        "library": "Laravel",
-        "description": "Fired when a user logs out.",
-        "github": "https://github.com/laravel/framework/blob/12.x/src/Illuminate/Auth/Events/Logout.php",
-        "path": "vendor/laravel/framework/src/Illuminate/Auth/Events/Logout.php"
-    },
-    "Illuminate\\Auth\\Events\\Failed": {
-        "fqcn": "Illuminate\\Auth\\Events\\Failed",
-        "short": "Failed",
-        "type": "class",
-        "library": "Laravel",
-        "description": "Fired when an authentication attempt fails.",
-        "github": "https://github.com/laravel/framework/blob/12.x/src/Illuminate/Auth/Events/Failed.php",
-        "path": "vendor/laravel/framework/src/Illuminate/Auth/Events/Failed.php"
-    },
-    "Illuminate\\Auth\\Events\\OtherDeviceLogout": {
-        "fqcn": "Illuminate\\Auth\\Events\\OtherDeviceLogout",
-        "short": "OtherDeviceLogout",
-        "type": "class",
-        "library": "Laravel",
-        "description": "Fired when sessions on other devices are invalidated.",
-        "github": "https://github.com/laravel/framework/blob/12.x/src/Illuminate/Auth/Events/OtherDeviceLogout.php",
-        "path": "vendor/laravel/framework/src/Illuminate/Auth/Events/OtherDeviceLogout.php"
-    },
-    "yii\\web\\User": {
-        "fqcn": "yii\\web\\User",
-        "short": "User",
-        "type": "class",
-        "library": "Yii 2",
-        "description": "Manages user authentication state. Provides login, logout, and identity management.",
-        "github": "https://github.com/yiisoft/yii2/blob/master/framework/web/User.php",
-        "path": "vendor/yiisoft/yii2/web/User.php"
     }
 }
