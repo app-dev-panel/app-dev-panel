@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Kernel\Project;
 
+use AppDevPanel\Kernel\Helper\Silencer;
 use JsonException;
 use RuntimeException;
 
@@ -32,14 +33,16 @@ final class FileSecretsStorage implements SecretsStorageInterface
     public function load(): SecretsConfig
     {
         $file = $this->filePath();
-        if (!is_file($file)) {
+        if (!is_file($file) || !is_readable($file)) {
             return SecretsConfig::empty();
         }
 
-        $contents = @file_get_contents($file);
-        if ($contents === false || $contents === '') {
+        $contents = file_get_contents($file);
+        if ($contents === false) {
             return SecretsConfig::empty();
         }
+
+        // An empty file is a JsonException below and therefore also yields the empty config.
 
         try {
             /** @var array<string, mixed> $data */
@@ -68,10 +71,11 @@ final class FileSecretsStorage implements SecretsStorageInterface
             throw new RuntimeException(sprintf('Failed to write secrets to "%s".', $tmp));
         }
 
-        @chmod($tmp, 0o600);
+        chmod($tmp, 0o600);
 
-        if (!@rename($tmp, $target)) {
-            @unlink($tmp);
+        // Muted: the rename races with concurrent writers / external editors; failure is reported below.
+        if (!Silencer::run(static fn(): bool => rename($tmp, $target))) {
+            unlink($tmp); // a failed rename leaves the temp file in place
             throw new RuntimeException(sprintf('Failed to move secrets to "%s".', $target));
         }
     }
@@ -92,7 +96,9 @@ final class FileSecretsStorage implements SecretsStorageInterface
             return;
         }
 
-        if (!@mkdir($this->configDir, 0o755, true) && !is_dir($this->configDir)) {
+        // Muted: a concurrent process may create the directory between the checks.
+        $created = Silencer::run(fn(): bool => mkdir($this->configDir, 0o755, true));
+        if (!$created && !is_dir($this->configDir)) {
             throw new RuntimeException(sprintf('Failed to create config directory "%s".', $this->configDir));
         }
     }

@@ -150,10 +150,10 @@ final class ProjectControllerTest extends TestCase
             if (is_dir($path)) {
                 $this->removeDir($path);
             } else {
-                @unlink($path);
+                unlink($path);
             }
         }
 
-        @rmdir($dir);
+        rmdir($dir);
     }
 }

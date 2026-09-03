@@ -26,7 +26,11 @@ use AppDevPanel\Kernel\Helper\Json;
  *   - `filter`, `chips`, `tabs` (interactive — render MUI controls that mutate
  *     the visibility of host descendants by data-search / data-tag /
  *     data-adp-tab-panel markers).
+ *
+ * One static factory per slot type keeps the whole slot contract readable in
+ * a single file; splitting by slot kind would scatter it.
  */
+// @mago-expect lint:too-many-methods
 final class Slot
 {
     public const ATTR_NAME = 'data-adp-slot';
@@ -61,8 +65,8 @@ final class Slot
             '<%1$s %2$s="%3$s">%4$s</%1$s>',
             self::escapeTag($tag),
             self::ATTR_NAME,
-            self::escapeAttr($name),
-            self::escapeText($content),
+            self::escape($name),
+            self::escape($content),
         );
     }
 
@@ -156,7 +160,7 @@ final class Slot
             if ($value === null || $value === '') {
                 continue;
             }
-            $attrHtml .= sprintf(' data-%s="%s"', self::escapeAttr((string) $key), self::escapeAttr((string) $value));
+            $attrHtml .= sprintf(' data-%s="%s"', self::escape($key), self::escape((string) $value));
         }
 
         $body = '';
@@ -170,25 +174,23 @@ final class Slot
             );
         }
         if ($label !== '') {
-            $body .= self::escapeText($label);
+            $body .= self::escape($label);
         }
 
         return sprintf(
             '<%1$s %2$s="%3$s"%4$s>%5$s</%1$s>',
             self::escapeTag($tag),
             self::ATTR_NAME,
-            self::escapeAttr($name),
+            self::escape($name),
             $attrHtml,
             $body,
         );
     }
 
-    private static function escapeAttr(string $value): string
-    {
-        return htmlspecialchars($value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
-    }
-
-    private static function escapeText(string $value): string
+    /**
+     * Attribute values and text nodes share the same escaping (ENT_QUOTES covers both contexts).
+     */
+    private static function escape(string $value): string
     {
         return htmlspecialchars($value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
     }

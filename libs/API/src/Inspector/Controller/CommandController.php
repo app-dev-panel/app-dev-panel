@@ -103,15 +103,27 @@ class CommandController
         $result = [];
         $merged = array_merge_recursive(self::BUILT_IN_COMMANDS, $this->commandMap);
         foreach ($merged as $groupName => $commands) {
-            $valid = array_filter(
-                $commands,
-                static fn(string $class) => is_subclass_of($class, CommandInterface::class) && $class::isAvailable(),
-            );
+            $valid = array_filter($commands, self::isAvailableCommand(...));
             foreach ($valid as $name => $command) {
                 $result[$name] = ['group' => $groupName, 'class' => $command];
             }
         }
         return $result;
+    }
+
+    /**
+     * `is_subclass_of()` alone still admits the interface name itself; `class_exists()`
+     * guarantees `$class` is a concrete class before the static call.
+     */
+    private static function isAvailableCommand(string $class): bool
+    {
+        if (!class_exists($class) || !is_subclass_of($class, CommandInterface::class)) {
+            return false;
+        }
+
+        // `class_exists()` above rules out the interface name the analyzer worries about.
+        // @mago-expect analysis:possibly-static-access-on-interface
+        return $class::isAvailable();
     }
 
     private function collectRegisteredCommands(): array

@@ -77,19 +77,15 @@ final class RedisController
         $cursor = (int) ($params['cursor'] ?? 0);
 
         try {
-            /** @var array{0: int, 1: string[]}|false $result */
-            $result = $redis->scan($cursor, ['match' => $pattern, 'count' => $limit]);
-
-            if ($result === false) {
-                return $this->responseFactory->createJsonResponse([
-                    'keys' => [],
-                    'cursor' => 0,
-                ]);
-            }
+            // phpredis SCAN: the iterator is passed by reference (null starts a new scan) and
+            // receives the next cursor; the return value is the list of keys for this page.
+            $iterator = $cursor === 0 ? null : $cursor;
+            /** @var list<string>|false $keys */
+            $keys = $redis->scan($iterator, (string) $pattern, $limit);
 
             return $this->responseFactory->createJsonResponse([
-                'keys' => $result[1] ?? [],
-                'cursor' => $result[0] ?? 0,
+                'keys' => $keys === false ? [] : array_values($keys),
+                'cursor' => (int) $iterator,
             ]);
         } catch (\Throwable $e) {
             return $this->responseFactory->createJsonResponse([

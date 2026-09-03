@@ -1,5 +1,6 @@
 import {DataContextProvider} from '@app-dev-panel/panel/Module/Inspector/Context/DataContext';
 import {createAdpTheme} from '@app-dev-panel/sdk/Component/Theme/DefaultTheme';
+import {copyText} from '@app-dev-panel/sdk/Helper/clipboard';
 import {ThemeProvider} from '@mui/material/styles';
 import {configureStore} from '@reduxjs/toolkit';
 import {render, screen} from '@testing-library/react';
@@ -22,6 +23,8 @@ const mockClasses = [
 ];
 
 const mockLazyLoadObject = vi.fn().mockResolvedValue({data: {object: {class: 'Test', active: true}, path: '/src'}});
+
+vi.mock('@app-dev-panel/sdk/Helper/clipboard', () => ({copyText: vi.fn().mockResolvedValue(true)}));
 
 vi.mock('@app-dev-panel/panel/Module/Inspector/API/Inspector', () => ({
     useGetClassesQuery: vi.fn(() => ({data: mockClasses, isLoading: false})),
@@ -139,5 +142,14 @@ describe('ContainerPage', () => {
         await user.click(loadButtons[0]);
 
         expect(await screen.findByLabelText('Retry loading')).toBeInTheDocument();
+    });
+
+    it('copies the entry name through the clipboard helper', async () => {
+        const user = userEvent.setup();
+        renderPage();
+
+        await user.click(screen.getAllByLabelText('Copy class name')[0]);
+
+        expect(copyText).toHaveBeenCalledWith('App\\Controller\\HomeController');
     });
 });

@@ -78,7 +78,7 @@ Registers in order:
 - Core services: `DebuggerIdGenerator`, `StorageInterface` (FileStorage), `TimelineCollector`
 - All enabled collectors (tagged `app_dev_panel.collector`)
 - Event subscribers: `HttpSubscriber`, `ConsoleSubscriber`, `CorsSubscriber`
-- API services: middleware stack, controllers, inspector endpoints
+- API services: middleware stack, controllers, inspector endpoints (`CodeCoverageController` gets `CollectorRepositoryInterface` as 3rd argument — without it `/inspect/api/coverage` answers 501)
 - Inspector: `SymfonyConfigProvider` as `config` alias, `DoctrineSchemaProvider` or `NullSchemaProvider`
 - Bridge: `AdpApiController` maps Symfony routing to `ApiApplication`
 - Console: `AssetsInstallCommand` (`app-dev-panel:assets:install`) tagged `console.command` — copies/symlinks `FrontendAssets::path()` into `public/bundles/appdevpanel/` so the web server (nginx/Apache) serves the panel + toolbar bundle directly

@@ -11,6 +11,8 @@ use AppDevPanel\Adapter\Symfony\EventSubscriber\HttpSubscriber;
 use AppDevPanel\Adapter\Symfony\Inspector\SymfonyConfigProvider;
 use AppDevPanel\Adapter\Symfony\Inspector\SymfonyRouteCollectionAdapter;
 use AppDevPanel\Adapter\Symfony\Inspector\SymfonyUrlMatcherAdapter;
+use AppDevPanel\Api\Debug\Repository\CollectorRepositoryInterface;
+use AppDevPanel\Api\Inspector\Controller\CodeCoverageController;
 use AppDevPanel\Api\Inspector\Controller\DatabaseController;
 use AppDevPanel\Api\Inspector\Controller\RoutingController;
 use AppDevPanel\Api\Inspector\Database\SchemaProviderInterface;
@@ -40,6 +42,7 @@ use AppDevPanel\McpServer\Inspector\InspectorClient;
 use AppDevPanel\McpServer\Tool\ToolRegistry;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Reference;
 
 final class AppDevPanelExtensionTest extends TestCase
 {
@@ -220,6 +223,19 @@ final class AppDevPanelExtensionTest extends TestCase
 
         $definition = $container->getDefinition(SchemaProviderInterface::class);
         $this->assertSame(SchemaProviderInterface::class, $definition->getClass());
+    }
+
+    public function testCodeCoverageControllerReceivesCollectorRepository(): void
+    {
+        $container = new ContainerBuilder();
+        $extension = new AppDevPanelExtension();
+
+        $extension->load([['enabled' => true]], $container);
+
+        $arguments = $container->getDefinition(CodeCoverageController::class)->getArguments();
+        $this->assertCount(3, $arguments);
+        $this->assertInstanceOf(Reference::class, $arguments[2]);
+        $this->assertSame(CollectorRepositoryInterface::class, (string) $arguments[2]);
     }
 
     public function testRoutingControllerReceivesAdapters(): void

@@ -77,8 +77,7 @@ final class CacheProxyInjector implements InjectorInterface
             {
                 $out = [];
                 foreach ($keys as $key) {
-                    $stringKey = (string) $key;
-                    $out[$stringKey] = $this->get($stringKey, $default);
+                    $out[$key] = $this->get($key, $default);
                 }
                 return $out;
             }
@@ -94,7 +93,7 @@ final class CacheProxyInjector implements InjectorInterface
             public function deleteMultiple(iterable $keys): bool
             {
                 foreach ($keys as $key) {
-                    $this->delete((string) $key);
+                    $this->delete($key);
                 }
                 return true;
             }

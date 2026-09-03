@@ -7,6 +7,8 @@ namespace AppDevPanel\Adapter\Spiral\Tests\Unit\Config;
 use AppDevPanel\Adapter\Spiral\Config\AdpConfig;
 use PHPUnit\Framework\TestCase;
 
+// One test per accessor / env fallback — splitting the class would duplicate the env snapshot fixture.
+// @mago-expect lint:too-many-methods
 final class AdpConfigTest extends TestCase
 {
     private string $previousStoragePath = '';
@@ -99,7 +101,7 @@ final class AdpConfigTest extends TestCase
             'queue',
             'database',
         ] as $name) {
-            self::assertTrue($config->isCollectorEnabled($name), "expected '$name' to default to true");
+            self::assertTrue($config->isCollectorEnabled($name), "expected '{$name}' to default to true");
         }
     }
 

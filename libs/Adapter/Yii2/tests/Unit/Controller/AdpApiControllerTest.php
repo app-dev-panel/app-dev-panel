@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AppDevPanel\Adapter\Yii2\Tests\Unit\Controller;
 
 use AppDevPanel\Adapter\Yii2\Controller\AdpApiController;
+use Nyholm\Psr7\Factory\Psr17Factory;
 use PHPUnit\Framework\Attributes\PreserveGlobalState;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use PHPUnit\Framework\TestCase;
@@ -162,6 +163,37 @@ final class AdpApiControllerTest extends TestCase
         $psrRequest = $this->callConvertYiiRequestToPsr7($app);
 
         $this->assertSame('PUT', $psrRequest->getMethod());
+    }
+
+    /**
+     * Multi-value headers must be copied line by line: joining `Set-Cookie` values with `, `
+     * would produce a single corrupted cookie header.
+     */
+    public function testMultipleSetCookieHeadersArePreservedAsSeparateLines(): void
+    {
+        $_SERVER['REQUEST_URI'] = '/debug/api';
+        $_SERVER['QUERY_STRING'] = '';
+        $_SERVER['HTTP_HOST'] = '127.0.0.1:8103';
+
+        $app = $this->createWebApp();
+        $psr17 = new Psr17Factory();
+        $psrResponse = $psr17
+            ->createResponse(200)
+            ->withHeader('Content-Type', 'application/json')
+            ->withAddedHeader('Set-Cookie', 'a=1; Path=/')
+            ->withAddedHeader('Set-Cookie', 'b=2; Path=/; HttpOnly')
+            ->withBody($psr17->createStream('{}'));
+
+        $controller = new AdpApiController('adp-api', $app);
+        $yiiResponse = new \ReflectionMethod($controller, 'convertPsr7ToYiiResponse')->invoke(
+            $controller,
+            $psrResponse,
+        );
+
+        $headers = $yiiResponse->getHeaders();
+        $this->assertSame(['a=1; Path=/', 'b=2; Path=/; HttpOnly'], $headers->get('Set-Cookie', null, false));
+        $this->assertSame('application/json', $headers->get('Content-Type'));
+        $this->assertSame('{}', $yiiResponse->content);
     }
 
     /**

@@ -1,4 +1,4 @@
-import {describe, expect, it} from 'vitest';
+import {describe, expect, it, vi} from 'vitest';
 import {parseSlotEntry, readSlotAttrs, readSlotPayload, ssrSlots} from './SsrPanel.slots';
 
 const mount = (html: string): Element => {
@@ -24,11 +24,18 @@ describe('SsrPanel.slots — parsers', () => {
         expect(readSlotPayload(el)).toBeUndefined();
     });
 
-    it('readSlotPayload swallows malformed JSON and returns undefined', () => {
+    it('readSlotPayload swallows malformed JSON, reports it and returns undefined', () => {
+        const error = vi.spyOn(console, 'error').mockImplementation(() => {});
         const el = mount(
             '<div data-adp-slot="json"><script type="application/json" data-adp-payload>{not-json}</script></div>',
         );
         expect(readSlotPayload(el)).toBeUndefined();
+        expect(error).toHaveBeenCalledWith(
+            '[SsrPanel] failed to parse slot payload',
+            expect.any(SyntaxError),
+            '{not-json}',
+        );
+        error.mockRestore();
     });
 
     it('readSlotAttrs returns every data-* attribute except data-adp-slot', () => {

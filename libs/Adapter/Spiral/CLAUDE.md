@@ -192,8 +192,9 @@ on throw `ExceptionCollector`.
 
 `AppDevPanelBootloader::SINGLETONS` registers all Kernel infrastructure (`Debugger`,
 `StorageInterface`, `DebuggerIdGenerator`), every collector, API services (`ApiApplication`,
-`CollectorRepository`, `ResponseDataWrapper`, `PanelController`), PSR-17 factories
-(nyholm/psr7), and the eight injectors. `boot()` calls `installInjector()` once per
+`CollectorRepository`, `ResponseDataWrapper`, `PanelController`, `CodeCoverageController` via
+`initCodeCoverageController()` so the optional `CollectorRepositoryInterface` argument is always
+passed), PSR-17 factories (nyholm/psr7), and the eight injectors. `boot()` calls `installInjector()` once per
 interface, wires the inspector aliases, and (when `spiral/router` is installed and bound)
 exposes the `'router'` / `'urlMatcher'` adapters.
 
@@ -211,7 +212,7 @@ Maps the PSR-15 pipeline to the Debugger lifecycle:
 ```
 tests/
 ├── Unit/
-│   ├── Bootloader/AdpInterceptorBootloaderTest.php
+│   ├── Bootloader/{AppDevPanel,AdpInterceptor}BootloaderTest.php
 │   ├── Config/AdpConfigTest.php
 │   ├── Container/{Cache,EventDispatcher,HttpClient,Logger,Mailer,Queue,Translator,Views}ProxyInjectorTest.php
 │   ├── Container/{ContainerStubsBootstrap,container-stubs}.php

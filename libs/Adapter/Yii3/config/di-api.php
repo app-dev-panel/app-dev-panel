@@ -27,6 +27,7 @@ use AppDevPanel\Api\Ingestion\Controller\OtlpController;
 use AppDevPanel\Api\Inspector\Authorization\AuthorizationConfigProviderInterface;
 use AppDevPanel\Api\Inspector\Controller\AuthorizationController;
 use AppDevPanel\Api\Inspector\Controller\CacheController;
+use AppDevPanel\Api\Inspector\Controller\CodeCoverageController;
 use AppDevPanel\Api\Inspector\Controller\CommandController;
 use AppDevPanel\Api\Inspector\Controller\ComposerController;
 use AppDevPanel\Api\Inspector\Controller\DatabaseController;
@@ -319,6 +320,13 @@ return [
     OpcacheController::class => static fn(JsonResponseFactoryInterface $jsonResponseFactory) => new OpcacheController(
         $jsonResponseFactory,
     ),
+
+    // Reads CodeCoverageCollector payloads from stored entries — without the repository the endpoint answers 501.
+    CodeCoverageController::class => static fn(
+        JsonResponseFactoryInterface $jsonResponseFactory,
+        PathResolverInterface $pathResolver,
+        CollectorRepositoryInterface $collectorRepository,
+    ) => new CodeCoverageController($jsonResponseFactory, $pathResolver, $collectorRepository),
 
     InspectController::class => static fn(
         JsonResponseFactoryInterface $jsonResponseFactory,

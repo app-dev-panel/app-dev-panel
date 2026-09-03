@@ -152,6 +152,7 @@ src/
 ├── Helper/                       # Utilities
 │   ├── BacktraceIgnoreMatcher.php
 │   ├── BoundedProcess.php        # proc_open with hard deadline + concurrent pipe draining
+│   ├── Silencer.php              # `Silencer::run(callable)` — scoped error handler replacing `@` on racy fs calls (mkdir/rename/copy/stat)
 │   └── StreamWrapper/
 └── DebugServer/                  # UDP socket server for real-time streaming
     ├── Broadcaster.php           # Implements BroadcasterInterface; 0.2s hard cap per connect/send

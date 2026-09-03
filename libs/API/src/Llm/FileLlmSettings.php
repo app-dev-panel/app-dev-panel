@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Api\Llm;
 
+use AppDevPanel\Kernel\Helper\Silencer;
 use AppDevPanel\Kernel\Project\SecretsConfig;
 use AppDevPanel\Kernel\Project\SecretsStorageInterface;
 use Psr\Log\LoggerInterface;
@@ -256,11 +257,11 @@ final class FileLlmSettings implements LlmSettingsInterface
     private function migrateLegacyFile(): void
     {
         $legacy = rtrim($this->storagePath, '/\\') . DIRECTORY_SEPARATOR . self::LEGACY_FILENAME;
-        if (!is_file($legacy)) {
+        if (!is_file($legacy) || !is_readable($legacy)) {
             return;
         }
 
-        $contents = @file_get_contents($legacy);
+        $contents = file_get_contents($legacy);
         if ($contents === false || $contents === '') {
             return;
         }
@@ -282,7 +283,8 @@ final class FileLlmSettings implements LlmSettingsInterface
 
         // Keep a backup so an admin can recover by hand if migration was wrong;
         // the suffix marks it as migrated so the legacy code path never runs again.
-        @rename($legacy, $legacy . '.migrated');
+        // Muted: the backup is best effort; a failed rename must not undo the migration.
+        Silencer::run(static fn(): bool => rename($legacy, $legacy . '.migrated'));
 
         $this->logger?->info('[ADP] Migrated LLM settings from {legacy} to {target}', [
             'legacy' => $legacy,

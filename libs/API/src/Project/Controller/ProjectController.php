@@ -6,6 +6,7 @@ namespace AppDevPanel\Api\Project\Controller;
 
 use AppDevPanel\Api\Http\JsonResponseFactoryInterface;
 use AppDevPanel\Api\ServerSentEventsStream;
+use AppDevPanel\Kernel\Helper\Silencer;
 use AppDevPanel\Kernel\Project\ProjectConfig;
 use AppDevPanel\Kernel\Project\ProjectConfigStorageInterface;
 use Closure;
@@ -69,7 +70,7 @@ final class ProjectController
             return $this->responseFactory->createJsonResponse(['error' => 'Request body must be a JSON object.'], 400);
         }
 
-        $rawConfig = isset($payload['config']) && is_array($payload['config']) ? $payload['config'] : $payload;
+        $rawConfig = is_array($payload['config'] ?? null) ? $payload['config'] : $payload;
         $config = ProjectConfig::fromArray($rawConfig);
 
         $this->storage->save($config);
@@ -166,7 +167,8 @@ final class ProjectController
                 $parts[] = $file . ':missing';
                 continue;
             }
-            $stat = @stat($file);
+            // Muted: the file may be replaced (atomic rename) between `is_file()` and `stat()`.
+            $stat = Silencer::run(static fn(): array|false => stat($file));
             if ($stat === false) {
                 $parts[] = $file . ':missing';
                 continue;

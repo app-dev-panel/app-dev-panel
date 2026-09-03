@@ -34,7 +34,7 @@ final class QueueProviderInterfaceProxyTest extends TestCase
         $provider
             ->expects($this->exactly(2))
             ->method('has')
-            ->willReturnCallback(fn(string $name) => $name === 'default');
+            ->willReturnCallback(static fn(string $name) => $name === 'default');
 
         $timeline = new TimelineCollector();
         $collector = new QueueCollector($timeline);

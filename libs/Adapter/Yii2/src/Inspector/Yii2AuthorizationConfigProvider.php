@@ -56,7 +56,8 @@ final class Yii2AuthorizationConfigProvider implements AuthorizationConfigProvid
             } catch (Throwable) {
                 continue;
             }
-            if ($value === null || is_scalar($value) || is_array($value)) {
+            // Keep JSON-safe values only (null, scalars, arrays); objects are dropped.
+            if (!is_object($value)) {
                 $config[$property] = $value;
             }
         }

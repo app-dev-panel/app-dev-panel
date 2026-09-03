@@ -1,5 +1,6 @@
 import {DataContextProvider} from '@app-dev-panel/panel/Module/Inspector/Context/DataContext';
 import {createAdpTheme} from '@app-dev-panel/sdk/Component/Theme/DefaultTheme';
+import {copyText} from '@app-dev-panel/sdk/Helper/clipboard';
 import {ThemeProvider} from '@mui/material/styles';
 import {configureStore} from '@reduxjs/toolkit';
 import {render, screen} from '@testing-library/react';
@@ -27,6 +28,8 @@ const mockDefinitions: Record<string, string> = {
 const mockLazyLoadObject = vi
     .fn()
     .mockResolvedValue({data: {object: {class: 'Test', host: 'localhost'}, path: '/src'}});
+
+vi.mock('@app-dev-panel/sdk/Helper/clipboard', () => ({copyText: vi.fn().mockResolvedValue(true)}));
 
 vi.mock('@app-dev-panel/panel/Module/Inspector/API/Inspector', () => ({
     useGetConfigurationQuery: vi.fn(() => ({data: mockDefinitions, isLoading: false})),
@@ -149,5 +152,14 @@ describe('DefinitionsPage', () => {
         await user.click(loadButtons[0]);
 
         expect(await screen.findByLabelText('Retry loading')).toBeInTheDocument();
+    });
+
+    it('copies the entry name through the clipboard helper', async () => {
+        const user = userEvent.setup();
+        renderPage();
+
+        await user.click(screen.getAllByLabelText('Copy name')[0]);
+
+        expect(copyText).toHaveBeenCalledWith('assetManager');
     });
 });

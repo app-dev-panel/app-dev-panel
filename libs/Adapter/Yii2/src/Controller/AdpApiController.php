@@ -96,10 +96,7 @@ final class AdpApiController extends Controller
             return $this->createStreamedResponse($psrResponse, $yiiResponse);
         }
 
-        // Copy headers
-        foreach ($psrResponse->getHeaders() as $name => $values) {
-            $yiiResponse->getHeaders()->set($name, implode(', ', $values));
-        }
+        $this->copyHeaders($psrResponse, $yiiResponse);
 
         $yiiResponse->content = (string) $psrResponse->getBody();
         $yiiResponse->format = Response::FORMAT_RAW;
@@ -111,9 +108,7 @@ final class AdpApiController extends Controller
         \Psr\Http\Message\ResponseInterface $psrResponse,
         Response $yiiResponse,
     ): Response {
-        foreach ($psrResponse->getHeaders() as $name => $values) {
-            $yiiResponse->getHeaders()->set($name, implode(', ', $values));
-        }
+        $this->copyHeaders($psrResponse, $yiiResponse);
 
         $body = $psrResponse->getBody();
 
@@ -127,5 +122,18 @@ final class AdpApiController extends Controller
         };
 
         return $yiiResponse;
+    }
+
+    /**
+     * Copy every header line as-is. Joining multi-value headers with `, ` would corrupt
+     * `Set-Cookie` (one cookie per line by RFC 6265); `HeaderCollection::set()` keeps the
+     * value list and `Response::sendHeaders()` emits one `header()` call per value.
+     */
+    private function copyHeaders(\Psr\Http\Message\ResponseInterface $psrResponse, Response $yiiResponse): void
+    {
+        $headers = $yiiResponse->getHeaders();
+        foreach ($psrResponse->getHeaders() as $name => $values) {
+            $headers->set($name, $values);
+        }
     }
 }

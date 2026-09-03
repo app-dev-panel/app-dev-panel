@@ -200,6 +200,50 @@ final class RedisControllerTest extends ControllerTestCase
         $this->assertSame(500, $response->getStatusCode());
     }
 
+    public function testKeysReturnsPageAndNextCursor(): void
+    {
+        $redis = $this->createMock(\Redis::class);
+        $redis
+            ->expects($this->once())
+            ->method('scan')
+            ->willReturnCallback(static function (mixed &$iterator, mixed $pattern, int $count): array {
+                self::assertNull($iterator);
+                self::assertSame('user:*', $pattern);
+                self::assertSame(50, $count);
+                $iterator = 17;
+
+                return ['user:1', 'user:2'];
+            });
+
+        $controller = $this->createController([\Redis::class => $redis]);
+        $response = $controller->keys($this->get(['pattern' => 'user:*', 'limit' => '50']));
+
+        $this->assertSame(200, $response->getStatusCode());
+        $data = $this->responseData($response);
+        $this->assertSame(['user:1', 'user:2'], $data['keys']);
+        $this->assertSame(17, $data['cursor']);
+    }
+
+    public function testKeysContinuesFromCursorAndEndsAtZero(): void
+    {
+        $redis = $this->createMock(\Redis::class);
+        $redis
+            ->method('scan')
+            ->willReturnCallback(static function (mixed &$iterator): array|false {
+                self::assertSame(17, $iterator);
+                $iterator = 0;
+
+                return false;
+            });
+
+        $controller = $this->createController([\Redis::class => $redis]);
+        $response = $controller->keys($this->get(['cursor' => '17']));
+
+        $data = $this->responseData($response);
+        $this->assertSame([], $data['keys']);
+        $this->assertSame(0, $data['cursor']);
+    }
+
     public function testKeysExceptionFromScan(): void
     {
         $redis = $this->createMock(\Redis::class);

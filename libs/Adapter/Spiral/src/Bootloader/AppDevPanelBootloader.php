@@ -28,6 +28,7 @@ use AppDevPanel\Api\Debug\Repository\CollectorRepositoryInterface;
 use AppDevPanel\Api\Http\JsonResponseFactory;
 use AppDevPanel\Api\Http\JsonResponseFactoryInterface;
 use AppDevPanel\Api\Inspector\Authorization\AuthorizationConfigProviderInterface;
+use AppDevPanel\Api\Inspector\Controller\CodeCoverageController;
 use AppDevPanel\Api\Inspector\Database\NullSchemaProvider;
 use AppDevPanel\Api\Inspector\Database\SchemaProviderInterface;
 use AppDevPanel\Api\Inspector\Elasticsearch\ElasticsearchProviderInterface;
@@ -101,7 +102,12 @@ use Spiral\Core\BinderInterface;
  * Then attach the `DebugMiddleware` to your HTTP pipeline (outermost, before CSRF/sessions)
  * and the `AdpApiMiddleware` in front of your router so `/debug/*` and `/inspect/api/*`
  * hand off to ADP before reaching the application routes.
+ *
+ * Kan defect is inherent to DI registration (one guard per optional `spiral/*` package),
+ * the same reason the Symfony/Laravel/Yii2 wiring classes are exempted in `mago.toml`;
+ * splitting into several bootloaders would break the single-registration contract above.
  */
+// @mago-expect lint:kan-defect
 final class AppDevPanelBootloader extends Bootloader
 {
     protected const SINGLETONS = [
@@ -148,6 +154,7 @@ final class AppDevPanelBootloader extends Bootloader
         JsonResponseFactoryInterface::class => JsonResponseFactory::class,
         PathMapperInterface::class => NullPathMapper::class,
         PathResolverInterface::class => [self::class, 'initPathResolver'],
+        CodeCoverageController::class => [self::class, 'initCodeCoverageController'],
         SchemaProviderInterface::class => NullSchemaProvider::class,
         AuthorizationConfigProviderInterface::class => SpiralAuthorizationConfigProvider::class,
         SpiralAuthorizationConfigProvider::class => SpiralAuthorizationConfigProvider::class,
@@ -326,6 +333,18 @@ final class AppDevPanelBootloader extends Bootloader
     public function initCollectorRepository(StorageInterface $storage): CollectorRepositoryInterface
     {
         return new CollectorRepository($storage);
+    }
+
+    /**
+     * Explicit factory: the repository argument is optional on the controller and the
+     * endpoint answers 501 without it, so autowiring must not be allowed to drop it.
+     */
+    public function initCodeCoverageController(
+        JsonResponseFactoryInterface $responseFactory,
+        PathResolverInterface $pathResolver,
+        CollectorRepositoryInterface $collectorRepository,
+    ): CodeCoverageController {
+        return new CodeCoverageController($responseFactory, $pathResolver, $collectorRepository);
     }
 
     public function initApiApplication(

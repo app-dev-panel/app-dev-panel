@@ -16,6 +16,7 @@ Bridges ADP Kernel and API into Yii 2. Third adapter after Yii 3 (Yii3) and Symf
 ```
 src/
 ├── Bootstrap.php                              # Yii 2 BootstrapInterface, auto-registers Module
+├── InstallWarnings.php                        # Logs yii2-debug conflict / pretty-URL-off warnings once per process (called by Bootstrap)
 ├── Module.php                                 # Core module: DI, collectors, event wiring, routes
 ├── EventListener/
 │   ├── WebListener.php                        # beforeRequest/afterRequest → Debugger lifecycle
@@ -132,6 +133,8 @@ requests as far as the listener is concerned — `Module::$ignoredRequests` hand
 
 Yii 2 uses its own `yii\web\Request` / `yii\web\Response` objects.
 `WebListener` and `AdpApiController` convert these to PSR-7 via `nyholm/psr7`.
+`AdpApiController` copies PSR-7 header value lists into `HeaderCollection::set()` unchanged
+(never `implode(', ')`), so multiple `Set-Cookie` lines are emitted as separate `header()` calls.
 
 ### 6. DB Profiling
 
@@ -203,7 +206,8 @@ This follows the same pattern as Yii3 and Symfony adapters (no auto-wiring for c
 **Registered controllers:**
 `FileController`, `RoutingController`, `InspectController`, `DatabaseController`,
 `GitController`, `ServiceController`, `CacheController`, `CommandController`,
-`ComposerController`, `RequestController`, `TranslationController`, `OpcacheController`.
+`ComposerController`, `RequestController`, `TranslationController`, `OpcacheController`,
+`CodeCoverageController` (receives `CollectorRepositoryInterface` — without it `/inspect/api/coverage` answers 501).
 
 **`Yii2ConfigProvider`** registered as `config` service alias:
 

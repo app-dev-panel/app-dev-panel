@@ -64,7 +64,7 @@ final class OtlpController
             $grouped[$span->traceId][] = $span;
         }
 
-        foreach ($grouped as $traceId => $traceSpans) {
+        foreach ($grouped as $traceSpans) {
             $idGenerator = new DebuggerIdGenerator();
             $id = $idGenerator->getId();
 
@@ -94,8 +94,8 @@ final class OtlpController
                 'context' => [
                     'type' => 'otlp',
                     'service' => $serviceName,
-                    'traceId' => (string) $traceId,
-                    'operation' => $rootSpan?->operationName ?? '',
+                    'traceId' => $traceSpans[0]->traceId,
+                    'operation' => $rootSpan->operationName ?? '',
                 ],
             ];
 

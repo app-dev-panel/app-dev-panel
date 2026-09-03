@@ -616,9 +616,9 @@ final class AppDevPanelExtension extends Extension
             // reachable by the web server until it has been published, so
             // pointing at `/bundles/appdevpanel` would 404 (issue #113).
             $projectDir = $container->hasParameter('kernel.project_dir')
-                ? (string) $container->getParameter('kernel.project_dir')
+                ? $container->getParameter('kernel.project_dir')
                 : null;
-            $publicBundle = $projectDir !== null
+            $publicBundle = is_string($projectDir)
                 ? $projectDir . '/public/' . AssetsInstallCommand::PUBLIC_SUBPATH . '/bundle.js'
                 : null;
 
@@ -831,6 +831,7 @@ final class AppDevPanelExtension extends Extension
             ->setArguments([
                 new Reference(JsonResponseFactoryInterface::class),
                 new Reference(PathResolverInterface::class),
+                new Reference(CollectorRepositoryInterface::class),
             ])
             ->setPublic(true);
 

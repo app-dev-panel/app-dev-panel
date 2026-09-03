@@ -55,7 +55,7 @@ final class TwigEnvironmentProxy extends Environment
 
     public function render($name, array $context = []): string
     {
-        $templateName = $name instanceof TemplateWrapper ? $name->getSourceContext()->getName() : (string) $name;
+        $templateName = $name instanceof TemplateWrapper ? $name->getSourceContext()->getName() : $name;
 
         $this->collector->beginRender($templateName);
         $start = microtime(true);
@@ -70,7 +70,7 @@ final class TwigEnvironmentProxy extends Environment
 
     public function display($name, array $context = []): void
     {
-        $templateName = $name instanceof TemplateWrapper ? $name->getSourceContext()->getName() : (string) $name;
+        $templateName = $name instanceof TemplateWrapper ? $name->getSourceContext()->getName() : $name;
 
         $this->collector->beginRender($templateName);
         $start = microtime(true);

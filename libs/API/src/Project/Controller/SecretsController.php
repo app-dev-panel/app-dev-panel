@@ -66,7 +66,7 @@ final class SecretsController
         }
 
         $config = $this->storage->load();
-        if (isset($payload['llm']) && is_array($payload['llm'])) {
+        if (is_array($payload['llm'] ?? null)) {
             $config = $config->withLlmPatch($payload['llm']);
         }
 
@@ -91,21 +91,15 @@ final class SecretsController
      */
     private function maskLlm(array $llm): array
     {
-        $apiKey = $llm['apiKey'] ?? null;
         $acpEnv = $llm['acpEnv'] ?? [];
         $acpArgs = $llm['acpArgs'] ?? [];
 
         $masked = $llm;
-
-        $masked['apiKey'] = is_string($apiKey) && $apiKey !== '' ? $this->maskString($apiKey) : null;
-        $masked['hasApiKey'] = is_string($apiKey) && $apiKey !== '';
+        $masked['apiKey'] = $this->maskSecret($llm['apiKey'] ?? null);
+        $masked['hasApiKey'] = $masked['apiKey'] !== null;
 
         if (is_array($acpEnv)) {
-            $maskedEnv = [];
-            foreach ($acpEnv as $key => $value) {
-                $maskedEnv[$key] = is_string($value) && $value !== '' ? $this->maskString($value) : '';
-            }
-            $masked['acpEnv'] = $maskedEnv;
+            $masked['acpEnv'] = array_map(fn(mixed $value): string => $this->maskSecret($value) ?? '', $acpEnv);
         }
 
         // ACP args may carry secret tokens (e.g. `--api-key=sk-…`); mask them
@@ -113,13 +107,23 @@ final class SecretsController
         // sensitive. The frontend treats acpArgs as opaque and shows them
         // in a "configured / empty" widget.
         if (is_array($acpArgs)) {
-            $masked['acpArgs'] = array_values(array_map(fn(mixed $arg) => is_string($arg) && $arg !== ''
-                ? $this->maskString($arg)
-                : '', $acpArgs));
+            $masked['acpArgs'] = array_values(array_map(
+                fn(mixed $arg): string => $this->maskSecret($arg) ?? '',
+                $acpArgs,
+            ));
             $masked['hasAcpArgs'] = $acpArgs !== [];
         }
 
         return $masked;
+    }
+
+    /**
+     * Masked preview for a secret value; `null` when there is nothing to mask
+     * (missing, empty or not a string).
+     */
+    private function maskSecret(mixed $value): ?string
+    {
+        return is_string($value) && $value !== '' ? $this->maskString($value) : null;
     }
 
     /**

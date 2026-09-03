@@ -109,10 +109,10 @@ final class FileSecretsStorageTest extends TestCase
             if (is_dir($path)) {
                 $this->removeDir($path);
             } else {
-                @unlink($path);
+                unlink($path);
             }
         }
 
-        @rmdir($dir);
+        rmdir($dir);
     }
 }

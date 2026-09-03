@@ -10,6 +10,8 @@ use AppDevPanel\Adapter\Yii2\EventListener\WebListener;
 use AppDevPanel\Adapter\Yii2\Module;
 use AppDevPanel\Adapter\Yii2\Proxy\UrlRuleProxy;
 use AppDevPanel\Api\ApiApplication;
+use AppDevPanel\Api\Inspector\Controller\CodeCoverageController;
+use AppDevPanel\Api\Inspector\Coverage\StoredCoverageReader;
 use AppDevPanel\Api\Inspector\Database\SchemaProviderInterface;
 use AppDevPanel\Api\PathResolverInterface;
 use AppDevPanel\Kernel\Collector\AssetBundleCollector;
@@ -103,6 +105,20 @@ final class ModuleBootstrapTest extends TestCase
         $this->createModuleAndBootstrap();
 
         $this->assertTrue(\Yii::$container->has(ApiApplication::class));
+    }
+
+    public function testBootstrapRegistersCodeCoverageControllerWithCollectorRepository(): void
+    {
+        $this->createModuleAndBootstrap();
+
+        $this->assertTrue(\Yii::$container->hasSingleton(CodeCoverageController::class));
+        $controller = \Yii::$container->get(CodeCoverageController::class);
+        $this->assertInstanceOf(CodeCoverageController::class, $controller);
+        // Without the repository the endpoint answers 501 — the reader is only built when it is injected.
+        $this->assertInstanceOf(
+            StoredCoverageReader::class,
+            new \ReflectionProperty(CodeCoverageController::class, 'reader')->getValue($controller),
+        );
     }
 
     public function testBootstrapRegistersAllDefaultCollectors(): void

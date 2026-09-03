@@ -29,7 +29,11 @@ use Spiral\Core\InjectableConfig;
  *   ignored_requests   ['/debug/api/**', '/debug', '/inspect/api/**']
  *   ignored_commands   ['help', 'list', 'completion']
  *   collectors         every collector enabled by default
+ *
+ * One accessor per config key is the `InjectableConfig` contract — splitting the
+ * class by option group would hide the single config-file schema.
  */
+// @mago-expect lint:too-many-methods
 final class AdpConfig extends InjectableConfig
 {
     public const CONFIG = 'app-dev-panel';
@@ -89,17 +93,10 @@ final class AdpConfig extends InjectableConfig
 
     public function storagePath(): string
     {
-        $explicit = $this->config['storage']['path'] ?? null;
-        if (is_string($explicit) && $explicit !== '') {
-            return $explicit;
-        }
-
-        $env = getenv('APP_DEV_PANEL_STORAGE_PATH');
-        if (is_string($env) && $env !== '') {
-            return $env;
-        }
-
-        return sys_get_temp_dir() . '/app-dev-panel';
+        return (
+            self::firstNonEmptyString($this->config['storage']['path'] ?? null, getenv('APP_DEV_PANEL_STORAGE_PATH'))
+            ?? sys_get_temp_dir() . '/app-dev-panel'
+        );
     }
 
     public function historySize(): int
@@ -125,71 +122,67 @@ final class AdpConfig extends InjectableConfig
      */
     public function projectConfigPath(): string
     {
-        $explicit = $this->config['project_config_path'] ?? null;
-        if (is_string($explicit) && $explicit !== '') {
-            return $explicit;
-        }
+        $rootPath = self::firstNonEmptyString(getenv('APP_DEV_PANEL_ROOT_PATH')) ?? (string) getcwd();
 
-        $env = getenv('APP_DEV_PANEL_PROJECT_CONFIG_PATH');
-        if (is_string($env) && $env !== '') {
-            return $env;
-        }
-
-        $rootPath = getenv('APP_DEV_PANEL_ROOT_PATH');
-        if (is_string($rootPath) && $rootPath !== '') {
-            return rtrim($rootPath, '/\\') . '/app/config/adp';
-        }
-
-        return (string) getcwd() . '/app/config/adp';
+        return (
+            self::firstNonEmptyString(
+                $this->config['project_config_path'] ?? null,
+                getenv('APP_DEV_PANEL_PROJECT_CONFIG_PATH'),
+            )
+            ?? rtrim($rootPath, '/\\') . '/app/config/adp'
+        );
     }
 
     public function staticUrl(): ?string
     {
-        $explicit = $this->config['panel']['static_url'] ?? null;
-        if (is_string($explicit) && $explicit !== '') {
-            return $explicit;
-        }
-
-        $env = getenv('APP_DEV_PANEL_STATIC_URL');
-        if (is_string($env) && $env !== '') {
-            return $env;
-        }
-
-        return null;
+        return self::firstNonEmptyString(
+            $this->config['panel']['static_url'] ?? null,
+            getenv('APP_DEV_PANEL_STATIC_URL'),
+        );
     }
 
     public function basePath(): string
     {
-        $value = $this->config['panel']['base_path'] ?? '/debug';
-
-        return is_string($value) && $value !== '' ? $value : '/debug';
+        return self::firstNonEmptyString($this->config['panel']['base_path'] ?? null) ?? '/debug';
     }
 
     public function isCollectorEnabled(string $name): bool
     {
         $collectors = $this->config['collectors'] ?? [];
-        if (!is_array($collectors) || !array_key_exists($name, $collectors)) {
-            return false;
-        }
 
-        return (bool) $collectors[$name];
+        return is_array($collectors) && (bool) ($collectors[$name] ?? false);
     }
 
     /** @return list<string> */
     public function ignoredRequests(): array
     {
-        $value = $this->config['ignored_requests'] ?? [];
-        if (!is_array($value)) {
-            return [];
-        }
-
-        return array_values(array_filter($value, static fn(mixed $v): bool => is_string($v)));
+        return self::stringList($this->config['ignored_requests'] ?? []);
     }
 
     /** @return list<string> */
     public function ignoredCommands(): array
     {
-        $value = $this->config['ignored_commands'] ?? [];
+        return self::stringList($this->config['ignored_commands'] ?? []);
+    }
+
+    /**
+     * First candidate that is a non-empty string — config values win over env vars,
+     * and `getenv()`'s `false` for unset variables is skipped like an empty string.
+     */
+    private static function firstNonEmptyString(mixed ...$candidates): ?string
+    {
+        foreach ($candidates as $candidate) {
+            if (is_string($candidate) && $candidate !== '') {
+                return $candidate;
+            }
+        }
+
+        return null;
+    }
+
+    /** @return list<string> */
+    private static function stringList(mixed $value): array
+    {
         if (!is_array($value)) {
             return [];
         }

@@ -66,7 +66,7 @@ Registers in `register()`:
 - Core services: `DebuggerIdGenerator`, `StorageInterface` (FileStorage), `TimelineCollector`
 - All enabled collectors (based on config)
 - `Debugger` with all collector references
-- API services: middleware stack, controllers, inspector endpoints
+- API services: middleware stack, controllers, inspector endpoints (`CodeCoverageController` gets `CollectorRepositoryInterface` as 3rd argument — without it `/inspect/api/coverage` answers 501)
 - CLI commands: `debug:reset`, `debug:query`
 
 Wires in `boot()`:
@@ -142,7 +142,7 @@ Wires in `boot()`:
 `AdpApiController` handles all `/debug/api/*` and `/inspect/api/*` requests:
 1. Converts Laravel `Request` → PSR-7
 2. Delegates to `ApiApplication::handle()`
-3. Converts PSR-7 `Response` → Symfony `Response`
+3. Converts PSR-7 `Response` → Symfony `Response` (header value lists are passed through as-is, so multiple `Set-Cookie` lines survive)
 4. Detects SSE streams and returns `StreamedResponse`
 
 CSRF protection is disabled for API routes.

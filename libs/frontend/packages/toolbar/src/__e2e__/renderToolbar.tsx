@@ -8,6 +8,12 @@ afterEach(() => {
 });
 
 export function renderToolbar() {
+    // Browser test files share one origin, and redux-persist flushes the
+    // toolbar state (open/closed, position, float rect) to localStorage
+    // asynchronously — so a write from the previous file can land after its
+    // `afterEach` cleared storage. Start every render from a clean slate.
+    localStorage.clear();
+    sessionStorage.clear();
     return render(
         <App
             config={{

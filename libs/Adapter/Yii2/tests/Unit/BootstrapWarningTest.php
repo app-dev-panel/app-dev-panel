@@ -146,10 +146,11 @@ final class BootstrapWarningTest extends TestCase
         $messages = array_filter($this->messages, static fn(array $m): bool => $m[1] === Logger::LEVEL_WARNING);
 
         foreach ($messages as $message) {
-            if (str_contains($message[0], $needle)) {
-                $this->addToAssertionCount(1);
-                return;
+            if (!str_contains($message[0], $needle)) {
+                continue;
             }
+            $this->addToAssertionCount(1);
+            return;
         }
 
         $this->fail(sprintf(
@@ -162,9 +163,10 @@ final class BootstrapWarningTest extends TestCase
     private function assertWarningNotContains(string $needle): void
     {
         foreach ($this->messages as $message) {
-            if ($message[1] === Logger::LEVEL_WARNING && str_contains($message[0], $needle)) {
-                $this->fail(sprintf('Unexpected warning containing "%s": %s', $needle, $message[0]));
+            if ($message[1] !== Logger::LEVEL_WARNING || !str_contains($message[0], $needle)) {
+                continue;
             }
+            $this->fail(sprintf('Unexpected warning containing "%s": %s', $needle, $message[0]));
         }
         $this->addToAssertionCount(1);
     }

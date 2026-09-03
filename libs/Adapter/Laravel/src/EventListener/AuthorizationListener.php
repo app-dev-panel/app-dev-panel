@@ -43,14 +43,14 @@ final class AuthorizationListener
             /** @var Authenticatable $user */
             $user = $event->user;
             $collector->collectUser($this->getUserIdentifier($user), $this->getUserRoles($user), true);
-            $collector->collectFirewall((string) $event->guard);
+            $collector->collectFirewall($event->guard);
         });
 
         $events->listen(Login::class, function (Login $event): void {
             $collector = ($this->collectorFactory)();
             /** @var Authenticatable $user */
             $user = $event->user;
-            $guard = (string) $event->guard;
+            $guard = $event->guard;
             $collector->collectUser($this->getUserIdentifier($user), $this->getUserRoles($user), true);
             $collector->collectFirewall($guard);
             $collector->collectAuthenticationEvent('login', $guard, 'success', ['remember' => $event->remember]);
@@ -60,7 +60,7 @@ final class AuthorizationListener
             $collector = ($this->collectorFactory)();
             $collector->collectAuthenticationEvent(
                 'logout',
-                (string) $event->guard,
+                $event->guard,
                 'success',
                 ['user' => $this->getUserIdentifier($event->user)],
             );
@@ -68,12 +68,9 @@ final class AuthorizationListener
 
         $events->listen(Failed::class, function (Failed $event): void {
             $collector = ($this->collectorFactory)();
-            $collector->collectAuthenticationEvent(
-                'login',
-                (string) $event->guard,
-                'failure',
-                ['credentials' => array_keys($event->credentials ?? [])],
-            );
+            $collector->collectAuthenticationEvent('login', $event->guard, 'failure', ['credentials' => array_keys(
+                $event->credentials ?? [],
+            )]);
         });
 
         if (class_exists(OtherDeviceLogout::class)) {
@@ -81,7 +78,7 @@ final class AuthorizationListener
                 $collector = ($this->collectorFactory)();
                 $collector->collectAuthenticationEvent(
                     'other_device_logout',
-                    (string) $event->guard,
+                    $event->guard,
                     'success',
                     ['user' => $this->getUserIdentifier($event->user)],
                 );

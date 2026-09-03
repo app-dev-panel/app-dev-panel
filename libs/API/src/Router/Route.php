@@ -42,10 +42,12 @@ final class Route
             static fn(array $m) => '(?P<' . $m[1] . '>' . $m[2] . ')',
             $pattern,
         );
-        // {param+} matches one or more path segments (including slashes)
-        $regex = preg_replace('/\{(\w+)\+\}/', '(?P<$1>.+)', $regex);
+        // {param+} matches one or more path segments (including slashes),
         // {param} matches a single path segment (no slashes)
-        $regex = preg_replace('/\{(\w+)\}/', '(?P<$1>[^/]+)', $regex);
+        $regex = preg_replace(['/\{(\w+)\+\}/', '/\{(\w+)\}/'], ['(?P<$1>.+)', '(?P<$1>[^/]+)'], $regex);
+        if (!is_string($regex)) {
+            return null;
+        }
         $regex = '#^' . $regex . '$#';
 
         if (preg_match($regex, $path, $matches)) {

@@ -18,7 +18,11 @@ use SensitiveParameter;
  * a schema migration.
  *
  * Immutable — mutators return a new instance via {@see withLlm()}.
+ *
+ * Cyclomatic complexity is one guard per secret key in {@see normaliseLlm()};
+ * a normaliser class per key would scatter the schema of a single file.
  */
+// @mago-expect lint:cyclomatic-complexity
 final class SecretsConfig
 {
     public const int CURRENT_VERSION = 1;
@@ -121,47 +125,50 @@ final class SecretsConfig
         $result = [];
 
         if (array_key_exists('apiKey', $llm)) {
-            $value = $llm['apiKey'];
-            $result['apiKey'] = is_string($value) && $value !== '' ? $value : null;
-        }
-        if (isset($llm['provider']) && is_string($llm['provider'])) {
-            $result['provider'] = $llm['provider'];
+            $result['apiKey'] = self::nonEmptyStringOrNull($llm['apiKey']);
         }
         if (array_key_exists('model', $llm)) {
-            $value = $llm['model'];
-            $result['model'] = is_string($value) && $value !== '' ? $value : null;
+            $result['model'] = self::nonEmptyStringOrNull($llm['model']);
         }
-        if (
-            isset($llm['timeout'])
-            && (is_int($llm['timeout']) || is_string($llm['timeout']) && ctype_digit($llm['timeout']))
-        ) {
-            $result['timeout'] = (int) $llm['timeout'];
-        }
-        if (isset($llm['customPrompt']) && is_string($llm['customPrompt'])) {
-            $result['customPrompt'] = $llm['customPrompt'];
-        }
-        if (isset($llm['acpCommand']) && is_string($llm['acpCommand'])) {
-            $result['acpCommand'] = $llm['acpCommand'];
-        }
-        if (isset($llm['acpArgs']) && is_array($llm['acpArgs'])) {
-            $args = [];
-            foreach ($llm['acpArgs'] as $arg) {
-                if (is_string($arg)) {
-                    $args[] = $arg;
-                }
+        foreach (['provider', 'customPrompt', 'acpCommand'] as $key) {
+            if (!is_string($llm[$key] ?? null)) {
+                continue;
             }
-            $result['acpArgs'] = $args;
+            $result[$key] = $llm[$key];
         }
-        if (isset($llm['acpEnv']) && is_array($llm['acpEnv'])) {
-            $env = [];
-            foreach ($llm['acpEnv'] as $key => $value) {
-                if (is_string($key) && is_string($value)) {
-                    $env[$key] = $value;
-                }
-            }
-            $result['acpEnv'] = $env;
+
+        $timeout = self::normaliseTimeout($llm['timeout'] ?? null);
+        if ($timeout !== null) {
+            $result['timeout'] = $timeout;
+        }
+        if (is_array($llm['acpArgs'] ?? null)) {
+            $result['acpArgs'] = array_values(array_filter($llm['acpArgs'], is_string(...)));
+        }
+        if (is_array($llm['acpEnv'] ?? null)) {
+            $result['acpEnv'] = array_filter(
+                $llm['acpEnv'],
+                static fn(mixed $value, mixed $key): bool => is_string($key) && is_string($value),
+                ARRAY_FILTER_USE_BOTH,
+            );
         }
 
         return $result;
+    }
+
+    private static function nonEmptyStringOrNull(mixed $value): ?string
+    {
+        return is_string($value) && $value !== '' ? $value : null;
+    }
+
+    /**
+     * Accepts an int or a digit-only string (JSON clients and form posts send both).
+     */
+    private static function normaliseTimeout(mixed $value): ?int
+    {
+        if (is_int($value)) {
+            return $value;
+        }
+
+        return is_string($value) && ctype_digit($value) ? (int) $value : null;
     }
 }

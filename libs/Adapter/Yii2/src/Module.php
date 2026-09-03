@@ -40,6 +40,7 @@ use AppDevPanel\Api\Http\JsonResponseFactoryInterface;
 use AppDevPanel\Api\Inspector\Authorization\AuthorizationConfigProviderInterface;
 use AppDevPanel\Api\Inspector\Controller\AuthorizationController;
 use AppDevPanel\Api\Inspector\Controller\CacheController;
+use AppDevPanel\Api\Inspector\Controller\CodeCoverageController;
 use AppDevPanel\Api\Inspector\Controller\CommandController;
 use AppDevPanel\Api\Inspector\Controller\ComposerController;
 use AppDevPanel\Api\Inspector\Controller\DatabaseController;
@@ -122,6 +123,7 @@ use AppDevPanel\Kernel\DebuggerIdGenerator;
 use AppDevPanel\Kernel\DebuggerIgnoreConfig;
 use AppDevPanel\Kernel\DebugServer\Broadcaster;
 use AppDevPanel\Kernel\DebugServer\Connection;
+use AppDevPanel\Kernel\Helper\Silencer;
 use AppDevPanel\Kernel\Project\FileProjectConfigStorage;
 use AppDevPanel\Kernel\Project\FileSecretsStorage;
 use AppDevPanel\Kernel\Project\ProjectConfigStorageInterface;
@@ -615,9 +617,13 @@ class Module extends \yii\base\Module implements BootstrapInterface
         return FrontendAssets::resolve(\dirname(__DIR__) . '/resources/dist');
     }
 
+    /**
+     * Best-effort recursive copy: `false` (never a warning) when the target is not
+     * writable, so the caller can fall back to the CDN bundle.
+     */
     private function copyDirectory(string $source, string $target): bool
     {
-        if (!@mkdir($target, 0o755, true) && !is_dir($target)) {
+        if (!self::ensureDirectory($target)) {
             return false;
         }
 
@@ -629,16 +635,25 @@ class Module extends \yii\base\Module implements BootstrapInterface
             /** @var \SplFileInfo $entry */
             $dest = $target . '/' . $iterator->getSubPathname();
             if ($entry->isDir()) {
-                if (!is_dir($dest) && !@mkdir($dest, 0o755, true)) {
+                if (!self::ensureDirectory($dest)) {
                     return false;
                 }
                 continue;
             }
-            if (!@copy($entry->getPathname(), $dest)) {
+            $sourcePath = $entry->getPathname();
+            if (!Silencer::run(static fn(): bool => copy($sourcePath, $dest))) {
                 return false;
             }
         }
         return true;
+    }
+
+    /**
+     * Muted `mkdir`: a concurrent request may create the directory between the checks.
+     */
+    private static function ensureDirectory(string $dir): bool
+    {
+        return is_dir($dir) || Silencer::run(static fn(): bool => mkdir($dir, 0o755, true)) || is_dir($dir);
     }
 
     private function registerApiApplication(\Psr\Container\ContainerInterface $containerBridge): void
@@ -788,6 +803,16 @@ class Module extends \yii\base\Module implements BootstrapInterface
             static fn() => new OpcacheController(\Yii::$container->get(JsonResponseFactoryInterface::class)),
         );
 
+        // Reads CodeCoverageCollector payloads from stored entries — without the repository the endpoint answers 501.
+        \Yii::$container->setSingleton(
+            CodeCoverageController::class,
+            static fn() => new CodeCoverageController(
+                \Yii::$container->get(JsonResponseFactoryInterface::class),
+                \Yii::$container->get(PathResolverInterface::class),
+                \Yii::$container->get(CollectorRepositoryInterface::class),
+            ),
+        );
+
         $storagePath = \Yii::getAlias($this->storagePath);
 
         \Yii::$container->setSingleton(McpSettings::class, static fn() => new McpSettings($storagePath));
@@ -820,7 +845,7 @@ class Module extends \yii\base\Module implements BootstrapInterface
         );
 
         // Project config (frames, OpenAPI specs) — committed to repo at <app>/config/adp/project.json
-        $resolvedProjectConfigPath = (string) \Yii::getAlias($this->projectConfigPath);
+        $resolvedProjectConfigPath = \Yii::getAlias($this->projectConfigPath);
         \Yii::$container->setSingleton(
             ProjectConfigStorageInterface::class,
             static fn() => new FileProjectConfigStorage($resolvedProjectConfigPath),
@@ -849,7 +874,7 @@ class Module extends \yii\base\Module implements BootstrapInterface
             ),
         );
 
-        $resolvedStoragePath = (string) \Yii::getAlias($this->storagePath);
+        $resolvedStoragePath = \Yii::getAlias($this->storagePath);
         // LLM settings — backed by SecretsStorage; legacy `runtime/.llm-settings.json` is auto-migrated.
         \Yii::$container->setSingleton(
             LlmSettingsInterface::class,

@@ -14,6 +14,11 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
+/**
+ * Kan defect comes from the release/asset lookup loops shared by `check` and `download`;
+ * splitting the two subcommands into separate classes would duplicate that lookup.
+ */
+// @mago-expect lint:kan-defect
 #[AsCommand(name: 'frontend:update', description: 'Check for updates and download the latest frontend build')]
 final class FrontendUpdateCommand extends Command
 {

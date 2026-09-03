@@ -96,9 +96,13 @@ packages/
     │   │   ├── mui/        # MUI type extensions
     │   │   ├── yii/        # Yii-specific input matchers
     │   │   └── yup/        # Yup validation adapters
-    │   ├── Helper/         # Utility functions (25 helpers)
+    │   ├── Helper/         # Utility functions (33 helpers)
     │   │   ├── fuzzyMatch.ts              # Fuzzy matching algorithm (score + indices)
     │   │   ├── layoutTranslit.ts          # QWERTY ↔ ЙЦУКЕН transliteration
+    │   │   ├── clipboard.ts               # `copyText(text): Promise<boolean>` — never throws; async Clipboard API with `execCommand('copy')` fallback. The only allowed way to copy (no `clipboard-copy`, no bare `navigator.clipboard`)
+    │   │   ├── panelBase.ts               # `basenameFromDocument()` (router basename from `<base href>`), `stripBasename(url, basename)` (mount prefix → router-relative URL)
+    │   │   ├── panelMountPath.ts          # `panelPagePath()` — builds `{mount}{panelPath}{?query}` URLs (see "Building URLs to ADP Pages")
+    │   │   ├── dispatchWindowEvent.ts     # `postMessage` envelope for toolbar ↔ panel (`router.navigate`, `panel.loaded`)
     │   └── Types/          # TypeScript type definitions
     └── package.json
 ```
@@ -309,6 +313,27 @@ npm run check          # Run all checks
 **Prettier** (v3.8+): Single quotes, trailing commas, 120 char width, 4-space indent, `objectWrap: "collapse"`, `prettier-plugin-organize-imports`.
 
 **ESLint**: @typescript-eslint with `consistent-type-definitions: "type"`, integrated with Prettier via `eslint-config-prettier`.
+
+## Testing
+
+```bash
+npm test               # Vitest unit suite (jsdom + node), config: vitest.config.ts
+npm run test:e2e       # Vitest browser suite (Playwright/Chromium), config: vitest.browser.config.ts
+CHROMIUM_PATH=/path/to/chrome npm run test:e2e   # point the browser suite at a preinstalled Chromium
+```
+
+Unit suite — `packages/*/src/**/*.test.{ts,tsx}` (excludes `__e2e__/` and `*.browser.test.*`):
+
+| Package | Files | Tests |
+|---------|------:|------:|
+| `packages/sdk` | 65 | 576 |
+| `packages/panel` | 40 | 442 |
+| `packages/toolbar` | 6 | 33 |
+| **Total** | **111** | **1051** |
+
+Browser suite — `packages/*/src/**/*.browser.test.{ts,tsx}`: 10 files, 54 tests (panel: navigation, debug, inspector, API interaction; toolbar: drag, snap, resize, navigation, empty state). Zero skipped tests is the policy — `it.skip` is never an acceptable way to keep a test green.
+
+`vitest.config.ts` runs two projects that share the root options (`extends: true`): `node` for plain `.test.ts` files and `jsdom` for `.test.tsx` plus the `.test.ts` files listed in `domDependentTsTests` (they touch `document`/`window`/`navigator`). A new `.test.ts` that fails with "document is not defined" must be added to that list or renamed to `.test.tsx`. Workers are `threads` (isolated — the suite relies on per-file `vi.mock` registrations and a fresh jsdom document, so `isolate: false` breaks it) and the `@mui/*` packages are pre-bundled through `deps.optimizer.client`, which cuts the per-file import cost roughly in half. `testTimeout`/`hookTimeout` are hard ceilings (10s jsdom, 15s browser) — never raise them. Console output is not silenced: a `console.error`/`console.warn` during a test shows up as a `stderr |` block in the report, so keep tests warning-free.
 
 ## Building URLs to ADP Pages
 

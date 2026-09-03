@@ -699,6 +699,7 @@ final class AppDevPanelServiceProvider extends ServiceProvider
             fn() => new CodeCoverageController(
                 $this->app->make(JsonResponseFactoryInterface::class),
                 $this->app->make(PathResolverInterface::class),
+                $this->app->make(CollectorRepositoryInterface::class),
             ),
         );
 

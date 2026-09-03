@@ -106,7 +106,7 @@ final class RoadRunnerLifecycleTest extends TestCase
 
         $seen = [];
         for ($i = 0; $i < 20; $i++) {
-            $resp = $middleware->process(new ServerRequest('GET', "/loop/$i"), $this->emptyHandler());
+            $resp = $middleware->process(new ServerRequest('GET', "/loop/{$i}"), $this->emptyHandler());
             self::assertSame(200, $resp->getStatusCode());
             self::assertTrue($resp->hasHeader('X-Debug-Id'));
             $seen[] = $resp->getHeaderLine('X-Debug-Id');
@@ -161,7 +161,7 @@ final class RoadRunnerLifecycleTest extends TestCase
         // any data that came from a prior request — otherwise we'd be leaking entries
         // across the RoadRunner request boundary.
         $entries = $collector->getCollected();
-        self::assertIsArray($entries, "getCollected() output ($label) must be an array");
+        self::assertIsArray($entries, "getCollected() output ({$label}) must be an array");
     }
 
     /**

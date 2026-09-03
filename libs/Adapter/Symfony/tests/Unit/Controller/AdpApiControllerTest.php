@@ -124,6 +124,23 @@ final class AdpApiControllerTest extends TestCase
         $this->assertSame('value', $response->headers->get('X-Custom'));
     }
 
+    public function testMultipleSetCookieHeadersArePreservedAsSeparateLines(): void
+    {
+        $controller = $this->createController('application/json', '{}', 200, [
+            'Set-Cookie' => ['a=1; Path=/', 'b=2; Path=/; HttpOnly'],
+        ]);
+        $request = Request::create('/inspect/api/files?path=/', 'GET');
+        $response = $controller($request);
+
+        // ResponseHeaderBag re-parses each line into a Cookie object — two lines must yield two cookies.
+        $cookies = $response->headers->getCookies();
+        $this->assertCount(2, $cookies);
+        $this->assertSame(['a', 'b'], array_map(static fn($cookie) => $cookie->getName(), $cookies));
+        $this->assertSame(['1', '2'], array_map(static fn($cookie) => $cookie->getValue(), $cookies));
+        $this->assertTrue($cookies[1]->isHttpOnly());
+        $this->assertCount(2, $response->headers->all('Set-Cookie'));
+    }
+
     public function testHttpMethodPreserved(): void
     {
         $capturedRequest = null;
@@ -184,7 +201,7 @@ final class AdpApiControllerTest extends TestCase
     }
 
     /**
-     * @param array<string, string> $extraHeaders
+     * @param array<string, string|list<string>> $extraHeaders
      */
     private function createController(
         string $contentType = 'application/json',
@@ -196,7 +213,7 @@ final class AdpApiControllerTest extends TestCase
 
         $testController = new class($psr17, $contentType, $body, $status, $extraHeaders) {
             /**
-             * @param array<string, string> $extraHeaders
+             * @param array<string, string|list<string>> $extraHeaders
              */
             public function __construct(
                 private readonly Psr17Factory $psr17,

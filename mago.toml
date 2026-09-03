@@ -236,6 +236,7 @@ excessive-parameter-list = { level = "warning", exclude = [
     "libs/Kernel/tests",
     "libs/API/tests",
     "libs/Adapter/Symfony/tests",
+    "libs/Adapter/Yii3/tests",
     "libs/Adapter/Yii2/tests",
     "libs/Adapter/Laravel/tests",
     "libs/Testing/tests",
