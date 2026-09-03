@@ -30,10 +30,11 @@ use Spiral\Core\InjectableConfig;
  *   ignored_commands   ['help', 'list', 'completion']
  *   collectors         every collector enabled by default
  *
- * One accessor per config key is the `InjectableConfig` contract — splitting the
- * class by option group would hide the single config-file schema.
+ * One accessor per config key (each with its env-var fallback) is the
+ * `InjectableConfig` contract — splitting the class by option group would hide
+ * the single config-file schema, hence the method count / complexity pragmas.
  */
-// @mago-expect lint:too-many-methods
+// @mago-expect lint:too-many-methods,cyclomatic-complexity
 final class AdpConfig extends InjectableConfig
 {
     public const CONFIG = 'app-dev-panel';

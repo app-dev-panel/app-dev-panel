@@ -25,12 +25,6 @@ message = "Numeric literal could use underscore separators for readability."
 count = 2
 
 [[issues]]
-file = "libs/API/src/Ingestion/Controller/OtlpController.php"
-code = "no-redundant-nullsafe"
-message = "The nullsafe operator (`?->`) is redundant when used with `??`."
-count = 1
-
-[[issues]]
 file = "libs/API/src/Inspector/Command/CodeceptionCommand.php"
 code = "inline-variable-return"
 message = "Variable assignment can be inlined into the return statement."
@@ -38,18 +32,6 @@ count = 1
 
 [[issues]]
 file = "libs/API/src/Inspector/Command/CodeceptionCommand.php"
-code = "no-error-control-operator"
-message = "Unsafe use of error control operator `@`."
-count = 1
-
-[[issues]]
-file = "libs/API/src/Inspector/Command/MagoCommand.php"
-code = "no-empty"
-message = "Use of the `empty` construct."
-count = 1
-
-[[issues]]
-file = "libs/API/src/Inspector/Command/MagoCommand.php"
 code = "no-error-control-operator"
 message = "Unsafe use of error control operator `@`."
 count = 1
@@ -65,18 +47,6 @@ file = "libs/API/src/Inspector/Command/PHPUnitCommand.php"
 code = "no-error-control-operator"
 message = "Unsafe use of error control operator `@`."
 count = 1
-
-[[issues]]
-file = "libs/API/src/Inspector/Controller/CodeCoverageController.php"
-code = "inline-variable-return"
-message = "Variable assignment can be inlined into the return statement."
-count = 1
-
-[[issues]]
-file = "libs/API/src/Inspector/Controller/CodeCoverageController.php"
-code = "no-debug-symbols"
-message = "Do not commit debug functions."
-count = 3
 
 [[issues]]
 file = "libs/API/src/Inspector/Controller/ComposerController.php"
@@ -135,7 +105,7 @@ count = 1
 [[issues]]
 file = "libs/API/src/Llm/Acp/AcpDaemonManager.php"
 code = "kan-defect"
-message = "Class has a high kan defect score (2.69)."
+message = "Class has a high kan defect score (2.1300000000000003)."
 count = 1
 
 [[issues]]
@@ -148,7 +118,7 @@ count = 2
 file = "libs/API/src/Llm/Acp/AcpDaemonManager.php"
 code = "no-error-control-operator"
 message = "Unsafe use of error control operator `@`."
-count = 9
+count = 2
 
 [[issues]]
 file = "libs/API/src/Llm/Acp/AcpDaemonManager.php"
@@ -296,12 +266,6 @@ count = 1
 
 [[issues]]
 file = "libs/API/src/Llm/FileLlmSettings.php"
-code = "no-isset"
-message = "Use of the `isset` construct."
-count = 8
-
-[[issues]]
-file = "libs/API/src/Llm/FileLlmSettings.php"
 code = "too-many-methods"
 message = "Class has too many methods."
 count = 1
@@ -445,12 +409,6 @@ message = "Numeric literal could use underscore separators for readability."
 count = 1
 
 [[issues]]
-file = "libs/API/tests/Unit/Inspector/Controller/CodeCoverageControllerTest.php"
-code = "no-error-control-operator"
-message = "Unsafe use of error control operator `@`."
-count = 2
-
-[[issues]]
 file = "libs/API/tests/Unit/Inspector/Controller/CommandControllerTest.php"
 code = "explicit-octal"
 message = "Use explicit octal numeral notation."
@@ -472,12 +430,6 @@ count = 1
 file = "libs/API/tests/Unit/Inspector/Controller/FileControllerTest.php"
 code = "no-isset"
 message = "Use of the `isset` construct."
-count = 1
-
-[[issues]]
-file = "libs/API/tests/Unit/Inspector/Controller/RedisControllerTest.php"
-code = "cyclomatic-complexity"
-message = "Class has high complexity."
 count = 1
 
 [[issues]]
@@ -520,7 +472,7 @@ count = 5
 file = "libs/API/tests/Unit/Llm/FileLlmSettingsTest.php"
 code = "no-error-control-operator"
 message = "Unsafe use of error control operator `@`."
-count = 5
+count = 4
 
 [[issues]]
 file = "libs/API/tests/Unit/Llm/LlmProviderServiceTest.php"
@@ -646,12 +598,6 @@ count = 2
 file = "libs/Adapter/Spiral/src/Bootloader/AppDevPanelBootloader.php"
 code = "cyclomatic-complexity"
 message = "Class has high complexity."
-count = 1
-
-[[issues]]
-file = "libs/Adapter/Spiral/src/Bootloader/AppDevPanelBootloader.php"
-code = "kan-defect"
-message = "Class has a high kan defect score (2.48)."
 count = 1
 
 [[issues]]
@@ -1403,12 +1349,6 @@ file = "libs/Kernel/src/Collector/TranslationRecord.php"
 code = "excessive-parameter-list"
 message = "Parameter list is too long."
 count = 1
-
-[[issues]]
-file = "libs/Kernel/src/DebugServer/Broadcaster.php"
-code = "no-error-control-operator"
-message = "Unsafe use of error control operator `@`."
-count = 6
 
 [[issues]]
 file = "libs/Kernel/src/DebugServer/Connection.php"

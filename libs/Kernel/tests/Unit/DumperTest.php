@@ -832,25 +832,19 @@ final class DumperTest extends TestCase
                 {"CurlHandle#{$curlResourceObjectId}":"{stateless object}"}
                 S,
         ];
-        $stdoutSeekable = stream_get_meta_data(STDOUT)['seekable'] ? 'true' : 'false';
-        yield 'stdout' => [
-            STDOUT,
+        // php://memory and php://temp have deterministic meta-data; STDIN/STDOUT/STDERR do not
+        // (a socket-backed stdin reports a different wrapper/stream type), which made this
+        // provider depend on the harness environment.
+        yield 'memory stream' => [
+            fopen('php://memory', 'rb'),
             <<<S
-                {"timed_out":false,"blocked":true,"eof":false,"wrapper_type":"PHP","stream_type":"STDIO","mode":"wb","unread_bytes":0,"seekable":{$stdoutSeekable},"uri":"php:\/\/stdout"}
+                {"timed_out":false,"blocked":true,"eof":false,"wrapper_type":"PHP","stream_type":"MEMORY","mode":"rb","unread_bytes":0,"seekable":true,"uri":"php:\/\/memory"}
                 S,
         ];
-        $stderrSeekable = stream_get_meta_data(STDERR)['seekable'] ? 'true' : 'false';
-        yield 'stderr' => [
-            STDERR,
+        yield 'temp stream' => [
+            fopen('php://temp', 'w+b'),
             <<<S
-                {"timed_out":false,"blocked":true,"eof":false,"wrapper_type":"PHP","stream_type":"STDIO","mode":"wb","unread_bytes":0,"seekable":{$stderrSeekable},"uri":"php:\/\/stderr"}
-                S,
-        ];
-        $stdinSeekable = stream_get_meta_data(STDIN)['seekable'] ? 'true' : 'false';
-        yield 'stdin' => [
-            STDIN,
-            <<<S
-                {"timed_out":false,"blocked":true,"eof":false,"wrapper_type":"PHP","stream_type":"STDIO","mode":"rb","unread_bytes":0,"seekable":{$stdinSeekable},"uri":"php:\/\/stdin"}
+                {"wrapper_type":"PHP","stream_type":"TEMP","mode":"w+b","unread_bytes":0,"seekable":true,"uri":"php:\/\/temp"}
                 S,
         ];
     }
