@@ -42,4 +42,37 @@ final class FilesystemStreamProxyTest extends TestCase
 
         $this->assertEquals($firstElement, readdir($handle));
     }
+
+    public function testHandleClosedAfterUnregisterDoesNotReRegisterProxy(): void
+    {
+        FilesystemStreamProxy::register();
+        $handle = opendir(sys_get_temp_dir());
+        $this->assertNotFalse($handle);
+
+        // Collector shutdown happens while the directory handle is still open.
+        FilesystemStreamProxy::unregister();
+        $this->assertFalse(FilesystemStreamProxy::$registered);
+
+        // The lingering handle is still served by the proxy instance; closing it must not
+        // re-enable the proxy globally.
+        readdir($handle);
+        closedir($handle);
+
+        $this->assertFalse(FilesystemStreamProxy::$registered);
+        // With the native wrapper back in place, registering again must go through the normal path.
+        FilesystemStreamProxy::register();
+        $this->assertTrue(FilesystemStreamProxy::$registered);
+    }
+
+    public function testHandleClosedWhileRegisteredKeepsProxyRegistered(): void
+    {
+        FilesystemStreamProxy::register();
+        $handle = opendir(sys_get_temp_dir());
+        $this->assertNotFalse($handle);
+
+        readdir($handle);
+        closedir($handle);
+
+        $this->assertTrue(FilesystemStreamProxy::$registered);
+    }
 }

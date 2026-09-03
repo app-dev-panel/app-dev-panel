@@ -97,4 +97,8 @@
             <directory>libs/Adapter/Spiral/src</directory>
         </include>
     </source>
+    <extensions>
+        <!-- Fails the run when a test leaks ADP's global file/http stream proxies (see tests/Extension). -->
+        <bootstrap class="AppDevPanel\Tests\Extension\StreamWrapperLeakGuard"/>
+    </extensions>
 </phpunit>

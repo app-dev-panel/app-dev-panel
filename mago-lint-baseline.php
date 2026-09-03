@@ -1381,12 +1381,6 @@ message = "Unused import: `ArrayObject`."
 count = 1
 
 [[issues]]
-file = "libs/Kernel/src/Helper/StreamWrapper/StreamWrapper.php"
-code = "no-error-control-operator"
-message = "Unsafe use of error control operator `@`."
-count = 1
-
-[[issues]]
 file = "libs/Kernel/src/Storage/BroadcastingStorage.php"
 code = "no-empty-catch-clause"
 message = "Do not use empty `catch` blocks."

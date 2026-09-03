@@ -35,11 +35,21 @@ trait StreamProxyTrait
 
     public function __call(string $name, array $arguments)
     {
+        // Handles opened while the proxy was registered outlive `unregister()` (the collector's
+        // shutdown). Their remaining operations (close, stat, eof, ...) still arrive here, so the
+        // proxy must only be re-registered if it was registered before this call — otherwise a
+        // lingering handle silently re-enables the proxy for the rest of the process (RoadRunner
+        // workers, PHPUnit runs).
+        $wasRegistered = static::$registered;
         try {
-            static::unregister();
+            if ($wasRegistered) {
+                static::unregister();
+            }
             return $this->decorated->{$name}(...$arguments);
         } finally {
-            static::register();
+            if ($wasRegistered) {
+                static::register();
+            }
         }
     }
 

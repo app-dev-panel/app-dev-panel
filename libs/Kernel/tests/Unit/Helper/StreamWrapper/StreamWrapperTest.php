@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Kernel\Tests\Unit\Helper\StreamWrapper;
 
+use AppDevPanel\Kernel\Collector\Stream\FilesystemStreamProxy;
 use AppDevPanel\Kernel\Tests\Support\Stub\PhpStreamProxy;
 use PHPUnit\Framework\TestCase;
 
@@ -12,6 +13,7 @@ final class StreamWrapperTest extends TestCase
     protected function tearDown(): void
     {
         PhpStreamProxy::unregister();
+        FilesystemStreamProxy::unregister();
     }
 
     public function testSeekStream(): void
@@ -313,6 +315,58 @@ final class StreamWrapperTest extends TestCase
 
         $this->assertIsArray($result);
         $this->assertArrayHasKey('size', $result);
+    }
+
+    public function testUrlStatWithLinkFlagDoesNotFollowSymlinks(): void
+    {
+        $dir = sys_get_temp_dir() . '/adp-url-stat-' . bin2hex(random_bytes(4));
+        mkdir($dir);
+        $target = $dir . '/target';
+        $link = $dir . '/link';
+        mkdir($target);
+        symlink($target, $link);
+
+        try {
+            $wrapper = new \AppDevPanel\Kernel\Helper\StreamWrapper\StreamWrapper();
+
+            $followed = $wrapper->url_stat($link, 0);
+            $notFollowed = $wrapper->url_stat($link, STREAM_URL_STAT_LINK);
+            $quietNotFollowed = $wrapper->url_stat($link, STREAM_URL_STAT_LINK | STREAM_URL_STAT_QUIET);
+
+            $this->assertIsArray($followed);
+            $this->assertIsArray($notFollowed);
+            $this->assertIsArray($quietNotFollowed);
+            // 0o040_000 = directory (target), 0o120_000 = symbolic link (the link itself).
+            $this->assertSame(0o040_000, $followed['mode'] & 0o170_000);
+            $this->assertSame(0o120_000, $notFollowed['mode'] & 0o170_000);
+            $this->assertSame(0o120_000, $quietNotFollowed['mode'] & 0o170_000);
+        } finally {
+            unlink($link);
+            rmdir($target);
+            rmdir($dir);
+        }
+    }
+
+    public function testIsLinkWorksWhileFilesystemProxyIsRegistered(): void
+    {
+        $dir = sys_get_temp_dir() . '/adp-is-link-' . bin2hex(random_bytes(4));
+        mkdir($dir);
+        $target = $dir . '/target';
+        $link = $dir . '/link';
+        mkdir($target);
+        symlink($target, $link);
+
+        try {
+            FilesystemStreamProxy::register();
+            $this->assertTrue(is_link($link));
+            $this->assertTrue(is_dir($link));
+            $this->assertFalse(is_link($target));
+        } finally {
+            FilesystemStreamProxy::unregister();
+            unlink($link);
+            rmdir($target);
+            rmdir($dir);
+        }
     }
 
     public function testUrlStatNonExistentQuiet(): void

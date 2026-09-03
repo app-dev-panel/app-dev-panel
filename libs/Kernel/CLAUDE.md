@@ -232,7 +232,7 @@ The application code is completely unaware of the interception.
 **Stream proxies** (PHP stream wrapper interception):
 - `FilesystemStreamProxy` — wraps `file://` stream wrapper, feeds `FilesystemStreamCollector`
 - `HttpStreamProxy` — wraps `http://` and `https://` stream wrappers, feeds `HttpStreamCollector`
-- `StreamProxyTrait` — shared delegation logic for both stream wrappers
+- `StreamProxyTrait` — shared delegation logic for both stream wrappers. `__call()` temporarily unregisters the proxy to reach the native wrapper and re-registers it only if it was registered before the call, so handles that outlive `shutdown()` cannot re-enable the proxy. `StreamWrapper::url_stat()` honours `STREAM_URL_STAT_LINK` (`lstat`), so `is_link()` works while the proxy is active.
 
 **Proxies moved to Yii adapter** (`libs/Adapter/Yii3/src/Proxy/`):
 - `ContainerInterfaceProxy` (PSR-11), `ContainerProxyConfig`, `ProxyLogTrait`

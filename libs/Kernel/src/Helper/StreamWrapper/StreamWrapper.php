@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace AppDevPanel\Kernel\Helper\StreamWrapper;
 
+use AppDevPanel\Kernel\Helper\Silencer;
 use Throwable;
 
 use function trigger_error;
 
 use const E_USER_ERROR;
 use const STREAM_MKDIR_RECURSIVE;
+use const STREAM_URL_STAT_LINK;
 use const STREAM_URL_STAT_QUIET;
 use const STREAM_USE_PATH;
 
@@ -210,11 +212,17 @@ final class StreamWrapper implements StreamWrapperInterface
 
     public function url_stat(string $path, int $flags): array|false
     {
+        // STREAM_URL_STAT_LINK means "do not follow symlinks" (is_link(), lstat(), filetype()).
+        // Ignoring it made is_link() report false for every symlink while the proxy was registered.
+        $quiet = ($flags & STREAM_URL_STAT_QUIET) === STREAM_URL_STAT_QUIET;
+        $noFollow = ($flags & STREAM_URL_STAT_LINK) === STREAM_URL_STAT_LINK;
+
         try {
-            if (($flags & STREAM_URL_STAT_QUIET) === STREAM_URL_STAT_QUIET) {
-                return @stat($path);
+            $stat = static fn(): array|false => $noFollow ? lstat($path) : stat($path);
+            if ($quiet) {
+                return Silencer::run($stat);
             }
-            return stat($path);
+            return $stat();
         } catch (Throwable $e) {
             if (($flags & STREAM_URL_STAT_QUIET) === STREAM_URL_STAT_QUIET) {
                 return false;

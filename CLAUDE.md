@@ -31,6 +31,10 @@ Rules:
 
 If you see yourself reaching for `markTestSkipped`, stop and ask for help writing a proper mock.
 
+Global state guard: `tests/Extension/StreamWrapperLeakGuard.php` (registered in `phpunit.xml.dist`) fails the run
+when a test leaves ADP's `file`/`http` stream proxies registered. Always pair `startup()`/`register()` with
+`shutdown()`/`unregister()` in a `finally` block.
+
 ## Hard Timeouts — NEVER RAISE
 
 The test infrastructure is aggressively time-boxed so that nothing — PHPUnit, Vitest, fixtures,

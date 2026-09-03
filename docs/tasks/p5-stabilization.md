@@ -118,6 +118,7 @@ Legend: `[x]` done in this branch, `[ ]` open, `[~]` partially done / deferred w
 ### [x] F8 — `RedisController::keys()` passed an array to phpredis `scan()` (`TypeError` → 500); now uses the by-reference iterator API
 ### [x] F9 — `CodeCoverageController` was autowired without the collector repository in every adapter; explicit wiring + tests in Yii3/Symfony/Laravel/Yii2/Spiral
 ### [x] F10 — `ComposerController::require` `json_decode`d composer's plain-text output and 500ed on every successful install
+### [x] F11 — `StreamProxyTrait::__call` re-registered the `file`/`http` proxy unconditionally, so a handle closed after `shutdown()` re-enabled the proxy for the rest of the process (RoadRunner workers, whole PHPUnit runs); `StreamWrapper::url_stat` ignored `STREAM_URL_STAT_LINK`, so `is_link()` was always false under the proxy. Both fixed with tests; `tests/Extension/StreamWrapperLeakGuard.php` now fails any run in which a test leaves a proxy registered (root cause of the order-dependent symlink failures seen once in `composer test:unit`).
 
 ## 7. Frontend runtime bugs (Medium)
 
