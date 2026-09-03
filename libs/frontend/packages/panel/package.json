@@ -25,7 +25,7 @@
     "build": "npm run build:prod",
     "build:dev": "tsc --build tsconfig.build.json && VITE_BUILD_ID=${VITE_BUILD_ID:-`git rev-parse --short HEAD`} VITE_ENV=${VITE_ENV:-dev} vite build",
     "build:prod": "rm -rf dist; tsc --build tsconfig.build.json && VITE_BUILD_ID=${VITE_BUILD_ID:-`git rev-parse --short HEAD`} VITE_ENV=${VITE_ENV:-github} vite build",
-    "test": "vite test",
+    "test": "vitest run --root ../.. packages/panel",
     "serve:dev": "vite preview --host",
     "serve:prod": "VITE_ENV=github vite preview --host",
     "generate-service-worker": "tsc && vite build && yes | cp -rf build/service-worker.js* build/static public",

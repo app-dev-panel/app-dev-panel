@@ -72,6 +72,45 @@ else
 fi
 
 # ----------------------------------------------------------
+# 1b. ext-redis — required by RedisControllerTest (libs/API)
+#     Non-fatal: tests fall back to the bundled \Redis stub when missing,
+#     but the extension is preferred so behaviour matches production.
+# ----------------------------------------------------------
+step "Checking redis extension..."
+
+if php -m 2>/dev/null | grep -qi '^redis$'; then
+    ok "redis extension already loaded"
+else
+    REDIS_INSTALLED=0
+
+    # Try the distro package first (fast, no compiler needed)
+    step "Installing redis extension via apt..."
+    if apt-get update -qq > /dev/null 2>&1 && apt-get install -y -qq php8.4-redis > /dev/null 2>&1; then
+        REDIS_INSTALLED=1
+    fi
+
+    # Fallback: PECL build + ini file
+    if [ "$REDIS_INSTALLED" -eq 0 ] || ! php -m 2>/dev/null | grep -qi '^redis$'; then
+        step "apt package unavailable — building redis extension via PECL..."
+        if ! command -v pecl &>/dev/null || ! command -v phpize &>/dev/null; then
+            apt-get update -qq > /dev/null 2>&1 && apt-get install -y -qq php8.4-dev php-pear build-essential > /dev/null 2>&1 || true
+        fi
+        if command -v pecl &>/dev/null && printf 'no\nno\nno\nno\n' | pecl install -f redis > /dev/null 2>&1; then
+            INI_DIR="$(php -i 2>/dev/null | grep 'Scan this dir' | awk -F'=>' '{print $NF}' | xargs)"
+            if [ -n "$INI_DIR" ] && [ -d "$INI_DIR" ]; then
+                echo "extension=redis.so" > "${INI_DIR}/20-redis.ini"
+            fi
+        fi
+    fi
+
+    if php -m 2>/dev/null | grep -qi '^redis$'; then
+        ok "redis extension installed and loaded"
+    else
+        warn "redis extension install failed — RedisControllerTest will use the \Redis stub"
+    fi
+fi
+
+# ----------------------------------------------------------
 # 2. Chromium + ChromeDriver (for e2e tests)
 #    Required for: make test-frontend-e2e, PHPUnit E2E suite
 #    WebDriverIO looks for `google-chrome` via locateChrome().
@@ -219,6 +258,7 @@ echo -e "${GREEN}═════════════════════
 echo ""
 echo -e "  PHP:          $(php -v 2>&1 | head -1 | awk '{print $2}')"
 echo -e "  PCOV:         $(php -m 2>/dev/null | grep -qi pcov && echo 'loaded' || echo 'NOT loaded')"
+echo -e "  ext-redis:    $(php -m 2>/dev/null | grep -qi '^redis$' && echo 'loaded' || echo 'NOT loaded')"
 echo -e "  Chromium:     $(google-chrome --version --no-sandbox 2>/dev/null || chromium --version --no-sandbox 2>/dev/null || echo 'not found')"
 echo -e "  ChromeDriver: $(chromedriver --version 2>/dev/null | head -1 || echo 'not found')"
 echo -e "  Node:         $(node -v 2>&1)"

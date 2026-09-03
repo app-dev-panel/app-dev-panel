@@ -38,11 +38,15 @@ Legend: `[x]` done in this branch, `[ ]` open, `[~]` partially done / deferred w
 - `mago-playgrounds` job installs playground vendors before `analyze`.
 - `deploy-docs.yml` waits for the Modulite job too; `split.yml` publishes `adapter-spiral`.
 - `.github/dependabot.yml` committed with grouped updates (illuminate/laravel, symfony, yiisoft, @mui, github-actions).
+- `nhedger/setup-mago` pinned to the version Composer installs (1.17.0) so local and CI formatting agree; the three playgrounds that failed `mago fmt --check` on `master` are reformatted.
+- Root `composer.lock` is git-ignored: the repository never shipped one and a truncated lock file slipped into a WIP commit during this branch.
 
 ### [x] A4 — Claude Code hooks were silently no-ops
 - `run-tests.sh`: wrong lerna scope (`@adp/*`), missing suite map for FrontendAssets/Spiral, no timeout wrapper.
 - `lint-file.sh` / `require-tests-for-pr.sh`: stale `mago format` subcommand, `| tail` swallowing exit codes (the pre-PR gate always passed), no PATH fallback for `mago`.
-- `settings.json`: one PostToolUse block instead of three; PR gate also covers `gh pr create` via Bash.
+- `settings.json`: one PostToolUse block instead of three; the PR gate also fires for the GitHub CLI PR-creation command issued through Bash (matched only at a command position, not inside strings).
+- `setup-env.sh` installs ext-redis (apt, then pecl fallback) so web sessions match CI.
+- Per-package `test` scripts (`vite test` was not a Vite subcommand) now run `vitest run --root ../.. packages/<pkg>`; `lerna` is a pinned devDependency; `clipboard-copy` dropped from the sdk.
 
 ### [ ] A5 — Still not covered by CI (needs infra decision)
 - Playground E2E (`make test-fixtures`, `test-scenario`, `test-mcp`, `test-pages`) — requires 5 running playground servers with installed vendors in CI. Proposal: one `playground-e2e` job per adapter with `composer install` + `php -S`, gated on `libs/**` and `playground/**` paths.
@@ -53,7 +57,7 @@ Legend: `[x]` done in this branch, `[ ]` open, `[~]` partially done / deferred w
 ## 2. Zero-tolerance test policy (Critical)
 
 ### [x] B1 — Remove every `markTestSkipped()` (52 calls)
-- ext-redis (20), OPcache state (1), Windows guards (6, CI is Linux-only), optional packages that are in `require-dev` anyway (11), playground-dependent integration tests (moved to `#[Group('playground')]` with hard failures instead of skips), `tests/E2E` WebDriver skips (hard failure + seeded entries), network-dependent `HttpStreamCollectorTest` (rewritten against local streams), `illuminate/foundation` (added as dev dependency).
+- ext-redis (20), OPcache state (1), Windows guards (6, CI is Linux-only), optional packages that are in `require-dev` anyway (11), playground-dependent integration tests (moved to `#[Group('playground')]` with hard failures instead of skips), `tests/E2E` WebDriver skips (hard failure + seeded entries), network-dependent `HttpStreamCollectorTest` (rewritten against local streams), `illuminate/foundation` (already shipped by `laravel/framework` in require-dev, guard deleted). `DumperTest` no longer depends on the harness STDIN/STDOUT type.
 - `tools/check-test-strictness.php` is now green and enforced in CI.
 
 ### [x] B2 — Playground `phpunit.xml.dist` files get the two missing `beStrictAbout*` attributes
@@ -62,9 +66,10 @@ Legend: `[x]` done in this branch, `[ ]` open, `[~]` partially done / deferred w
 - `DebugServerBroadcastCommandTest` no longer hits a real socket; `Broadcaster` never blocks or emits notices.
 - LLM settings migration no longer prints to stdout during tests.
 
-### [ ] B4 — Suite duration is at the ceiling
-- PHPUnit: 147s for 3114 tests on a 4-core box under load. Largest offenders to profile: Kernel integration-style tests (temp dirs, storage), Cli process tests. Target < 90s.
-- Vitest: 261s under load / ~50s idle; `import` phase dominates (408s cumulative). Consider `pool: 'threads'`, `isolate: false` for pure helper tests, and splitting MUI-heavy suites.
+### [x] B4 — Suite duration was at the ceiling
+- PHPUnit: 147s → 44s for 3511 tests (the three 10s-hanging `DebugServerBroadcastCommandTest` cases were the bulk; `Broadcaster` now uses a non-blocking datagram socket).
+- Vitest: 165-175s → ~104s on the same loaded box (`pool: 'threads'`, MUI pre-bundled via `deps.optimizer`, two projects: `node` for plain `.test.ts`, `jsdom` for the rest). `isolate: false` was tried and reverted (400 failures: per-file `vi.mock` registries and jsdom documents are shared). `onConsoleLog` silencing removed; the one hidden `console.error` is now asserted.
+- Browser e2e: the two `it.skip` cases were rewritten as real tests (0 skipped, 68 tests).
 
 ## 3. Open GitHub issues (High)
 
@@ -110,6 +115,9 @@ Legend: `[x]` done in this branch, `[ ]` open, `[~]` partially done / deferred w
 ### [x] F5 — GC lock file unlinked while held; duplicate `GarbageCollector` class
 ### [x] F6 — OpenAPI spec double-encoded; `JsonResponseFactory` 500 on invalid UTF-8; multi-value headers joined with `, ` (breaks `Set-Cookie`); `FrontendUpdateCommand` zip-slip + temp file leak
 ### [x] F7 — Yii2 `WebListener` hard-coded `/debug/api`; `timeline` collector toggle ignored
+### [x] F8 — `RedisController::keys()` passed an array to phpredis `scan()` (`TypeError` → 500); now uses the by-reference iterator API
+### [x] F9 — `CodeCoverageController` was autowired without the collector repository in every adapter; explicit wiring + tests in Yii3/Symfony/Laravel/Yii2/Spiral
+### [x] F10 — `ComposerController::require` `json_decode`d composer's plain-text output and 500ed on every successful install
 
 ## 7. Frontend runtime bugs (Medium)
 
@@ -127,8 +135,9 @@ Legend: `[x]` done in this branch, `[ ]` open, `[~]` partially done / deferred w
 ## 8. Deferred / needs a decision
 
 - `strictNullChecks` / `noImplicitAny` are off repo-wide (`libs/frontend/tsconfig.json`). Enabling them is the single biggest quality lever for the frontend; error counts per package are recorded in the branch summary. Do it package by package, sdk first.
-- Frontend unit coverage: toolbar has 3 test files for 46 sources; `onConsoleLog: () => false` hides React warnings. Add a coverage threshold once the toolbar has baseline tests.
-- `mago lint` has 55 issues outside the baseline and the baseline contains stale entries; `mago analyze` has 21. Fix them file by file, then regenerate the baseline (`composer lint:baseline`) — bulk regeneration re-adds ~1380 entries.
+- Frontend unit coverage: toolbar has 6 test files for 46 sources. Add a coverage threshold (`@vitest/coverage-v8` is installed, no script yet).
+- `mago lint` / `mago analyze`: all 55 + 21 non-baseline issues fixed in this branch (`Silencer` helper replaces `@`, extractions for complexity), baseline regenerated 267 → 257 entries. Keep it at zero: `mago lint` exits 0 on warnings, so a non-empty output is the signal, not the exit code — consider `--minimum-fail-level warning` in CI.
+- `website/ru/api/rest.md` lacks the `## LLM API` section present in the EN page.
 - Spiral bootloader wires 17 collectors vs 29 in the other adapters with no documented reason.
 - Per-lib `composer.json` scripts are inconsistent and only 4 of 12 libs ship a `phpunit.xml.dist`.
 - `docs/tasks/p4-debt.md` "E2E browser tests skip gracefully" describes a `markTestSkipped` workaround that contradicts CLAUDE.md; superseded by B1.

@@ -11,13 +11,20 @@ if [[ -z "$FILE_PATH" || ! -f "$FILE_PATH" ]]; then
 fi
 
 ROOT_DIR="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
-MAGO="${ROOT_DIR}/vendor/bin/mago"
 
-# PHP files: run Mago format + lint
+# Resolve Mago: prefer the Composer-installed binary, fall back to a global one on PATH
+MAGO=""
+if [[ -x "${ROOT_DIR}/vendor/bin/mago" ]]; then
+    MAGO="${ROOT_DIR}/vendor/bin/mago"
+elif command -v mago &>/dev/null; then
+    MAGO="$(command -v mago)"
+fi
+
+# PHP files: run Mago fmt + lint
 if [[ "$FILE_PATH" == *.php ]]; then
-    if [[ -x "$MAGO" ]]; then
-        "$MAGO" format "$FILE_PATH" 2>/dev/null || true
-        LINT_OUTPUT=$("$MAGO" lint "$FILE_PATH" 2>&1) || true
+    if [[ -n "$MAGO" ]]; then
+        (cd "$ROOT_DIR" && "$MAGO" fmt "$FILE_PATH" 2>/dev/null) || true
+        LINT_OUTPUT=$(cd "$ROOT_DIR" && "$MAGO" lint "$FILE_PATH" 2>&1) || true
         if [[ -n "$LINT_OUTPUT" && "$LINT_OUTPUT" != *"No issues found"* ]]; then
             echo "$LINT_OUTPUT" | tail -20
         fi

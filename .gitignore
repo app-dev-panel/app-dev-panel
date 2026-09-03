@@ -13,3 +13,5 @@ screenshots/
 playground/*/public/app-dev-panel
 playground/*/public/panel-dist
 .DS_STORE
+# Root lock file is intentionally not shipped (constraints live in composer.json)
+/composer.lock

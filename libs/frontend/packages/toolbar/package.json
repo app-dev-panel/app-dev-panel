@@ -45,7 +45,7 @@
   "scripts": {
     "start": "vite",
     "build": "tsc --build tsconfig.build.json && VITE_ENV=${VITE_ENV:-github} vite build",
-    "test": "vite test",
+    "test": "vitest run --root ../.. packages/toolbar",
     "serve": "vite preview --host",
     "prettier": "prettier -l src"
   },

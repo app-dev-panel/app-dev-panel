@@ -3,13 +3,14 @@
 # Top-level Makefile for running all tests, code quality checks, and CI tasks
 # ============================================================================
 
-.PHONY: help build-panel install-panel build-install-panel test test-php test-frontend test-frontend-e2e test-ci \
+.PHONY: help build-panel install-panel build-install-panel frontend-build website-build \
+        test test-php test-php-e2e test-frontend test-frontend-e2e test-ci \
         mago mago-format mago-lint mago-analyze mago-fix \
         mago-playgrounds mago-playground-yii3 mago-playground-symfony mago-playground-yii2 mago-playground-laravel mago-playground-spiral \
         mago-playgrounds-fix mago-playground-yii3-fix mago-playground-symfony-fix mago-playground-yii2-fix mago-playground-laravel-fix mago-playground-spiral-fix \
         modulite modulite-ci \
         doctor check-timeouts check-strict check-docs-tree smoke-playgrounds review-checks \
-        check check-ci fix \
+        frontend-check frontend-fix check check-ci fix \
         install install-php install-frontend install-playgrounds \
         spiral-panel-sync \
         serve-yii3 serve-symfony serve-yii2 serve-laravel serve-spiral serve \
@@ -72,13 +73,16 @@ help: ## Show this help
 	@echo "  make test                  Run ALL tests in parallel (PHP unit + frontend unit)"
 	@echo "  make test-php              Run PHP unit tests (PHPUnit)"
 	@echo "  make test-frontend         Run frontend unit tests (Vitest)"
-	@echo "  make test-frontend-e2e     Run frontend browser tests (Vitest + WebDriverIO + ChromeDriver)"
+	@echo "  make test-frontend-e2e     Run frontend browser tests (Vitest + Playwright)"
+	@echo "  make test-php-e2e          Run PHP E2E suite (PHPUnit, tests/E2E; needs ChromeDriver + playgrounds)"
 	@echo "  make test-ci               Run all tests for CI (parallel, GitHub Actions)"
 	@echo ""
 	@echo "$(YELLOW)Build:$(RESET)"
 	@echo "  make build-panel           Build panel + toolbar, copy to all adapter assets"
 	@echo "  make install-panel         Publish built assets to playground apps"
 	@echo "  make build-install-panel   Build + publish in one step"
+	@echo "  make frontend-build        Type-check + build all frontend packages (sdk, toolbar, panel)"
+	@echo "  make website-build         Build VitePress docs site (+ llms.txt)"
 	@echo ""
 	@echo "$(YELLOW)Code Quality — Core:$(RESET)"
 	@echo "  make mago                  Run Mago checks on core libs (format + lint + analyze)"
@@ -107,8 +111,8 @@ help: ## Show this help
 	@echo "  make review-checks         Run all project-review checks"
 	@echo ""
 	@echo "$(YELLOW)Combined:$(RESET)"
-	@echo "  make check                 Run ALL code quality checks (core + playgrounds + modulite)"
-	@echo "  make check-ci              Run all checks for CI (core + playgrounds + frontend)"
+	@echo "  make check                 Run ALL code quality checks (core + playgrounds + frontend + modulite + review-checks)"
+	@echo "  make check-ci              Run all checks for CI (check + frontend-build)"
 	@echo "  make fix                   Fix all code (core + playgrounds)"
 	@echo ""
 	@echo "$(YELLOW)Install:$(RESET)"
@@ -242,6 +246,10 @@ test-frontend-e2e: ## Run frontend browser tests (Vitest + Playwright)
 	@echo "$(CYAN)Running frontend browser tests (timeout: $(TEST_TIMEOUT)s)...$(RESET)"
 	cd $(FRONTEND_DIR) && $(call with_timeout,$(TEST_TIMEOUT),npm run test:e2e)
 
+test-php-e2e: ## Run PHP E2E suite (PHPUnit tests/E2E; requires ChromeDriver + running playgrounds)
+	@echo "$(CYAN)Running PHP E2E tests (timeout: $(TEST_TIMEOUT)s)...$(RESET)"
+	$(call with_timeout,$(TEST_TIMEOUT),composer test:e2e)
+
 test: ## Run ALL tests in parallel (PHP unit + frontend unit)
 	@echo "$(CYAN)Running all tests in parallel...$(RESET)"
 	@$(MAKE) -j2 --output-sync=target test-php test-frontend
@@ -369,9 +377,9 @@ modulite-ci: ## Check module boundaries with GitHub Actions annotations
 # ============================================================================
 #
 # Each target validates one section of docs/project-review-checklist.md and
-# exits non-zero on regressions. They are deliberately NOT wired into
-# `make check` by default — pre-existing violations need to be triaged first.
-# Run them on-demand or as part of a periodic review pass.
+# exits non-zero on regressions. `review-checks` (timeouts + strict + docs-tree)
+# is part of `make check` / `make check-ci`; `doctor` and `smoke-playgrounds`
+# need a local environment / running servers and stay on-demand.
 
 doctor: ## §0 — Check local environment (PHP, Node, PCOV, ChromeDriver)
 	@bash scripts/doctor.sh
@@ -410,19 +418,31 @@ frontend-fix: ## Fix frontend code quality issues
 	@echo "$(CYAN)[Frontend] Fixing code quality issues...$(RESET)"
 	cd $(FRONTEND_DIR) && npm run format && npm run lint:fix
 
+frontend-build: ## Type-check (tsc --build) and build all frontend packages (sdk, toolbar, panel)
+	@echo "$(CYAN)[Frontend] Building all packages...$(RESET)"
+	cd $(FRONTEND_DIR) && npm run build
+
+# ============================================================================
+# Documentation Site (VitePress)
+# ============================================================================
+
+website-build: ## Build VitePress docs site (also generates llms.txt / llms-full.txt)
+	@echo "$(CYAN)[Website] Building VitePress site...$(RESET)"
+	cd $(ROOT_DIR)/website && npm run build
+
 # ============================================================================
 # Combined
 # ============================================================================
 
-check: ## Run ALL code quality checks (core + playgrounds + frontend + modulite)
+check: ## Run ALL code quality checks (core + playgrounds + frontend + modulite + review-checks)
 	@echo "$(CYAN)Running all code quality checks...$(RESET)"
-	@$(MAKE) -j4 --output-sync=target mago mago-playgrounds frontend-check modulite
+	@$(MAKE) -j4 --output-sync=target mago mago-playgrounds frontend-check modulite review-checks
 	@echo ""
 	@echo "$(GREEN)All code quality checks passed!$(RESET)"
 
-check-ci: ## Run all checks for CI (core + playgrounds + frontend + modulite)
+check-ci: ## Run all checks for CI (core + playgrounds + frontend + modulite + review-checks + frontend-build)
 	@echo "$(CYAN)Running all CI checks...$(RESET)"
-	@$(MAKE) -j4 --output-sync=target mago mago-playgrounds frontend-check modulite-ci
+	@$(MAKE) -j4 --output-sync=target mago mago-playgrounds frontend-check modulite-ci review-checks frontend-build
 	@echo ""
 	@echo "$(GREEN)All CI checks passed!$(RESET)"
 
