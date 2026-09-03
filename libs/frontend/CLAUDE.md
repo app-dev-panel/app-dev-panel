@@ -331,7 +331,7 @@ Unit suite — `packages/*/src/**/*.test.{ts,tsx}` (excludes `__e2e__/` and `*.b
 | `packages/toolbar` | 6 | 33 |
 | **Total** | **111** | **1051** |
 
-Browser suite — `packages/*/src/**/*.browser.test.{ts,tsx}`: 10 files, 54 tests (panel: navigation, debug, inspector, API interaction; toolbar: drag, snap, resize, navigation, empty state). Zero skipped tests is the policy — `it.skip` is never an acceptable way to keep a test green.
+Browser suite — `packages/*/src/**/*.browser.test.{ts,tsx}`: 10 files, 68 tests (panel: navigation, debug, inspector, API interaction; toolbar: drag, snap, resize, navigation, empty state). Zero skipped tests is the policy — `it.skip` is never an acceptable way to keep a test green.
 
 `vitest.config.ts` runs two projects that share the root options (`extends: true`): `node` for plain `.test.ts` files and `jsdom` for `.test.tsx` plus the `.test.ts` files listed in `domDependentTsTests` (they touch `document`/`window`/`navigator`). A new `.test.ts` that fails with "document is not defined" must be added to that list or renamed to `.test.tsx`. Workers are `threads` (isolated — the suite relies on per-file `vi.mock` registrations and a fresh jsdom document, so `isolate: false` breaks it) and the `@mui/*` packages are pre-bundled through `deps.optimizer.client`, which cuts the per-file import cost roughly in half. `testTimeout`/`hookTimeout` are hard ceilings (10s jsdom, 15s browser) — never raise them. Console output is not silenced: a `console.error`/`console.warn` during a test shows up as a `stderr |` block in the report, so keep tests warning-free.
 
