@@ -36,8 +36,8 @@ If you see yourself reaching for `markTestSkipped`, stop and ask for help writin
 The test infrastructure is aggressively time-boxed so that nothing — PHPUnit, Vitest, fixtures,
 network calls, socket reads — can hang a Claude Code hook or a CI run. These limits are the
 **ceiling, not a target**. You are **forbidden** from raising any of them. If a test or command
-breaches a limit, fix the slow code (mock I/O, reduce fixture data, split the test, skip a broken
-service) — do not edit the ceiling.
+breaches a limit, fix the slow code (mock I/O, reduce fixture data, split the test, move a service
+call behind a mock) — do not edit the ceiling.
 
 | Scope | Limit | Where |
 |-------|------:|-------|
@@ -217,7 +217,7 @@ The project uses a **top-level Makefile** as the single entry point for all task
 make test                           # Run ALL tests in parallel (PHP + frontend)
 make test-php                       # Run PHP unit tests (PHPUnit)
 make test-frontend                  # Run frontend unit tests (Vitest)
-make test-frontend-e2e              # Run frontend browser tests (Vitest + WebDriverIO + ChromeDriver)
+make test-frontend-e2e              # Run frontend browser tests (Vitest browser mode + Playwright)
 
 # Code quality — PHP (Mago)
 make mago                           # Run all Mago checks on core (format + lint + analyze)
@@ -322,41 +322,69 @@ To add a new dependency: edit `requires` in `modulite.php`. To add a new module:
 
 ## CI/CD
 
-GitHub Actions runs on every push and PR:
+GitHub Actions (`.github/workflows/ci.yml`) runs on every push and PR. `ci-ok` aggregates every job so
+branch protection needs a single required check:
 
-- **Tests**: Matrix of PHP 8.4/8.5 on Linux and Windows
-- **Mago**: Format check, lint, and static analysis
-- **Modulite**: Module boundary validation
-- **PR Reports**: Coverage report and Mago analysis posted as PR comments
+- **PHP Tests**: PHP 8.4/8.5 on `ubuntu-latest` (Linux only). `composer validate` for root + `libs/*/composer.json`,
+  then `composer test:coverage` (8.4) / `composer test:unit` (8.5). ext-redis installed via `setup-php`.
+- **Review: Invariants**: `tools/check-timeouts.php`, `tools/check-test-strictness.php`, `tools/check-docs-tree.php`
+  (same as `make review-checks`, which is part of `make check`).
+- **Frontend**: Install (cached `node_modules`, `npm ci` fallback on cache miss), Unit Tests (Vitest), E2E Tests
+  (Vitest browser mode + Playwright), Build (`tsc --build` + `vite build` — the only type-check of shipped code),
+  Quality (Prettier + ESLint).
+- **Website: Build**: `vitepress build` (previously only on deploy).
+- **Mago**: Format check, lint, and static analysis for core libs and each playground (playgrounds get
+  `composer install` first so `analyze` sees vendor).
+- **Modulite**: Module boundary validation.
+- **PR Reports** (`pr-report.yml`): Coverage report and Mago analysis posted as PR comments.
+- **Dependabot** (`.github/dependabot.yml`): weekly composer / npm / github-actions updates, grouped
+  (illuminate+laravel, symfony, yiisoft, @mui, minor+patch catch-all).
+
+Not covered by CI (see `docs/tasks/p5-stabilization.md` A5): playground E2E fixtures (`make test-fixtures`,
+`test-scenario`, `test-mcp`, `test-pages`), PHP Selenium suite (`composer test:e2e`), OpenAPI lint, client
+generation drift, `composer audit` / `npm audit`.
 
 ## Test Coverage Summary
 
+Counts are from `phpunit --list-tests` / `vitest run` on 2026-09-03. Every suite runs with
+`failOnSkipped="true"`, so the skipped count is always 0 by construction.
+
 ### PHP (PHPUnit) — `make test-php`
 
-| Suite | Library | Tests | Skipped | Time | Line Coverage |
-|-------|---------|------:|--------:|-----:|--------------:|
-| Kernel | `libs/Kernel` | 276 | 7 | 1m 21s | **85.2%** (1073/1259) |
-| API | `libs/API` | 174 | 0 | 0.1s | **76.2%** (754/990) |
-| Adapter-Symfony | `libs/Adapter/Symfony` | 151 | 9 | 0.2s | **98.9%** (905/915) |
-| Adapter-Laravel | `libs/Adapter/Laravel` | 86 | 0 | 0.1s | — |
-| Adapter-Yii2 | `libs/Adapter/Yii2` | 95 | 0 | 0.1s | **57.3%** (373/651) |
-| Adapter-Cycle | `libs/Adapter/Cycle` | 10 | 0 | 0.02s | — |
-| Cli | `libs/Cli` | 198 | 0 | ~14s | — |
-| McpServer | `libs/McpServer` | 48 | 0 | 0.02s | — |
-| McpServer (API) | `libs/API` (Mcp controller) | 6 | 0 | 0.02s | — |
-| **Total** | **all libs** | **755** | **16** | **~1m 22s** | — |
+`composer test:unit` runs all suites below except `E2E` and `Fixtures`: 3511 tests, ~44s on a 4-core box.
 
-E2E suite (54 tests) requires Chrome + ChromeDriver and runs separately via `make test-frontend-e2e`.
+| Suite | Library | Tests |
+|-------|---------|------:|
+| Kernel | `libs/Kernel` | 871 |
+| API | `libs/API` | 1112 |
+| Cli | `libs/Cli` | 241 |
+| FrontendAssets | `libs/FrontendAssets` | 3 |
+| McpServer | `libs/McpServer` | 172 |
+| Testing | `libs/Testing/tests/Unit` | 34 |
+| Adapter-Symfony | `libs/Adapter/Symfony` | 257 |
+| Adapter-Yii3 | `libs/Adapter/Yii3` | 185 |
+| Adapter-Laravel | `libs/Adapter/Laravel` | 202 |
+| Adapter-Yii2 | `libs/Adapter/Yii2` | 330 |
+| Adapter-Cycle | `libs/Adapter/Cycle` | 16 |
+| Adapter-Spiral | `libs/Adapter/Spiral` | 88 |
+| E2E (Selenium, `composer test:e2e` / `make test-php-e2e`) | `tests/E2E` | 54 |
+| Fixtures (live playgrounds, `make test-fixtures`) | `libs/Testing/tests/E2E` | 119 |
+
+`E2E` needs Chrome + ChromeDriver and a running panel; it fails fast (never skips) when they are missing.
+`Fixtures` needs the playground servers (`make serve`).
 
 ### Frontend (Vitest) — `make test-frontend`
 
-| Package | Tests | Suites | Time |
-|---------|------:|-------:|-----:|
-| `packages/sdk` | 209 | 25 | ~51s |
-| `packages/panel` | 119 | 16 | ~51s |
-| **Total** | **328** | **41** | **~51s** |
+| Package | Test files | Tests |
+|---------|-----------:|------:|
+| `packages/sdk` | 65 | 576 |
+| `packages/panel` | 40 | 442 |
+| `packages/toolbar` | 6 | 33 |
+| **Total** | **111** | **1051** |
 
-Browser e2e tests (4 suites) run separately via `make test-frontend-e2e`.
+~100s on a loaded 4-core box (two Vitest projects: `node` for plain `.test.ts`, `jsdom` for the rest; MUI
+pre-bundled via `deps.optimizer`). Browser e2e tests (10 files, 68 tests, Playwright) run separately via
+`make test-frontend-e2e`; 0 skipped.
 
 ### Playgrounds — `make mago-playgrounds`
 
@@ -368,6 +396,7 @@ Playgrounds are demo/reference apps — they have **no unit tests**. Quality is 
 | `symfony-app` | pass | pass | pass (11 baselined) | 11 |
 | `yii2-basic-app` | pass | pass | pass (9 baselined) | 9 |
 | `laravel-app` | pass | pass | pass | 0 |
+| `spiral-app` | pass | pass | pass | 0 |
 
 ### Running Coverage Locally
 
@@ -463,7 +492,7 @@ composer lint:baseline
 | Frontend Dev | `/frontend-dev [component, page, or feature]` | Implement frontend features with React 19, strict TypeScript, semantic HTML, a11y |
 | Frontend Designer | `/frontend-designer [component or page]` | Design and implement React/MUI frontend components, pages, modules |
 | Screenshot | `/screenshot [URL or page path]` | Take screenshots of frontend pages using Playwright for visual verification |
-| Selenium E2E | `/selenium-e2e [test file or feature]` | Write and debug E2E browser tests (Vitest + WebDriverIO, PHPUnit + php-webdriver) |
+| Selenium E2E | `/selenium-e2e [test file or feature]` | Write and debug E2E browser tests (Vitest + Playwright, PHPUnit + php-webdriver) |
 
 Skill definitions in `.claude/skills/*/SKILL.md`.
 

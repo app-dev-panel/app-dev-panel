@@ -34,14 +34,14 @@ final class MailerAction extends Action
             ->setSubject('ADP fixture — newsletter with attachments')
             ->setTextBody('Please see the attached TXT and PDF files.')
             ->setHtmlBody(MailerFixtureContent::newsletterHtml())
-            ->attachContent(
-                MailerFixtureContent::textAttachment(),
-                ['fileName' => 'release-notes.txt', 'contentType' => 'text/plain'],
-            )
-            ->attachContent(
-                MailerFixtureContent::pdfAttachment(),
-                ['fileName' => 'adp-fixture.pdf', 'contentType' => 'application/pdf'],
-            );
+            ->attachContent(MailerFixtureContent::textAttachment(), [
+                'fileName' => 'release-notes.txt',
+                'contentType' => 'text/plain',
+            ])
+            ->attachContent(MailerFixtureContent::pdfAttachment(), [
+                'fileName' => 'adp-fixture.pdf',
+                'contentType' => 'application/pdf',
+            ]);
 
         $plain->send();
         $table->send();

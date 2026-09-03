@@ -15,13 +15,10 @@ final class LogsAction extends Action
         \Yii::warning('Test log: warning level message', 'application');
         \Yii::error('Test log: error level message', 'application');
 
-        \Yii::info(
-            ['Test log: debug with dump-like context' => [
-                'user' => ['id' => 42, 'name' => 'Alice', 'roles' => ['admin', 'editor']],
-                'metadata' => ['session' => 'abc123', 'request_id' => 'req-789'],
-            ]],
-            'application',
-        );
+        \Yii::info(['Test log: debug with dump-like context' => [
+            'user' => ['id' => 42, 'name' => 'Alice', 'roles' => ['admin', 'editor']],
+            'metadata' => ['session' => 'abc123', 'request_id' => 'req-789'],
+        ]], 'application');
 
         /** @var VarDumperCollector|null $collector */
         $collector = \Yii::$container->has(VarDumperCollector::class)

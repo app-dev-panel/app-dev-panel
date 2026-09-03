@@ -337,6 +337,9 @@ jobs:
 
       - name: Setup Mago
         uses: nhedger/setup-mago@v1
+        with:
+          # Pinned to the version composer installs (carthage-software/mago) so local and CI formatting agree.
+          version: '1.17.0'
 
       - name: Run format check
         if: matrix.check == 'format'
@@ -408,6 +411,9 @@ jobs:
 
       - name: Setup Mago
         uses: nhedger/setup-mago@v1
+        with:
+          # Pinned to the version composer installs (carthage-software/mago) so local and CI formatting agree.
+          version: '1.17.0'
 
       - name: Run format check
         if: matrix.check == 'format'
